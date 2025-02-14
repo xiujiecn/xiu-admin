@@ -1,0 +1,22 @@
+
+# CLI tool, only in development environment.
+# https://goframe.org/docs/cli
+gfcli:
+  gen:
+    dao:
+      - link: "mysql:xj_admin:xj_admin123456@tcp(192.168.158.200:3306)/xiujie_admin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+        tables: "sys_client,sys_config,sys_dept,sys_dict_data,sys_dict_type,
+          sys_logininfor,sys_menu,sys_notice,sys_oper_log,sys_oss,sys_oss_config,
+          sys_post,sys_role,sys_role_dept,sys_role_menu,sys_social,sys_tenant,
+          sys_tenant_package,sys_user,sys_user_post,sys_user_role"
+        descriptionTag:  true # 数据表字段注释
+        noModelComment:  true
+        jsonCase: "CamelLower" # 生成json字段时，字段名使用驼峰命名
+        gJsonSupport: true
+        group: "default"                      # 分组 使用代码生成功能时必须填
+        tablesEx: "sys_addons_install"        # 指定当前数据库中需要排除代码生成的数据表。
+
+  docker:
+    build: "-a amd64 -s linux -p temp -ew"
+    tagPrefixes:
+      - my.image.pub/my-app
