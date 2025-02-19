@@ -11,3 +11,11 @@ export const MdiGithub = createIconifyIcon('mdi:github');
 export const MdiGoogle = createIconifyIcon('mdi:google');
 
 export const MdiQqchat = createIconifyIcon('mdi:qqchat');
+
+export const MdiPlus = createIconifyIcon('mdi:plus');
+
+export const MdiEdit = createIconifyIcon('mdi:pencil');
+
+export const MdiDelete = createIconifyIcon('mdi:delete');
+
+

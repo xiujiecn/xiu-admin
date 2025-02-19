@@ -4,6 +4,7 @@ import (
 	"context"
 	"server/internal/dao"
 	"server/internal/model/entity"
+	"server/internal/service"
 )
 
 type sSysRole struct {
@@ -11,6 +12,10 @@ type sSysRole struct {
 
 func NewSysRole() *sSysRole {
 	return &sSysRole{}
+}
+
+func init() {
+	service.RegisterSysRole(NewSysRole())
 }
 
 // 获取租户下角色列表

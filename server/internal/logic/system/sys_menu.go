@@ -9,7 +9,11 @@ import (
 	"server/internal/model"
 	"server/internal/model/entity"
 	"server/internal/service"
+	"slices"
+	"sort"
 	"strings"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type sSysMenu struct {
@@ -92,21 +96,30 @@ func (l *sSysMenu) MenuTree(ctx context.Context, parentMenu *model.SysMenuTree, 
 // 获取用户动态路由列表
 func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err error) {
 	// 获取当前用户信息
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	// claims, err := service.SysAuth().GetCurrentUser(ctx)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	roleIds := []int64{1}
+	// 判断是否存在超级管理员角色
+	if slices.Contains(roleIds, consts.SuperAdminRoleId) {
+		// 获取所有菜单
+		err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().Status, consts.SysMenuStatusNormal).Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
+		return
+	}
+	// 获取角色菜单列表
+	menuList, err := service.SysRole().GetRoleListMenu(ctx, roleIds)
 	if err != nil {
 		return nil, err
 	}
-	// 获取用户角色列表
-	menuList, err := service.SysRole().GetRoleListMenu(ctx, claims.AuthorityIds)
-	if err != nil {
-		return nil, err
-	}
+	g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuList: %v", menuList)
 	menuIds := make([]int64, 0)
 	for _, menu := range menuList {
 		menuIds = append(menuIds, menu.MenuId)
 	}
 	// 获取用户角色菜单
-	err = dao.SysMenu.Ctx(ctx).WhereIn(dao.SysMenu.Columns().MenuId, menuIds).Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
+	err = dao.SysMenu.Ctx(ctx).WhereIn(dao.SysMenu.Columns().MenuId, menuIds).Where(dao.SysMenu.Columns().Status, consts.SysMenuStatusNormal).Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
 	return
 }
 
@@ -128,7 +141,7 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 		if menu.ParentId == pId {
 			openInNewWindow := false
 			var link *string
-			if menu.IsFrame == 1 {
+			if menu.IsFrame == consts.SysMenuIsFrameYes {
 				openInNewWindow = true
 				link = &menu.Path
 			}
@@ -143,9 +156,9 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 					}
 				}
 			}
-			visible := false
-			if menu.Visible == "0" {
-				visible = true
+			hideInMenu := false
+			if menu.Visible == consts.SysMenuVisibleHide {
+				hideInMenu = true
 			}
 			item := &v1.RouteMenu{
 				Id:        menu.MenuId,
@@ -159,7 +172,7 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 					Order:           &menu.OrderNum,
 					OpenInNewWindow: &openInNewWindow,
 					Query:           query,
-					HideInMenu:      &visible,
+					HideInMenu:      &hideInMenu,
 					Authority:       strings.Split(menu.Perms, ","),
 					Link:            link,
 				},
@@ -176,18 +189,22 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 			data = append(data, item)
 		}
 	}
+	// 排序
+	sort.Slice(data, func(i, j int) bool {
+		return *data[i].Meta.Order < *data[j].Meta.Order
+	})
 	return
 }
 
 // 获取用户动态路由树
-func (l *sSysMenu) GetMenuTree(ctx context.Context) (data v1.MenuAllRes, err error) {
+func (l *sSysMenu) GetUserMenuTree(ctx context.Context) (data v1.MenuAllRes, err error) {
 	// 获取用户动态路由列表
 	menuList, err := l.GetUserMenu(ctx)
 	if err != nil {
 		return nil, err
 	}
 	// 构建树结构
-	data, err = l.MenuTree(ctx, nil, menuList)
+	data, err = l.BuildUserMenuTree(ctx, nil, menuList)
 	if err != nil {
 		return nil, err
 	}

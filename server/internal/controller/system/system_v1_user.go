@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 
 	v1 "server/api/system/v1"
+	"server/internal/model/response"
 	"server/internal/service"
 )
 
@@ -38,4 +39,28 @@ func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *
 			Email:    user.Email,
 		},
 	}, nil
+}
+func (c *ControllerV1) UserList(ctx context.Context, req *v1.UserListReq) (res *v1.UserListRes, err error) {
+	// 获取当前用户信息
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req.TenantId = claims.BaseClaims.TenantId
+	// 获取用户列表
+	users, total, err := service.SysUser().GetUserList(ctx, req.PageInfo, req.UserListQuery)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UserListRes{
+		Data: users,
+		PageResult: response.PageResult{
+			Page:     req.Page,
+			PageSize: req.PageSize,
+			Total:    total,
+		},
+	}, nil
+}
+func (c *ControllerV1) AddUser(ctx context.Context, req *v1.AddUserReq) (res *v1.AddUserRes, err error) {
+	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }
