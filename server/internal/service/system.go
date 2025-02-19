@@ -30,14 +30,12 @@ type (
 		VerifyCaptcha(ctx context.Context, key string, value string) (err error)
 	}
 	ISysDept interface {
-		GetDeptList(ctx context.Context, page request.PageInfo, query model.DeptListQuery) (items []*model.SysDept, total int, err error)
+		GetDeptList(ctx context.Context, query model.DeptListQuery) (items []*model.SysDept, total int, err error)
 		GetDeptById(ctx context.Context, id int64) (dept *model.SysDept, err error)
 	}
 	ISysMenu interface {
 		// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
-		GetTenantMenu(ctx context.Context) (data []*entity.SysMenu, err error)
-		// 获取租户菜单树
-		GetTenantMenuTree(ctx context.Context) (data []*model.SysMenuTree, err error)
+		GetTenantMenu(ctx context.Context, query *model.SysMenuListQuery) (data []*model.SysMenu, total int, err error)
 		// 构建树结构
 		MenuTree(ctx context.Context, parentMenu *model.SysMenuTree, menuList []*entity.SysMenu) (data []*model.SysMenuTree, err error)
 		// 获取用户动态路由列表
@@ -47,11 +45,14 @@ type (
 		// 获取用户动态路由树
 		GetUserMenuTree(ctx context.Context) (data v1.MenuAllRes, err error)
 	}
+	ISysPost interface {
+		GetPostList(ctx context.Context, query model.SysPostListQuery, pageInfo request.PageInfo) (items []*model.SysPost, total int, err error)
+	}
 	ISysRole interface {
 		// 获取租户下角色列表
-		GetRoleList(ctx context.Context, tenantId int64) (res []*entity.SysRole, err error)
+		GetRoleList(ctx context.Context, model *model.SysRoleListQuery, pageInfo *request.PageInfo) (res []*model.SysRole, total int, err error)
 		// 获取角色详情
-		GetRoleDetail(ctx context.Context, id int64) (res *entity.SysRole, err error)
+		GetRoleDetail(ctx context.Context, id int64) (res *model.SysRole, err error)
 		// 获取角色菜单
 		GetRoleMenu(ctx context.Context, id int64) (res []*entity.SysMenu, err error)
 		// 获取角色列表对应菜单
@@ -86,6 +87,7 @@ var (
 	localSysCaptcha ISysCaptcha
 	localSysDept    ISysDept
 	localSysMenu    ISysMenu
+	localSysPost    ISysPost
 	localSysRole    ISysRole
 	localSysTenant  ISysTenant
 	localSysUser    ISysUser
@@ -133,6 +135,17 @@ func SysMenu() ISysMenu {
 
 func RegisterSysMenu(i ISysMenu) {
 	localSysMenu = i
+}
+
+func SysPost() ISysPost {
+	if localSysPost == nil {
+		panic("implement not found for interface ISysPost, forgot register?")
+	}
+	return localSysPost
+}
+
+func RegisterSysPost(i ISysPost) {
+	localSysPost = i
 }
 
 func SysRole() ISysRole {

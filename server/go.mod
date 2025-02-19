@@ -1,6 +1,8 @@
 module server
 
-go 1.18
+go 1.23.0
+
+toolchain go1.23.5
 
 require (
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.8.3
@@ -9,6 +11,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/google/uuid v1.6.0
 	github.com/mojocn/base64Captcha v1.3.8
+	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa
 	gorm.io/gorm v1.25.12
 )
 

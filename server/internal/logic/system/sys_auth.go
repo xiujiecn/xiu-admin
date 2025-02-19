@@ -43,6 +43,8 @@ func (s *sSysAuth) Login(ctx context.Context, captchaID string, captchaValue str
 		Username: user.UserName,
 		NickName: user.NickName,
 		Avatar:   user.Avatar,
+		TenantId: user.TenantId,
+		DeptId:   user.DeptId,
 	}
 	// TODO: 保存在线列表
 	// TODO: 保存登录日志
@@ -69,6 +71,8 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 			ID:       user.ID,
 			Username: user.Username,
 			NickName: user.NickName,
+			TenantId: user.TenantId,
+			DeptId:   user.DeptId,
 		},
 		BufferTime: int64(bt / time.Second),
 		RegisteredClaims: jwt.RegisteredClaims{

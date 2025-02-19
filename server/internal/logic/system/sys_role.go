@@ -3,7 +3,9 @@ package system
 import (
 	"context"
 	"server/internal/dao"
+	"server/internal/model"
 	"server/internal/model/entity"
+	"server/internal/model/request"
 	"server/internal/service"
 )
 
@@ -19,13 +21,31 @@ func init() {
 }
 
 // 获取租户下角色列表
-func (s *sSysRole) GetRoleList(ctx context.Context, tenantId int64) (res []*entity.SysRole, err error) {
-	err = dao.SysRole.Ctx(ctx).Where(dao.SysRole.Columns().TenantId, tenantId).Order("sort").Scan(&res)
+func (s *sSysRole) GetRoleList(ctx context.Context, model *model.SysRoleListQuery, pageInfo *request.PageInfo) (res []*model.SysRole, total int, err error) {
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	db := dao.SysRole.Ctx(ctx).Where(dao.SysRole.Columns().TenantId, claims.TenantId)
+	if model.RoleName != "" {
+		db = db.WhereLike(dao.SysRole.Columns().RoleName, "%"+model.RoleName+"%")
+	}
+	if model.Status != "" {
+		db = db.Where(dao.SysRole.Columns().Status, model.Status)
+	}
+	if model.CreatedAt != nil {
+		db = db.Where(dao.SysRole.Columns().CreatedAt, model.CreatedAt)
+	}
+	total, err = db.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+	err = db.Page(pageInfo.Page, pageInfo.PageSize).Scan(&res)
 	return
 }
 
 // 获取角色详情
-func (s *sSysRole) GetRoleDetail(ctx context.Context, id int64) (res *entity.SysRole, err error) {
+func (s *sSysRole) GetRoleDetail(ctx context.Context, id int64) (res *model.SysRole, err error) {
 	err = dao.SysRole.Ctx(ctx).Where(dao.SysRole.Columns().RoleId, id).Scan(&res)
 	return
 }

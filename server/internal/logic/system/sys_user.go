@@ -10,9 +10,9 @@ import (
 	"server/internal/service"
 	"server/utility"
 
-	"github.com/gogf/gf/os/gtime"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"gorm.io/gorm"
 )
 
@@ -183,9 +183,10 @@ func (l *sSysUser) AddUser(ctx context.Context, req model.AddUser) (user *entity
 	if err != nil {
 		return nil, err
 	}
-	if dept == nil {
+	if dept == nil || dept.TenantId != claims.BaseClaims.TenantId {
 		return nil, gerror.NewCode(consts.CodeDeptNotFound, "部门不存在")
 	}
+
 	// 判断用户名是否存在
 	user, err = l.GetUserByUsername(ctx, req.UserName)
 	if err != nil {
