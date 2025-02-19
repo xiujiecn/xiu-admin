@@ -2,7 +2,7 @@ package consts
 
 var (
 	//  默认系统租客编号,禁止修改编号
-	DefaultSystemTenantCode = "system"
+	DefaultSystemTenantCode = "000000"
 	SuperAdminRoleId        = int64(1)
 )
 

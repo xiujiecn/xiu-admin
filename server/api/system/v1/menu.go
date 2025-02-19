@@ -1,6 +1,10 @@
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"server/internal/model"
+
+	"github.com/gogf/gf/v2/frame/g"
+)
 
 // 路由菜单
 type RouteMenu struct {
@@ -52,3 +56,13 @@ type MenuAllReq struct {
 //		Data []RouteMenu `json:"data" dc:"菜单列表"`
 //	}
 type MenuAllRes = []*RouteMenu
+
+type MenuListReq struct {
+	g.Meta `path:"/menu/list" method:"get" tags:"系统" summary:"获取菜单列表"`
+	model.SysMenuListQuery
+}
+
+type MenuListRes struct {
+	Data  []*model.SysMenu `json:"items" dc:"菜单列表"`
+	Total int              `json:"total" dc:"总数"`
+}

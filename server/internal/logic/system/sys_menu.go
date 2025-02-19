@@ -13,6 +13,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
@@ -28,44 +30,47 @@ func init() {
 }
 
 // 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
-func (l *sSysMenu) GetTenantMenu(ctx context.Context) (data []*entity.SysMenu, err error) {
+func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListQuery) (data []*model.SysMenu, total int, err error) {
 	// 获取当前用户信息
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	if claims.TenantId == consts.DefaultSystemTenantCode {
-		err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().ParentId, 0).Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
-		return
+	m := dao.SysMenu.Ctx(ctx)
+	if claims.TenantId != consts.DefaultSystemTenantCode {
+		// 获取租户信息
+		tenantInfo, err := service.SysTenant().GetTenantInfo(ctx, claims.TenantId)
+		if err != nil {
+			return nil, 0, err
+		}
+		// 获取租户套餐
+		tenantPackage, err := service.SysTenant().GetTenantPackage(ctx, tenantInfo.PackageId)
+		if err != nil {
+			return nil, 0, err
+		}
+		if tenantPackage == nil {
+			g.Log().Errorf(ctx, "sSysMenu.GetTenantMenu not found tenantPackage. TenantId:%s PackageId:%d",
+				claims.TenantId, tenantInfo.PackageId)
+			return nil, 0, gerror.NewCode(gcode.CodeInternalError, "系统内部错误")
+		}
+		if tenantPackage.MenuIds != "" {
+			menuIds := strings.Split(tenantPackage.MenuIds, ",")
+			m = m.WhereIn(dao.SysMenu.Columns().MenuId, menuIds)
+		} else {
+			return nil, 0, nil
+		}
 	}
-	// 获取租户信息
-	tenantInfo, err := service.SysTenant().GetTenantInfo(ctx, claims.TenantId)
+	if query.MenuName != "" {
+		m = m.WhereLike(dao.SysMenu.Columns().MenuName, "%"+query.MenuName+"%")
+	}
+	if query.Status != "" {
+		m = m.Where(dao.SysMenu.Columns().Status, query.Status)
+	}
+	total, err = m.Count()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	// 获取租户套餐
-	tenantPackage, err := service.SysTenant().GetTenantPackage(ctx, tenantInfo.PackageId)
-	if err != nil {
-		return nil, err
-	}
-	menuIds := strings.Split(tenantPackage.MenuIds, ",")
-	// 获取租客菜单列表
-	err = dao.SysMenu.Ctx(ctx).WhereIn(dao.SysMenu.Columns().MenuId, menuIds).Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
-	return
-}
-
-// 获取租户菜单树
-func (l *sSysMenu) GetTenantMenuTree(ctx context.Context) (data []*model.SysMenuTree, err error) {
-	// 获取租客菜单列表
-	menuList, err := l.GetTenantMenu(ctx)
-	if err != nil {
-		return nil, err
-	}
-	// 构建树结构
-	data, err = l.MenuTree(ctx, nil, menuList)
-	if err != nil {
-		return nil, err
-	}
+	err = m.Order(dao.SysMenu.Columns().OrderNum).Page(0, 5000).Scan(&data)
 	return
 }
 

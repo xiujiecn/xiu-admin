@@ -7,6 +7,8 @@ type LoginUserOut struct {
 	Username string `json:"username"`
 	NickName string `json:"nickName"`
 	Avatar   string `json:"avatar"`
+	TenantId string `json:"tenantId"    orm:"tenant_id"    description:"租户编号"`
+	DeptId   int64  `json:"deptId"      orm:"dept_id"      description:"部门ID"`
 }
 
 type UserListQuery struct {
