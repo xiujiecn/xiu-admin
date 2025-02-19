@@ -7,8 +7,10 @@ package service
 
 import (
 	"context"
+	v1 "server/api/system/v1"
 	"server/internal/model"
 	"server/internal/model/entity"
+	"server/internal/model/request"
 )
 
 type (
@@ -27,15 +29,23 @@ type (
 		// 验证验证码
 		VerifyCaptcha(ctx context.Context, key string, value string) (err error)
 	}
+	ISysDept interface {
+		GetDeptList(ctx context.Context, page request.PageInfo, query model.DeptListQuery) (items []*model.SysDept, total int, err error)
+		GetDeptById(ctx context.Context, id int64) (dept *model.SysDept, err error)
+	}
 	ISysMenu interface {
 		// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
 		GetTenantMenu(ctx context.Context) (data []*entity.SysMenu, err error)
-		// 获取用户动态路由列表
-		GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err error)
+		// 获取租户菜单树
+		GetTenantMenuTree(ctx context.Context) (data []*model.SysMenuTree, err error)
 		// 构建树结构
 		MenuTree(ctx context.Context, parentMenu *model.SysMenuTree, menuList []*entity.SysMenu) (data []*model.SysMenuTree, err error)
+		// 获取用户动态路由列表
+		GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err error)
+		// 构建用户动态路由树
+		BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMenu, menuList []*entity.SysMenu) (data v1.MenuAllRes, err error)
 		// 获取用户动态路由树
-		GetMenuTree(ctx context.Context) (data []*model.SysMenuTree, err error)
+		GetUserMenuTree(ctx context.Context) (data v1.MenuAllRes, err error)
 	}
 	ISysRole interface {
 		// 获取租户下角色列表
@@ -56,16 +66,25 @@ type (
 	ISysUser interface {
 		// 根据用户名获取用户信息
 		GetUserByUsername(ctx context.Context, username string) (user *entity.SysUser, err error)
+		// 根据邮箱获取用户信息
+		GetUserByEmail(ctx context.Context, email string) (user *entity.SysUser, err error)
+		// 根据手机号获取用户信息
+		GetUserByPhone(ctx context.Context, phone string) (user *entity.SysUser, err error)
 		// 根据用户名和密码获取用户信息
 		GetUserByUsernameAndPassword(ctx context.Context, username string, password string) (user *entity.SysUser, err error)
 		// 根据用户ID获取用户信息
 		GetUserById(ctx context.Context, id int64) (user *entity.SysUser, err error)
+		// 获取用户列表
+		GetUserList(ctx context.Context, page request.PageInfo, query model.UserListQuery) (items []*model.SysUser, total int, err error)
+		// 新增用户
+		AddUser(ctx context.Context, req model.AddUser) (user *entity.SysUser, err error)
 	}
 )
 
 var (
 	localSysAuth    ISysAuth
 	localSysCaptcha ISysCaptcha
+	localSysDept    ISysDept
 	localSysMenu    ISysMenu
 	localSysRole    ISysRole
 	localSysTenant  ISysTenant
@@ -92,6 +111,17 @@ func SysCaptcha() ISysCaptcha {
 
 func RegisterSysCaptcha(i ISysCaptcha) {
 	localSysCaptcha = i
+}
+
+func SysDept() ISysDept {
+	if localSysDept == nil {
+		panic("implement not found for interface ISysDept, forgot register?")
+	}
+	return localSysDept
+}
+
+func RegisterSysDept(i ISysDept) {
+	localSysDept = i
 }
 
 func SysMenu() ISysMenu {

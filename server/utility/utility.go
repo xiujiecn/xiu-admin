@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/crypto/gmd5"
+	"golang.org/x/exp/rand"
 )
 
 func Md5(str string) string {
@@ -38,4 +39,14 @@ func ParseDuration(d string) (time.Duration, error) {
 
 	dv, err := strconv.ParseInt(d, 10, 64)
 	return time.Duration(dv), err
+}
+
+// 随机生成5位字符
+func RandomString(n int) string {
+	letters := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }

@@ -18,4 +18,6 @@ type ISystemV1 interface {
 	GetCaptcha(ctx context.Context, req *v1.GetCaptchaReq) (res *v1.GetCaptchaRes, err error)
 	MenuAll(ctx context.Context, req *v1.MenuAllReq) (res *v1.MenuAllRes, err error)
 	UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *v1.UserInfoRes, err error)
+	UserList(ctx context.Context, req *v1.UserListReq) (res *v1.UserListRes, err error)
+	AddUser(ctx context.Context, req *v1.AddUserReq) (res *v1.AddUserRes, err error)
 }
