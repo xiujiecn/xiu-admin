@@ -1,4 +1,4 @@
-import { baseRequestClient, requestClient } from '#/api/request';
+import {  requestClient } from '#/api/request';
 
 export namespace CaptchaApi {
   export interface GetCaptchaResult {

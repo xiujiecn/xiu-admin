@@ -129,7 +129,7 @@ func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err
 }
 
 // 构建用户动态路由树
-func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMenu, menuList []*entity.SysMenu) (data v1.MenuAllRes, err error) {
+func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMenu, menuList []*entity.SysMenu, allPath string) (data v1.MenuAllRes, err error) {
 	data = make(v1.MenuAllRes, 0)
 	for _, menu := range menuList {
 		if menu.Status == consts.SysMenuStatusDisable {
@@ -182,8 +182,14 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 					Link:            link,
 				},
 			}
-
-			subMenu, err := l.BuildUserMenuTree(ctx, item, menuList)
+			if hideInMenu {
+				activePath := allPath + "/"
+				if strings.Contains(menu.Path, "-") {
+					activePath = activePath + strings.Split(menu.Path, "-")[0]
+				}
+				item.Meta.ActivePath = &activePath
+			}
+			subMenu, err := l.BuildUserMenuTree(ctx, item, menuList, allPath+"/"+menu.Path)
 			if err != nil {
 				return nil, err
 			}
@@ -209,7 +215,7 @@ func (l *sSysMenu) GetUserMenuTree(ctx context.Context) (data v1.MenuAllRes, err
 		return nil, err
 	}
 	// 构建树结构
-	data, err = l.BuildUserMenuTree(ctx, nil, menuList)
+	data, err = l.BuildUserMenuTree(ctx, nil, menuList, "")
 	if err != nil {
 		return nil, err
 	}
