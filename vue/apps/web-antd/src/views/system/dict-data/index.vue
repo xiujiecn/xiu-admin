@@ -9,7 +9,7 @@ import { Button, message, Switch,Tag  } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getDictDataListApi } from '#/api'; 
+import { getSysDictDataListApi } from '#/api'; 
 import { useRouter } from 'vue-router';
 // 获取url参数
 
@@ -86,7 +86,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     ajax: {
       query: async ({ page }, formValues) => {
         message.success(`Query params: ${JSON.stringify(formValues)}`);
-        return await getDictDataListApi({
+        return await getSysDictDataListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
           dictId: dictId,

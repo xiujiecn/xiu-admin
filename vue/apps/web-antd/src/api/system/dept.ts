@@ -1,11 +1,11 @@
 import { requestClient } from '#/api/request';
 
-export interface DeptListQuery {
+export interface SysDeptListQuery {
   deptName: string;
   status: string;
 }
 
-export interface DeptListData {
+export interface SysDeptListData {
   deptId: number;
   tenantId: string; 
   parentId: number; 
@@ -19,12 +19,12 @@ export interface DeptListData {
   status: string;
 }
 
-export interface DeptListRes {
-  data: DeptListData[];
+export interface SysDeptListRes {
+  data: SysDeptListData[];
   total: number;
 }
 
 
-export async function getDeptListApi(params: DeptListQuery) {
-  return requestClient.get<DeptListRes>('/dept/list', { params });
+export async function getSysDeptListApi(params: SysDeptListQuery) {
+  return requestClient.get<SysDeptListRes>('/dept/list', { params });
 }

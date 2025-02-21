@@ -9,7 +9,7 @@ import { Button, message, Switch,Tag  } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getDeptListApi } from '#/api'; 
+import { getSysDeptListApi } from '#/api'; 
 
 import {
   MdiPlus,
@@ -91,7 +91,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     ajax: {
       query: async ({ page }, formValues) => {
         message.success(`Query params: ${JSON.stringify(formValues)}`);
-        return await getDeptListApi({
+        return await getSysDeptListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,

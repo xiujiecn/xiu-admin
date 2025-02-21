@@ -1,14 +1,14 @@
 import { requestClient } from '#/api/request';
 
 
-export interface PostListQuery {
+export interface SysPostListQuery {
   page: number;
   pageSize: number;
   postCode: string;
   postName: string;
 }
 
-export interface PostListData {
+export interface SysPostListData {
     postId: number; 
     tenantId: string;
     deptId: number;
@@ -21,11 +21,11 @@ export interface PostListData {
     createdAt: string;
 }
 
-export interface PostListRes {
-  data: PostListData[];
+export interface SysPostListRes {
+  data: SysPostListData[];
   total: number;
 }
 
-export async function getPostListApi(params: PostListQuery) {
-  return requestClient.get<PostListRes>('/post/list', { params });
+export async function getSysPostListApi(params: SysPostListQuery) {
+  return requestClient.get<SysPostListRes>('/post/list', { params });
 }

@@ -1,7 +1,7 @@
 
 import { requestClient } from '#/api/request';
 
-export interface RoleListQuery {
+export interface SysRoleListQuery {
   page: number;
   pageSize: number;
   roleName: string;
@@ -10,7 +10,7 @@ export interface RoleListQuery {
   createdAt: string;
 }
 
-export interface RoleListData {
+export interface SysRoleListData {
     roleId: number; 
     tenantId: string;
     roleName: string;
@@ -25,11 +25,11 @@ export interface RoleListData {
     remark: string;
 }
 
-export interface RoleListRes {
-  data: RoleListData[];
+export interface SysRoleListRes {
+  data: SysRoleListData[];
   total: number;
 }
 
-export async function getRoleListApi(params: RoleListQuery) {
-  return requestClient.get<RoleListRes>('/role/list', { params });
+export async function getSysRoleListApi(params: SysRoleListQuery) {
+  return requestClient.get<SysRoleListRes>('/role/list', { params });
 }
