@@ -9,7 +9,7 @@ import { Button, message, Switch,Tag  } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getDictTypeListApi } from '#/api'; 
+import { getSysDictTypeListApi } from '#/api'; 
 import { useRouter } from 'vue-router';
 
 import {
@@ -69,7 +69,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { field: 'dictType', title: '字典类型' ,slots: { default: 'type' }, },
     { field: 'remark', title: '备注' },
     { field: 'createdAt', formatter: 'formatDateTime', title: '创建时间' },
-    { title: '操作', width: 200, slots: { default: 'action' } }
+    { title: '操作', width: 120, slots: { default: 'action' } }
   ],
   exportConfig: {},
   height: 'auto',
@@ -79,7 +79,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     ajax: {
       query: async ({ page }, formValues) => {
         message.success(`Query params: ${JSON.stringify(formValues)}`);
-        return await getDictTypeListApi({
+        return await getSysDictTypeListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,

@@ -1,12 +1,12 @@
 import { requestClient } from '#/api/request';
 
-export interface DictTypeListReq {
+export interface SysDictTypeListReq {
     page: number;
     pageSize: number;
     dictName: string;
     dictType: string;
 }
-export interface DictType {
+export interface SysDictType {
     dictId: number; 
     tenantId: string;
     dictName: string;
@@ -16,21 +16,21 @@ export interface DictType {
     createdAt: string;
     remark: string;
 }
-export interface DictTypeListRes {
-    items: DictType[];
+export interface SysDictTypeListRes {
+    items: SysDictType[];
     total: number;
 }
 
-export async function getDictTypeListApi(params: DictTypeListReq) {
-    return requestClient.get<DictTypeListRes>('/dict/list', { params });
+export async function getSysDictTypeListApi(params: SysDictTypeListReq) {
+    return requestClient.get<SysDictTypeListRes>('/dict/list', { params });
 }
 
-export interface DictDataListReq {
+export interface SysDictDataListReq {
     page: number;
     pageSize: number;
     dictId: number;
 }
-export interface DictData {
+export interface SysDictData {
     dictCode: number;
     tenantId: string;
     dictSort: number;
@@ -45,14 +45,14 @@ export interface DictData {
     createdAt: string;
     remark: string;
 }
-export interface DictDataListRes {
-    items: DictData[];
-    type: DictType;
+export interface SysDictDataListRes {
+    items: SysDictData[];
+    type: SysDictType;
     total: number;
 }
 
-export async function getDictDataListApi(params: DictDataListReq) {
-    return requestClient.get<DictDataListRes>('/dict-data/list/'+params.dictId, { params });
+export async function getSysDictDataListApi(params: SysDictDataListReq) {
+    return requestClient.get<SysDictDataListRes>('/dict-data/list/'+params.dictId, { params });
 }
 
 

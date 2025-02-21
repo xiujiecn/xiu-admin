@@ -29,6 +29,9 @@ type (
 		// 验证验证码
 		VerifyCaptcha(ctx context.Context, key string, value string) (err error)
 	}
+	ISysConfig interface {
+		GetConfigList(ctx context.Context, query *model.SysConfigListQuery, page *request.PageInfo) (items []*model.SysConfig, total int, err error)
+	}
 	ISysDept interface {
 		GetDeptList(ctx context.Context, query model.DeptListQuery) (items []*model.SysDept, total int, err error)
 		GetDeptById(ctx context.Context, id int64) (dept *model.SysDept, err error)
@@ -48,6 +51,12 @@ type (
 		BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMenu, menuList []*entity.SysMenu, allPath string) (data v1.MenuAllRes, err error)
 		// 获取用户动态路由树
 		GetUserMenuTree(ctx context.Context) (data v1.MenuAllRes, err error)
+	}
+	ISysNotice interface {
+		GetNoticeList(ctx context.Context, query *model.SysNoticeListQuery, page *request.PageInfo) (items []*model.SysNotice, total int, err error)
+	}
+	ISysOperLog interface {
+		GetOperLogList(ctx context.Context, query *model.SysOperLogListQuery, page *request.PageInfo) (items []*model.SysOperLogListModel, total int, err error)
 	}
 	ISysPost interface {
 		GetPostList(ctx context.Context, query model.SysPostListQuery, pageInfo request.PageInfo) (items []*model.SysPost, total int, err error)
@@ -89,9 +98,12 @@ type (
 var (
 	localSysAuth    ISysAuth
 	localSysCaptcha ISysCaptcha
+	localSysConfig  ISysConfig
 	localSysDept    ISysDept
 	localSysDict    ISysDict
 	localSysMenu    ISysMenu
+	localSysNotice  ISysNotice
+	localSysOperLog ISysOperLog
 	localSysPost    ISysPost
 	localSysRole    ISysRole
 	localSysTenant  ISysTenant
@@ -118,6 +130,17 @@ func SysCaptcha() ISysCaptcha {
 
 func RegisterSysCaptcha(i ISysCaptcha) {
 	localSysCaptcha = i
+}
+
+func SysConfig() ISysConfig {
+	if localSysConfig == nil {
+		panic("implement not found for interface ISysConfig, forgot register?")
+	}
+	return localSysConfig
+}
+
+func RegisterSysConfig(i ISysConfig) {
+	localSysConfig = i
 }
 
 func SysDept() ISysDept {
@@ -151,6 +174,28 @@ func SysMenu() ISysMenu {
 
 func RegisterSysMenu(i ISysMenu) {
 	localSysMenu = i
+}
+
+func SysNotice() ISysNotice {
+	if localSysNotice == nil {
+		panic("implement not found for interface ISysNotice, forgot register?")
+	}
+	return localSysNotice
+}
+
+func RegisterSysNotice(i ISysNotice) {
+	localSysNotice = i
+}
+
+func SysOperLog() ISysOperLog {
+	if localSysOperLog == nil {
+		panic("implement not found for interface ISysOperLog, forgot register?")
+	}
+	return localSysOperLog
+}
+
+func RegisterSysOperLog(i ISysOperLog) {
+	localSysOperLog = i
 }
 
 func SysPost() ISysPost {
