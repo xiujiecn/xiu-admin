@@ -1,6 +1,6 @@
 import { defineComponent, h } from 'vue';
 
-import { Icon } from '@iconify/vue';
+import { addIcon, Icon, type IconifyIcon } from '@iconify/vue';
 
 function createIconifyIcon(icon: string) {
   return defineComponent({
@@ -11,4 +11,14 @@ function createIconifyIcon(icon: string) {
   });
 }
 
-export { createIconifyIcon };
+function createIconifyOfflineIcon(icon: string, iconComponent: IconifyIcon) {
+  return defineComponent({
+    name: `Icon-${icon}`,
+    setup(props, { attrs }) {
+      addIcon(icon, iconComponent);
+      return () => h(Icon, { icon, ...props, ...attrs });
+    },
+  });
+}
+
+export { createIconifyIcon, createIconifyOfflineIcon };

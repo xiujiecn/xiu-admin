@@ -148,3 +148,23 @@ func GetLocalIP() (ip string, err error) {
 	}
 	return
 }
+
+// 获取两个字符串之间的字符串
+func GetBetweenStr(str, start, end string) (result string) {
+	startIndex := strings.Index(str, start)
+	if startIndex == -1 {
+		return ""
+	}
+	// 更新startIndex为开始字符串之后的位置
+	startIndex += len(start)
+
+	// 找到结束字符串的位置，从更新后的startIndex开始查找
+	endIndex := strings.Index(str[startIndex:], end)
+	if endIndex == -1 {
+		return ""
+	}
+
+	// 切片操作获取中间的字符串
+	result = str[startIndex : startIndex+endIndex]
+	return
+}
