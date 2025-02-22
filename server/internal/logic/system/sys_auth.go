@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"errors"
+	"server/internal/library/bcache"
 	"server/internal/model"
 	"server/internal/service"
 	"server/utility"
@@ -12,7 +13,8 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	jwt "github.com/golang-jwt/jwt/v4"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
 
@@ -46,18 +48,52 @@ func (s *sSysAuth) Login(ctx context.Context, captchaID string, captchaValue str
 		TenantId: user.TenantId,
 		DeptId:   user.DeptId,
 	}
-	// TODO: 保存在线列表
-	// TODO: 保存登录日志
+
 	// 生成token
-	token, err = s.GenerateToken(ctx, userOut)
+	claims, token, err := s.GenerateToken(ctx, userOut)
 	if err != nil {
 		return nil, "", err
 	}
+	ip := g.RequestFromCtx(ctx).GetClientIp()
+	// 保存登录日志
+	logininfor := &model.SysLogininforAddModel{
+		TenantId:      user.TenantId,
+		UserName:      user.UserName,
+		ClientKey:     "web",
+		DeviceType:    "web",
+		Ipaddr:        ip,
+		LoginLocation: utility.GetCityByIp(ip),
+		Browser:       utility.GetBrowser(ctx),
+		Os:            utility.GetOs(ctx),
+		Status:        "0",
+		Msg:           "登录成功",
+		LoginTime:     gtime.Now(),
+	}
+	id, err := service.SysLogininfor().AddLogininfor(ctx, logininfor)
+	if err != nil {
+		return nil, "", err
+	}
+	// 保存在线列表
+	service.SysUserOnline().Add(ctx, &model.SysUserOnlineAddModel{
+		OnlineId:      id,
+		TenantId:      user.TenantId,
+		Uuid:          claims.UUID,
+		UserName:      user.UserName,
+		ClientKey:     "web",
+		DeviceType:    "web",
+		Ipaddr:        ip,
+		LoginLocation: utility.GetCityByIp(ip),
+		Browser:       utility.GetBrowser(ctx),
+		Os:            utility.GetOs(ctx),
+		Token:         token,
+		LoginTime:     gtime.Now(),
+		ExpireTime:    gtime.NewFromTime(claims.ExpiresAt.Time),
+	})
 	return userOut, token, nil
 }
 
 // 生成Token
-func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) (token string, err error) {
+func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) (claims *model.CustomClaims, token string, err error) {
 	ets := g.Cfg().MustGet(ctx, "jwt.expiresTime", "7d").String()
 	bts := g.Cfg().MustGet(ctx, "jwt.bufferTime", "1d").String()
 	iss := g.Cfg().MustGet(ctx, "jwt.issuer", "XiujieAdmin").String()
@@ -65,9 +101,9 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 	et, _ := utility.ParseDuration(ets)
 	bt, _ := utility.ParseDuration(bts)
 	g.Log().Infof(ctx, "生成Token: user:%+v, et:%s, bt:%s, iss:%s, sk:%s", user, et, bt, iss, sk)
-	claims := model.CustomClaims{
+	claims = &model.CustomClaims{
 		BaseClaims: model.BaseClaims{
-			UUID:     uuid.New(),
+			UUID:     strings.ReplaceAll(uuid.New().String(), "-", ""),
 			ID:       user.ID,
 			Username: user.Username,
 			NickName: user.NickName,
@@ -85,9 +121,10 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err = t.SignedString([]byte(sk))
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
-	return token, nil
+	bcache.SetSysAuthToken(ctx, claims.BaseClaims.ID, claims.BaseClaims.UUID, token, et)
+	return claims, token, nil
 }
 
 // 解析Token
@@ -103,7 +140,30 @@ func (s *sSysAuth) ParseToken(ctx context.Context, token string) (claims *model.
 	if t.Claims.(*model.CustomClaims).ExpiresAt.Unix() < time.Now().Unix() {
 		return nil, errors.New("token已过期")
 	}
+	_, err = bcache.GetSysAuthToken(ctx, t.Claims.(*model.CustomClaims).BaseClaims.ID, t.Claims.(*model.CustomClaims).BaseClaims.UUID)
+	if err != nil {
+		return nil, err
+	}
 	return t.Claims.(*model.CustomClaims), nil
+}
+
+// 删除Token
+func (s *sSysAuth) DeleteToken(ctx context.Context, token string) (err error) {
+	sk := g.Cfg().MustGet(ctx, "jwt.signingKey", "39c54195e73304e74a8429b178965865").String()
+	t, err := jwt.ParseWithClaims(token, &model.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(sk), nil
+	})
+	if err != nil {
+		return err
+	}
+	if t.Claims.(*model.CustomClaims).ExpiresAt.Unix() < time.Now().Unix() {
+		return errors.New("token已过期")
+	}
+	err = bcache.DelSysAuthToken(ctx, t.Claims.(*model.CustomClaims).BaseClaims.ID, t.Claims.(*model.CustomClaims).BaseClaims.UUID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // 根据Token获取当前登录用户信息

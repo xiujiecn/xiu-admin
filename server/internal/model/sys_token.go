@@ -2,11 +2,10 @@ package model
 
 import (
 	jwt "github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 )
 
 type BaseClaims struct {
-	UUID         uuid.UUID
+	UUID         string
 	ID           int64   // 用户ID
 	Username     string  // 用户名
 	NickName     string  // 昵称

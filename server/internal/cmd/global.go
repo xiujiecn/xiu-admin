@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"server/internal/library/cache"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -22,6 +23,8 @@ func SystemInit(ctx context.Context) {
 		g.Log().Fatalf(ctx, "时区设置异常 err: %+v", err)
 		return
 	}
+	// 设置缓存适配器
+	cache.SetAdapter(ctx)
 }
 
 // CheckConnDB 检查数据库连接

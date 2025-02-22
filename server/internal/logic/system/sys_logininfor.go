@@ -16,6 +16,10 @@ func NewSysLogininfor() *sSysLogininfor {
 	return &sSysLogininfor{}
 }
 
+func init() {
+	service.RegisterSysLogininfor(NewSysLogininfor())
+}
+
 func (s *sSysLogininfor) ListLogininfor(ctx context.Context, query *model.SysLogininforListQuery, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error) {
 	// 获取当前用户租户编码
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
@@ -47,4 +51,16 @@ func (s *sSysLogininfor) ListLogininfor(ctx context.Context, query *model.SysLog
 		return nil, 0, err
 	}
 	return items, total, nil
+}
+
+func (s *sSysLogininfor) AddLogininfor(ctx context.Context, logininfor *model.SysLogininforAddModel) (id int64, err error) {
+	result, err := dao.SysLogininfor.Ctx(ctx).Data(logininfor).Save()
+	if err != nil {
+		return 0, err
+	}
+	id, err = result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
