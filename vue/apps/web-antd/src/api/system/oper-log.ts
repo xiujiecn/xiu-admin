@@ -33,5 +33,5 @@ export interface SysOperLogListRes {
 }
 
 export async function getSysOperLogList(params: SysOperLogListReq) {
-    return requestClient.get<SysOperLogListRes>('/oper-log/list', { params });
+    return requestClient.get<SysOperLogListRes>('/system/oper-log/list', { params });
 }

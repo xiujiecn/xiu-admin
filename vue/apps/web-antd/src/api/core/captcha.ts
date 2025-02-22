@@ -8,5 +8,5 @@ export namespace CaptchaApi {
 }
 
 export async function getCaptchaApi() {
-  return requestClient.get<CaptchaApi.GetCaptchaResult>('/captcha');
+  return requestClient.get<CaptchaApi.GetCaptchaResult>('/system/captcha');
 }

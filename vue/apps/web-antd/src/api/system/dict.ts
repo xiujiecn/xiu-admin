@@ -52,7 +52,7 @@ export interface SysDictDataListRes {
 }
 
 export async function getSysDictDataListApi(params: SysDictDataListReq) {
-    return requestClient.get<SysDictDataListRes>('/dict-data/list/'+params.dictId, { params });
+    return requestClient.get<SysDictDataListRes>('/system/dict-data/list/'+params.dictId, { params });
 }
 
 

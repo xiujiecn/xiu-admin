@@ -31,5 +31,5 @@ export interface SysMenuListRes {
   }
   
   export async function getSysMenuListApi(params: SysMenuListReq) {
-    return requestClient.get<SysMenuListRes>('/menu/list', { params });
+    return requestClient.get<SysMenuListRes>('/system/menu/list', { params });
   }

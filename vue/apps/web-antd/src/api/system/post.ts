@@ -27,5 +27,5 @@ export interface SysPostListRes {
 }
 
 export async function getSysPostListApi(params: SysPostListQuery) {
-  return requestClient.get<SysPostListRes>('/post/list', { params });
+  return requestClient.get<SysPostListRes>('/system/post/list', { params });
 }

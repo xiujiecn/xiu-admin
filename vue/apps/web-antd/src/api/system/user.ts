@@ -41,6 +41,6 @@ export interface SysUserListQuery {
   }
   
   export async function getSysUserListApi(params: SysUserListQuery) {
-    return requestClient.get<SysUserListRes>('/user/list', { params });
+    return requestClient.get<SysUserListRes>('/system/user/list', { params });
   }
   
