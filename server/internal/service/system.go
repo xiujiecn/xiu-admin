@@ -17,9 +17,11 @@ type (
 	ISysAuth interface {
 		Login(ctx context.Context, captchaID string, captchaValue string, username string, password string) (res *model.LoginUserOut, token string, err error)
 		// 生成Token
-		GenerateToken(ctx context.Context, user *model.LoginUserOut) (token string, err error)
+		GenerateToken(ctx context.Context, user *model.LoginUserOut) (claims *model.CustomClaims, token string, err error)
 		// 解析Token
 		ParseToken(ctx context.Context, token string) (claims *model.CustomClaims, err error)
+		// 删除Token
+		DeleteToken(ctx context.Context, token string) (err error)
 		// 根据Token获取当前登录用户信息
 		GetCurrentUser(ctx context.Context) (claims *model.CustomClaims, err error)
 	}
@@ -45,6 +47,7 @@ type (
 	}
 	ISysLogininfor interface {
 		ListLogininfor(ctx context.Context, query *model.SysLogininforListQuery, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error)
+		AddLogininfor(ctx context.Context, logininfor *model.SysLogininforAddModel) (id int64, err error)
 	}
 	ISysMenu interface {
 		// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
@@ -85,6 +88,9 @@ type (
 		GetTenantInfo(ctx context.Context, tenantId string) (data *entity.SysTenant, err error)
 		// 获取租户套餐
 		GetTenantPackage(ctx context.Context, packageId int64) (data *entity.SysTenantPackage, err error)
+		// 获取租户列表
+		List(ctx context.Context, query *model.SysTenantListQuery, page *request.PageInfo) (data []*model.SysTenantListModel, total int, err error)
+		TenantPackageList(ctx context.Context, query *model.SysTenantPackageListQuery, page *request.PageInfo) (data []*model.SysTenantPackageListModel, total int, err error)
 	}
 	ISysUser interface {
 		// 根据用户名获取用户信息
@@ -101,6 +107,11 @@ type (
 		GetUserList(ctx context.Context, page request.PageInfo, query model.UserListQuery) (items []*model.SysUser, total int, err error)
 		// 新增用户
 		AddUser(ctx context.Context, req model.AddUser) (user *entity.SysUser, err error)
+	}
+	ISysUserOnline interface {
+		Add(ctx context.Context, userOnline *model.SysUserOnlineAddModel) (err error)
+		List(ctx context.Context, query *model.SysUserOnlineListQuery, page *request.PageInfo) (items []*model.SysUserOnlineListModel, total int, err error)
+		Delete(ctx context.Context, id int64) (err error)
 	}
 )
 
@@ -120,6 +131,7 @@ var (
 	localSysRole       ISysRole
 	localSysTenant     ISysTenant
 	localSysUser       ISysUser
+	localSysUserOnline ISysUserOnline
 )
 
 func SysAuth() ISysAuth {
@@ -285,4 +297,15 @@ func SysUser() ISysUser {
 
 func RegisterSysUser(i ISysUser) {
 	localSysUser = i
+}
+
+func SysUserOnline() ISysUserOnline {
+	if localSysUserOnline == nil {
+		panic("implement not found for interface ISysUserOnline, forgot register?")
+	}
+	return localSysUserOnline
+}
+
+func RegisterSysUserOnline(i ISysUserOnline) {
+	localSysUserOnline = i
 }

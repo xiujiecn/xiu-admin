@@ -10,6 +10,7 @@ require (
 	github.com/gogf/gf/v2 v2.8.3
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/google/uuid v1.6.0
+	github.com/mileusna/useragent v1.3.5
 	github.com/mojocn/base64Captcha v1.3.8
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa
 	gorm.io/gorm v1.25.12
