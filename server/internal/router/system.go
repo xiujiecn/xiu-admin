@@ -10,7 +10,7 @@ import (
 
 // System 系统默认功能的路由，不含业务属性的
 func System(ctx context.Context, group *ghttp.RouterGroup) {
-	group.Group("/", func(group *ghttp.RouterGroup) {
+	group.Group("/system", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			system.NewV1(),
 		)

@@ -29,6 +29,9 @@ type (
 		// 验证验证码
 		VerifyCaptcha(ctx context.Context, key string, value string) (err error)
 	}
+	ISysClient interface {
+		List(ctx context.Context, query *model.SysClientListQuery, pageInfo *request.PageInfo) (items []*model.SysClientListModel, total int, err error)
+	}
 	ISysConfig interface {
 		GetConfigList(ctx context.Context, query *model.SysConfigListQuery, page *request.PageInfo) (items []*model.SysConfig, total int, err error)
 	}
@@ -39,6 +42,9 @@ type (
 	ISysDict interface {
 		GetDictTypeList(ctx context.Context, req *model.SysDictTypeListQuery, pageInfo *request.PageInfo) (items []model.SysDictType, total int, err error)
 		GetDictDataList(ctx context.Context, id int64, pageInfo *request.PageInfo) (items []model.SysDictData, total int, err error)
+	}
+	ISysLogininfor interface {
+		ListLogininfor(ctx context.Context, query *model.SysLogininforListQuery, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error)
 	}
 	ISysMenu interface {
 		// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
@@ -57,6 +63,9 @@ type (
 	}
 	ISysOperLog interface {
 		GetOperLogList(ctx context.Context, query *model.SysOperLogListQuery, page *request.PageInfo) (items []*model.SysOperLogListModel, total int, err error)
+	}
+	ISysOss interface {
+		List(ctx context.Context, query *model.SysOssListQuery, pageInfo *request.PageInfo) (items []*model.SysOssListModel, total int, err error)
 	}
 	ISysPost interface {
 		GetPostList(ctx context.Context, query model.SysPostListQuery, pageInfo request.PageInfo) (items []*model.SysPost, total int, err error)
@@ -96,18 +105,21 @@ type (
 )
 
 var (
-	localSysAuth    ISysAuth
-	localSysCaptcha ISysCaptcha
-	localSysConfig  ISysConfig
-	localSysDept    ISysDept
-	localSysDict    ISysDict
-	localSysMenu    ISysMenu
-	localSysNotice  ISysNotice
-	localSysOperLog ISysOperLog
-	localSysPost    ISysPost
-	localSysRole    ISysRole
-	localSysTenant  ISysTenant
-	localSysUser    ISysUser
+	localSysAuth       ISysAuth
+	localSysCaptcha    ISysCaptcha
+	localSysClient     ISysClient
+	localSysConfig     ISysConfig
+	localSysDept       ISysDept
+	localSysDict       ISysDict
+	localSysLogininfor ISysLogininfor
+	localSysMenu       ISysMenu
+	localSysNotice     ISysNotice
+	localSysOperLog    ISysOperLog
+	localSysOss        ISysOss
+	localSysPost       ISysPost
+	localSysRole       ISysRole
+	localSysTenant     ISysTenant
+	localSysUser       ISysUser
 )
 
 func SysAuth() ISysAuth {
@@ -130,6 +142,17 @@ func SysCaptcha() ISysCaptcha {
 
 func RegisterSysCaptcha(i ISysCaptcha) {
 	localSysCaptcha = i
+}
+
+func SysClient() ISysClient {
+	if localSysClient == nil {
+		panic("implement not found for interface ISysClient, forgot register?")
+	}
+	return localSysClient
+}
+
+func RegisterSysClient(i ISysClient) {
+	localSysClient = i
 }
 
 func SysConfig() ISysConfig {
@@ -165,6 +188,17 @@ func RegisterSysDict(i ISysDict) {
 	localSysDict = i
 }
 
+func SysLogininfor() ISysLogininfor {
+	if localSysLogininfor == nil {
+		panic("implement not found for interface ISysLogininfor, forgot register?")
+	}
+	return localSysLogininfor
+}
+
+func RegisterSysLogininfor(i ISysLogininfor) {
+	localSysLogininfor = i
+}
+
 func SysMenu() ISysMenu {
 	if localSysMenu == nil {
 		panic("implement not found for interface ISysMenu, forgot register?")
@@ -196,6 +230,17 @@ func SysOperLog() ISysOperLog {
 
 func RegisterSysOperLog(i ISysOperLog) {
 	localSysOperLog = i
+}
+
+func SysOss() ISysOss {
+	if localSysOss == nil {
+		panic("implement not found for interface ISysOss, forgot register?")
+	}
+	return localSysOss
+}
+
+func RegisterSysOss(i ISysOss) {
+	localSysOss = i
 }
 
 func SysPost() ISysPost {

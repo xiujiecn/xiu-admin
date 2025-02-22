@@ -26,5 +26,5 @@ export interface SysDeptListRes {
 
 
 export async function getSysDeptListApi(params: SysDeptListQuery) {
-  return requestClient.get<SysDeptListRes>('/dept/list', { params });
+  return requestClient.get<SysDeptListRes>('/system/dept/list', { params });
 }

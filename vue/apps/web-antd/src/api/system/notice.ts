@@ -25,5 +25,5 @@ export interface SysNoticeListRes {
 }
 
 export async function getSysNoticeListApi(params: SysNoticeListReq) {
-  return requestClient.get<SysNoticeListRes>('/notice/list', { params });
+  return requestClient.get<SysNoticeListRes>('/system/notice/list', { params });
 }

@@ -26,5 +26,5 @@ export interface GetSysConfigListRes {
 }
 
 export async function getSysConfigListApi(params: GetSysConfigListReq) {
-  return requestClient.get<GetSysConfigListRes>('/config/list', { params });
+  return requestClient.get<GetSysConfigListRes>('/system/config/list', { params });
 }
