@@ -12,5 +12,6 @@ func InitRouter(ctx context.Context, s *ghttp.Server) {
 	s.Group("/api/v1", func(group *ghttp.RouterGroup) {
 		group.Middleware(service.Middleware().ResponseHandler)
 		System(ctx, group)
+		Monitor(ctx, group)
 	})
 }

@@ -9,7 +9,7 @@ import { Button, message, Switch,Tag  } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysMenuListApi } from '#/api'; 
+import { getSysMenuListApi } from '#/api/system'; 
 import { Icon } from '@iconify/vue';
 import {
   MdiPlus,

@@ -9,22 +9,9 @@ import { Button, message, Switch,  } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getUserListApi } from '#/api'; 
+import { getSysUserListApi } from '#/api/system'; 
 
 import {
-  MdiGithub,
-  MdiGoogle,
-  MdiKeyboardEsc,
-  MdiQqchat,
-  MdiWechat,
-  SvgAvatar1Icon,
-  SvgAvatar2Icon,
-  SvgAvatar3Icon,
-  SvgAvatar4Icon,
-  SvgBellIcon,
-  SvgCakeIcon,
-  SvgCardIcon,
-  SvgDownloadIcon,
   MdiPlus,
   MdiEdit,
   MdiDelete,
@@ -122,7 +109,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     ajax: {
       query: async ({ page }, formValues) => {
         message.success(`Query params: ${JSON.stringify(formValues)}`);
-        return await getUserListApi({
+        return await getSysUserListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,
