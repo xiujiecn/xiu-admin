@@ -637,6 +637,9 @@ importers:
       ant-design-vue:
         specifier: 'catalog:'
         version: 4.2.6(vue@3.5.13(typescript@5.7.3))
+      cropperjs:
+        specifier: ^1.6.2
+        version: 1.6.2
       dayjs:
         specifier: 'catalog:'
         version: 1.11.13
@@ -655,6 +658,10 @@ importers:
       vue-router:
         specifier: 'catalog:'
         version: 4.5.0(vue@3.5.13(typescript@5.7.3))
+    devDependencies:
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
 
   docs:
     dependencies:
@@ -1537,6 +1544,12 @@ importers:
         specifier: workspace:*
         version: link:../@core/base/icons
     devDependencies:
+      '@iconify/icons-ant-design':
+        specifier: ^1.2.7
+        version: 1.2.7
+      '@iconify/icons-fa-brands':
+        specifier: ^1.2.4
+        version: 1.2.4
       '@iconify/icons-flat-color-icons':
         specifier: ^1.2.5
         version: 1.2.5
@@ -1546,6 +1559,15 @@ importers:
       '@iconify/icons-logos':
         specifier: ^1.2.36
         version: 1.2.36
+      '@iconify/icons-ri':
+        specifier: ^1.2.10
+        version: 1.2.10
+      '@iconify/icons-simple-icons':
+        specifier: ^1.2.74
+        version: 1.2.74
+      '@iconify/icons-uiw':
+        specifier: ^1.2.6
+        version: 1.2.6
 
   packages/locales:
     dependencies:
@@ -3235,6 +3257,12 @@ packages:
   '@iconify-json/vscode-icons@1.2.11':
     resolution: {integrity: sha512-V0ldtWPUKe7ZB3CV/TjgDW1Gbz74AxjGPS2NBWDTSn/y25gTwFycI1YcrluDhuVSoQpDEIYmm3JQJkhtSefh7A==}
 
+  '@iconify/icons-ant-design@1.2.7':
+    resolution: {integrity: sha512-X5OaFEhBroyUZru7aYi30q1EkLcAtqQqTdsq4g8oJUJOuVL8CxS43naaJVlFFgHj+F9QnuCT65yTpTIW3mdQEg==}
+
+  '@iconify/icons-fa-brands@1.2.4':
+    resolution: {integrity: sha512-MnUUfPhKJ6ECvVNxipBCmyuvJPDgRJcJ1f9nfgv0obikp6D9d6dGtMrR+bw4Gku6Gr/WCnS1e/Qd5gdmXlE84w==}
+
   '@iconify/icons-flat-color-icons@1.2.5':
     resolution: {integrity: sha512-tlvRMTNVE006O1FFEb59TbseADRSeiDIg7tvZdPpCo7aRIzGyaeoI3A4SUl7ufdmKR8W36Sm4J3v0LccLVOfGA==}
 
@@ -3243,6 +3271,15 @@ packages:
 
   '@iconify/icons-logos@1.2.36':
     resolution: {integrity: sha512-RVdZE9figuWmd8HeVmM8oQvOdv/4YzXV6lZ+G9QJgzCB/VBLV0inPltZxOt939oj4GbKbr7PF6J4bADMua/GPw==}
+
+  '@iconify/icons-ri@1.2.10':
+    resolution: {integrity: sha512-w/Xu177artcK7P1LPUMq85WcRbqFE8sKYQEuNfEkuex/47DOaCgW6oBFdjlFBAmBczKlsJPdcy2pAGBGZvXdYw==}
+
+  '@iconify/icons-simple-icons@1.2.74':
+    resolution: {integrity: sha512-bsmbvwO8hauz49z740CYg70IDevOgshUoq4q1IKt6NnElnn+N2F6AseO3Uti82yUU4OHyQqkWjjUwoPTazlNnA==}
+
+  '@iconify/icons-uiw@1.2.6':
+    resolution: {integrity: sha512-y6LCoHQ3o1/C5cYipQ5/kt6I4h15JOS5YzBvv2INpj4kSEdUuZ4u9SF4gsLxKqLMxDlTE+mF9skF+Qaypputpw==}
 
   '@iconify/json@2.2.302':
     resolution: {integrity: sha512-gklpnOBA3xLNW68cdQz6iI4UnRGIXb+se8UyQN1lzy4Si01XIHynGq2nTep01HQK/I1Ltgz2h6srnPGSDB8LhQ==}
@@ -3969,6 +4006,9 @@ packages:
 
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
+
+  '@types/lodash-es@4.17.12':
+    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
 
   '@types/lodash.clonedeep@4.5.9':
     resolution: {integrity: sha512-19429mWC+FyaAhOLzsS8kZUsI+/GmBAQ0HFiCPsKGU+7pBXOQWhyrY6xNNDwUSX8SMZMJvuFVMF9O5dQOlQK9Q==}
@@ -5017,6 +5057,9 @@ packages:
   croner@9.0.0:
     resolution: {integrity: sha512-onMB0OkDjkXunhdW9htFjEhqrD54+M94i6ackoUkjHKbRnXdyEyKRelp4nJ1kAz32+s27jP1FsebpJCVl0BsvA==}
     engines: {node: '>=18.0'}
+
+  cropperjs@1.6.2:
+    resolution: {integrity: sha512-nhymn9GdnV3CqiEHJVai54TULFAE3VshJTXSqSJKa8yXAKyBKDWdhHarnlIPrshJ0WMFTGuFvG02YjLXfPiuOA==}
 
   cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
@@ -11719,6 +11762,14 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
+  '@iconify/icons-ant-design@1.2.7':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify/icons-fa-brands@1.2.4':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify/icons-flat-color-icons@1.2.5':
     dependencies:
       '@iconify/types': 2.0.0
@@ -11728,6 +11779,18 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify/icons-logos@1.2.36':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify/icons-ri@1.2.10':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify/icons-simple-icons@1.2.74':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify/icons-uiw@1.2.6':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -12606,6 +12669,10 @@ snapshots:
     optional: true
 
   '@types/linkify-it@5.0.0': {}
+
+  '@types/lodash-es@4.17.12':
+    dependencies:
+      '@types/lodash': 4.17.15
 
   '@types/lodash.clonedeep@4.5.9':
     dependencies:
@@ -13858,6 +13925,8 @@ snapshots:
       readable-stream: 4.7.0
 
   croner@9.0.0: {}
+
+  cropperjs@1.6.2: {}
 
   cross-env@7.0.3:
     dependencies:

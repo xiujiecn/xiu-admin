@@ -2,11 +2,12 @@
 import type { NotificationItem } from '@vben/layouts';
 
 import { computed, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { AuthenticationLoginExpiredModal } from '@vben/common-ui';
 import { VBEN_DOC_URL, VBEN_GITHUB_URL } from '@vben/constants';
 import { useWatermark } from '@vben/hooks';
-import { BookOpenText, CircleHelp, MdiGithub } from '@vben/icons';
+import { BookOpenText, CircleHelp, MdiGithub,UserOutlined } from '@vben/icons';
 import {
   BasicLayout,
   LockScreen,
@@ -55,12 +56,20 @@ const notifications = ref<NotificationItem[]>([
 const userStore = useUserStore();
 const authStore = useAuthStore();
 const accessStore = useAccessStore();
+const router = useRouter();
 const { destroyWatermark, updateWatermark } = useWatermark();
 const showDot = computed(() =>
   notifications.value.some((item) => !item.isRead),
 );
 
 const menus = computed(() => [
+  {
+    handler: () => {
+      router.push('/profile');
+    },
+    icon: UserOutlined,
+    text: $t('ui.widgets.profile'),
+  },
   {
     handler: () => {
       openWindow(VBEN_DOC_URL, {

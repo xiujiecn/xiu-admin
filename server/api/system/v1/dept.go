@@ -18,3 +18,11 @@ type DeptListRes struct {
 	response.PageResult
 	Data []*model.SysDept `json:"items" dc:"部门列表"`
 }
+
+type DeptTreeReq struct {
+	g.Meta `path:"/dept/tree" method:"get" tags:"系统" summary:"获取部门树"`
+}
+
+type DeptTreeRes struct {
+	Data []*model.SysDeptTreeModel `json:"items" dc:"部门树"`
+}

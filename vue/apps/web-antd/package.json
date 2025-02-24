@@ -47,6 +47,10 @@
     "pinia": "catalog:",
     "vue": "catalog:",
     "lodash-es": "^4.17.21",
+    "cropperjs": "^1.6.2",
     "vue-router": "catalog:"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12"
   }
 }

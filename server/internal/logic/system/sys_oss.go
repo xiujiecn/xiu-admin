@@ -63,7 +63,7 @@ func (s *sSysOss) List(ctx context.Context, query *model.SysOssListQuery, pageIn
 		return nil, 0, err
 	}
 
-	err = db.Page(pageInfo.Page, pageInfo.PageSize).Order("id", "desc").Scan(&items)
+	err = db.Page(pageInfo.Page, pageInfo.PageSize).Order(dao.SysOss.Columns().OssId, "DESC").Scan(&items)
 	if err != nil {
 		return nil, 0, err
 	}

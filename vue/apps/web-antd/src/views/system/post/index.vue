@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h } from 'vue';
+import { h, ref } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 
@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysPostListApi } from '#/api'; 
-
+import DeptTree from '#/components/dept/dept-tree.vue';
 import {
   MdiPlus,
   MdiEdit,
@@ -25,6 +25,8 @@ interface RowType {
   productName: string;
   releaseDate: string;
 }
+
+const selectDeptId = ref<string[]>([]);
 
 const formOptions: VbenFormProps = {
   // 默认展开
@@ -73,6 +75,11 @@ const formOptions: VbenFormProps = {
   submitOnChange: true,
   // 按下回车时是否提交表单
   submitOnEnter: false,
+  handleReset: async () => {
+    selectDeptId.value = [];
+    await tableApi.formApi.resetForm();
+    await tableApi.reload();
+  },
 };
 
 const gridOptions: VxeTableGridOptions<RowType> = {
@@ -84,7 +91,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
     { field: 'postCode', title: '岗位编码' },
     { field: 'postName', title: '岗位名称' },
-    { field: 'deptId', title: '部门' },
+    { field: 'deptInfo.deptName', title: '部门' },
     { field: 'postCategory', title: '岗位类别' },
     {
       field: 'status',
@@ -102,10 +109,14 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
+        let deptId:number = 0;
+        if(selectDeptId.value.length > 0) {
+          deptId = Number(selectDeptId.value[0]);
+        }
         return await getSysPostListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
+          deptId: deptId,
           ...formValues,
         });
       },
@@ -121,7 +132,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid] = useVbenVxeGrid({
+const [Grid, tableApi ] = useVbenVxeGrid({
   formOptions,
   gridOptions,
 });
@@ -129,6 +140,11 @@ const [Grid] = useVbenVxeGrid({
 
 <template>
   <Page auto-content-height>
+    <div class="flex h-full gap-[8px]">
+    <DeptTree class="w-[240px]" 
+      @select="()=> tableApi.reload()" 
+      @reload="()=> tableApi.reload()"
+      v-model:select-dept-id="selectDeptId" />
     <Grid>
       <template #toolbar-actions>
         
@@ -150,5 +166,6 @@ const [Grid] = useVbenVxeGrid({
         </div>
       </template>
     </Grid>
+    </div>
   </Page>
 </template>

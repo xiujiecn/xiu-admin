@@ -19,13 +19,23 @@ func init() {
 	service.RegisterSysPost(NewSysPost())
 }
 
-func (l *sSysPost) GetPostList(ctx context.Context, query model.SysPostListQuery, pageInfo request.PageInfo) (items []*model.SysPost, total int, err error) {
+func (l *sSysPost) GetPostList(ctx context.Context, query model.SysPostListQuery, pageInfo request.PageInfo) (items []*model.SysPostListModel, total int, err error) {
 
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 	tenantId := claims.BaseClaims.TenantId
+
+	deptIds := make([]int64, 0)
+	if query.DeptId != 0 {
+		deptIds = append(deptIds, query.DeptId)
+		subDeptIds, err := service.SysDept().GetDeptIdsByParentId(ctx, query.DeptId)
+		if err != nil {
+			return nil, 0, err
+		}
+		deptIds = append(deptIds, subDeptIds...)
+	}
 
 	m := dao.SysPost.Ctx(ctx).Where(dao.SysPost.Columns().TenantId, tenantId)
 	if query.PostCode != "" {
@@ -34,11 +44,15 @@ func (l *sSysPost) GetPostList(ctx context.Context, query model.SysPostListQuery
 	if query.PostName != "" {
 		m = m.WhereLike(dao.SysPost.Columns().PostName, "%"+query.PostName+"%")
 	}
+	if len(deptIds) > 0 {
+		m = m.WhereIn(dao.SysPost.Columns().DeptId, deptIds)
+	}
+
 	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
 	}
-	err = m.Page(pageInfo.Page, pageInfo.PageSize).Scan(&items)
+	err = m.WithAll().Page(pageInfo.Page, pageInfo.PageSize).Scan(&items)
 	if err != nil {
 		return nil, 0, err
 	}

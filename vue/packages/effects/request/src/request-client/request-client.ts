@@ -1,4 +1,4 @@
-import type { AxiosInstance, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import type { RequestClientConfig, RequestClientOptions } from './types';
 
@@ -68,6 +68,19 @@ class RequestClient {
     return this.request<T>(url, { ...config, method: 'DELETE' });
   }
 
+  /**
+   * DELETE请求方法 成功会弹出msg
+   */
+  public deleteWithMsg<T = any>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    return this.request<T>(url, {
+      ...config,
+      method: 'DELETE',
+      successMessageMode: 'message',
+    });
+  }
   /**
    * GET请求方法
    */

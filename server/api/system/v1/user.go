@@ -32,7 +32,7 @@ type UserListReq struct {
 
 type UserListRes struct {
 	response.PageResult
-	Data []*model.SysUser `json:"items" dc:"用户列表"`
+	Data []*model.SysUserListModel `json:"items" dc:"用户列表"`
 }
 
 type AddUserReq struct {
@@ -41,5 +41,13 @@ type AddUserReq struct {
 }
 
 type AddUserRes struct {
-	Data *model.SysUser `json:"data" dc:"用户信息"`
+	Data *model.SysUserListModel `json:"data" dc:"用户信息"`
+}
+
+type UserProfileReq struct {
+	g.Meta `path:"/user/profile" method:"get" tags:"系统" summary:"获取用户个人中心"`
+}
+
+type UserProfileRes struct {
+	User *model.UserProfileModel `json:"user" dc:"用户信息"`
 }
