@@ -1,5 +1,6 @@
 import { requestClient } from '#/api/request';
 
+import type { SysDeptMini } from '#/api/system/dept';
 
 export interface SysPostListQuery {
   page: number;
@@ -19,6 +20,7 @@ export interface SysPostListData {
     status: string;
     remark: string;
     createdAt: string;
+    deptInfo: SysDeptMini;
 }
 
 export interface SysPostListRes {
@@ -28,4 +30,10 @@ export interface SysPostListRes {
 
 export async function getSysPostListApi(params: SysPostListQuery) {
   return requestClient.get<SysPostListRes>('/system/post/list', { params });
+}
+
+export interface SysPostMini {
+  postId: number;
+  deptId: number;
+  postName: string;
 }

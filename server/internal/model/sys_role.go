@@ -23,3 +23,8 @@ type SysRoleListQuery struct {
 	RoleKey   string      `json:"roleKey"           orm:"role_key"            description:"角色权限字符串"`
 	CreatedAt *gtime.Time `json:"createdAt"         orm:"created_at"          description:"创建时间"`
 }
+
+type SysRoleMiniModel struct {
+	RoleId   int64  `json:"roleId"   orm:"role_id"   description:"角色ID"`
+	RoleName string `json:"roleName" orm:"role_name" description:"角色名称"`
+}

@@ -1,0 +1,41 @@
+package system
+
+import (
+	"context"
+	"server/internal/dao"
+	"server/internal/model"
+	"server/internal/model/request"
+	"server/internal/service"
+)
+
+type sSysSocial struct {
+}
+
+func NewSysSocial() *sSysSocial {
+	return &sSysSocial{}
+}
+
+func init() {
+	service.RegisterSysSocial(NewSysSocial())
+}
+
+func (s *sSysSocial) List(ctx context.Context, query *model.SysSocialListQuery, page *request.PageInfo) (items []*model.SysSocialListModel, total int, err error) {
+	if query.UserId == 0 {
+		claims, err := service.SysAuth().GetCurrentUser(ctx)
+		if err != nil {
+			return nil, 0, err
+		}
+		query.UserId = claims.BaseClaims.ID
+	}
+
+	db := dao.SysSocial.Ctx(ctx).Where(dao.SysSocial.Columns().UserId, query.UserId)
+	total, err = db.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+	err = db.Page(page.Page, page.PageSize).Scan(&items)
+	if err != nil {
+		return nil, 0, err
+	}
+	return items, total, nil
+}

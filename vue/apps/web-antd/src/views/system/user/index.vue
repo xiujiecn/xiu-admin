@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h } from 'vue';
+import { h, ref } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 
@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysUserListApi } from '#/api/system'; 
+import DeptTree from '#/components/dept/dept-tree.vue';
 
 import {
   MdiPlus,
@@ -25,6 +26,8 @@ interface RowType {
   productName: string;
   releaseDate: string;
 }
+
+const selectDeptId = ref<string[]>([]);
 
 const formOptions: VbenFormProps = {
   // 默认展开
@@ -79,6 +82,11 @@ const formOptions: VbenFormProps = {
   submitOnChange: true,
   // 按下回车时是否提交表单
   submitOnEnter: false,
+  handleReset: async () => {
+    selectDeptId.value = [];
+    await tableApi.formApi.resetForm();
+    await tableApi.reload();
+  },
 };
 
 const gridOptions: VxeTableGridOptions<RowType> = {
@@ -90,7 +98,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
     { field: 'userName', title: '用户名称' },
     { field: 'nickName', title: '用户昵称' },
-    { field: 'deptId', title: '部门' },
+    { field: 'deptInfo.deptName', title: '部门' },
     { field: 'email', title: '邮箱' },
     {
       field: 'status',
@@ -109,9 +117,15 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     ajax: {
       query: async ({ page }, formValues) => {
         message.success(`Query params: ${JSON.stringify(formValues)}`);
+        let deptId:number = 0;
+        if(selectDeptId.value.length > 0) {
+          deptId = Number(selectDeptId.value[0]);
+        }
+
         return await getSysUserListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
+          deptId: deptId,
           ...formValues,
         });
       },
@@ -127,15 +141,22 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid] = useVbenVxeGrid({
+const [Grid, tableApi ] = useVbenVxeGrid({
   formOptions,
   gridOptions,
 });
+
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
+    <div class="flex h-full gap-[8px]">
+    <DeptTree class="w-[240px]" 
+      @select="()=> tableApi.reload()" 
+      @reload="()=> tableApi.reload()"
+      v-model:select-dept-id="selectDeptId" />
+
+    <Grid class="flex-1">
       <template #toolbar-actions>
         
         <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
@@ -153,5 +174,6 @@ const [Grid] = useVbenVxeGrid({
         </div>
       </template>
     </Grid>
+  </div>
   </Page>
 </template>

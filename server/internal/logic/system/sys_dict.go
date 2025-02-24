@@ -45,7 +45,7 @@ func (s *sSysDict) GetDictTypeList(ctx context.Context, req *model.SysDictTypeLi
 	return
 }
 
-func (s *sSysDict) GetDictDataList(ctx context.Context, id int64, pageInfo *request.PageInfo) (items []model.SysDictData, total int, err error) {
+func (s *sSysDict) GetDictDataList(ctx context.Context, query *model.SysDictDataListQuery, pageInfo *request.PageInfo) (items []model.SysDictData, total int, err error) {
 	// 获取当前用户租户编码
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
@@ -53,24 +53,30 @@ func (s *sSysDict) GetDictDataList(ctx context.Context, id int64, pageInfo *requ
 	}
 	tenantId := claims.TenantId
 	// 获取字典类型
-	var data *model.SysDictType
-	err = dao.SysDictType.Ctx(ctx).Where(dao.SysDictType.Columns().TenantId, tenantId).
-		Where(dao.SysDictType.Columns().DictId, id).Scan(&data)
-	if err != nil {
-		return nil, 0, err
+	if query.DictType == "" && query.DictId != 0 {
+		var data *model.SysDictType
+		err = dao.SysDictType.Ctx(ctx).Where(dao.SysDictType.Columns().TenantId, tenantId).
+			Where(dao.SysDictType.Columns().DictId, query.DictId).Scan(&data)
+		if err != nil {
+			return nil, 0, err
+		}
+		if data == nil {
+			return nil, 0, gerror.New("字典类型不存在")
+		}
+		query.DictType = data.DictType
 	}
-	if data == nil {
-		return nil, 0, gerror.New("字典类型不存在")
+	if query.DictType == "" {
+		return nil, 0, gerror.New("字典类型不能为空")
 	}
 	// 获取字典数据
 	items = make([]model.SysDictData, 0)
 	m := dao.SysDictData.Ctx(ctx).Where(dao.SysDictData.Columns().TenantId, tenantId)
-	m = m.Where(dao.SysDictData.Columns().DictType, data.DictType)
+	m = m.Where(dao.SysDictData.Columns().DictType, query.DictType)
 	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
 	}
-	err = m.Order().Page(pageInfo.Page, pageInfo.PageSize).Scan(&items)
+	err = m.Order(dao.SysDictData.Columns().DictSort, "ASC").Page(pageInfo.Page, pageInfo.PageSize).Scan(&items)
 	if err != nil {
 		return nil, 0, err
 	}

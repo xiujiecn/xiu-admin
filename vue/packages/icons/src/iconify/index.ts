@@ -19,3 +19,4 @@ export const MdiEdit = createIconifyIcon('mdi:pencil');
 
 export const MdiDelete = createIconifyIcon('mdi:delete');
 
+export const SyncOutlined = createIconifyIcon('ant-design:sync-outlined');

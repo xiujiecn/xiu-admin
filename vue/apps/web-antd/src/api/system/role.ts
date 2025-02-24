@@ -33,3 +33,9 @@ export interface SysRoleListRes {
 export async function getSysRoleListApi(params: SysRoleListQuery) {
   return requestClient.get<SysRoleListRes>('/system/role/list', { params });
 }
+
+export interface SysRoleMini {
+  roleId: number;
+  roleName: string;
+}
+

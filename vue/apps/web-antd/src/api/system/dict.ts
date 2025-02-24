@@ -22,13 +22,14 @@ export interface SysDictTypeListRes {
 }
 
 export async function getSysDictTypeListApi(params: SysDictTypeListReq) {
-    return requestClient.get<SysDictTypeListRes>('/dict/list', { params });
+    return requestClient.get<SysDictTypeListRes>('/system/dict/list', { params });
 }
 
 export interface SysDictDataListReq {
     page: number;
     pageSize: number;
     dictId: number;
+    dictType: string;
 }
 export interface SysDictData {
     dictCode: number;

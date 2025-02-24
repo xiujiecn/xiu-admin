@@ -65,3 +65,7 @@ export type {
   RequestResponse,
   ResponseInterceptorConfig,
 };
+
+export type ErrorMessageMode = 'message' | 'modal' | 'none' | undefined;
+export type SuccessMessageMode = ErrorMessageMode;
+

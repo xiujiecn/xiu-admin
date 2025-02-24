@@ -64,3 +64,12 @@ func (c *ControllerV1) UserList(ctx context.Context, req *v1.UserListReq) (res *
 func (c *ControllerV1) AddUser(ctx context.Context, req *v1.AddUserReq) (res *v1.AddUserRes, err error) {
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }
+func (c *ControllerV1) UserProfile(ctx context.Context, req *v1.UserProfileReq) (res *v1.UserProfileRes, err error) {
+	user, err := service.SysUser().Profile(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UserProfileRes{
+		User: user,
+	}, nil
+}

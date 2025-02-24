@@ -22,7 +22,7 @@ type SysDictTypeListRes struct {
 type SysDictDataListReq struct {
 	g.Meta `path:"/dict-data/list/{id}" method:"get" tags:"字典数据" summary:"字典数据列表"`
 	request.PageInfo
-	Id int64 `json:"id" form:"id" v:"required#字典类型id不能为空" path:"id" comment:"字典类型id"`
+	model.SysDictDataListQuery
 }
 
 type SysDictDataListRes struct {

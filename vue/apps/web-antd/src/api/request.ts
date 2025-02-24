@@ -1,7 +1,7 @@
 /**
  * 该文件可自行根据业务逻辑进行调整
  */
-import type { RequestClientOptions } from '@vben/request';
+import type { RequestClientOptions, HttpResponse } from '@vben/request';
 
 import { useAppConfig } from '@vben/hooks';
 import { preferences } from '@vben/preferences';
@@ -13,11 +13,15 @@ import {
 } from '@vben/request';
 import { useAccessStore } from '@vben/stores';
 
-import { message } from 'ant-design-vue';
+import { message,Modal } from 'ant-design-vue';
 
 import { useAuthStore } from '#/store';
 
 import { refreshTokenApi } from './core';
+
+import { $t } from '@vben/locales';
+import { isEmpty, isNull } from 'lodash-es';
+
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 

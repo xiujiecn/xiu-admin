@@ -124,15 +124,54 @@ func (l *sSysUser) GetUserByUsernameAndPassword(ctx context.Context, username st
 }
 
 // 根据用户ID获取用户信息
-func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *entity.SysUser, err error) {
-	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, id).Scan(&user)
+func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUserViewModel, err error) {
+	err = dao.SysUser.Ctx(ctx).WithAll().Where(dao.SysUser.Columns().UserId, id).Scan(&user)
+	// 获取用户角色
+	roles := make([]*entity.SysRole, 0)
+	dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, id).Scan(&roles)
+	user.Roles = make([]*model.SysRoleMiniModel, 0)
+	for _, role := range roles {
+		user.Roles = append(user.Roles, &model.SysRoleMiniModel{
+			RoleId:   role.RoleId,
+			RoleName: role.RoleName,
+		})
+	}
+	// 获取用户岗位
+	posts := make([]*entity.SysPost, 0)
+	dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, id).Scan(&posts)
+	user.Posts = make([]*model.SysPostMiniModel, 0)
+	for _, post := range posts {
+		user.Posts = append(user.Posts, &model.SysPostMiniModel{
+			PostId:   post.PostId,
+			PostCode: post.PostCode,
+			PostName: post.PostName,
+		})
+	}
 	return
 }
 
 // 获取用户列表
-func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query model.UserListQuery) (items []*model.SysUser, total int, err error) {
+func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query model.UserListQuery) (items []*model.SysUserListModel, total int, err error) {
+	tenantId := query.TenantId
+	if tenantId == "" {
+		claims, err := service.SysAuth().GetCurrentUser(ctx)
+		if err != nil {
+			return nil, 0, err
+		}
+		tenantId = claims.BaseClaims.TenantId
+	}
+	deptIds := make([]int64, 0)
+	if query.DeptId != 0 {
+		deptIds = append(deptIds, query.DeptId)
+		subDeptIds, err := service.SysDept().GetDeptIdsByParentId(ctx, query.DeptId)
+		if err != nil {
+			return nil, 0, err
+		}
+		deptIds = append(deptIds, subDeptIds...)
+	}
+	g.Log().Infof(ctx, "sSysUser.GetUserList 获取机构列表: deptIds:%+v", deptIds)
 	// 实现分页查询逻辑
-	var users []*model.SysUser
+	var users []*model.SysUserListModel
 	m := dao.SysUser.Ctx(ctx).Page(page.Page, page.PageSize)
 	if query.TenantId != "" {
 		m = m.Where(dao.SysUser.Columns().TenantId, query.TenantId)
@@ -140,8 +179,8 @@ func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query
 	if query.UserId != 0 {
 		m = m.Where(dao.SysUser.Columns().UserId, query.UserId)
 	}
-	if query.DeptId != 0 {
-		m = m.Where(dao.SysUser.Columns().DeptId, query.DeptId)
+	if len(deptIds) > 0 {
+		m = m.WhereIn(dao.SysUser.Columns().DeptId, deptIds)
 	}
 	if query.UserName != "" {
 		m = m.WhereLike(dao.SysUser.Columns().UserName, "%"+query.UserName+"%")
@@ -162,7 +201,7 @@ func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query
 	if err != nil {
 		return nil, 0, err
 	}
-	err = m.Scan(&users)
+	err = m.WithAll().Scan(&users)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -231,4 +270,18 @@ func (l *sSysUser) AddUser(ctx context.Context, req model.AddUser) (user *entity
 		return nil, err
 	}
 	return user, nil
+}
+
+func (l *sSysUser) Profile(ctx context.Context) (user *model.UserProfileModel, err error) {
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	u, err := l.GetUserById(ctx, claims.BaseClaims.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.UserProfileModel{
+		SysUserViewModel: *u,
+	}, nil
 }

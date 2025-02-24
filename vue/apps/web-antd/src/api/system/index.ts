@@ -6,3 +6,4 @@ export * from './config';
 export * from './user';
 export * from './notice';
 export * from './menu';
+export * from './social';

@@ -20,8 +20,13 @@
     "@vben-core/icons": "workspace:*"
   },
   "devDependencies": {
+    "@iconify/icons-ant-design": "^1.2.7",
     "@iconify/icons-flat-color-icons": "^1.2.5",
     "@iconify/icons-la": "^1.2.3",
+    "@iconify/icons-ri": "^1.2.10",
+    "@iconify/icons-simple-icons": "^1.2.74",
+    "@iconify/icons-fa-brands": "^1.2.4",
+    "@iconify/icons-uiw": "^1.2.6",
     "@iconify/icons-logos": "^1.2.36"
   }
 }

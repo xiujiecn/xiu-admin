@@ -22,3 +22,13 @@ func (c *ControllerV1) DeptList(ctx context.Context, req *v1.DeptListReq) (res *
 		Data: items,
 	}, nil
 }
+
+func (c *ControllerV1) DeptTree(ctx context.Context, req *v1.DeptTreeReq) (res *v1.DeptTreeRes, err error) {
+	items, err := service.SysDept().GetDeptTree(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.DeptTreeRes{
+		Data: items,
+	}, nil
+}

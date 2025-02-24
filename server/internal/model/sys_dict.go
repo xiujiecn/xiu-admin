@@ -44,3 +44,8 @@ type SysDictDataList struct {
 	SysDictType
 	Items []SysDictData `json:"items" orm:"with:dict_type=dict_type"`
 }
+
+type SysDictDataListQuery struct {
+	DictId   int64  `json:"dictId"`
+	DictType string `json:"dictType"`
+}

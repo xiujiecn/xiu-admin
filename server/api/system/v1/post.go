@@ -16,5 +16,5 @@ type PostListReq struct {
 
 type PostListRes struct {
 	response.PageResult
-	Data []*model.SysPost `json:"items" dc:"岗位列表"`
+	Data []*model.SysPostListModel `json:"items" dc:"岗位列表"`
 }

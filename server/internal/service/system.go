@@ -40,10 +40,17 @@ type (
 	ISysDept interface {
 		GetDeptList(ctx context.Context, query model.DeptListQuery) (items []*model.SysDept, total int, err error)
 		GetDeptById(ctx context.Context, id int64) (dept *model.SysDept, err error)
+		// 构建树结构
+		DeptTree(ctx context.Context, parentDept *model.SysDeptTreeModel, deptList []*model.SysDept, ancestors string) (data []*model.SysDeptTreeModel, err error)
+		GetDeptTree(ctx context.Context) (items []*model.SysDeptTreeModel, err error)
+		// 递归构建结构
+		RecursionDeptIds(ctx context.Context, parentId int64, deptList []*model.SysDept, data *[]int64) (err error)
+		// 根据父部门id获取部门列表
+		GetDeptIdsByParentId(ctx context.Context, parentId int64) (ids []int64, err error)
 	}
 	ISysDict interface {
 		GetDictTypeList(ctx context.Context, req *model.SysDictTypeListQuery, pageInfo *request.PageInfo) (items []model.SysDictType, total int, err error)
-		GetDictDataList(ctx context.Context, id int64, pageInfo *request.PageInfo) (items []model.SysDictData, total int, err error)
+		GetDictDataList(ctx context.Context, query *model.SysDictDataListQuery, pageInfo *request.PageInfo) (items []model.SysDictData, total int, err error)
 	}
 	ISysLogininfor interface {
 		ListLogininfor(ctx context.Context, query *model.SysLogininforListQuery, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error)
@@ -71,7 +78,7 @@ type (
 		List(ctx context.Context, query *model.SysOssListQuery, pageInfo *request.PageInfo) (items []*model.SysOssListModel, total int, err error)
 	}
 	ISysPost interface {
-		GetPostList(ctx context.Context, query model.SysPostListQuery, pageInfo request.PageInfo) (items []*model.SysPost, total int, err error)
+		GetPostList(ctx context.Context, query model.SysPostListQuery, pageInfo request.PageInfo) (items []*model.SysPostListModel, total int, err error)
 	}
 	ISysRole interface {
 		// 获取租户下角色列表
@@ -82,6 +89,9 @@ type (
 		GetRoleMenu(ctx context.Context, id int64) (res []*entity.SysMenu, err error)
 		// 获取角色列表对应菜单
 		GetRoleListMenu(ctx context.Context, ids []int64) (res []*entity.SysRoleMenu, err error)
+	}
+	ISysSocial interface {
+		List(ctx context.Context, query *model.SysSocialListQuery, page *request.PageInfo) (items []*model.SysSocialListModel, total int, err error)
 	}
 	ISysTenant interface {
 		// 获取租户信息
@@ -102,11 +112,12 @@ type (
 		// 根据用户名和密码获取用户信息
 		GetUserByUsernameAndPassword(ctx context.Context, username string, password string) (user *entity.SysUser, err error)
 		// 根据用户ID获取用户信息
-		GetUserById(ctx context.Context, id int64) (user *entity.SysUser, err error)
+		GetUserById(ctx context.Context, id int64) (user *model.SysUserViewModel, err error)
 		// 获取用户列表
-		GetUserList(ctx context.Context, page request.PageInfo, query model.UserListQuery) (items []*model.SysUser, total int, err error)
+		GetUserList(ctx context.Context, page request.PageInfo, query model.UserListQuery) (items []*model.SysUserListModel, total int, err error)
 		// 新增用户
 		AddUser(ctx context.Context, req model.AddUser) (user *entity.SysUser, err error)
+		Profile(ctx context.Context) (user *model.UserProfileModel, err error)
 	}
 	ISysUserOnline interface {
 		Add(ctx context.Context, userOnline *model.SysUserOnlineAddModel) (err error)
@@ -129,6 +140,7 @@ var (
 	localSysOss        ISysOss
 	localSysPost       ISysPost
 	localSysRole       ISysRole
+	localSysSocial     ISysSocial
 	localSysTenant     ISysTenant
 	localSysUser       ISysUser
 	localSysUserOnline ISysUserOnline
@@ -275,6 +287,17 @@ func SysRole() ISysRole {
 
 func RegisterSysRole(i ISysRole) {
 	localSysRole = i
+}
+
+func SysSocial() ISysSocial {
+	if localSysSocial == nil {
+		panic("implement not found for interface ISysSocial, forgot register?")
+	}
+	return localSysSocial
+}
+
+func RegisterSysSocial(i ISysSocial) {
+	localSysSocial = i
 }
 
 func SysTenant() ISysTenant {
