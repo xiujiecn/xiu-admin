@@ -63,6 +63,41 @@ type MenuListReq struct {
 }
 
 type MenuListRes struct {
-	Data  []*model.SysMenu `json:"items" dc:"菜单列表"`
-	Total int              `json:"total" dc:"总数"`
+	Data  []*model.SysMenuListModel `json:"items" dc:"菜单列表"`
+	Total int                       `json:"total" dc:"总数"`
+}
+
+type MenuViewReq struct {
+	g.Meta `path:"/menu/view" method:"get" tags:"系统" summary:"获取菜单详情"`
+	MenuId int64 `json:"menuId" dc:"菜单ID"`
+}
+
+type MenuViewRes struct {
+	model.SysMenuViewModel
+}
+
+type MenuAddReq struct {
+	g.Meta `path:"/menu/add" method:"post" tags:"系统" summary:"添加菜单"`
+	model.SysMenuAddModel
+}
+
+type MenuAddRes struct {
+	model.SysMenuViewModel
+}
+
+type MenuUpdateReq struct {
+	g.Meta `path:"/menu/update" method:"post" tags:"系统" summary:"更新菜单"`
+	model.SysMenuUpdateModel
+}
+
+type MenuUpdateRes struct {
+	model.SysMenuViewModel
+}
+
+type MenuDeleteReq struct {
+	g.Meta `path:"/menu/delete" method:"post" tags:"系统" summary:"删除菜单"`
+	MenuId int64 `json:"menuId" dc:"菜单ID"`
+}
+
+type MenuDeleteRes struct {
 }

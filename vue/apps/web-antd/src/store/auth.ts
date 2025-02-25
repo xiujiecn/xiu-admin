@@ -11,7 +11,7 @@ import { defineStore } from 'pinia';
 
 import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
 import { $t } from '#/locales';
-import md5 from 'js-md5';
+import {md5} from 'js-md5';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
           fetchUserInfo(),
           getAccessCodesApi(),
         ]);
-
+        console.log('vue/apps/web-antd/src/store/auth.ts','fetchUserInfoResult',fetchUserInfoResult);
         userInfo = fetchUserInfoResult;
 
         userStore.setUserInfo(userInfo);
@@ -64,7 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
             ? await onSuccess?.()
             : await router.push(userInfo.homePath || DEFAULT_HOME_PATH);
         }
-
+        console.log('vue/apps/web-antd/src/store/auth.ts','userInfo.realName',userInfo?.realName);
         if (userInfo?.realName) {
           notification.success({
             description: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,

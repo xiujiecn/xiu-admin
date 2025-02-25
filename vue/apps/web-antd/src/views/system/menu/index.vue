@@ -2,20 +2,23 @@
 import { h } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { SysMenuListData } from '#/api/system';
 
-import { Page } from '@vben/common-ui';
+import { Page,useVbenDrawer } from '@vben/common-ui';
 
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
+import { Button, message, Switch,Tag,Popconfirm  } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysMenuListApi } from '#/api/system'; 
+import { getSysMenuListApi,deleteSysMenuApi } from '#/api/system'; 
 import { Icon } from '@iconify/vue';
 import {
   MdiPlus,
   MdiEdit,
   MdiDelete,
 } from '@vben/icons';
+
+import menuDrawer from './menu-drawer.vue';
 
 interface RowType {
   category: string;
@@ -128,12 +131,43 @@ const expandAll = () => {
 const collapseAll = () => {
   gridApi.grid?.setAllTreeExpand(false);
 };
+
+const [MenuDrawer, drawerApi] = useVbenDrawer({
+  connectedComponent: menuDrawer,
+});
+
+function handleAdd() {
+  drawerApi.setData({update:false,view:false});
+  drawerApi.open();
+}
+
+function handleView(row: SysMenuListData) {
+  const { menuId } = row;
+  drawerApi.setData({id: menuId, update:false,view:true});
+  drawerApi.open();
+}
+function handleSubAdd(row: SysMenuListData) {
+  const { menuId } = row;
+  drawerApi.setData({ id: menuId, update: false,view:false });
+  drawerApi.open();
+}
+
+async function handleEdit(record: SysMenuListData) {
+  drawerApi.setData({ id: record.menuId, update: true,view:false });
+  drawerApi.open();
+}
+
+async function handleDelete(row: SysMenuListData) {
+  await deleteSysMenuApi({ menuId: row.menuId });
+  await gridApi.query();
+}
+
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
+    <Grid table-title="菜单列表">
+      <template #toolbar-tools>
         
         <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
         <Button class="mr-2 flex items-center"  @click="expandAll">展开</Button>
@@ -147,12 +181,15 @@ const collapseAll = () => {
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">新增</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleSubAdd(row)">新增</Button>
+          <Popconfirm placement="left" title="确定删除吗？" @confirm="handleDelete(row)">
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger>删除</Button>
+          </Popconfirm>
         </div>
       </template>
     </Grid>
+    <MenuDrawer @reload="gridApi.query()" />
   </Page>
 </template>

@@ -85,7 +85,7 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'userId',
+    labelField: 'postId',
   },
   columns: [
     { align: 'left', title: 'ID', type: 'checkbox', width: 80 },

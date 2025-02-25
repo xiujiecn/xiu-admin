@@ -127,8 +127,21 @@ func (l *sSysUser) GetUserByUsernameAndPassword(ctx context.Context, username st
 func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUserViewModel, err error) {
 	err = dao.SysUser.Ctx(ctx).WithAll().Where(dao.SysUser.Columns().UserId, id).Scan(&user)
 	// 获取用户角色
+	// 获取用户角色
+	userRoles := make([]*entity.SysUserRole, 0)
+	err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, id).Scan(&userRoles)
+	if err != nil {
+		return nil, err
+	}
+	roleIds := make([]int64, 0)
+	for _, userRole := range userRoles {
+		roleIds = append(roleIds, userRole.RoleId)
+	}
 	roles := make([]*entity.SysRole, 0)
-	dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, id).Scan(&roles)
+	err = dao.SysRole.Ctx(ctx).WhereIn(dao.SysRole.Columns().RoleId, roleIds).Scan(&roles)
+	if err != nil {
+		return nil, err
+	}
 	user.Roles = make([]*model.SysRoleMiniModel, 0)
 	for _, role := range roles {
 		user.Roles = append(user.Roles, &model.SysRoleMiniModel{
@@ -137,16 +150,30 @@ func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUs
 		})
 	}
 	// 获取用户岗位
+	userPosts := make([]*entity.SysUserPost, 0)
+	err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, id).Scan(&userPosts)
+	if err != nil {
+		return nil, err
+	}
+	postIds := make([]int64, 0)
+	for _, userPost := range userPosts {
+		postIds = append(postIds, userPost.PostId)
+	}
 	posts := make([]*entity.SysPost, 0)
-	dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, id).Scan(&posts)
+	err = dao.SysPost.Ctx(ctx).WhereIn(dao.SysPost.Columns().PostId, postIds).Scan(&posts)
+	if err != nil {
+		return nil, err
+	}
 	user.Posts = make([]*model.SysPostMiniModel, 0)
 	for _, post := range posts {
 		user.Posts = append(user.Posts, &model.SysPostMiniModel{
 			PostId:   post.PostId,
 			PostCode: post.PostCode,
 			PostName: post.PostName,
+			DeptId:   post.DeptId,
 		})
 	}
+
 	return
 }
 
@@ -284,4 +311,45 @@ func (l *sSysUser) Profile(ctx context.Context) (user *model.UserProfileModel, e
 	return &model.UserProfileModel{
 		SysUserViewModel: *u,
 	}, nil
+}
+
+func (l *sSysUser) UpdateCurrentUser(ctx context.Context, req *model.UpdateCurrentUserModel) (user *model.SysUserViewModel, err error) {
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	_, err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, claims.BaseClaims.ID).Data(req).OmitEmpty().Update()
+	if err != nil {
+		return nil, err
+	}
+	user, err = l.GetUserById(ctx, claims.BaseClaims.ID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (l *sSysUser) UpdateCurrentUserPassword(ctx context.Context, req *model.UpdateCurrentUserPasswordModel) (err error) {
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return err
+	}
+	user, err := l.GetUserById(ctx, claims.BaseClaims.ID)
+	if err != nil {
+		return err
+	}
+	oldPassword := utility.PasswordEncrypt(req.OldPassword, user.Salt)
+	if oldPassword != user.Password {
+		return gerror.NewCode(consts.CodeUserPasswordError, "旧密码错误")
+	}
+	salt := utility.RandomString(5)
+	password := utility.PasswordEncrypt(req.NewPassword, salt)
+	_, err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, claims.BaseClaims.ID).Data(map[string]any{
+		dao.SysUser.Columns().Password: password,
+		dao.SysUser.Columns().Salt:     salt,
+	}).OmitEmpty().Update()
+	if err != nil {
+		return err
+	}
+	return nil
 }
