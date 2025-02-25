@@ -67,6 +67,10 @@ const formOptions: VbenFormProps = {
       // defaultValue: [dayjs().subtract(7, 'days'), dayjs()],
       fieldName: 'createdAt',
       label: '创建时间',
+      componentProps: {
+        format: 'YYYY-MM-DD',
+        valueFormat:"YYYY-MM-DD",
+      },
     },
   ],
   // 控制表单是否显示折叠按钮

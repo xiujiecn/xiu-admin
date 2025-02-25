@@ -37,11 +37,11 @@ type UserListRes struct {
 
 type AddUserReq struct {
 	g.Meta `path:"/user/add" method:"post" tags:"系统" summary:"新增用户"`
-	model.AddUser
+	model.SysUserAddModel
 }
 
 type AddUserRes struct {
-	Data *model.SysUserListModel `json:"data" dc:"用户信息"`
+	Data *model.SysUserViewModel `json:"data" dc:"用户信息"`
 }
 
 type UserProfileReq struct {
@@ -67,4 +67,40 @@ type UpdateCurrentUserPasswordReq struct {
 }
 
 type UpdateCurrentUserPasswordRes struct {
+}
+
+type UpdateUserReq struct {
+	g.Meta `path:"/user/update" method:"post" tags:"系统" summary:"更新用户信息"`
+	model.SysUserUpdateModel
+}
+
+type UpdateUserRes struct {
+	model.SysUserViewModel
+}
+
+type DeleteUserReq struct {
+	g.Meta  `path:"/user/delete" method:"post" tags:"系统" summary:"删除用户"`
+	UserId  int64   `json:"userId" dc:"用户ID"`
+	UserIds []int64 `json:"userIds" dc:"用户ID列表"`
+}
+
+type DeleteUserRes struct {
+}
+
+type GetUserReq struct {
+	g.Meta `path:"/user/view" method:"get" tags:"系统" summary:"获取用户信息"`
+	UserId int64 `json:"userId" dc:"用户ID"`
+}
+
+type GetUserRes struct {
+	model.SysUserViewModel
+}
+
+type ResetPasswordReq struct {
+	g.Meta   `path:"/user/resetPassword" method:"post" tags:"系统" summary:"重置用户密码"`
+	UserId   int64  `json:"userId" dc:"用户ID"`
+	Password string `json:"password" dc:"新密码"`
+}
+
+type ResetPasswordRes struct {
 }

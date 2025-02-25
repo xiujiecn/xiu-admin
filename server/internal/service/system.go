@@ -120,10 +120,13 @@ type (
 		// 获取用户列表
 		GetUserList(ctx context.Context, page request.PageInfo, query model.UserListQuery) (items []*model.SysUserListModel, total int, err error)
 		// 新增用户
-		AddUser(ctx context.Context, req model.AddUser) (user *entity.SysUser, err error)
+		AddUser(ctx context.Context, req *model.SysUserAddModel) (data *model.SysUserViewModel, err error)
 		Profile(ctx context.Context) (user *model.UserProfileModel, err error)
 		UpdateCurrentUser(ctx context.Context, req *model.UpdateCurrentUserModel) (user *model.SysUserViewModel, err error)
 		UpdateCurrentUserPassword(ctx context.Context, req *model.UpdateCurrentUserPasswordModel) (err error)
+		UpdateUser(ctx context.Context, req *model.SysUserUpdateModel) (err error)
+		DeleteUser(ctx context.Context, userIds []int64) (err error)
+		ResetPassword(ctx context.Context, userId int64, password string) (err error)
 	}
 	ISysUserOnline interface {
 		Add(ctx context.Context, userOnline *model.SysUserOnlineAddModel) (err error)

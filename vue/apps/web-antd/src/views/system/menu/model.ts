@@ -18,8 +18,6 @@ export const yesNoOptions = [
 import { getDictOptions } from '#/utils/dict';
 import { DictEnum } from '@vben/constants';
 
-// import { FolderIcon, MenuIcon, OkButtonIcon, VbenIcon } from '@vben/icons';
-
 export const drawerSchema: VbenFormSchema[] = [
     {
       component: 'Input',

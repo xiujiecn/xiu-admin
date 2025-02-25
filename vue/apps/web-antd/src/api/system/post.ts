@@ -3,10 +3,12 @@ import { requestClient } from '#/api/request';
 import type { SysDeptMini } from '#/api/system/dept';
 
 export interface SysPostListQuery {
-  page: number;
-  pageSize: number;
-  postCode: string;
-  postName: string;
+  page?: number;
+  pageSize?: number;
+  postCode?: string;
+  postName?: string;
+  deptId?: number;
+  belongDeptId?: number;
 }
 
 export interface SysPostListData {
@@ -24,8 +26,10 @@ export interface SysPostListData {
 }
 
 export interface SysPostListRes {
-  data: SysPostListData[];
+  items: SysPostListData[];
   total: number;
+  page: number;
+  pageSize: number;
 }
 
 export async function getSysPostListApi(params: SysPostListQuery) {

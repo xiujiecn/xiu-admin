@@ -2,12 +2,12 @@
 import { requestClient } from '#/api/request';
 
 export interface SysRoleListQuery {
-  page: number;
-  pageSize: number;
-  roleName: string;
-  roleKey: string;
-  status: string;
-  createdAt: string;
+  page?: number;
+  pageSize?: number;
+  roleName?: string;
+  roleKey?: string;
+  status?: string;
+  createdAt?: string[];
 }
 
 export interface SysRoleListData {
@@ -26,7 +26,7 @@ export interface SysRoleListData {
 }
 
 export interface SysRoleListRes {
-  data: SysRoleListData[];
+  items: SysRoleListData[];
   total: number;
 }
 
@@ -37,5 +37,6 @@ export async function getSysRoleListApi(params: SysRoleListQuery) {
 export interface SysRoleMini {
   roleId: number;
   roleName: string;
+  dataScope: string;
 }
 

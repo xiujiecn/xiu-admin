@@ -21,6 +21,7 @@ type SysPostListQuery struct {
 	PostCode     string `json:"postCode"      description:"岗位编码"`
 	PostCategory string `json:"postCategory"  description:"岗位类别编码"`
 	PostName     string `json:"postName"      description:"岗位名称"`
+	BelongDeptId int64  `json:"belongDeptId"  description:"归属部门id"`
 }
 
 type SysPostMiniModel struct {

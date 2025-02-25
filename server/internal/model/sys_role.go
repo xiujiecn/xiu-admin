@@ -25,6 +25,7 @@ type SysRoleListQuery struct {
 }
 
 type SysRoleMiniModel struct {
-	RoleId   int64  `json:"roleId"   orm:"role_id"   description:"角色ID"`
-	RoleName string `json:"roleName" orm:"role_name" description:"角色名称"`
+	RoleId    int64  `json:"roleId"   orm:"role_id"   description:"角色ID"`
+	RoleName  string `json:"roleName" orm:"role_name" description:"角色名称"`
+	DataScope string `json:"dataScope" orm:"data_scope" description:"数据范围"`
 }
