@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SysRoleMini } from '#/api/system/role';
-import type { SysUserListData, SysUserViewModel,  } from '#/api/system/user';
+import type {  SysUserViewModel,  } from '#/api/system/user';
 import type { SysPostMini } from '#/api/system/post';
 import { computed, h, onMounted, ref } from 'vue';
 
@@ -8,7 +8,7 @@ import { useVbenDrawer } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 import { addFullName, cloneDeep, getPopupContainer } from '@vben/utils';
 
-import { Tag } from 'ant-design-vue';
+import { message, Tag } from 'ant-design-vue';
 
 import { useVbenForm } from '#/adapter/form';
 import { getSysPostListApi } from '#/api/system/post';
@@ -139,15 +139,6 @@ onMounted(async () => {
 
 });
 
-/**
- * 新增时候 从参数设置获取默认密码
- */
-// async function loadDefaultPassword(update: boolean) {
-//   if (!update && defaultPassword.value) {
-//     formApi.setFieldValue('password', defaultPassword.value);
-//   }
-// }
-
 const [BasicDrawer, drawerApi] = useVbenDrawer({
   onCancel: handleCancel,
   onConfirm: handleConfirm,
@@ -224,7 +215,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
     ]);
     // 部门选择 && 初始密码
     await Promise.all([setupDeptSelect()]);//, loadDefaultPassword(isUpdate.value)]);
-    if (user) {
+    if (user.userId > 0) {
       await Promise.all([
         // 添加基础信息
         formApi.setValues(user),
@@ -232,7 +223,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
         formApi.setFieldValue('postIds', postIds),
         formApi.setFieldValue('roleIds', roleIds),
         // 更新时不会触发onSelect 需要手动调用
-        setupPostOptions(user.deptId),
+        setupPostOptions(Number(user.deptId)),
       ]);
     }
     drawerApi.setState({ confirmLoading: false, loading: false });
@@ -262,6 +253,7 @@ async function handleConfirm() {
     }
     const data = cloneDeep(await formApi.getValues());
     await (isUpdate.value ? updateSysUser(data) : addSysUser(data));
+    isUpdate.value ? message.success('更新成功'): message.success('新增成功');
     emit('reload');
     await handleCancel();
   } catch (error) {

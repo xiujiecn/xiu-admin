@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { h, ref, computed } from 'vue';
+import { h, ref } from 'vue';
+import type {  DeepPartial } from '@vben/types';
 import type { VbenFormProps } from '#/adapter/form';
-import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { VxeTableGridOptions,VxeGridListeners } from '#/adapter/vxe-table';
 import type { SysUserListData } from '#/api/system/user';
 import { deleteSysUser } from '#/api/system/user';
 
@@ -33,6 +34,10 @@ interface RowType {
 }
 
 const selectDeptId = ref<string[]>([]);
+
+const gridEvents: DeepPartial<VxeGridListeners> = {
+  checkboxChange: handleCheckboxChange
+}
 
 const formOptions: VbenFormProps = {
   // 默认展开
@@ -153,6 +158,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
 const [Grid, tableApi ] = useVbenVxeGrid({
   formOptions,
   gridOptions,
+  gridEvents,
 });
 const [UserDrawer, userDrawerApi] = useVbenDrawer({
   connectedComponent: userDrawer,
@@ -176,13 +182,14 @@ function handleEdit(row: SysUserListData) {
 
 async function handleDelete(row: SysUserListData) {
   await deleteSysUser({ userId: row.userId });
+  message.success("删除成功");
   await tableApi.query();
 }
 
 const CheckboxChecked = ref(false);
 
 function handleCheckboxChange() {
-  CheckboxChecked.value = tableApi?.grid?.getCheckboxRecords?.()?.length > 0;
+  CheckboxChecked.value = tableApi.grid.getCheckboxRecords().length > 0;
   console.log('vue/apps/web-antd/src/views/system/user/index.vue CheckboxChecked',CheckboxChecked.value);
 }
 
@@ -195,6 +202,7 @@ function handleMultiDelete() {
     content: `确认删除选中的${ids.length}条记录吗？`,
     onOk: async () => {
       await deleteSysUser({ userIds: ids });
+      message.success("删除成功");
       await tableApi.query();
     },
   });
@@ -225,7 +233,7 @@ async function handleStatusChange(row: SysUserListData) {
       @reload="()=> tableApi.reload()"
       v-model:select-dept-id="selectDeptId" />
 
-    <Grid class="flex-1" table-title="用户列表" @checkbox-change="handleCheckboxChange">
+    <Grid class="flex-1" table-title="用户列表"    >
       <template #toolbar-tools>
         
         <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
