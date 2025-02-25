@@ -1,15 +1,17 @@
 <script lang="ts" setup>
-import { h, ref } from 'vue';
+import { h, ref, computed } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { SysUserListData } from '#/api/system/user';
+import { deleteSysUser } from '#/api/system/user';
 
-import { Page } from '@vben/common-ui';
+import { Page, useVbenDrawer, useVbenModal } from '@vben/common-ui';
 
-import { Button, message, Switch,  } from 'ant-design-vue';
+import { Button, message, Switch, Modal, Popconfirm } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysUserListApi } from '#/api/system'; 
+import { getSysUserListApi, updateSysUser } from '#/api/system'; 
 import DeptTree from '#/components/dept/dept-tree.vue';
 
 import {
@@ -17,6 +19,9 @@ import {
   MdiEdit,
   MdiDelete,
 } from '@vben/icons';
+
+import userDrawer from './user-drawer.vue';
+import userResetPwdModal from './user-reset-pwd-modal.vue';
 
 interface RowType {
   category: string;
@@ -74,6 +79,10 @@ const formOptions: VbenFormProps = {
       // defaultValue: [dayjs().subtract(7, 'days'), dayjs()],
       fieldName: 'createdAt',
       label: '创建时间',
+      componentProps: {
+        format: 'YYYY-MM-DD',
+        valueFormat:"YYYY-MM-DD",
+      },
     },
   ],
   // 控制表单是否显示折叠按钮
@@ -107,7 +116,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
       width: 100,
     },
     { field: 'createdAt', formatter: 'formatDateTime', title: '创建时间' },
-    { title: '操作', width: 120, slots: { default: 'action' } }
+    { title: '操作', width: 180, slots: { default: 'action' } }
   ],
   exportConfig: {},
   height: 'auto',
@@ -116,7 +125,6 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
         let deptId:number = 0;
         if(selectDeptId.value.length > 0) {
           deptId = Number(selectDeptId.value[0]);
@@ -139,12 +147,73 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     search: true,
     zoom: true,
   },
+
 };
 
 const [Grid, tableApi ] = useVbenVxeGrid({
   formOptions,
   gridOptions,
 });
+const [UserDrawer, userDrawerApi] = useVbenDrawer({
+  connectedComponent: userDrawer,
+});
+
+function handleView(row: SysUserListData) {
+  const { userId } = row;
+  userDrawerApi.setData({id: userId, update:false,view:true});
+  userDrawerApi.open();
+}
+
+function handleAdd() {
+  userDrawerApi.setData({update:false, view:false});
+  userDrawerApi.open();
+}
+
+function handleEdit(row: SysUserListData) {
+  userDrawerApi.setData({ id: row.userId, update:true, view:false });
+  userDrawerApi.open();
+}
+
+async function handleDelete(row: SysUserListData) {
+  await deleteSysUser({ userId: row.userId });
+  await tableApi.query();
+}
+
+const CheckboxChecked = ref(false);
+
+function handleCheckboxChange() {
+  CheckboxChecked.value = tableApi?.grid?.getCheckboxRecords?.()?.length > 0;
+  console.log('vue/apps/web-antd/src/views/system/user/index.vue CheckboxChecked',CheckboxChecked.value);
+}
+
+function handleMultiDelete() {
+  const rows = tableApi.grid.getCheckboxRecords();
+  const ids = rows.map((row: SysUserListData) => row.userId);
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await deleteSysUser({ userIds: ids });
+      await tableApi.query();
+    },
+  });
+}
+
+const [UserResetPwdModal, userResetPwdModalApi] = useVbenModal({
+  connectedComponent: userResetPwdModal,
+});
+
+function handleResetPassword(row: SysUserListData) {
+  userResetPwdModalApi.setData({ record: row });
+  userResetPwdModalApi.open();
+}
+
+async function handleStatusChange(row: SysUserListData) {
+  await updateSysUser({ userId: row.userId, status: row.status });
+  message.success('状态更新成功');
+  await tableApi.query();
+}
 
 </script>
 
@@ -156,24 +225,28 @@ const [Grid, tableApi ] = useVbenVxeGrid({
       @reload="()=> tableApi.reload()"
       v-model:select-dept-id="selectDeptId" />
 
-    <Grid class="flex-1">
-      <template #toolbar-actions>
+    <Grid class="flex-1" table-title="用户列表" @checkbox-change="handleCheckboxChange">
+      <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
-        <Button class="mr-2 flex items-center bg-green-500"  disabled :icon="h(MdiEdit)">编辑</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
       </template>
       <template #open="{ row }">
-        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" />
+        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" />
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1" danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleResetPassword(row)">重置密码</Button>
+          <Popconfirm placement="left" title="确定删除吗？" @confirm="handleDelete(row)">
+            <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1" danger >删除</Button>
+          </Popconfirm>
         </div>
       </template>
     </Grid>
   </div>
+  <UserDrawer @reload="tableApi.query()" />
+  <UserResetPwdModal />
   </Page>
 </template>

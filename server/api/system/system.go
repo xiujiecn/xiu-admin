@@ -45,4 +45,8 @@ type ISystemV1 interface {
 	UserProfile(ctx context.Context, req *v1.UserProfileReq) (res *v1.UserProfileRes, err error)
 	UpdateCurrentUser(ctx context.Context, req *v1.UpdateCurrentUserReq) (res *v1.UpdateCurrentUserRes, err error)
 	UpdateCurrentUserPassword(ctx context.Context, req *v1.UpdateCurrentUserPasswordReq) (res *v1.UpdateCurrentUserPasswordRes, err error)
+	UpdateUser(ctx context.Context, req *v1.UpdateUserReq) (res *v1.UpdateUserRes, err error)
+	DeleteUser(ctx context.Context, req *v1.DeleteUserReq) (res *v1.DeleteUserRes, err error)
+	GetUser(ctx context.Context, req *v1.GetUserReq) (res *v1.GetUserRes, err error)
+	ResetPassword(ctx context.Context, req *v1.ResetPasswordReq) (res *v1.ResetPasswordRes, err error)
 }

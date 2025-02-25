@@ -30,13 +30,14 @@ func (l *sSysPost) GetPostList(ctx context.Context, query model.SysPostListQuery
 	deptIds := make([]int64, 0)
 	if query.DeptId != 0 {
 		deptIds = append(deptIds, query.DeptId)
-		subDeptIds, err := service.SysDept().GetDeptIdsByParentId(ctx, query.DeptId)
+	} else if query.BelongDeptId != 0 {
+		deptIds = append(deptIds, query.BelongDeptId)
+		subDeptIds, err := service.SysDept().GetDeptIdsByParentId(ctx, query.BelongDeptId)
 		if err != nil {
 			return nil, 0, err
 		}
 		deptIds = append(deptIds, subDeptIds...)
 	}
-
 	m := dao.SysPost.Ctx(ctx).Where(dao.SysPost.Columns().TenantId, tenantId)
 	if query.PostCode != "" {
 		m = m.WhereLike(dao.SysPost.Columns().PostCode, "%"+query.PostCode+"%")
@@ -52,7 +53,7 @@ func (l *sSysPost) GetPostList(ctx context.Context, query model.SysPostListQuery
 	if err != nil {
 		return nil, 0, err
 	}
-	err = m.WithAll().Page(pageInfo.Page, pageInfo.PageSize).Scan(&items)
+	err = m.WithAll().Page(pageInfo.Page, pageInfo.PageSize).OrderAsc(dao.SysPost.Columns().PostSort).Scan(&items)
 	if err != nil {
 		return nil, 0, err
 	}

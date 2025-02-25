@@ -24,7 +24,7 @@ import { drawerSchema } from './model';
 interface ModalProps {
   id?: number | string;
   update: boolean;
-  view:boolean;
+  view: boolean;
 }
 
 const emit = defineEmits<{ reload: [] }>();
@@ -107,7 +107,6 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
     if (!isOpen) {
       return null;
     }
-    // drawerApi.drawerLoading(true);
     drawerApi.setState({ confirmLoading: true, loading: true });
     const { id, update,view } = drawerApi.getData() as ModalProps;
     isUpdate.value = update;
@@ -128,7 +127,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
         readonly:true,
         "only-read":true,
       } } });
-    }else{
+    } else {
       drawerApi.setState({ showConfirmButton: true});
       formApi.setState({ commonConfig: { componentProps:{
         readonly:false,
@@ -140,7 +139,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
 
 async function handleConfirm() {
   try {
-    // drawerApi.drawerLoading(true);
+    drawerApi.setState({ confirmLoading: true, loading: true });
     const { valid } = await formApi.validate();
     if (!valid) {
       return;
@@ -152,7 +151,7 @@ async function handleConfirm() {
   } catch (error) {
     console.error(error);
   } finally {
-    // drawerApi.drawerLoading(false);
+    drawerApi.setState({ confirmLoading: false, loading: false });
   }
 }
 
