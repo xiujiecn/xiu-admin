@@ -25,6 +25,10 @@ type ISystemV1 interface {
 	ListLogininfor(ctx context.Context, req *v1.ListLogininforReq) (res *v1.ListLogininforRes, err error)
 	MenuAll(ctx context.Context, req *v1.MenuAllReq) (res *v1.MenuAllRes, err error)
 	MenuList(ctx context.Context, req *v1.MenuListReq) (res *v1.MenuListRes, err error)
+	MenuView(ctx context.Context, req *v1.MenuViewReq) (res *v1.MenuViewRes, err error)
+	MenuAdd(ctx context.Context, req *v1.MenuAddReq) (res *v1.MenuAddRes, err error)
+	MenuUpdate(ctx context.Context, req *v1.MenuUpdateReq) (res *v1.MenuUpdateRes, err error)
+	MenuDelete(ctx context.Context, req *v1.MenuDeleteReq) (res *v1.MenuDeleteRes, err error)
 	SysNoticeList(ctx context.Context, req *v1.SysNoticeListReq) (res *v1.SysNoticeListRes, err error)
 	SysUserOnlineList(ctx context.Context, req *v1.SysUserOnlineListReq) (res *v1.SysUserOnlineListRes, err error)
 	SysUserOnlineDelete(ctx context.Context, req *v1.SysUserOnlineDeleteReq) (res *v1.SysUserOnlineDeleteRes, err error)
@@ -39,4 +43,6 @@ type ISystemV1 interface {
 	UserList(ctx context.Context, req *v1.UserListReq) (res *v1.UserListRes, err error)
 	AddUser(ctx context.Context, req *v1.AddUserReq) (res *v1.AddUserRes, err error)
 	UserProfile(ctx context.Context, req *v1.UserProfileReq) (res *v1.UserProfileRes, err error)
+	UpdateCurrentUser(ctx context.Context, req *v1.UpdateCurrentUserReq) (res *v1.UpdateCurrentUserRes, err error)
+	UpdateCurrentUserPassword(ctx context.Context, req *v1.UpdateCurrentUserPasswordReq) (res *v1.UpdateCurrentUserPasswordRes, err error)
 }

@@ -2,6 +2,9 @@ import { requestClient } from '#/api/request';
 import type { SysDeptMini } from './dept';
 import type { SysRoleMini } from './role';
 import type { SysPostMini } from './post';
+import type { UserInfo } from '@vben/types';
+import type { Recordable } from '@vben/types';
+import {md5} from 'js-md5';
 
 export interface SysUserListQuery {
     tenantId: string;
@@ -96,8 +99,10 @@ export interface SysUserListQuery {
   }
 
   export async function updateCurrentUserPassword(params: UpdateCurrentUserPasswordParam) {
-    return requestClient.post<UserProfileRes>('/system/user/profile/password', { params });
+    params.oldPassword = md5(params.oldPassword);
+    params.newPassword = md5(params.newPassword);
+    return requestClient.post('/system/user/profile/password', { ...params });
   }
-  export async function updateCurrentProfile(params: UserProfileData) {
-    return requestClient.post<UserProfileRes>('/system/user/profile/password', { params });
+  export async function updateCurrentUserProfile(params: UserProfileData|Recordable<any>) {
+    return requestClient.post<UserInfo>('/system/user/profile/update', { ...params });
   }

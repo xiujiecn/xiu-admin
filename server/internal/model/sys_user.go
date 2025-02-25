@@ -83,3 +83,16 @@ type AddUser struct {
 type UserProfileModel struct {
 	SysUserViewModel
 }
+
+type UpdateCurrentUserModel struct {
+	NickName    string `json:"nickName"`
+	Email       string `json:"email"`
+	Phonenumber string `json:"phonenumber"`
+	Avatar      string `json:"avatar"`
+	Sex         string `json:"sex"`
+}
+
+type UpdateCurrentUserPasswordModel struct {
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}

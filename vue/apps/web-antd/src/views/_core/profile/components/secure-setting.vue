@@ -7,6 +7,7 @@ import { omit } from 'lodash-es';
 import { useVbenForm, z } from '#/adapter/form';
 import { updateCurrentUserPassword } from '#/api/system/user';
 import { useAuthStore } from '#/store';
+import { message } from 'ant-design-vue';
 
 const [BasicForm, formApi] = useVbenForm({
   actionWrapperClass: 'text-left mb-[16px] ml-[96px]',
@@ -87,6 +88,7 @@ function handleSubmit(values: any) {
         buttonLoading(true);
         const data = omit(values, ['confirmPassword']) as UpdateCurrentUserPasswordParam;
         await updateCurrentUserPassword(data);
+        message.success('密码修改成功，请重新登录');
         await authStore.logout(true);
       } catch (error) {
         console.error(error);

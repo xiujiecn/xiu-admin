@@ -58,7 +58,7 @@ type (
 	}
 	ISysMenu interface {
 		// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
-		GetTenantMenu(ctx context.Context, query *model.SysMenuListQuery) (data []*model.SysMenu, total int, err error)
+		GetTenantMenu(ctx context.Context, query *model.SysMenuListQuery) (data []*model.SysMenuListModel, total int, err error)
 		// 构建树结构
 		MenuTree(ctx context.Context, parentMenu *model.SysMenuTree, menuList []*entity.SysMenu) (data []*model.SysMenuTree, err error)
 		// 获取用户动态路由列表
@@ -67,6 +67,10 @@ type (
 		BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMenu, menuList []*entity.SysMenu, allPath string) (data v1.MenuAllRes, err error)
 		// 获取用户动态路由树
 		GetUserMenuTree(ctx context.Context) (data v1.MenuAllRes, err error)
+		GetSysMenuView(ctx context.Context, menuId int64) (data *model.SysMenuViewModel, err error)
+		UpdateSysMenu(ctx context.Context, menu *model.SysMenuUpdateModel) (data *model.SysMenuViewModel, err error)
+		AddSysMenu(ctx context.Context, menu *model.SysMenuAddModel) (data *model.SysMenuViewModel, err error)
+		DeleteSysMenu(ctx context.Context, menuId int64) (err error)
 	}
 	ISysNotice interface {
 		GetNoticeList(ctx context.Context, query *model.SysNoticeListQuery, page *request.PageInfo) (items []*model.SysNotice, total int, err error)
@@ -118,6 +122,8 @@ type (
 		// 新增用户
 		AddUser(ctx context.Context, req model.AddUser) (user *entity.SysUser, err error)
 		Profile(ctx context.Context) (user *model.UserProfileModel, err error)
+		UpdateCurrentUser(ctx context.Context, req *model.UpdateCurrentUserModel) (user *model.SysUserViewModel, err error)
+		UpdateCurrentUserPassword(ctx context.Context, req *model.UpdateCurrentUserPasswordModel) (err error)
 	}
 	ISysUserOnline interface {
 		Add(ctx context.Context, userOnline *model.SysUserOnlineAddModel) (err error)

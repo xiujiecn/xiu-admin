@@ -10,7 +10,7 @@ export const localRoutes : RouteRecordStringComponent[] = [
         meta: {
             title: $t('ui.widgets.profile'),
             icon: 'mingcute:profile-line',
-            hidden: true,
+            hideInMenu: true,
         }
     },
 ]

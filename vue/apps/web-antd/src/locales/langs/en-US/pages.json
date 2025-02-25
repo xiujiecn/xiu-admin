@@ -1,6 +1,7 @@
 {
     "common": {
       "add": "Add",
+      "view": "View",
       "edit": "Edit",
       "delete": "Delete",
       "more": "More",

@@ -31,7 +31,7 @@ func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *
 		return nil, err
 	}
 	return &v1.UserInfoRes{
-		Data: &v1.UserInfo{
+		UserInfo: v1.UserInfo{
 			Id:       user.UserId,
 			Username: user.UserName,
 			Nickname: user.NickName,
@@ -72,4 +72,26 @@ func (c *ControllerV1) UserProfile(ctx context.Context, req *v1.UserProfileReq) 
 	return &v1.UserProfileRes{
 		User: user,
 	}, nil
+}
+func (c *ControllerV1) UpdateCurrentUser(ctx context.Context, req *v1.UpdateCurrentUserReq) (res *v1.UpdateCurrentUserRes, err error) {
+	user, err := service.SysUser().UpdateCurrentUser(ctx, &req.UpdateCurrentUserModel)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UpdateCurrentUserRes{
+		UserInfo: v1.UserInfo{
+			Id:       user.UserId,
+			Username: user.UserName,
+			Nickname: user.NickName,
+			Avatar:   user.Avatar,
+			Email:    user.Email,
+		},
+	}, nil
+}
+func (c *ControllerV1) UpdateCurrentUserPassword(ctx context.Context, req *v1.UpdateCurrentUserPasswordReq) (res *v1.UpdateCurrentUserPasswordRes, err error) {
+	err = service.SysUser().UpdateCurrentUserPassword(ctx, &req.UpdateCurrentUserPasswordModel)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UpdateCurrentUserPasswordRes{}, nil
 }

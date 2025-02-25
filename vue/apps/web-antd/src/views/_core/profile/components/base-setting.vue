@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Recordable } from '@vben/types';
 
-import type { UserProfileData } from '#/api/system/user';
+import type { UserProfileRes } from '#/api/system/user';
 
 import { onMounted } from 'vue';
 
@@ -11,13 +11,14 @@ import { useUserStore } from '@vben/stores';
 import { pick } from 'lodash-es';
 
 import { useVbenForm, z } from '#/adapter/form';
-import { updateCurrentProfile } from '#/api/system/user';
+import { updateCurrentUserProfile } from '#/api/system/user';
 import { useAuthStore } from '#/store';
 import { getDictOptions } from '#/utils/dict';
 
 import { emitter } from '../mitt';
+import { message } from 'ant-design-vue';
 
-const props = defineProps<{ profile: UserProfileData }>();
+const props = defineProps<{ profile: UserProfileRes }>();
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
@@ -88,7 +89,8 @@ function buttonLoading(loading: boolean) {
 async function handleSubmit(values: Recordable<any>) {
   try {
     buttonLoading(true);
-    await updateCurrentProfile(values);
+    await updateCurrentUserProfile(values);
+    message.success('更新成功');
     // 更新store
     const userInfo = await authStore.fetchUserInfo();
     userStore.setUserInfo(userInfo);

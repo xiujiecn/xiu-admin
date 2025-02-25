@@ -16,6 +16,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 type sSysMenu struct {
@@ -30,7 +31,7 @@ func init() {
 }
 
 // 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
-func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListQuery) (data []*model.SysMenu, total int, err error) {
+func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListQuery) (data []*model.SysMenuListModel, total int, err error) {
 	// 获取当前用户信息
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
@@ -219,5 +220,65 @@ func (l *sSysMenu) GetUserMenuTree(ctx context.Context) (data v1.MenuAllRes, err
 	if err != nil {
 		return nil, err
 	}
+	return
+}
+
+func (l *sSysMenu) GetSysMenuView(ctx context.Context, menuId int64) (data *model.SysMenuViewModel, err error) {
+	menu := &entity.SysMenu{}
+	err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().MenuId, menuId).Scan(menu)
+	if err != nil {
+		return nil, err
+	}
+	data = &model.SysMenuViewModel{
+		SysMenu: *menu,
+	}
+	return
+}
+
+func (l *sSysMenu) UpdateSysMenu(ctx context.Context, menu *model.SysMenuUpdateModel) (data *model.SysMenuViewModel, err error) {
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	menu.UpdatedAt = gtime.Now()
+	menu.UpdatedBy = claims.BaseClaims.ID
+	_, err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().MenuId, menu.MenuId).Data(menu).OmitNil().Update(menu)
+	if err != nil {
+		return nil, err
+	}
+	data, err = l.GetSysMenuView(ctx, menu.MenuId)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (l *sSysMenu) AddSysMenu(ctx context.Context, menu *model.SysMenuAddModel) (data *model.SysMenuViewModel, err error) {
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	menu.CreatedDept = claims.BaseClaims.DeptId
+	menu.CreatedAt = gtime.Now()
+	menu.CreatedBy = claims.BaseClaims.ID
+	menu.UpdatedAt = gtime.Now()
+	menu.UpdatedBy = claims.BaseClaims.ID
+	re, err := dao.SysMenu.Ctx(ctx).Data(menu).Insert()
+	if err != nil {
+		return nil, err
+	}
+	menuId, err := re.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	data, err = l.GetSysMenuView(ctx, menuId)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (l *sSysMenu) DeleteSysMenu(ctx context.Context, menuId int64) (err error) {
+	_, err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().MenuId, menuId).Delete()
 	return
 }

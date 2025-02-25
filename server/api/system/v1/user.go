@@ -21,7 +21,7 @@ type UserInfoReq struct {
 }
 
 type UserInfoRes struct {
-	Data *UserInfo `json:"data" dc:"用户信息"`
+	UserInfo
 }
 
 type UserListReq struct {
@@ -45,9 +45,26 @@ type AddUserRes struct {
 }
 
 type UserProfileReq struct {
-	g.Meta `path:"/user/profile" method:"get" tags:"系统" summary:"获取用户个人中心"`
+	g.Meta `path:"/user/profile" method:"get" tags:"系统" summary:"获取当前用户信息"`
 }
 
 type UserProfileRes struct {
 	User *model.UserProfileModel `json:"user" dc:"用户信息"`
+}
+
+type UpdateCurrentUserReq struct {
+	g.Meta `path:"/user/profile/update" method:"post" tags:"系统" summary:"更新当前用户信息"`
+	model.UpdateCurrentUserModel
+}
+
+type UpdateCurrentUserRes struct {
+	UserInfo
+}
+
+type UpdateCurrentUserPasswordReq struct {
+	g.Meta `path:"/user/profile/password" method:"post" tags:"系统" summary:"更新当前用户密码"`
+	model.UpdateCurrentUserPasswordModel
+}
+
+type UpdateCurrentUserPasswordRes struct {
 }
