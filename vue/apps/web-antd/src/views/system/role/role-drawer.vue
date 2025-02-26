@@ -44,9 +44,10 @@ const [BasicForm, formApi] = useVbenForm({
   wrapperClass: 'grid-cols-2 gap-x-4',
 });
 
-
-
+const showMenuSelect = ref(false); // 菜单选择是否显示,控制加载顺序
+const menuIds = ref<number[]>([]);
 const checkStrictly = ref(false);
+
 
 const [BasicDrawer, drawerApi] = useVbenDrawer({
   onCancel: handleCancel,
@@ -62,9 +63,11 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
 
     if (isUpdate.value || isView.value) {
       const record = await getSysRoleViewApi({roleId: id});
-      await formApi.setValues(record);
+      menuIds.value = record.menuIds;
       checkStrictly.value = record.menuCheckStrictly === 0;
+      await formApi.setValues(record);
     }
+    showMenuSelect.value = true;
     // init菜单 注意顺序要放在赋值record之后 内部watch会依赖record
     // await setupMenuTree(id);
 
@@ -87,7 +90,6 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
   },
 });
 
-// const menuSelectRef = ref<InstanceType<typeof MenuSelectTable>>();
 async function handleConfirm() {
   try {
     drawerApi.setState({confirmLoading:true,loading:true})
@@ -96,10 +98,8 @@ async function handleConfirm() {
       return;
     }
     // 这个用于提交
-    // const menuIds: number[] = [];//menuSelectRef.value?.getCheckedKeys?.() ?? [];
     // formApi.getValues拿到的是一个readonly对象，不能直接修改，需要cloneDeep
     const data = cloneDeep(await formApi.getValues());
-    // data.menuIds = menuIds;
     await (isUpdate.value ? editSysRoleApi (data) : addSysRoleApi(data));
     emit('reload');
     await handleCancel();
@@ -119,10 +119,13 @@ async function handleCancel() {
  * @param menuIds 选中的菜单ID数组
  * @param checkStrictly 菜单选择是否严格模式 true 严格模式(解除父子联动) false 非严格模式(父子联动), 默认非严格模式, 后台 1：非严格模式(父子联动) 0：严格模式(解除父子联动)
  */
-async function handleMenuChange(menuIds: number[], checkStrictly: boolean) {
+async function handleMenuChange(menuIds2: number[], checkStrictly2: boolean) {
   await nextTick();
-  await formApi.setFieldValue('menuIds', menuIds);
-  await formApi.setFieldValue('menuCheckStrictly', checkStrictly ? 0 : 1);
+  await formApi.setFieldValue('menuIds', menuIds2);
+  await formApi.setFieldValue('menuCheckStrictly', checkStrictly2 ? 0 : 1);
+  checkStrictly.value = checkStrictly2;
+  menuIds.value = menuIds2;
+  console.log('vue/apps/web-antd/src/views/system/role/role-drawer.vue handleMenuChange', menuIds, checkStrictly2, checkStrictly.value);
 }
 </script>
 
@@ -131,7 +134,7 @@ async function handleMenuChange(menuIds: number[], checkStrictly: boolean) {
     <BasicForm>
       <template #menuIds="slotProps">
         <div class="h-[600px] w-full">
-          <MenuSelect ref="menuSelectRef" :menu-ids="slotProps.value" :check-strictly="checkStrictly" @change="handleMenuChange" />
+          <MenuSelect :menu-ids="menuIds" v-if="showMenuSelect" :check-strictly="checkStrictly" @change="handleMenuChange" />
         </div>
       </template>
     </BasicForm>

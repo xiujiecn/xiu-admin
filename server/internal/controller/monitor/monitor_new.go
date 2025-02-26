@@ -5,7 +5,7 @@
 package monitor
 
 import (
-	"server/api/monitor"
+	"xiujieadmin/api/monitor"
 )
 
 type ControllerV1 struct{}

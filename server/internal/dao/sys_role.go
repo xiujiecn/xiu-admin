@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"server/internal/dao/internal"
+	"xiujieadmin/internal/dao/internal"
 )
 
 // internalSysRoleDao is an internal type for wrapping the internal DAO implementation.

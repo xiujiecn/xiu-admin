@@ -2,13 +2,13 @@ package system
 
 import (
 	"context"
-	"server/internal/dao"
-	"server/internal/model"
-	"server/internal/model/do"
-	"server/internal/model/entity"
-	"server/internal/model/request"
-	"server/internal/service"
-	"server/utility"
+	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/do"
+	"xiujieadmin/internal/model/entity"
+	"xiujieadmin/internal/model/request"
+	"xiujieadmin/internal/service"
+	"xiujieadmin/utility"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -53,13 +53,46 @@ func (s *sSysRole) GetRoleList(ctx context.Context, model *model.SysRoleListPara
 
 // 获取角色详情
 func (s *sSysRole) GetRoleView(ctx context.Context, id int64) (res *model.SysRoleViewModel, err error) {
-	err = dao.SysRole.Ctx(ctx).Where(dao.SysRole.Columns().RoleId, id).Scan(&res)
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = dao.SysRole.Ctx(ctx).Where(dao.SysRole.Columns().RoleId, id).Where(dao.SysRole.Columns().TenantId, claims.TenantId).Scan(&res)
+	if err != nil {
+		return nil, err
+	}
+	// 获取角色菜单
+	roleMenus, err := s.GetRoleMenu(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	menuIdList := make([]int64, 0)
+	for _, menu := range roleMenus {
+		menuIdList = append(menuIdList, menu.MenuId)
+	}
+	res.MenuIds = menuIdList
+	// 获取角色部门
+	roleDepts, err := s.GetRoleDept(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	deptIdList := make([]int64, 0)
+	for _, dept := range roleDepts {
+		deptIdList = append(deptIdList, dept.DeptId)
+	}
+	res.DeptIds = deptIdList
 	return
 }
 
 // 获取角色菜单
 func (s *sSysRole) GetRoleMenu(ctx context.Context, id int64) (res []*entity.SysMenu, err error) {
 	err = dao.SysRoleMenu.Ctx(ctx).Where(dao.SysRoleMenu.Columns().RoleId, id).Scan(&res)
+	return
+}
+
+// 获取角色部门
+func (s *sSysRole) GetRoleDept(ctx context.Context, id int64) (res []*entity.SysDept, err error) {
+	err = dao.SysRoleDept.Ctx(ctx).Where(dao.SysRoleDept.Columns().RoleId, id).Scan(&res)
 	return
 }
 
@@ -208,6 +241,29 @@ func (s *sSysRole) RoleDept(ctx context.Context, roleId int64, deptIds []int64) 
 			})
 		}
 		_, err = dao.SysRoleDept.Ctx(ctx).Data(addData).Insert()
+	}
+	return
+}
+
+// 编辑角色数据权限
+func (s *sSysRole) EditRoleDataScope(ctx context.Context, model *model.SysRoleDataScopeEditParam) (err error) {
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return err
+	}
+	data := do.SysRole{}
+	gconv.Struct(model, &data)
+	data.UpdatedBy = claims.BaseClaims.ID
+	data.UpdatedAt = gtime.Now()
+
+	_, err = dao.SysRole.Ctx(ctx).Data(data).Where(dao.SysRole.Columns().RoleId, model.RoleId).Where(dao.SysRole.Columns().TenantId, claims.TenantId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	// 更新角色部门
+	err = s.RoleDept(ctx, model.RoleId, model.DeptIds)
+	if err != nil {
+		return err
 	}
 	return
 }

@@ -1,18 +1,13 @@
 <script lang="ts" setup>
-import { h,onMounted,ref, watch } from 'vue';
+import { onMounted, ref, watch, nextTick } from 'vue';
 import type { DeepPartial } from '@vben/types';
-import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
 import type { SysMenuListData } from '#/api/system';
 
-import { Page } from '@vben/common-ui';
-
-import {message,Tag, CheckboxGroup} from 'ant-design-vue';
-import dayjs from 'dayjs';
+import { Tag, CheckboxGroup } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysMenuListApi,deleteSysMenuApi } from '#/api/system'; 
-import { Icon } from '@iconify/vue';
+import { getSysMenuListApi } from '#/api/system';
 import { getMenuTypeOptionsLabel, getMenuTypeOptionsColor } from './model';
 
 
@@ -29,7 +24,7 @@ const emit = defineEmits(['change']);
 const props = defineProps<{
   menuIds?: number[];
   checkStrictly?: boolean;
-}>(); 
+}>();
 const checkedMenuIds = ref<number[]>(props.menuIds || []);
 const checkStrictly = ref(props.checkStrictly || false);
 
@@ -46,6 +41,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     checkRowKeys: checkedMenuIds.value,
     checkStrictly: checkStrictly.value,
+    reserve: true,
   },
   rowConfig: {
     keyField: 'menuId',
@@ -53,8 +49,8 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   align: 'center',
   columns: [
     { align: 'left', title: '', type: 'checkbox', width: 40 },
-    { field: 'menuName', title: '菜单名称' , treeNode: true, minWidth: 160,  align: 'left', },
-    { field: 'menuType', title: '类型' ,width: 60, slots: { default: 'menuType' } },
+    { field: 'menuName', title: '菜单名称', treeNode: true, minWidth: 160, align: 'left', },
+    { field: 'menuType', title: '类型', width: 60, slots: { default: 'menuType' } },
     { field: 'perms', title: '权限标识' },
   ],
   exportConfig: {},
@@ -66,7 +62,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        
+
         return await getSysMenuListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -74,7 +70,12 @@ const gridOptions: VxeTableGridOptions<RowType> = {
         });
       },
       querySuccess: () => {
+        nextTick();
         expandAll();
+
+        gridApi.grid.setCheckboxRowKey(checkedMenuIds.value, true);
+        // gridApi.grid.reloadData(gridApi.grid.getData());
+        console.log('vue/apps/web-antd/src/views/system/menu/menu-select.vue querySuccess', checkedMenuIds.value);
       },
     },
   },
@@ -88,26 +89,54 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid,gridApi] = useVbenVxeGrid({
+const [Grid, gridApi] = useVbenVxeGrid({
   gridOptions,
   gridEvents
 });
 
-watch(checkedMenuIds, (newVal) => {
-  const rows = gridApi.grid.getCheckboxRecords();
-  const ids = rows.map((row: SysMenuListData) => row.menuId);
-  if (ids.toString() != newVal.toString()) {
-    gridApi.grid.setCheckboxRowKey(newVal, true);
+watch(props, (newVal) => {
+  nextTick();
+  checkedMenuIds.value = newVal.menuIds || [];
+  checkStrictly.value = newVal.checkStrictly || false;
+
+  if (checkStrictly.value) {
+    // checkboxGroupValue 中删除 3
+    checkboxGroupValue.value.splice(checkboxGroupValue.value.indexOf(3), 1);
+  }else {
+    checkboxGroupValue.value.push(3);
   }
-});
-
-
-function  handleCheckboxChange() {
+  gridApi.setGridOptions({
+    checkboxConfig: {
+      checkStrictly: checkStrictly.value,
+      checkRowKeys: checkedMenuIds.value,
+    }
+  });
+  nextTick();
   const rows = gridApi.grid.getCheckboxRecords();
   const ids = rows.map((row: SysMenuListData) => row.menuId);
   if (ids.toString() != checkedMenuIds.value.toString()) {
+    gridApi.grid.setCheckboxRowKey(checkedMenuIds.value, true);
+    console.log('vue/apps/web-antd/src/views/system/menu/menu-select.vue watch  props setCheckboxRowKey', checkedMenuIds.value, checkStrictly.value);
+  }
+  nextTick();
+  // gridApi.reload();
+  console.log('vue/apps/web-antd/src/views/system/menu/menu-select.vue watch props end', checkedMenuIds.value, checkStrictly.value);
+});
+// watch(checkedMenuIds, (newVal) => {
+//   const rows = gridApi.grid.getCheckboxRecords();
+//   const ids = rows.map((row: SysMenuListData) => row.menuId);
+//   if (ids.toString() != newVal.toString()) {
+//     gridApi.grid.setCheckboxRowKey(newVal, true);
+//   }
+// });
+
+
+function handleCheckboxChange() {
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids = rows.map((row: SysMenuListData) => row.menuId);
+  if (ids.toString() != props.menuIds?.toString() || checkStrictly.value != props?.checkStrictly) {
     checkedMenuIds.value = ids;
-    emit('change',ids, checkStrictly.value);
+    emit('change', ids, checkStrictly.value);
   }
 }
 
@@ -125,9 +154,9 @@ const expandCollapseAll = (value: boolean) => {
 
 
 const checkboxGroupOptions = [
-  {label: '展开/折叠', value: 1},
-  {label: '全选/全不选', value: 2},
-  {label: '父子联动', value:3 }
+  { label: '展开/折叠', value: 1 },
+  { label: '全选/全不选', value: 2 },
+  { label: '父子联动', value: 3 }
 ]
 const checkboxGroupValue = ref<number[]>([3]);
 watch(checkboxGroupValue, (newVal, oldVal) => {
@@ -150,6 +179,7 @@ watch(checkboxGroupValue, (newVal, oldVal) => {
       }
     });
     checkStrictly.value = false;
+    handleCheckboxChange();
   } else if (!newVal.includes(3) && oldVal.includes(3)) {
     gridApi.setGridOptions({
       checkboxConfig: {
@@ -157,6 +187,7 @@ watch(checkboxGroupValue, (newVal, oldVal) => {
       }
     });
     checkStrictly.value = true;
+    handleCheckboxChange();
   }
 });
 
@@ -164,10 +195,11 @@ watch(checkboxGroupValue, (newVal, oldVal) => {
 
 <template>
 
-    <CheckboxGroup class="w-full pl-3 plr-3 justify-between" :options="checkboxGroupOptions" v-model:value="checkboxGroupValue" />
-    <Grid class="w-full m-0 p-0" >
-      <template #menuType="{ row }"> 
-        <Tag :color="getMenuTypeOptionsColor(row.menuType)">{{ getMenuTypeOptionsLabel(row.menuType) }}</Tag>
-      </template>
-    </Grid>
+  <CheckboxGroup class="w-full pl-3 plr-3 justify-between" :options="checkboxGroupOptions"
+    v-model:value="checkboxGroupValue" />
+  <Grid class="w-full m-0 p-0">
+    <template #menuType="{ row }">
+      <Tag :color="getMenuTypeOptionsColor(row.menuType)">{{ getMenuTypeOptionsLabel(row.menuType) }}</Tag>
+    </template>
+  </Grid>
 </template>

@@ -7,10 +7,10 @@ package service
 
 import (
 	"context"
-	v1 "server/api/system/v1"
-	"server/internal/model"
-	"server/internal/model/entity"
-	"server/internal/model/request"
+	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/entity"
+	"xiujieadmin/internal/model/request"
 )
 
 type (
@@ -91,6 +91,8 @@ type (
 		GetRoleView(ctx context.Context, id int64) (res *model.SysRoleViewModel, err error)
 		// 获取角色菜单
 		GetRoleMenu(ctx context.Context, id int64) (res []*entity.SysMenu, err error)
+		// 获取角色部门
+		GetRoleDept(ctx context.Context, id int64) (res []*entity.SysDept, err error)
 		// 获取角色列表对应菜单
 		GetRoleListMenu(ctx context.Context, ids []int64) (res []*entity.SysRoleMenu, err error)
 		// 新增角色
@@ -99,6 +101,11 @@ type (
 		EditRole(ctx context.Context, model *model.SysRoleEditParam) (err error)
 		// 删除角色
 		DeleteRole(ctx context.Context, model *model.SysRoleDeleteParam) (err error)
+		RoleMenu(ctx context.Context, roleId int64, menuIds []int64) (err error)
+		// 自定义角色部门数据权限
+		RoleDept(ctx context.Context, roleId int64, deptIds []int64) (err error)
+		// 编辑角色数据权限
+		EditRoleDataScope(ctx context.Context, model *model.SysRoleDataScopeEditParam) (err error)
 	}
 	ISysSocial interface {
 		List(ctx context.Context, query *model.SysSocialListParam, page *request.PageInfo) (items []*model.SysSocialListModel, total int, err error)
@@ -133,6 +140,8 @@ type (
 		UpdateUser(ctx context.Context, req *model.SysUserUpdateModel) (err error)
 		DeleteUser(ctx context.Context, userIds []int64) (err error)
 		ResetPassword(ctx context.Context, userId int64, password string) (err error)
+		// 获取用户角色ID列表
+		GetUserRoleIds(ctx context.Context, userId int64) (roleIds []int64, err error)
 	}
 	ISysUserOnline interface {
 		Add(ctx context.Context, userOnline *model.SysUserOnlineAddModel) (err error)

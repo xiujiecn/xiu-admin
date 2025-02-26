@@ -7,7 +7,7 @@ package system
 import (
 	"context"
 
-	"server/api/system/v1"
+	"xiujieadmin/api/system/v1"
 )
 
 type ISystemV1 interface {
@@ -29,6 +29,7 @@ type ISystemV1 interface {
 	MenuAdd(ctx context.Context, req *v1.MenuAddReq) (res *v1.MenuAddRes, err error)
 	MenuUpdate(ctx context.Context, req *v1.MenuUpdateReq) (res *v1.MenuUpdateRes, err error)
 	MenuDelete(ctx context.Context, req *v1.MenuDeleteReq) (res *v1.MenuDeleteRes, err error)
+	MenuTree(ctx context.Context, req *v1.MenuTreeReq) (res *v1.MenuTreeRes, err error)
 	SysNoticeList(ctx context.Context, req *v1.SysNoticeListReq) (res *v1.SysNoticeListRes, err error)
 	SysUserOnlineList(ctx context.Context, req *v1.SysUserOnlineListReq) (res *v1.SysUserOnlineListRes, err error)
 	SysUserOnlineDelete(ctx context.Context, req *v1.SysUserOnlineDeleteReq) (res *v1.SysUserOnlineDeleteRes, err error)
@@ -40,6 +41,7 @@ type ISystemV1 interface {
 	RoleEdit(ctx context.Context, req *v1.RoleEditReq) (res *v1.RoleEditRes, err error)
 	RoleDelete(ctx context.Context, req *v1.RoleDeleteReq) (res *v1.RoleDeleteRes, err error)
 	RoleView(ctx context.Context, req *v1.RoleViewReq) (res *v1.RoleViewRes, err error)
+	RoleDataScopeEdit(ctx context.Context, req *v1.RoleDataScopeEditReq) (res *v1.RoleDataScopeEditRes, err error)
 	SysSocialList(ctx context.Context, req *v1.SysSocialListReq) (res *v1.SysSocialListRes, err error)
 	SysTenantList(ctx context.Context, req *v1.SysTenantListReq) (res *v1.SysTenantListRes, err error)
 	SysTenantPackageList(ctx context.Context, req *v1.SysTenantPackageListReq) (res *v1.SysTenantPackageListRes, err error)

@@ -1,7 +1,7 @@
 package model
 
 import (
-	"server/internal/model/entity"
+	"xiujieadmin/internal/model/entity"
 
 	"github.com/gogf/gf/v2/os/gtime"
 )

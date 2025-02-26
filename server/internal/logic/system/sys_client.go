@@ -2,10 +2,10 @@ package system
 
 import (
 	"context"
-	"server/internal/dao"
-	"server/internal/model"
-	"server/internal/model/request"
-	"server/internal/service"
+	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/request"
+	"xiujieadmin/internal/service"
 )
 
 type sSysClient struct {

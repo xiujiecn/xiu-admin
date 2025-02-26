@@ -3,9 +3,9 @@ package system
 import (
 	"context"
 
-	v1 "server/api/system/v1"
-	"server/internal/model/response"
-	"server/internal/service"
+	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/model/response"
+	"xiujieadmin/internal/service"
 )
 
 func (c *ControllerV1) RoleList(ctx context.Context, req *v1.RoleListReq) (res *v1.RoleListRes, err error) {
@@ -53,4 +53,11 @@ func (c *ControllerV1) RoleView(ctx context.Context, req *v1.RoleViewReq) (res *
 	return &v1.RoleViewRes{
 		SysRoleViewModel: *record,
 	}, nil
+}
+func (c *ControllerV1) RoleDataScopeEdit(ctx context.Context, req *v1.RoleDataScopeEditReq) (res *v1.RoleDataScopeEditRes, err error) {
+	err = service.SysRole().EditRoleDataScope(ctx, &req.SysRoleDataScopeEditParam)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.RoleDataScopeEditRes{}, nil
 }

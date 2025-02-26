@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"server/internal/model"
-	"server/internal/model/request"
-	"server/internal/model/response"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/request"
+	"xiujieadmin/internal/model/response"
 
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -50,4 +50,12 @@ type RoleViewReq struct {
 
 type RoleViewRes struct {
 	model.SysRoleViewModel
+}
+
+type RoleDataScopeEditReq struct {
+	g.Meta `path:"/role/dataScope" method:"post" tags:"系统" summary:"编辑角色数据权限"`
+	model.SysRoleDataScopeEditParam
+}
+
+type RoleDataScopeEditRes struct {
 }

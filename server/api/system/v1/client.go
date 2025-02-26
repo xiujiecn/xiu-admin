@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"server/internal/model"
-	"server/internal/model/request"
-	"server/internal/model/response"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/request"
+	"xiujieadmin/internal/model/response"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

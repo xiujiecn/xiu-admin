@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"server/internal/library/cache/file"
+	"xiujieadmin/internal/library/cache/file"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcache"

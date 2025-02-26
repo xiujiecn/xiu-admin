@@ -2,7 +2,8 @@ package router
 
 import (
 	"context"
-	"server/internal/controller/monitor"
+	"xiujieadmin/internal/controller/monitor"
+	"xiujieadmin/internal/service"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 )
@@ -10,6 +11,9 @@ import (
 // Monitor 监控功能的路由，不含业务属性的
 func Monitor(ctx context.Context, group *ghttp.RouterGroup) {
 	group.Group("/monitor", func(group *ghttp.RouterGroup) {
+		group.Middleware(
+			service.Middleware().Auth,
+		)
 		group.Bind(
 			monitor.NewV1(),
 		)

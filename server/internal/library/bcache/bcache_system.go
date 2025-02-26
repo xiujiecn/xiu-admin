@@ -3,9 +3,9 @@ package bcache
 import (
 	"context"
 	"fmt"
-	"server/internal/consts"
-	"server/internal/library/cache"
 	"time"
+	"xiujieadmin/internal/consts"
+	"xiujieadmin/internal/library/cache"
 )
 
 // 设置系统认证token缓存

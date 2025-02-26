@@ -2,7 +2,7 @@ package router
 
 import (
 	"context"
-	"server/internal/service"
+	"xiujieadmin/internal/service"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 )
@@ -10,7 +10,11 @@ import (
 // InitRouter 初始化路由
 func InitRouter(ctx context.Context, s *ghttp.Server) {
 	s.Group("/api/v1", func(group *ghttp.RouterGroup) {
-		group.Middleware(service.Middleware().ResponseHandler)
+		group.Middleware(
+			service.Middleware().ResponseHandler,
+			service.Middleware().Ctx,
+			service.Middleware().CORS,
+		)
 		System(ctx, group)
 		Monitor(ctx, group)
 	})

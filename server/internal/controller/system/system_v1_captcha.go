@@ -3,8 +3,8 @@ package system
 import (
 	"context"
 
-	v1 "server/api/system/v1"
-	"server/internal/service"
+	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/service"
 )
 
 func (c *ControllerV1) GetCaptcha(ctx context.Context, req *v1.GetCaptchaReq) (res *v1.GetCaptchaRes, err error) {

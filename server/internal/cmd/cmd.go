@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcmd"
 
-	"server/internal/router"
+	"xiujieadmin/internal/router"
 )
 
 var (

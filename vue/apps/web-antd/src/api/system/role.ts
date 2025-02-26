@@ -38,6 +38,8 @@ export interface SysRoleViewData {
   createdDept: number;
   createdAt: string;
   remark: string;
+  menuIds: number[];
+  deptIds: number[];
 }
 
 export interface SysRoleListRes {
@@ -95,6 +97,15 @@ export interface SysRoleEditRes {
 export interface SysRoleDeleteRes {
 }
 
+export interface SysRoleDataScopeEditParam {
+  roleId: number;
+  dataScope: string;
+  deptCheckStrictly?: number;
+  deptIds?: number[];
+}
+export interface SysRoleDataScopeEditRes {
+}
+
 export async function addSysRoleApi(params: SysRoleAddParam|any) {
   return requestClient.post<SysRoleAddRes>('/system/role/add', { ...params });
 }
@@ -110,4 +121,8 @@ export async function deleteSysRoleApi(params: SysRoleDeleteParam|any) {
 export async function getSysRoleViewApi(params: SysRoleViewParam|any) {
   console.log('/Users/lixiujie/dev_test/dev_go/xiujie_iot/vue/apps/web-antd/src/api/system/role.ts', params);  
   return requestClient.get<SysRoleViewData>('/system/role/view', { params });
+}
+
+export async function editSysRoleDataScopeApi(params: SysRoleDataScopeEditParam|any) {
+  return requestClient.post<SysRoleDataScopeEditRes>('/system/role/dataScope', { ...params });
 }

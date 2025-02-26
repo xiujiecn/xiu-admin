@@ -3,9 +3,9 @@ package system
 import (
 	"context"
 
-	v1 "server/api/system/v1"
-	"server/internal/model/response"
-	"server/internal/service"
+	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/model/response"
+	"xiujieadmin/internal/service"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

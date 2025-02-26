@@ -61,13 +61,13 @@ export const drawerSchema: VbenFormSchema[] =  [
       rules: 'required',
     },
     {
-      component: 'Radio',
+      component: 'InputNumber',
       dependencies: {
         show: () => false,
         triggerFields: [''],
       },
       fieldName: 'menuCheckStrictly',
-      label: '菜单权限',
+      label: '菜单树父子关联',
     },
     {
       component: 'CheckboxGroup',
@@ -82,5 +82,54 @@ export const drawerSchema: VbenFormSchema[] =  [
       fieldName: 'remark',
       formItemClass: 'items-baseline col-span-2',
       label: '备注',
+    },
+  ];
+
+  export const dataScopeModalSchema: VbenFormSchema[] = [
+    {
+      component: 'Input',
+      fieldName: 'roleId',
+      label: '角色ID',
+      dependencies: {
+        show: () => false,
+        triggerFields: [''],
+      },
+    },
+    {
+      component: 'Input',
+      fieldName: 'roleName',
+      label: '角色名称',
+      componentProps: {
+        readonly: true,
+      },
+    },
+    {
+      component: 'Select',
+      fieldName: 'dataScope',
+      label: '数据权限',
+      componentProps: {
+        options: authScopeOptions,
+      },
+    },
+    {
+      component: 'CheckboxGroup',
+      defaultValue: [],
+      fieldName: 'deptIds',
+      label: '部门权限',
+      // formItemClass: 'col-span-2',
+      dependencies: {
+        show: (values) => values?.dataScope === '2',
+        triggerFields: ['dataScope'],
+      },
+    },
+    {
+      component: 'InputNumber',
+      dependencies: {
+        show: () => false,
+        triggerFields: [''],
+      },
+      
+      fieldName: 'deptCheckStrictly',
+      label: '部门树父子关联',
     },
   ];
