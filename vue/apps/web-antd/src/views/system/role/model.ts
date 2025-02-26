@@ -9,8 +9,6 @@ import type {
   import { getPopupContainer } from '@vben/utils';
   
   
-
-
 export const authScopeOptions = [
     { color: 'green', label: '全部数据权限', value: '1' },
     { color: 'default', label: '自定数据权限', value: '2' },
@@ -19,7 +17,6 @@ export const authScopeOptions = [
     { color: 'error', label: '仅本人数据权限', value: '5' },
     { color: 'default', label: '部门及以下或本人数据权限', value: '6' },
 ];
-
 
 export const drawerSchema: VbenFormSchema[] =  [
     {
@@ -73,7 +70,7 @@ export const drawerSchema: VbenFormSchema[] =  [
       label: '菜单权限',
     },
     {
-      component: 'Input',
+      component: 'CheckboxGroup',
       defaultValue: [],
       fieldName: 'menuIds',
       label: '菜单权限',

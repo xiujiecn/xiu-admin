@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -167,4 +168,15 @@ func GetBetweenStr(str, start, end string) (result string) {
 	// 切片操作获取中间的字符串
 	result = str[startIndex : startIndex+endIndex]
 	return
+}
+
+// A和B两个数组，A数组中存在，B数组中不存在
+func ArrayRightDiff(a, b []int64) []int64 {
+	diff := make([]int64, 0)
+	for _, v := range a {
+		if !slices.Contains(b, v) {
+			diff = append(diff, v)
+		}
+	}
+	return diff
 }

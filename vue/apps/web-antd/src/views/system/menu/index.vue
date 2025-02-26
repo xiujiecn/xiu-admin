@@ -169,7 +169,7 @@ async function handleDelete(row: SysMenuListData) {
     <Grid table-title="菜单列表">
       <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
         <Button class="mr-2 flex items-center"  @click="expandAll">展开</Button>
         <Button class="mr-2 flex items-center"  @click="collapseAll">折叠</Button>
       </template>

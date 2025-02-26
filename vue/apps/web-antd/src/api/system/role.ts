@@ -62,16 +62,11 @@ export interface SysRoleAddParam {
   roleName: string;
   roleKey: string;
   roleSort: number;
-  dataScope: string;
   menuCheckStrictly: number;
   deptCheckStrictly: number;
   status: string;
-  createdDept: number;
-  createdBy: number;
-  createdAt: string;
-  updatedBy: number;
-  updatedAt: string;
   remark: string;
+  menuIds: number[];
 }
 
 export interface SysRoleEditParam {
@@ -79,16 +74,11 @@ export interface SysRoleEditParam {
   roleName: string;
   roleKey: string;
   roleSort: number;
-  dataScope: string;
   menuCheckStrictly: number;
   deptCheckStrictly: number;
   status: string;
-  createdDept: number;
-  createdBy: number;
-  createdAt: string;
-  updatedBy: number;
-  updatedAt: string;
   remark: string;
+  menuIds: number[];
 }
 
 export interface SysRoleDeleteParam {
