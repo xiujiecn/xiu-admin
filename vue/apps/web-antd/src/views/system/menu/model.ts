@@ -5,10 +5,11 @@ import type {
 import { z } from '@vben/common-ui';
 // 菜单类型（M目录 C菜单 F按钮）
 export const menuTypeOptions = [
-    { label: '目录', value: 'M' },
-    { label: '菜单', value: 'C' },
-    { label: '按钮', value: 'F' },
+    { label: '目录', value: 'M' ,color: 'blue'  },
+    { label: '菜单', value: 'C' ,color: 'green' },
+    { label: '按钮', value: 'F' ,color: 'cyan' },
 ];
+
 
 export const yesNoOptions = [
     { label: '是', value: 0 },
@@ -17,6 +18,14 @@ export const yesNoOptions = [
 
 import { getDictOptions } from '#/utils/dict';
 import { DictEnum } from '@vben/constants';
+
+export function getMenuTypeOptionsLabel(type: string) {
+    return menuTypeOptions.filter((item) => item.value === type)?.[0]?.label;
+}
+
+export function getMenuTypeOptionsColor(type: string) {
+    return menuTypeOptions.filter((item) => item.value === type)?.[0]?.color;
+}
 
 export const drawerSchema: VbenFormSchema[] = [
     {

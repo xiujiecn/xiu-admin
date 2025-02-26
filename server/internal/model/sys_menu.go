@@ -87,3 +87,19 @@ type SysMenuUpdateModel struct {
 type SysMenuDeleteModel struct {
 	MenuId int64 `json:"menuId"`
 }
+
+type SysMenuMini struct {
+	MenuId   int64   `json:"menuId"`
+	MenuName *string `json:"menuName"    orm:"menu_name"    description:"菜单名称"`
+	ParentId *int64  `json:"parentId"    orm:"parent_id"    description:"父菜单ID"`
+}
+
+type SysMenuTreeModel struct {
+	Title    string              `json:"title"`
+	Key      string              `json:"key"`
+	ParentId int64               `json:"parentId"`
+	MenuId   int64               `json:"menuId"`
+	MenuName string              `json:"menuName"`
+	MenuType string              `json:"menuType"    orm:"menu_type"    description:"菜单类型（M目录 C菜单 F按钮）"`
+	Children []*SysMenuTreeModel `json:"children"`
+}

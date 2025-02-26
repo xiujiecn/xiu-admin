@@ -5,14 +5,12 @@ import { computed, nextTick, ref } from 'vue';
 
 import { useVbenDrawer } from '@vben/common-ui';
 import { $t } from '@vben/locales';
-import { cloneDeep, eachTree } from '@vben/utils';
+import { cloneDeep } from '@vben/utils';
 
 import { useVbenForm } from '#/adapter/form';
-import { getSysMenuListApi } from '#/api/system/menu';
+import MenuSelect from '../menu/menu-select.vue';
 
 import { addSysRoleApi, editSysRoleApi, getSysRoleViewApi } from '#/api/system/role';
-// import { MenuSelectTable } from '#/components/tree';
-
 import { drawerSchema } from './model';
 
 const emit = defineEmits<{ reload: [] }>();
@@ -46,33 +44,9 @@ const [BasicForm, formApi] = useVbenForm({
   wrapperClass: 'grid-cols-2 gap-x-4',
 });
 
-// const menuTree = ref<MenuOption[]>([]);
-// async function setupMenuTree(id?: number | string) {
-//   if (id) {
-//     const resp = await getSysMenuListApi();
-//     const menus = resp.items;
-//     // i18n处理
-//     eachTree(menus, (node) => {
-//       node.label = $t(node.label);
-//     });
-//     // 设置菜单信息
-//     menuTree.value =  menus;
-//     // keys依赖于menu 需要先加载menu
-//     await nextTick();
-//     await formApi.setFieldValue('menuIds', resp.checkedKeys);
-//   } else {
-//     const resp = await menuTreeSelect();
-//     // i18n处理
-//     eachTree(resp, (node) => {
-//       node.label = $t(node.label);
-//     });
-//     // 设置菜单信息
-//     menuTree.value = resp;
-//     // keys依赖于menu 需要先加载menu
-//     await nextTick();
-//     await formApi.setFieldValue('menuIds', []);
-//   }
-// }
+
+
+const checkStrictly = ref(false);
 
 const [BasicDrawer, drawerApi] = useVbenDrawer({
   onCancel: handleCancel,
@@ -89,6 +63,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
     if (isUpdate.value || isView.value) {
       const record = await getSysRoleViewApi({roleId: id});
       await formApi.setValues(record);
+      checkStrictly.value = record.menuCheckStrictly === 0;
     }
     // init菜单 注意顺序要放在赋值record之后 内部watch会依赖record
     // await setupMenuTree(id);
@@ -121,10 +96,10 @@ async function handleConfirm() {
       return;
     }
     // 这个用于提交
-    const menuIds: number[] = [];//menuSelectRef.value?.getCheckedKeys?.() ?? [];
+    // const menuIds: number[] = [];//menuSelectRef.value?.getCheckedKeys?.() ?? [];
     // formApi.getValues拿到的是一个readonly对象，不能直接修改，需要cloneDeep
     const data = cloneDeep(await formApi.getValues());
-    data.menuIds = menuIds;
+    // data.menuIds = menuIds;
     await (isUpdate.value ? editSysRoleApi (data) : addSysRoleApi(data));
     emit('reload');
     await handleCancel();
@@ -139,13 +114,15 @@ async function handleCancel() {
   drawerApi.close();
   await formApi.resetForm();
 }
-
 /**
  * 通过回调更新 无法通过v-model
- * @param value 菜单选择是否严格模式
+ * @param menuIds 选中的菜单ID数组
+ * @param checkStrictly 菜单选择是否严格模式 true 严格模式(解除父子联动) false 非严格模式(父子联动), 默认非严格模式, 后台 1：非严格模式(父子联动) 0：严格模式(解除父子联动)
  */
-function handleMenuCheckStrictlyChange(value: boolean) {
-  formApi.setFieldValue('menuCheckStrictly', value);
+async function handleMenuChange(menuIds: number[], checkStrictly: boolean) {
+  await nextTick();
+  await formApi.setFieldValue('menuIds', menuIds);
+  await formApi.setFieldValue('menuCheckStrictly', checkStrictly ? 0 : 1);
 }
 </script>
 
@@ -154,14 +131,7 @@ function handleMenuCheckStrictlyChange(value: boolean) {
     <BasicForm>
       <template #menuIds="slotProps">
         <div class="h-[600px] w-full">
-          <!-- association为readonly 不能通过v-model绑定 -->
-          <!-- <MenuSelectTable
-            ref="menuSelectRef"
-            :checked-keys="slotProps.value"
-            :association="formApi.form.values.menuCheckStrictly"
-            :menus="menuTree"
-            @update:association="handleMenuCheckStrictlyChange"
-          /> -->
+          <MenuSelect ref="menuSelectRef" :menu-ids="slotProps.value" :check-strictly="checkStrictly" @change="handleMenuChange" />
         </div>
       </template>
     </BasicForm>

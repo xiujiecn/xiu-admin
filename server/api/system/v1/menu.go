@@ -101,3 +101,11 @@ type MenuDeleteReq struct {
 
 type MenuDeleteRes struct {
 }
+
+type MenuTreeReq struct {
+	g.Meta `path:"/menu/tree" method:"get" tags:"系统" summary:"获取菜单树"`
+}
+
+type MenuTreeRes struct {
+	Data []*model.SysMenuTreeModel `json:"items" dc:"菜单树"`
+}

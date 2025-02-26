@@ -14,6 +14,7 @@ import { getSysRoleListApi, deleteSysRoleApi } from '#/api/system/role';
 import { useVbenDrawer } from '@vben/common-ui';
 
 import roleDrawer from './role-drawer.vue';
+import { authScopeOptions } from './model';
 
 
 
@@ -31,6 +32,23 @@ interface RowType {
   productName: string;
   releaseDate: string;
 }
+
+function getDataScopeOptionLabel(dataScope: string) {
+  const found = authScopeOptions.find((item) => item.value === dataScope);
+  if (!found) {
+    return dataScope;
+  }
+  return found.label;
+}
+
+function getDataScopeOptionColor(dataScope: string) {
+  const found = authScopeOptions.find((item) => item.value === dataScope);
+  if (!found) {
+    return 'default';
+  }
+  return found.color;
+}
+
 
 const formOptions: VbenFormProps = {
   // 默认展开
@@ -94,7 +112,8 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
     { field: 'roleName', title: '角色名称' },
     { field: 'roleKey', title: '角色权限字符串' },
-    { field: 'roleSort', title: '显示顺序' },
+    { field: 'dataScope', title: '数据范围', slots: { default: 'dataScope' }, minWidth: 90 },
+    { field: 'roleSort', title: '排序',width: 60 },
     {
       field: 'status',
       slots: { default: 'status' },
@@ -202,6 +221,9 @@ function handleReload() {
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '停用' }}</Tag>
+      </template>
+      <template #dataScope="{ row }">
+        <Tag :color="getDataScopeOptionColor(row.dataScope)">{{ getDataScopeOptionLabel(row.dataScope) }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
