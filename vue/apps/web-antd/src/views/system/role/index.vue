@@ -1,15 +1,21 @@
 <script lang="ts" setup>
-import { h } from 'vue';
+import { h, ref } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
-
+import type { SysRoleListData } from '#/api/system/role';
 import { Page } from '@vben/common-ui';
 
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
+import { Button, message, Switch,Tag, Modal } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysRoleListApi } from '#/api/system/role'; 
+import { getSysRoleListApi, deleteSysRoleApi } from '#/api/system/role'; 
+
+import { useVbenDrawer } from '@vben/common-ui';
+
+import roleDrawer from './role-drawer.vue';
+
+
 
 import {
   MdiPlus,
@@ -124,20 +130,72 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid] = useVbenVxeGrid({
+const [Grid, tableApi] = useVbenVxeGrid({
   formOptions,
   gridOptions,
 });
+
+const [RoleDrawer, roleDrawerApi] = useVbenDrawer({
+  connectedComponent: roleDrawer,
+});
+
+function handleView(row: SysRoleListData) {
+  const { roleId } = row;
+  roleDrawerApi.setData({id: roleId, update:false,view:true});
+  roleDrawerApi.open();
+}
+
+function handleAdd() {
+  roleDrawerApi.setData({update:false, view:false});
+  roleDrawerApi.open();
+}
+
+function handleEdit(row: SysRoleListData) {
+  roleDrawerApi.setData({ id: row.roleId, update:true, view:false });
+  roleDrawerApi.open();
+}
+
+async function handleDelete(row: SysRoleListData) {
+  await deleteSysRoleApi({ roleId: row.roleId });
+  message.success("删除成功");
+  await tableApi.query();
+}
+
+const CheckboxChecked = ref(false);
+
+function handleCheckboxChange() {
+  CheckboxChecked.value = tableApi.grid.getCheckboxRecords().length > 0;
+  console.log('vue/apps/web-antd/src/views/system/user/index.vue CheckboxChecked',CheckboxChecked.value);
+}
+
+function handleMultiDelete() {
+  const rows = tableApi.grid.getCheckboxRecords();
+  const ids = rows.map((row: SysRoleListData) => row.roleId);
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await deleteSysRoleApi({ roleIds: ids });
+      message.success("删除成功");
+      await tableApi.query();
+    },
+  });
+}
+
+function handleReload() {
+  tableApi.query();
+}
+
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
+    <Grid title="角色管理">
+      <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
-        <Button class="mr-2 flex items-center bg-green-500"  disabled :icon="h(MdiEdit)">编辑</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
       </template>
       <template #open="{ row }">
         <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" />
@@ -147,12 +205,13 @@ const [Grid] = useVbenVxeGrid({
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1">修改</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" @click="handleEdit(row)">修改</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1">数据权限</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" danger @click="handleDelete(row)">删除</Button>
         </div>
       </template>
     </Grid>
+    <RoleDrawer @reload="handleReload" />
   </Page>
 </template>

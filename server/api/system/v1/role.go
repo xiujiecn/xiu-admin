@@ -18,3 +18,36 @@ type RoleListRes struct {
 	response.PageResult
 	Data []*model.SysRoleListModel `json:"items" dc:"角色列表"`
 }
+
+type RoleAddReq struct {
+	g.Meta `path:"/role/add" method:"post" tags:"系统" summary:"新增角色"`
+	model.SysRoleAddParam
+}
+
+type RoleAddRes struct {
+}
+
+type RoleEditReq struct {
+	g.Meta `path:"/role/edit" method:"post" tags:"系统" summary:"编辑角色"`
+	model.SysRoleEditParam
+}
+
+type RoleEditRes struct {
+}
+
+type RoleDeleteReq struct {
+	g.Meta `path:"/role/delete" method:"post" tags:"系统" summary:"删除角色"`
+	model.SysRoleDeleteParam
+}
+
+type RoleDeleteRes struct {
+}
+
+type RoleViewReq struct {
+	g.Meta `path:"/role/view" method:"get" tags:"系统" summary:"获取角色详情"`
+	model.SysRoleViewParam
+}
+
+type RoleViewRes struct {
+	model.SysRoleViewModel
+}
