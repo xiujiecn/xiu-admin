@@ -2,31 +2,51 @@
 import { onMounted, ref, watch, nextTick } from 'vue';
 import type { DeepPartial } from '@vben/types';
 import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
-import type { SysMenuListData } from '#/api/system';
-
-import { Tag, CheckboxGroup } from 'ant-design-vue';
-
+import type { SysDeptListData } from '#/api/system';
+import { CheckboxGroup } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysMenuListApi } from '#/api/system';
-import { getMenuTypeOptionsLabel, getMenuTypeOptionsColor } from './model';
+import { getSysDeptListApi } from '#/api/system';
 
 
 interface RowType {
-  category: string;
-  color: string;
-  id: string;
-  price: string;
-  productName: string;
-  releaseDate: string;
+  deptId: number;
+  deptName: string;
+  parentId: number;
+  orderNum: number;
+  status: string;
+  children?: RowType[];
 }
 
 const emit = defineEmits(['change']);
 const props = defineProps<{
-  menuIds?: number[];
+  deptIds?: number[];
   checkStrictly?: boolean;
 }>();
-const checkedMenuIds = ref<number[]>(props.menuIds || []);
-const checkStrictly = ref(props.checkStrictly || false);
+const checkedDeptIds = ref<number[]>(props.deptIds||[] );
+const checkStrictly = ref(props.checkStrictly||false);
+
+watch(props, (newVal) => {
+  nextTick();
+  checkedDeptIds.value = newVal.deptIds||[];
+  checkStrictly.value = newVal.checkStrictly||false;
+  gridApi.setGridOptions({
+    checkboxConfig: {
+      checkStrictly: checkStrictly.value
+    }
+  });
+  nextTick();
+  if (checkStrictly.value) {
+    // checkboxGroupValue 中删除 3
+    checkboxGroupValue.value.splice(checkboxGroupValue.value.indexOf(3), 1);
+  }else {
+    checkboxGroupValue.value.push(3);
+  }
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids = rows.map((row: SysDeptListData) => row.deptId);
+  if (ids.toString() != props.deptIds?.toString()) {
+    gridApi.grid.setCheckboxRowKey(checkedDeptIds.value, true);
+  }
+});
 
 const gridEvents: DeepPartial<VxeGridListeners> = {
   checkboxChange: handleCheckboxChange,
@@ -35,23 +55,21 @@ const gridEvents: DeepPartial<VxeGridListeners> = {
 
 onMounted(() => {
   expandAll();
+  console.log('vue/apps/web-antd/src/views/system/dept/dept-select.vue onMounted', checkedDeptIds.value, checkStrictly.value);
 });
 
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
-    checkRowKeys: checkedMenuIds.value,
+    checkRowKeys: checkedDeptIds.value,
     checkStrictly: checkStrictly.value,
-    reserve: true,
   },
   rowConfig: {
-    keyField: 'menuId',
+    keyField: 'deptId',
   },
   align: 'center',
   columns: [
     { align: 'left', title: '', type: 'checkbox', width: 40 },
-    { field: 'menuName', title: '菜单名称', treeNode: true, minWidth: 160, align: 'left', },
-    { field: 'menuType', title: '类型', width: 60, slots: { default: 'menuType' } },
-    { field: 'perms', title: '权限标识' },
+    { field: 'deptName', title: '部门名称', treeNode: true, minWidth: 160, align: 'left', },
   ],
   exportConfig: {},
   height: 'auto',
@@ -63,19 +81,17 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     ajax: {
       query: async ({ page }, formValues) => {
 
-        return await getSysMenuListApi({
+        return await getSysDeptListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,
         });
       },
       querySuccess: () => {
-        nextTick();
         expandAll();
-
-        gridApi.grid.setCheckboxRowKey(checkedMenuIds.value, true);
-        // gridApi.grid.reloadData(gridApi.grid.getData());
-        console.log('vue/apps/web-antd/src/views/system/menu/menu-select.vue querySuccess', checkedMenuIds.value);
+        nextTick();
+        gridApi.grid.setCheckboxRowKey(checkedDeptIds.value, true);
+        
       },
     },
   },
@@ -83,7 +99,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
   treeConfig: {
     parentField: 'parentId',
-    rowField: 'menuId',
+    rowField: 'deptId',
     transform: true,
     expandAll: true,
   },
@@ -94,58 +110,27 @@ const [Grid, gridApi] = useVbenVxeGrid({
   gridEvents
 });
 
-watch(props, (newVal) => {
-  nextTick();
-  checkedMenuIds.value = newVal.menuIds || [];
-  checkStrictly.value = newVal.checkStrictly || false;
-
-  if (checkStrictly.value) {
-    // checkboxGroupValue 中删除 3
-    checkboxGroupValue.value.splice(checkboxGroupValue.value.indexOf(3), 1);
-  }else {
-    checkboxGroupValue.value.push(3);
-  }
-  gridApi.setGridOptions({
-    checkboxConfig: {
-      checkStrictly: checkStrictly.value,
-      checkRowKeys: checkedMenuIds.value,
-    }
-  });
+watch(checkedDeptIds, (newVal) => {
   nextTick();
   const rows = gridApi.grid.getCheckboxRecords();
-  const ids = rows.map((row: SysMenuListData) => row.menuId);
-  if (ids.toString() != checkedMenuIds.value.toString()) {
-    gridApi.grid.setCheckboxRowKey(checkedMenuIds.value, true);
-    console.log('vue/apps/web-antd/src/views/system/menu/menu-select.vue watch  props setCheckboxRowKey', checkedMenuIds.value, checkStrictly.value);
+  const ids = rows.map((row: SysDeptListData) => row.deptId);
+  if (ids.toString() != newVal.toString()) {
+    gridApi.grid.setCheckboxRowKey(newVal, true);
   }
-  nextTick();
-  // gridApi.reload();
-  console.log('vue/apps/web-antd/src/views/system/menu/menu-select.vue watch props end', checkedMenuIds.value, checkStrictly.value);
 });
-// watch(checkedMenuIds, (newVal) => {
-//   const rows = gridApi.grid.getCheckboxRecords();
-//   const ids = rows.map((row: SysMenuListData) => row.menuId);
-//   if (ids.toString() != newVal.toString()) {
-//     gridApi.grid.setCheckboxRowKey(newVal, true);
-//   }
-// });
 
 
 function handleCheckboxChange() {
   const rows = gridApi.grid.getCheckboxRecords();
-  const ids = rows.map((row: SysMenuListData) => row.menuId);
-  if (ids.toString() != props.menuIds?.toString() || checkStrictly.value != props?.checkStrictly) {
-    checkedMenuIds.value = ids;
+  const ids = rows.map((row: SysDeptListData) => row.deptId);
+  if (ids.toString() != checkedDeptIds.value.toString() || checkStrictly.value != props.checkStrictly) {
+    checkedDeptIds.value = ids;
     emit('change', ids, checkStrictly.value);
   }
 }
 
 const expandAll = () => {
   gridApi.grid?.setAllTreeExpand(true);
-};
-
-const collapseAll = () => {
-  gridApi.grid?.setAllTreeExpand(false);
 };
 
 const expandCollapseAll = (value: boolean) => {
@@ -198,8 +183,5 @@ watch(checkboxGroupValue, (newVal, oldVal) => {
   <CheckboxGroup class="w-full pl-3 plr-3 justify-between" :options="checkboxGroupOptions"
     v-model:value="checkboxGroupValue" />
   <Grid class="w-full m-0 p-0">
-    <template #menuType="{ row }">
-      <Tag :color="getMenuTypeOptionsColor(row.menuType)">{{ getMenuTypeOptionsLabel(row.menuType) }}</Tag>
-    </template>
   </Grid>
 </template>

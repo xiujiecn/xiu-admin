@@ -3,9 +3,9 @@ package system
 import (
 	"context"
 	"fmt"
-	"server/internal/dao"
-	"server/internal/model"
-	"server/internal/service"
+	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/service"
 )
 
 type sSysDept struct {

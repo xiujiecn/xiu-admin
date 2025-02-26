@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"server/internal/dao/internal"
+	"xiujieadmin/internal/dao/internal"
 )
 
 // internalSysClientDao is an internal type for wrapping the internal DAO implementation.

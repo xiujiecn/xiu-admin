@@ -8,9 +8,9 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	v1 "server/api/system/v1"
-	"server/internal/model/response"
-	"server/internal/service"
+	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/model/response"
+	"xiujieadmin/internal/service"
 )
 
 func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *v1.UserInfoRes, err error) {

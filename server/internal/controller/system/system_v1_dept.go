@@ -3,9 +3,9 @@ package system
 import (
 	"context"
 
-	v1 "server/api/system/v1"
-	"server/internal/model/response"
-	"server/internal/service"
+	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/model/response"
+	"xiujieadmin/internal/service"
 )
 
 func (c *ControllerV1) DeptList(ctx context.Context, req *v1.DeptListReq) (res *v1.DeptListRes, err error) {

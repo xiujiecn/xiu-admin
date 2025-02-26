@@ -2,9 +2,9 @@ package system
 
 import (
 	"context"
-	"server/internal/consts"
-	"server/internal/service"
 	"time"
+	"xiujieadmin/internal/consts"
+	"xiujieadmin/internal/service"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"

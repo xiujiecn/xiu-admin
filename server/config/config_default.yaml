@@ -1,0 +1,98 @@
+# 系统配置
+system:
+  name: "xiujieiot"
+  version: "2.0"
+  description: "XiujieIot Server"
+  gfmode: "dev"
+# 服务配置
+server:
+  # 基本配置
+  address:          ":8199"
+  # 接口文档
+  openapiPath: "/api.json" # OpenAPI接口文档地址
+  swaggerPath: "/swagger"  # 内置SwaggerUI展示地址
+  # 静态服务配置
+  indexFiles:          ["index.html","index.htm"]   # 自动首页静态文件检索。默认为["index.html", "index.htm"]
+  indexFolder:         false                        # 当访问静态文件目录时，是否展示目录下的文件列表。默认关闭，那么请求将返回403
+  serverRoot:          "resource/public"                   # 静态文件服务的目录根路径，配置时自动开启静态文件服务。默认关闭
+  searchPaths:         ["/resource/public"] # 提供静态文件服务时额外的文件搜索路径，当根路径找不到时则按照顺序在搜索目录查找。默认关闭
+  fileServerEnabled:   true
+  # 文件上传配置
+  maxHeaderBytes:    "20KB"
+  clientMaxBodySize: "200MB"
+
+# 日志配置
+logger:
+  path:                  "resource/log/server"           # 日志文件路径。默认为空，表示关闭，仅输出到终端
+  file:                  "{Y-m-d-H}.log"         # 日志文件格式。默认为"{Y-m-d}.log"
+  prefix:                ""                    # 日志内容输出前缀。默认为空
+  level:                 "dev"                 # 日志输出级别
+  timeFormat:            "2006-01-02T15:04:05" # 自定义日志输出的时间格式，使用Golang标准的时间格式配置
+  ctxKeys:               []                    # 自定义Context上下文变量名称，自动打印Context的变量到日志中。默认为空
+  header:                true                  # 是否打印日志的头信息。默认true
+  stdout:                true                  # 日志是否同时输出到终端。默认true
+  rotateSize:            0                     # 按照日志文件大小对文件进行滚动切分。默认为0，表示关闭滚动切分特性
+  rotateExpire:          0                     # 按照日志文件时间间隔对文件滚动切分。默认为0，表示关闭滚动切分特性
+  rotateBackupLimit:     0                     # 按照切分的文件数量清理切分文件，当滚动切分特性开启时有效。默认为0，表示不备份，切分则删除
+  rotateBackupExpire:    0                     # 按照切分的文件有效期清理切分文件，当滚动切分特性开启时有效。默认为0，表示不备份，切分则删除
+  rotateBackupCompress:  0                     # 滚动切分文件的压缩比（0-9）。默认为0，表示不压缩
+  rotateCheckInterval:   "1h"                  # 滚动切分的时间检测间隔，一般不需要设置。默认为1小时
+  stdoutColorDisabled:   false                 # 关闭终端的颜色打印。默认开启
+  writerColorEnable:     false                 # 日志文件是否带上颜色。默认false，表示不带颜色
+
+# JWT配置
+jwt:
+    signingKey: 39c54195e73304e74a8429b178965865
+    expiresTime: 7d
+    bufferTime: 1d
+    issuer: xiujie # 发行人
+
+# 验证码配置
+captcha:
+    keyLong: 6
+    imgWidth: 240
+    imgHeight: 80
+    openCaptcha: 0
+    openCaptchaTimeout: 3600
+
+database:
+  logger:
+    path:    "resource/log/server/sql"
+    level:   "all"
+    stdout:  true
+  default:  # 分组名称，可自定义，默认为default
+    link: "mysql:xj_admin:xj_admin123456@tcp(192.168.158.200:3306)/xiujie_admin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+    debug: true #开启调试模式
+    charset: "utf8mb4" # (可选)数据库编码(如: utf8mb4/utf8/gbk/gb2312)，一般设置为utf8mb4。默认为utf8。
+    dryRun: false #ORM空跑(只读不写)
+    maxIdle: 30 #连接池最大闲置的连接数
+    maxOpen: 100 #连接池最大打开的连接数
+    maxLifetime: 120 #(单位秒)连接对象可重复使用的时间长度
+
+# 缓存配置
+cache:
+  adapter: "redis" # 缓存适配器，支持：file|redis
+  fileDir: "resource/cache" # 缓存文件目录
+
+# Redis 配置示例
+redis:
+  # 单实例配置
+  default:
+    mode: "single" #redis模式，支持：single|cluster|sentinel
+    sentinelMasterName: "xiujie-master" #哨兵模式主节点名称
+    address: 192.168.158.200:6379
+    db: 0
+    pass: redis123456@@
+    minIdle: 5 #最小空闲连接数
+    maxIdle: 30 #允许闲置的最大连接数
+    maxActive: 5000 #最大活跃连接数
+    idleTimeout: "60s" #连接最大空闲时间，使用时间字符串例如30s/2m/2d
+    ClientName: "SystemCache"
+
+# 路由配置
+router:
+  # 不需要验证登录的路由地址
+  exceptLogin:
+    - /system/auth/login
+    - /system/auth/refresh
+    - /system/auth/getCaptcha

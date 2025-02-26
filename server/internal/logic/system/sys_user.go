@@ -3,13 +3,13 @@ package system
 import (
 	"context"
 	"errors"
-	"server/internal/consts"
-	"server/internal/dao"
-	"server/internal/model"
-	"server/internal/model/entity"
-	"server/internal/model/request"
-	"server/internal/service"
-	"server/utility"
+	"xiujieadmin/internal/consts"
+	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/entity"
+	"xiujieadmin/internal/model/request"
+	"xiujieadmin/internal/service"
+	"xiujieadmin/utility"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -544,4 +544,17 @@ func (l *sSysUser) ResetPassword(ctx context.Context, userId int64, password str
 		return err
 	}
 	return nil
+}
+
+// 获取用户角色ID列表
+func (l *sSysUser) GetUserRoleIds(ctx context.Context, userId int64) (roleIds []int64, err error) {
+	urList := make([]*entity.SysUserRole, 0)
+	err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, userId).Scan(&urList)
+	if err != nil {
+		return nil, err
+	}
+	for _, ur := range urList {
+		roleIds = append(roleIds, ur.RoleId)
+	}
+	return roleIds, nil
 }

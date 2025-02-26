@@ -3,12 +3,12 @@ package system
 import (
 	"context"
 	"errors"
-	"server/internal/library/bcache"
-	"server/internal/model"
-	"server/internal/service"
-	"server/utility"
 	"strings"
 	"time"
+	"xiujieadmin/internal/library/bcache"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/service"
+	"xiujieadmin/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -101,14 +101,20 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 	et, _ := utility.ParseDuration(ets)
 	bt, _ := utility.ParseDuration(bts)
 	g.Log().Infof(ctx, "生成Token: user:%+v, et:%s, bt:%s, iss:%s, sk:%s", user, et, bt, iss, sk)
+	authorityIds, err := service.SysUser().GetUserRoleIds(ctx, user.ID)
+	if err != nil {
+		return nil, "", err
+	}
 	claims = &model.CustomClaims{
 		BaseClaims: model.BaseClaims{
-			UUID:     strings.ReplaceAll(uuid.New().String(), "-", ""),
-			ID:       user.ID,
-			Username: user.Username,
-			NickName: user.NickName,
-			TenantId: user.TenantId,
-			DeptId:   user.DeptId,
+			UUID:         strings.ReplaceAll(uuid.New().String(), "-", ""),
+			ID:           user.ID,
+			Username:     user.Username,
+			NickName:     user.NickName,
+			TenantId:     user.TenantId,
+			DeptId:       user.DeptId,
+			AuthorityIds: authorityIds,
+			LoginAt:      time.Now().Unix(),
 		},
 		BufferTime: int64(bt / time.Second),
 		RegisteredClaims: jwt.RegisteredClaims{

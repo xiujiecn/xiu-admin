@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
-	"server/internal/library/cache"
+	"xiujieadmin/internal/library/cache"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -49,4 +49,8 @@ func SetGFMode(ctx context.Context) {
 			break
 		}
 	}
+}
+
+func DBHandle(ctx context.Context) {
+
 }

@@ -12,6 +12,7 @@ type BaseClaims struct {
 	DeptId       int64   // 部门ID
 	TenantId     string  // 租户编号
 	AuthorityIds []int64 // 角色ID
+	LoginAt      int64   // 登录时间戳(秒)
 }
 
 type CustomClaims struct {

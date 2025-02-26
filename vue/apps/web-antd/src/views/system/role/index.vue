@@ -11,9 +11,10 @@ import dayjs from 'dayjs';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysRoleListApi, deleteSysRoleApi } from '#/api/system/role'; 
 
-import { useVbenDrawer } from '@vben/common-ui';
+import { useVbenDrawer,useVbenModal } from '@vben/common-ui';
 
 import roleDrawer from './role-drawer.vue';
+import roleDataScopeModal from './role-data-scope-modal.vue';
 import { authScopeOptions } from './model';
 
 
@@ -106,7 +107,7 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'userId',
+    labelField: 'roleId',
   },
   columns: [
     { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
@@ -121,7 +122,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
       width: 100,
     },
     { field: 'createdAt', formatter: 'formatDateTime', title: '创建时间' },
-    { title: '操作', width: 200, slots: { default: 'action' } }
+    { title: '操作', width: 190, slots: { default: 'action' } }
   ],
   exportConfig: {},
   height: 'auto',
@@ -156,6 +157,10 @@ const [Grid, tableApi] = useVbenVxeGrid({
 
 const [RoleDrawer, roleDrawerApi] = useVbenDrawer({
   connectedComponent: roleDrawer,
+});
+
+const [RoleDataScopeModal, roleDataScopeModalApi] = useVbenModal({
+  connectedComponent: roleDataScopeModal,
 });
 
 function handleView(row: SysRoleListData) {
@@ -206,6 +211,11 @@ function handleReload() {
   tableApi.query();
 }
 
+function handleDataScope(row: SysRoleListData) {
+  roleDataScopeModalApi.setData({id: row.roleId, update:true, view:false});
+  roleDataScopeModalApi.open();
+}
+
 </script>
 
 <template>
@@ -229,11 +239,12 @@ function handleReload() {
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" @click="handleEdit(row)">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1">数据权限</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" @click="handleDataScope(row)">数据权限</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" danger @click="handleDelete(row)">删除</Button>
         </div>
       </template>
     </Grid>
     <RoleDrawer @reload="handleReload" />
+    <RoleDataScopeModal @reload="handleReload" />
   </Page>
 </template>

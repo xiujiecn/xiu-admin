@@ -1,4 +1,4 @@
-module server
+module xiujieadmin
 
 go 1.23.0
 

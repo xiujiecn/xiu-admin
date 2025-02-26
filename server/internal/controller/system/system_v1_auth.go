@@ -6,8 +6,8 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	v1 "server/api/system/v1"
-	"server/internal/service"
+	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/service"
 )
 
 func (c *ControllerV1) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRes, err error) {

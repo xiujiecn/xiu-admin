@@ -25,4 +25,6 @@ var (
 	CodePhoneExists = gcode.New(10010, "手机号已存在", nil)
 	// 邮箱已存在
 	CodeEmailExists = gcode.New(10011, "邮箱已存在", nil)
+	// 用户未登录
+	CodeUserNotLogin = gcode.New(61, "用户未登录", nil)
 )

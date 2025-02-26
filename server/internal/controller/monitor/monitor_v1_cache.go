@@ -7,8 +7,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	v1 "server/api/monitor/v1"
-	"server/utility"
+	v1 "xiujieadmin/api/monitor/v1"
+	"xiujieadmin/utility"
 )
 
 func (c *ControllerV1) RedisInfo(ctx context.Context, req *v1.RedisInfoReq) (res *v1.RedisInfoRes, err error) {
