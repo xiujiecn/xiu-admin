@@ -11,7 +11,7 @@ import (
 type SysUserOnlineListReq struct {
 	g.Meta `path:"/user-online/list" method:"get" tags:"系统" summary:"系统用户在线列表"`
 	request.PageInfo
-	model.SysUserOnlineListQuery
+	model.SysUserOnlineListParam
 }
 
 type SysUserOnlineListRes struct {

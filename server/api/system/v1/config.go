@@ -11,7 +11,7 @@ import (
 type GetConfigListReq struct {
 	g.Meta `path:"/config/list" method:"get" tags:"系统配置" summary:"获取系统配置列表"`
 	request.PageInfo
-	model.SysConfigListQuery
+	model.SysConfigListParam
 }
 
 type GetConfigListRes struct {

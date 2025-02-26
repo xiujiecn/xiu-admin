@@ -6,7 +6,7 @@ import type { UserInfo } from '@vben/types';
 import type { Recordable } from '@vben/types';
 import {md5} from 'js-md5';
 
-export interface SysUserListQuery {
+export interface SysUserListParam {
     tenantId: string;
     userId: number;
     deptId: number;
@@ -48,7 +48,7 @@ export interface SysUserListQuery {
     total: number;
   }
   
-  export async function getSysUserListApi(params: SysUserListQuery) {
+  export async function getSysUserListApi(params: SysUserListParam) {
     return requestClient.get<SysUserListRes>('/system/user/list', { params });
   }
   

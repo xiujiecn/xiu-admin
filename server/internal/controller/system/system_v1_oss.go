@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) SysOssList(ctx context.Context, req *v1.SysOssListReq) (res *v1.SysOssListRes, err error) {
-	items, total, err := service.SysOss().List(ctx, &req.SysOssListQuery, &req.PageInfo)
+	items, total, err := service.SysOss().List(ctx, &req.SysOssListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

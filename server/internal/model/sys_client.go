@@ -25,7 +25,7 @@ type SysClientListModel struct {
 	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"     description:"创建时间"`
 }
 
-type SysClientListQuery struct {
+type SysClientListParam struct {
 	ClientId     string `json:"clientId"      orm:"client_id"      description:"客户端id"`
 	ClientKey    string `json:"clientKey"     orm:"client_key"     description:"客户端key"`
 	ClientSecret string `json:"clientSecret"  orm:"client_secret"  description:"客户端秘钥"`

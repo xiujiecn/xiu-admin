@@ -19,7 +19,7 @@ func init() {
 	service.RegisterSysDept(NewSysDept())
 }
 
-func (l *sSysDept) GetDeptList(ctx context.Context, query model.DeptListQuery) (items []*model.SysDept, total int, err error) {
+func (l *sSysDept) GetDeptList(ctx context.Context, query model.DeptListParam) (items []*model.SysDept, total int, err error) {
 	// 获取当前用户租户
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
@@ -71,7 +71,7 @@ func (l *sSysDept) DeptTree(ctx context.Context, parentDept *model.SysDeptTreeMo
 }
 
 func (l *sSysDept) GetDeptTree(ctx context.Context) (items []*model.SysDeptTreeModel, err error) {
-	depts, _, err := l.GetDeptList(ctx, model.DeptListQuery{})
+	depts, _, err := l.GetDeptList(ctx, model.DeptListParam{})
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (l *sSysDept) RecursionDeptIds(ctx context.Context, parentId int64, deptLis
 
 // 根据父部门id获取部门列表
 func (l *sSysDept) GetDeptIdsByParentId(ctx context.Context, parentId int64) (ids []int64, err error) {
-	depts, _, err := l.GetDeptList(ctx, model.DeptListQuery{})
+	depts, _, err := l.GetDeptList(ctx, model.DeptListParam{})
 	if err != nil {
 		return nil, err
 	}

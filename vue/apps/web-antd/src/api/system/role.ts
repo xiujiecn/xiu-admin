@@ -1,7 +1,7 @@
 
 import { requestClient } from '#/api/request';
 
-export interface SysRoleListQuery {
+export interface SysRoleListParam {
   page?: number;
   pageSize?: number;
   roleName?: string;
@@ -30,7 +30,7 @@ export interface SysRoleListRes {
   total: number;
 }
 
-export async function getSysRoleListApi(params: SysRoleListQuery) {
+export async function getSysRoleListApi(params: SysRoleListParam) {
   return requestClient.get<SysRoleListRes>('/system/role/list', { params });
 }
 

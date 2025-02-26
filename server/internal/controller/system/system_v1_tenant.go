@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) SysTenantList(ctx context.Context, req *v1.SysTenantListReq) (res *v1.SysTenantListRes, err error) {
-	items, total, err := service.SysTenant().List(ctx, &req.SysTenantListQuery, &req.PageInfo)
+	items, total, err := service.SysTenant().List(ctx, &req.SysTenantListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func (c *ControllerV1) SysTenantList(ctx context.Context, req *v1.SysTenantListR
 }
 
 func (c *ControllerV1) SysTenantPackageList(ctx context.Context, req *v1.SysTenantPackageListReq) (res *v1.SysTenantPackageListRes, err error) {
-	items, total, err := service.SysTenant().TenantPackageList(ctx, &req.SysTenantPackageListQuery, &req.PageInfo)
+	items, total, err := service.SysTenant().TenantPackageList(ctx, &req.SysTenantPackageListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

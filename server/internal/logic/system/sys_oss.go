@@ -21,7 +21,7 @@ func init() {
 	service.RegisterSysOss(NewSysOss())
 }
 
-func (s *sSysOss) List(ctx context.Context, query *model.SysOssListQuery, pageInfo *request.PageInfo) (items []*model.SysOssListModel, total int, err error) {
+func (s *sSysOss) List(ctx context.Context, query *model.SysOssListParam, pageInfo *request.PageInfo) (items []*model.SysOssListModel, total int, err error) {
 	// 获取当前用户租户编码
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {

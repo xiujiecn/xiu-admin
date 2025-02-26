@@ -31,7 +31,7 @@ type SysOperLogListModel struct {
 	CostTime      int64       `json:"costTime"      orm:"cost_time"      description:"消耗时间"`
 }
 
-type SysOperLogListQuery struct {
+type SysOperLogListParam struct {
 	Title        string `json:"title"`
 	BusinessType string `json:"businessType"`
 	Method       string `json:"method"`

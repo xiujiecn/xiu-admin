@@ -10,7 +10,7 @@ type SysUserOnlineViewModel struct {
 	entity.SysUserOnline
 }
 
-type SysUserOnlineListQuery struct {
+type SysUserOnlineListParam struct {
 	UserName   string   `json:"userName"       description:"用户账号"`
 	ClientKey  string   `json:"clientKey"      description:"客户端"`
 	DeviceType string   `json:"deviceType"     description:"设备类型"`

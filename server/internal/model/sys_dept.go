@@ -8,7 +8,7 @@ type DeptMiniModel struct {
 	DeptName string `json:"deptName" orm:"dept_name" description:"部门名称"`
 }
 
-type DeptListQuery struct {
+type DeptListParam struct {
 	DeptName string `json:"deptName"`
 	Status   string `json:"status"`
 }

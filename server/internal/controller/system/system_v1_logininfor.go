@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) ListLogininfor(ctx context.Context, req *v1.ListLogininforReq) (res *v1.ListLogininforRes, err error) {
-	items, total, err := service.SysLogininfor().ListLogininfor(ctx, &req.SysLogininforListQuery, &req.PageInfo)
+	items, total, err := service.SysLogininfor().ListLogininfor(ctx, &req.SysLogininforListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

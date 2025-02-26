@@ -31,7 +31,7 @@ func init() {
 }
 
 // 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
-func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListQuery) (data []*model.SysMenuListModel, total int, err error) {
+func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error) {
 	// 获取当前用户信息
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {

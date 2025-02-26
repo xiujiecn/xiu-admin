@@ -10,7 +10,7 @@ import (
 
 type SysOssListReq struct {
 	g.Meta `path:"/oss/list" method:"get" tags:"系统" summary:"获取OSS列表"`
-	model.SysOssListQuery
+	model.SysOssListParam
 	request.PageInfo
 }
 

@@ -19,7 +19,7 @@ func init() {
 	service.RegisterSysClient(NewSysClient())
 }
 
-func (s *sSysClient) List(ctx context.Context, query *model.SysClientListQuery, pageInfo *request.PageInfo) (items []*model.SysClientListModel, total int, err error) {
+func (s *sSysClient) List(ctx context.Context, query *model.SysClientListParam, pageInfo *request.PageInfo) (items []*model.SysClientListModel, total int, err error) {
 
 	db := dao.SysClient.Ctx(ctx)
 	if query.ClientId != "" {

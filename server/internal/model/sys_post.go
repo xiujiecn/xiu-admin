@@ -16,7 +16,7 @@ type SysPostListModel struct {
 	DeptInfo     DeptMiniModel `json:"deptInfo"    orm:"with:dept_id=dept_id"    description:"部门信息"`
 }
 
-type SysPostListQuery struct {
+type SysPostListParam struct {
 	DeptId       int64  `json:"deptId"        description:"部门id"`
 	PostCode     string `json:"postCode"      description:"岗位编码"`
 	PostCategory string `json:"postCategory"  description:"岗位类别编码"`

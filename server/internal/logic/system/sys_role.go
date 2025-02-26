@@ -21,7 +21,7 @@ func init() {
 }
 
 // 获取租户下角色列表
-func (s *sSysRole) GetRoleList(ctx context.Context, model *model.SysRoleListQuery, pageInfo *request.PageInfo) (res []*model.SysRole, total int, err error) {
+func (s *sSysRole) GetRoleList(ctx context.Context, model *model.SysRoleListParam, pageInfo *request.PageInfo) (res []*model.SysRoleListModel, total int, err error) {
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -45,7 +45,7 @@ func (s *sSysRole) GetRoleList(ctx context.Context, model *model.SysRoleListQuer
 }
 
 // 获取角色详情
-func (s *sSysRole) GetRoleDetail(ctx context.Context, id int64) (res *model.SysRole, err error) {
+func (s *sSysRole) GetRoleView(ctx context.Context, id int64) (res *model.SysRoleViewModel, err error) {
 	err = dao.SysRole.Ctx(ctx).Where(dao.SysRole.Columns().RoleId, id).Scan(&res)
 	return
 }

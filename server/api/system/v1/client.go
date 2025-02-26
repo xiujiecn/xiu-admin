@@ -10,7 +10,7 @@ import (
 
 type SysClientListReq struct {
 	g.Meta `path:"/client/list" method:"get" tags:"系统" summary:"获取客户端列表"`
-	model.SysClientListQuery
+	model.SysClientListParam
 	request.PageInfo
 }
 

@@ -33,7 +33,7 @@ func (l *sSysTenant) GetTenantPackage(ctx context.Context, packageId int64) (dat
 }
 
 // 获取租户列表
-func (l *sSysTenant) List(ctx context.Context, query *model.SysTenantListQuery, page *request.PageInfo) (data []*model.SysTenantListModel, total int, err error) {
+func (l *sSysTenant) List(ctx context.Context, query *model.SysTenantListParam, page *request.PageInfo) (data []*model.SysTenantListModel, total int, err error) {
 	db := dao.SysTenant.Ctx(ctx)
 	if query.TenantId != "" {
 		db = db.Where(dao.SysTenant.Columns().TenantId, query.TenantId)
@@ -63,7 +63,7 @@ func (l *sSysTenant) List(ctx context.Context, query *model.SysTenantListQuery, 
 	return data, total, nil
 }
 
-func (l *sSysTenant) TenantPackageList(ctx context.Context, query *model.SysTenantPackageListQuery, page *request.PageInfo) (data []*model.SysTenantPackageListModel, total int, err error) {
+func (l *sSysTenant) TenantPackageList(ctx context.Context, query *model.SysTenantPackageListParam, page *request.PageInfo) (data []*model.SysTenantPackageListModel, total int, err error) {
 	db := dao.SysTenantPackage.Ctx(ctx)
 	if query.PackageName != "" {
 		db = db.WhereLike(dao.SysTenantPackage.Columns().PackageName, "%"+query.PackageName+"%")

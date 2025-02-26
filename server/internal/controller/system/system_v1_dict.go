@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) SysDictTypeList(ctx context.Context, req *v1.SysDictTypeListReq) (res *v1.SysDictTypeListRes, err error) {
-	items, total, err := service.SysDict().GetDictTypeList(ctx, &req.SysDictTypeListQuery, &req.PageInfo)
+	items, total, err := service.SysDict().GetDictTypeList(ctx, &req.SysDictTypeListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func (c *ControllerV1) SysDictTypeList(ctx context.Context, req *v1.SysDictTypeL
 }
 
 func (c *ControllerV1) SysDictDataList(ctx context.Context, req *v1.SysDictDataListReq) (res *v1.SysDictDataListRes, err error) {
-	items, total, err := service.SysDict().GetDictDataList(ctx, &req.SysDictDataListQuery, &req.PageInfo)
+	items, total, err := service.SysDict().GetDictDataList(ctx, &req.SysDictDataListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

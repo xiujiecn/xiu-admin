@@ -15,7 +15,7 @@ type SysConfig struct {
 	Remark      string      `json:"remark"      orm:"remark"       description:"备注"`
 }
 
-type SysConfigListQuery struct {
+type SysConfigListParam struct {
 	ConfigName string      `json:"configName" form:"configName" comment:"参数名称"`
 	ConfigKey  string      `json:"configKey"  form:"configKey"  comment:"参数键名"`
 	ConfigType string      `json:"configType" form:"configType" comment:"系统内置"`

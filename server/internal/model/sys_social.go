@@ -31,6 +31,6 @@ type SysSocialListModel struct {
 	CreatedAt        *gtime.Time `json:"createdAt"        orm:"created_at"         description:"创建时间"`
 }
 
-type SysSocialListQuery struct {
+type SysSocialListParam struct {
 	UserId int64 `json:"userId" description:"用户ID"`
 }

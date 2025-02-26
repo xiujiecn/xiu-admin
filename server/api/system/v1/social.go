@@ -10,7 +10,7 @@ import (
 
 type SysSocialListReq struct {
 	g.Meta `path:"/social/list" method:"get" tags:"社交" summary:"社交列表"`
-	model.SysSocialListQuery
+	model.SysSocialListParam
 	request.PageInfo
 }
 

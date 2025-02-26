@@ -27,7 +27,7 @@ type UserInfoRes struct {
 type UserListReq struct {
 	g.Meta `path:"/user/list" method:"get" tags:"系统" summary:"获取用户列表"`
 	request.PageInfo
-	model.UserListQuery
+	model.UserListParam
 }
 
 type UserListRes struct {

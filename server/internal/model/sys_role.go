@@ -2,7 +2,7 @@ package model
 
 import "github.com/gogf/gf/v2/os/gtime"
 
-type SysRole struct {
+type SysRoleListModel struct {
 	RoleId            int64       `json:"roleId"            orm:"role_id"             description:"角色ID"`
 	TenantId          string      `json:"tenantId"          orm:"tenant_id"           description:"租户编号"`
 	RoleName          string      `json:"roleName"          orm:"role_name"           description:"角色名称"`
@@ -17,7 +17,7 @@ type SysRole struct {
 	Remark            string      `json:"remark"            orm:"remark"              description:"备注"`
 }
 
-type SysRoleListQuery struct {
+type SysRoleListParam struct {
 	RoleName  string      `json:"roleName" orm:"role_name"`
 	Status    string      `json:"status" orm:"status"`
 	RoleKey   string      `json:"roleKey"           orm:"role_key"            description:"角色权限字符串"`
@@ -28,4 +28,8 @@ type SysRoleMiniModel struct {
 	RoleId    int64  `json:"roleId"   orm:"role_id"   description:"角色ID"`
 	RoleName  string `json:"roleName" orm:"role_name" description:"角色名称"`
 	DataScope string `json:"dataScope" orm:"data_scope" description:"数据范围"`
+}
+
+type SysRoleViewModel struct {
+	SysRoleListModel
 }

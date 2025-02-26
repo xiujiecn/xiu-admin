@@ -11,7 +11,7 @@ import (
 type SysDictTypeListReq struct {
 	g.Meta `path:"/dict/list" method:"get" tags:"字典类型" summary:"字典类型列表"`
 	request.PageInfo
-	model.SysDictTypeListQuery
+	model.SysDictTypeListParam
 }
 
 type SysDictTypeListRes struct {
@@ -22,7 +22,7 @@ type SysDictTypeListRes struct {
 type SysDictDataListReq struct {
 	g.Meta `path:"/dict-data/list/{id}" method:"get" tags:"字典数据" summary:"字典数据列表"`
 	request.PageInfo
-	model.SysDictDataListQuery
+	model.SysDictDataListParam
 }
 
 type SysDictDataListRes struct {

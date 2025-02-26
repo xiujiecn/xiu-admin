@@ -32,7 +32,7 @@ type SysMenuListModel struct {
 	Remark      string      `json:"remark"      orm:"remark"       description:"备注"`
 }
 
-type SysMenuListQuery struct {
+type SysMenuListParam struct {
 	MenuName string `json:"menuName"`
 	Status   string `json:"status"`
 }

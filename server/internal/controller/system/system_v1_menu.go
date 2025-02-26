@@ -12,7 +12,7 @@ func (c *ControllerV1) MenuAll(ctx context.Context, req *v1.MenuAllReq) (res *v1
 	return &data, err
 }
 func (c *ControllerV1) MenuList(ctx context.Context, req *v1.MenuListReq) (res *v1.MenuListRes, err error) {
-	data, total, err := service.SysMenu().GetTenantMenu(ctx, &req.SysMenuListQuery)
+	data, total, err := service.SysMenu().GetTenantMenu(ctx, &req.SysMenuListParam)
 	return &v1.MenuListRes{
 		Data:  data,
 		Total: total,

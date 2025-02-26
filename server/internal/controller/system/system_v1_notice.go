@@ -12,7 +12,7 @@ import (
 
 func (c *ControllerV1) SysNoticeList(ctx context.Context, req *v1.SysNoticeListReq) (res *v1.SysNoticeListRes, err error) {
 	g.Log().Infof(ctx, "SystemControl.SysNoticeList %+v", req)
-	items, total, err := service.SysNotice().GetNoticeList(ctx, &req.SysNoticeListQuery, &req.PageInfo)
+	items, total, err := service.SysNotice().GetNoticeList(ctx, &req.SysNoticeListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

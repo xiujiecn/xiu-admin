@@ -10,7 +10,7 @@ import (
 
 type ListLogininforReq struct {
 	g.Meta `path:"/logininfor/list" method:"get" tags:"系统" summary:"登录信息列表"`
-	model.SysLogininforListQuery
+	model.SysLogininforListParam
 	request.PageInfo
 }
 

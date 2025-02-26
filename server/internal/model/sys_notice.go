@@ -15,7 +15,7 @@ type SysNotice struct {
 	Remark        string      `json:"remark"        orm:"remark"         description:"备注"`
 }
 
-type SysNoticeListQuery struct {
+type SysNoticeListParam struct {
 	NoticeTitle string   `json:"noticeTitle"   orm:"notice_title"   description:"公告标题"`
 	NoticeType  string   `json:"noticeType"    orm:"notice_type"    description:"公告类型（1通知 2公告）"`
 	CreatedBy   string   `json:"createdBy"    orm:"created_by"     description:"创建者"`

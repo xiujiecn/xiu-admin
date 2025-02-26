@@ -24,7 +24,7 @@ type LoginUserOut struct {
 	DeptId   int64  `json:"deptId"      orm:"dept_id"      description:"部门ID"`
 }
 
-type UserListQuery struct {
+type UserListParam struct {
 	TenantId    string   `json:"tenantId"    description:"租户编号"`
 	UserId      int64    `json:"userId"      description:"用户ID"`
 	DeptId      int64    `json:"deptId"      description:"部门ID"`

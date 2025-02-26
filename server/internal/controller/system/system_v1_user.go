@@ -48,7 +48,7 @@ func (c *ControllerV1) UserList(ctx context.Context, req *v1.UserListReq) (res *
 	}
 	req.TenantId = claims.BaseClaims.TenantId
 	// 获取用户列表
-	users, total, err := service.SysUser().GetUserList(ctx, req.PageInfo, req.UserListQuery)
+	users, total, err := service.SysUser().GetUserList(ctx, req.PageInfo, req.UserListParam)
 	if err != nil {
 		return nil, err
 	}
