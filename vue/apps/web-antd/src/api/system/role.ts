@@ -25,6 +25,21 @@ export interface SysRoleListData {
     remark: string;
 }
 
+export interface SysRoleViewData {
+  roleId: number; 
+  tenantId: string;
+  roleName: string;
+  roleKey: string;
+  roleSort: number;
+  dataScope: string;
+  menuCheckStrictly: number;
+  deptCheckStrictly: number;
+  status: string;
+  createdDept: number;
+  createdAt: string;
+  remark: string;
+}
+
 export interface SysRoleListRes {
   items: SysRoleListData[];
   total: number;
@@ -39,4 +54,70 @@ export interface SysRoleMini {
   roleName: string;
   dataScope: string;
 }
+export interface SysRoleViewParam {
+  roleId: number;
+}
 
+export interface SysRoleAddParam {
+  roleName: string;
+  roleKey: string;
+  roleSort: number;
+  dataScope: string;
+  menuCheckStrictly: number;
+  deptCheckStrictly: number;
+  status: string;
+  createdDept: number;
+  createdBy: number;
+  createdAt: string;
+  updatedBy: number;
+  updatedAt: string;
+  remark: string;
+}
+
+export interface SysRoleEditParam {
+  roleId: number;
+  roleName: string;
+  roleKey: string;
+  roleSort: number;
+  dataScope: string;
+  menuCheckStrictly: number;
+  deptCheckStrictly: number;
+  status: string;
+  createdDept: number;
+  createdBy: number;
+  createdAt: string;
+  updatedBy: number;
+  updatedAt: string;
+  remark: string;
+}
+
+export interface SysRoleDeleteParam {
+  roleId: number;
+  roleIds: number[];
+}
+
+export interface SysRoleAddRes {
+}
+
+export interface SysRoleEditRes {
+}
+
+export interface SysRoleDeleteRes {
+}
+
+export async function addSysRoleApi(params: SysRoleAddParam|any) {
+  return requestClient.post<SysRoleAddRes>('/system/role/add', { ...params });
+}
+
+export async function editSysRoleApi(params: SysRoleEditParam|any) {
+  return requestClient.post<SysRoleEditRes>('/system/role/edit', { ...params });
+}
+
+export async function deleteSysRoleApi(params: SysRoleDeleteParam|any) {
+  return requestClient.post<SysRoleDeleteRes>('/system/role/delete', { ...params });
+} 
+
+export async function getSysRoleViewApi(params: SysRoleViewParam|any) {
+  console.log('/Users/lixiujie/dev_test/dev_go/xiujie_iot/vue/apps/web-antd/src/api/system/role.ts', params);  
+  return requestClient.get<SysRoleViewData>('/system/role/view', { params });
+}

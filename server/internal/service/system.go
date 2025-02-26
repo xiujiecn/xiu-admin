@@ -93,6 +93,12 @@ type (
 		GetRoleMenu(ctx context.Context, id int64) (res []*entity.SysMenu, err error)
 		// 获取角色列表对应菜单
 		GetRoleListMenu(ctx context.Context, ids []int64) (res []*entity.SysRoleMenu, err error)
+		// 新增角色
+		AddRole(ctx context.Context, model *model.SysRoleAddParam) (err error)
+		// 编辑角色
+		EditRole(ctx context.Context, model *model.SysRoleEditParam) (err error)
+		// 删除角色
+		DeleteRole(ctx context.Context, model *model.SysRoleDeleteParam) (err error)
 	}
 	ISysSocial interface {
 		List(ctx context.Context, query *model.SysSocialListParam, page *request.PageInfo) (items []*model.SysSocialListModel, total int, err error)
