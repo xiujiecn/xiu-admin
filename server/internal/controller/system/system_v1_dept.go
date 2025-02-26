@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) DeptList(ctx context.Context, req *v1.DeptListReq) (res *v1.DeptListRes, err error) {
-	items, total, err := service.SysDept().GetDeptList(ctx, req.DeptListQuery)
+	items, total, err := service.SysDept().GetDeptList(ctx, req.DeptListParam)
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ func init() {
 	service.RegisterSysConfig(NewSysConfig())
 }
 
-func (s *sSysConfig) GetConfigList(ctx context.Context, query *model.SysConfigListQuery, page *request.PageInfo) (items []*model.SysConfig, total int, err error) {
+func (s *sSysConfig) GetConfigList(ctx context.Context, query *model.SysConfigListParam, page *request.PageInfo) (items []*model.SysConfig, total int, err error) {
 	// 获取当前用户租户ID
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {

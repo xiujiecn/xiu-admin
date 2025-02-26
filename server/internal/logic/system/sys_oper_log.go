@@ -19,7 +19,7 @@ func init() {
 	service.RegisterSysOperLog(NewSysOperLog())
 }
 
-func (s *sSysOperLog) GetOperLogList(ctx context.Context, query *model.SysOperLogListQuery, page *request.PageInfo) (items []*model.SysOperLogListModel, total int, err error) {
+func (s *sSysOperLog) GetOperLogList(ctx context.Context, query *model.SysOperLogListParam, page *request.PageInfo) (items []*model.SysOperLogListModel, total int, err error) {
 	// 获取当前用户租户编码
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {

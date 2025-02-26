@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) GetOperLogList(ctx context.Context, req *v1.GetOperLogListReq) (res *v1.GetOperLogListRes, err error) {
-	items, total, err := service.SysOperLog().GetOperLogList(ctx, &req.SysOperLogListQuery, &req.PageInfo)
+	items, total, err := service.SysOperLog().GetOperLogList(ctx, &req.SysOperLogListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

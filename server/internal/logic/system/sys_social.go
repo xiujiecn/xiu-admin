@@ -19,7 +19,7 @@ func init() {
 	service.RegisterSysSocial(NewSysSocial())
 }
 
-func (s *sSysSocial) List(ctx context.Context, query *model.SysSocialListQuery, page *request.PageInfo) (items []*model.SysSocialListModel, total int, err error) {
+func (s *sSysSocial) List(ctx context.Context, query *model.SysSocialListParam, page *request.PageInfo) (items []*model.SysSocialListModel, total int, err error) {
 	if query.UserId == 0 {
 		claims, err := service.SysAuth().GetCurrentUser(ctx)
 		if err != nil {

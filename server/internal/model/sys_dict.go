@@ -17,7 +17,7 @@ type SysDictType struct {
 	Remark      string      `json:"remark"      orm:"remark"       description:"备注"`
 }
 
-type SysDictTypeListQuery struct {
+type SysDictTypeListParam struct {
 	DictName  string      `json:"dictName"    orm:"dict_name"    description:"字典名称"`
 	DictType  string      `json:"dictType"    orm:"dict_type"    description:"字典类型"`
 	CreatedAt *gtime.Time `json:"createdAt"   orm:"created_at"   description:"创建时间"`
@@ -45,7 +45,7 @@ type SysDictDataList struct {
 	Items []SysDictData `json:"items" orm:"with:dict_type=dict_type"`
 }
 
-type SysDictDataListQuery struct {
+type SysDictDataListParam struct {
 	DictId   int64  `json:"dictId"`
 	DictType string `json:"dictType"`
 }

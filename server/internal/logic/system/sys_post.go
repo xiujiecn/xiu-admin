@@ -19,7 +19,7 @@ func init() {
 	service.RegisterSysPost(NewSysPost())
 }
 
-func (l *sSysPost) GetPostList(ctx context.Context, query model.SysPostListQuery, pageInfo request.PageInfo) (items []*model.SysPostListModel, total int, err error) {
+func (l *sSysPost) GetPostList(ctx context.Context, query model.SysPostListParam, pageInfo request.PageInfo) (items []*model.SysPostListModel, total int, err error) {
 
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {

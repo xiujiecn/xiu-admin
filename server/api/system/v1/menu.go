@@ -59,7 +59,7 @@ type MenuAllRes = []*RouteMenu
 
 type MenuListReq struct {
 	g.Meta `path:"/menu/list" method:"get" tags:"系统" summary:"获取菜单列表"`
-	model.SysMenuListQuery
+	model.SysMenuListParam
 }
 
 type MenuListRes struct {

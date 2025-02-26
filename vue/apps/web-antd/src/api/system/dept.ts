@@ -5,7 +5,7 @@ export interface SysDeptMini {
   deptName: string;
 }
 
-export interface SysDeptListQuery {
+export interface SysDeptListParam {
   deptName: string;
   status: string;
 }
@@ -26,12 +26,12 @@ export interface SysDeptListData {
 }
 
 export interface SysDeptListRes {
-  data: SysDeptListData[];
+  items: SysDeptListData[];
   total: number;
 }
 
 
-export async function getSysDeptListApi(params: SysDeptListQuery) {
+export async function getSysDeptListApi(params: SysDeptListParam) {
   return requestClient.get<SysDeptListRes>('/system/dept/list', { params });
 }
 

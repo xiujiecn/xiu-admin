@@ -30,7 +30,7 @@ type SysTenantListModel struct {
 	CreatedAt       *gtime.Time `json:"createdAt"       orm:"created_at"        description:"创建时间"`
 }
 
-type SysTenantListQuery struct {
+type SysTenantListParam struct {
 	TenantId        string `json:"tenantId"        orm:"tenant_id"         description:"租户编号"`
 	ContactUserName string `json:"contactUserName" orm:"contact_user_name" description:"联系人"`
 	ContactPhone    string `json:"contactPhone"    orm:"contact_phone"     description:"联系电话"`
@@ -56,6 +56,6 @@ type SysTenantPackageListModel struct {
 	UpdatedAt         *gtime.Time `json:"updatedAt"         orm:"updated_at"          description:"更新时间"`
 }
 
-type SysTenantPackageListQuery struct {
+type SysTenantPackageListParam struct {
 	PackageName string `json:"packageName"       orm:"package_name"        description:"套餐名称"`
 }

@@ -11,7 +11,7 @@ import (
 type SysNoticeListReq struct {
 	g.Meta `path:"/notice/list" method:"get" tags:"公告" summary:"公告列表"`
 	request.PageInfo
-	model.SysNoticeListQuery
+	model.SysNoticeListParam
 }
 
 type SysNoticeListRes struct {

@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) SysSocialList(ctx context.Context, req *v1.SysSocialListReq) (res *v1.SysSocialListRes, err error) {
-	items, total, err := service.SysSocial().List(ctx, &req.SysSocialListQuery, &req.PageInfo)
+	items, total, err := service.SysSocial().List(ctx, &req.SysSocialListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,6 @@
 import { requestClient } from '#/api/request';
 
-export interface SysOssListQuery {
+export interface SysOssListParam {
   page: number;
   pageSize: number;
   fileName: string;
@@ -26,6 +26,6 @@ export interface SysOssListRes {
   total: number;
 }
 
-export async function getSysOssListApi(params: SysOssListQuery) {
+export async function getSysOssListApi(params: SysOssListParam) {
   return requestClient.get<SysOssListRes>('/system/oss/list', { params });
 }

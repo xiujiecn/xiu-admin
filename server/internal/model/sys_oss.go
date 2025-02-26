@@ -23,7 +23,7 @@ type SysOssListModel struct {
 	Service      string      `json:"service"      orm:"service"       description:"服务商"`
 }
 
-type SysOssListQuery struct {
+type SysOssListParam struct {
 	FileName     string   `json:"fileName"     orm:"file_name"     description:"文件名"`
 	OriginalName string   `json:"originalName" orm:"original_name" description:"原名"`
 	FileSuffix   string   `json:"fileSuffix"   orm:"file_suffix"   description:"文件后缀名"`

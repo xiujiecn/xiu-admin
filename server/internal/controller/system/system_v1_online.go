@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) SysUserOnlineList(ctx context.Context, req *v1.SysUserOnlineListReq) (res *v1.SysUserOnlineListRes, err error) {
-	items, total, err := service.SysUserOnline().List(ctx, &req.SysUserOnlineListQuery, &req.PageInfo)
+	items, total, err := service.SysUserOnline().List(ctx, &req.SysUserOnlineListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

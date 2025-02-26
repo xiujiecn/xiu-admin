@@ -21,7 +21,7 @@ func init() {
 	service.RegisterSysNotice(NewSysNotice())
 }
 
-func (s *sSysNotice) GetNoticeList(ctx context.Context, query *model.SysNoticeListQuery, page *request.PageInfo) (items []*model.SysNotice, total int, err error) {
+func (s *sSysNotice) GetNoticeList(ctx context.Context, query *model.SysNoticeListParam, page *request.PageInfo) (items []*model.SysNotice, total int, err error) {
 	// 获取当前用户租户编码
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {

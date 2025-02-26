@@ -175,7 +175,7 @@ func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUs
 }
 
 // 获取用户列表
-func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query model.UserListQuery) (items []*model.SysUserListModel, total int, err error) {
+func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query model.UserListParam) (items []*model.SysUserListModel, total int, err error) {
 	tenantId := query.TenantId
 	if tenantId == "" {
 		claims, err := service.SysAuth().GetCurrentUser(ctx)

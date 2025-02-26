@@ -2,7 +2,7 @@ import { requestClient } from '#/api/request';
 
 import type { SysDeptMini } from '#/api/system/dept';
 
-export interface SysPostListQuery {
+export interface SysPostListParam {
   page?: number;
   pageSize?: number;
   postCode?: string;
@@ -32,7 +32,7 @@ export interface SysPostListRes {
   pageSize: number;
 }
 
-export async function getSysPostListApi(params: SysPostListQuery) {
+export async function getSysPostListApi(params: SysPostListParam) {
   return requestClient.get<SysPostListRes>('/system/post/list', { params });
 }
 

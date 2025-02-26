@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) RoleList(ctx context.Context, req *v1.RoleListReq) (res *v1.RoleListRes, err error) {
-	data, total, err := service.SysRole().GetRoleList(ctx, &req.SysRoleListQuery, &req.PageInfo)
+	data, total, err := service.SysRole().GetRoleList(ctx, &req.SysRoleListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

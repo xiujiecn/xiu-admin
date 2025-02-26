@@ -11,7 +11,7 @@ import (
 type PostListReq struct {
 	g.Meta `path:"/post/list" method:"get" tags:"系统" summary:"获取岗位列表"`
 	request.PageInfo
-	model.SysPostListQuery
+	model.SysPostListParam
 }
 
 type PostListRes struct {

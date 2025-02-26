@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) PostList(ctx context.Context, req *v1.PostListReq) (res *v1.PostListRes, err error) {
-	items, total, err := service.SysPost().GetPostList(ctx, req.SysPostListQuery, req.PageInfo)
+	items, total, err := service.SysPost().GetPostList(ctx, req.SysPostListParam, req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

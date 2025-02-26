@@ -39,7 +39,7 @@ type SysLogininforViewModel struct {
 	entity.SysLogininfor
 }
 
-type SysLogininforListQuery struct {
+type SysLogininforListParam struct {
 	Ipaddr    string   `json:"ipaddr"        description:"登录IP地址"`
 	UserName  string   `json:"userName"      description:"用户账号"`
 	Status    string   `json:"status"        description:"登录状态（0成功 1失败）"`

@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) SysClientList(ctx context.Context, req *v1.SysClientListReq) (res *v1.SysClientListRes, err error) {
-	items, total, err := service.SysClient().List(ctx, &req.SysClientListQuery, &req.PageInfo)
+	items, total, err := service.SysClient().List(ctx, &req.SysClientListParam, &req.PageInfo)
 	if err != nil {
 		return nil, err
 	}

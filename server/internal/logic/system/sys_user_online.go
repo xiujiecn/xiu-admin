@@ -26,7 +26,7 @@ func (s *sSysUserOnline) Add(ctx context.Context, userOnline *model.SysUserOnlin
 	return
 }
 
-func (s *sSysUserOnline) List(ctx context.Context, query *model.SysUserOnlineListQuery, page *request.PageInfo) (items []*model.SysUserOnlineListModel, total int, err error) {
+func (s *sSysUserOnline) List(ctx context.Context, query *model.SysUserOnlineListParam, page *request.PageInfo) (items []*model.SysUserOnlineListModel, total int, err error) {
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
 		return nil, 0, err

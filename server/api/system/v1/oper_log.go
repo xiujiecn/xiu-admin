@@ -10,7 +10,7 @@ import (
 
 type GetOperLogListReq struct {
 	g.Meta `path:"/oper-log/list" method:"get" tags:"操作日志" summary:"操作日志列表"`
-	model.SysOperLogListQuery
+	model.SysOperLogListParam
 	request.PageInfo
 }
 

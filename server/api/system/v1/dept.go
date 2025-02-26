@@ -11,7 +11,7 @@ import (
 type DeptListReq struct {
 	g.Meta `path:"/dept/list" method:"get" tags:"系统" summary:"获取部门列表"`
 	request.PageInfo
-	model.DeptListQuery
+	model.DeptListParam
 }
 
 type DeptListRes struct {

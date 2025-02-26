@@ -20,7 +20,7 @@ func init() {
 	service.RegisterSysLogininfor(NewSysLogininfor())
 }
 
-func (s *sSysLogininfor) ListLogininfor(ctx context.Context, query *model.SysLogininforListQuery, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error) {
+func (s *sSysLogininfor) ListLogininfor(ctx context.Context, query *model.SysLogininforListParam, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error) {
 	// 获取当前用户租户编码
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {

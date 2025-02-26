@@ -11,7 +11,7 @@ import (
 type SysTenantListReq struct {
 	g.Meta `path:"/tenant/list" method:"get" tags:"租户" summary:"租户列表"`
 	request.PageInfo
-	model.SysTenantListQuery
+	model.SysTenantListParam
 }
 
 type SysTenantListRes struct {
@@ -22,7 +22,7 @@ type SysTenantListRes struct {
 type SysTenantPackageListReq struct {
 	g.Meta `path:"/tenant/package/list" method:"get" tags:"租户" summary:"租户套餐列表"`
 	request.PageInfo
-	model.SysTenantPackageListQuery
+	model.SysTenantPackageListParam
 }
 
 type SysTenantPackageListRes struct {

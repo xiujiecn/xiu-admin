@@ -20,7 +20,7 @@ func init() {
 	service.RegisterSysDict(NewSysDict())
 }
 
-func (s *sSysDict) GetDictTypeList(ctx context.Context, req *model.SysDictTypeListQuery, pageInfo *request.PageInfo) (items []model.SysDictType, total int, err error) {
+func (s *sSysDict) GetDictTypeList(ctx context.Context, req *model.SysDictTypeListParam, pageInfo *request.PageInfo) (items []model.SysDictType, total int, err error) {
 	// 获取当前用户租户编码
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
@@ -45,7 +45,7 @@ func (s *sSysDict) GetDictTypeList(ctx context.Context, req *model.SysDictTypeLi
 	return
 }
 
-func (s *sSysDict) GetDictDataList(ctx context.Context, query *model.SysDictDataListQuery, pageInfo *request.PageInfo) (items []model.SysDictData, total int, err error) {
+func (s *sSysDict) GetDictDataList(ctx context.Context, query *model.SysDictDataListParam, pageInfo *request.PageInfo) (items []model.SysDictData, total int, err error) {
 	// 获取当前用户租户编码
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
