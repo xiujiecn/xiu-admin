@@ -1,5 +1,16 @@
+
+
 import { baseRequestClient, requestClient } from '#/api/request';
-import type { GrantType } from '@vben/common-ui';
+
+/**
+ * 登录类型
+ * password 密码
+ * sms 短信
+ * social 第三方oauth
+ * email 邮箱
+ * xcx 小程序
+ */
+type GrantType = 'email' | 'password' | 'sms' | 'social' | 'xcx';
 
 export namespace AuthApi {
   /** 登录接口参数 */
@@ -82,7 +93,7 @@ export function authBinding(source: string, tenantId: string) {
  * @param id id
  */
 export function authUnbinding(id: string) {
-  return requestClient.deleteWithMsg<void>(`/auth/unlock/${id}`);
+  return requestClient.delete<void>(`/auth/unlock/${id}`);
 }
 
 /**

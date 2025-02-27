@@ -67,14 +67,6 @@ interface AuthenticationProps {
   submitButtonText?: string;
 }
 
-/**
- * 登录类型
- * password 密码
- * sms 短信
- * social 第三方oauth
- * email 邮箱
- * xcx 小程序
- */
-type GrantType = 'email' | 'password' | 'sms' | 'social' | 'xcx';
 
-export type { AuthenticationProps, GrantType };
+
+export type { AuthenticationProps };

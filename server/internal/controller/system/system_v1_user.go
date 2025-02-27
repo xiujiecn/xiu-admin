@@ -7,8 +7,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/util/gconv"
 
 	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/model/response"
 	"xiujieadmin/internal/service"
 )
@@ -48,7 +51,7 @@ func (c *ControllerV1) UserList(ctx context.Context, req *v1.UserListReq) (res *
 	}
 	req.TenantId = claims.BaseClaims.TenantId
 	// 获取用户列表
-	users, total, err := service.SysUser().GetUserList(ctx, req.PageInfo, req.UserListParam)
+	users, total, err := service.SysUser().List(ctx, &req.PageInfo, &req.UserListParam)
 	if err != nil {
 		return nil, err
 	}
@@ -146,4 +149,25 @@ func (c *ControllerV1) ResetPassword(ctx context.Context, req *v1.ResetPasswordR
 		return nil, err
 	}
 	return &v1.ResetPasswordRes{}, nil
+}
+func (c *ControllerV1) GetUserListByDeptId(ctx context.Context, req *v1.GetUserListByDeptIdReq) (res *v1.GetUserListByDeptIdRes, err error) {
+	users, total, err := service.SysUser().List(ctx, &request.PageInfo{
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}, &model.UserListParam{
+		DeptId: req.DeptId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	miniUsers := make([]*model.SysUserMiniModel, 0)
+	gconv.Structs(users, &miniUsers)
+	return &v1.GetUserListByDeptIdRes{
+		Items: miniUsers,
+		PageResult: response.PageResult{
+			Page:     req.Page,
+			PageSize: req.PageSize,
+			Total:    total,
+		},
+	}, nil
 }

@@ -2,19 +2,19 @@
 import { h } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { SysDeptListData } from '#/api/system/dept';
 
-import { Page } from '@vben/common-ui';
-
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
-import dayjs from 'dayjs';
+import { Page, useVbenDrawer } from '@vben/common-ui';
+import { getVxePopupContainer } from '@vben/utils';
+import { Button, message, Popconfirm,Tag  } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysDeptListApi } from '#/api'; 
+import { getSysDeptListApi, deleteSysDeptApi } from '#/api/system/dept'; 
+
+import deptDrawer from './dept-drawer.vue';
 
 import {
   MdiPlus,
-  MdiEdit,
-  MdiDelete,
 } from '@vben/icons';
 
 interface RowType {
@@ -28,13 +28,13 @@ interface RowType {
 
 const formOptions: VbenFormProps = {
   // 默认展开
-  collapsed: false,
+  collapsed: true,
   fieldMappingTime: [['date', ['start', 'end']]],
   schema: [
     {
       component: 'Input',
       fieldName: 'deptName',
-      label: '机构名称',
+      label: '部门名称',
     },
     {
       component: 'Select',
@@ -67,10 +67,8 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   align: 'center',
   columns: [
-    { field: 'deptName', title: '机构名称' , treeNode: true, minWidth: 300,  align: 'left', },
-    { field: 'deptCategory', title: '机构列表编码' },
-    { field: 'leader', title: '负责人' },
-    { field: 'phone', title: '联系电话' },
+    { field: 'deptName', title: '部门名称' , treeNode: true, minWidth: 240,  align: 'left', },
+    { field: 'deptCategory', title: '部门编码', minWidth: 100 },
     {
       field: 'status',
       slots: { default: 'status' },
@@ -90,12 +88,13 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
         return await getSysDeptListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,
         });
+      },
+      querySuccess: () => {
       },
     },
   },
@@ -126,27 +125,63 @@ const expandAll = () => {
 const collapseAll = () => {
   gridApi.grid?.setAllTreeExpand(false);
 };
+
+
+
+const [DeptDrawer, deptDrawerApi] = useVbenDrawer({
+  connectedComponent: deptDrawer,
+});
+
+
+function handleView(row: SysDeptListData) {
+  const { deptId } = row;
+  deptDrawerApi.setData({id: deptId, update:false,view:true});
+  deptDrawerApi.open();
+}
+
+function handleAdd() {
+  deptDrawerApi.setData({update:false, view:false});
+  deptDrawerApi.open();
+}
+
+function handleEdit(row: SysDeptListData) {
+  deptDrawerApi.setData({ id: row.deptId, update:true, view:false });
+  deptDrawerApi.open();
+}
+
+async function handleDelete(row: SysDeptListData) {
+  await deleteSysDeptApi({ deptId: row.deptId });
+  message.success("删除成功");
+  await handleRefresh();
+}
+async function handleRefresh() {
+  await gridApi.query();
+  expandAll();
+}
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
+    <Grid :table-title="'部门管理'">
+      <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
         <Button class="mr-2 flex items-center"  @click="expandAll">展开</Button>
         <Button class="mr-2 flex items-center"  @click="collapseAll">折叠</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '停用' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.deptId != 1" danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-if="row.deptId != 1" >
+            <Button class="mr-2 border-none p-0" :block="false" type="link" danger >删除</Button>
+          </Popconfirm>
         </div>
       </template>
     </Grid>
+    <DeptDrawer @reload="handleRefresh" />
   </Page>
 </template>

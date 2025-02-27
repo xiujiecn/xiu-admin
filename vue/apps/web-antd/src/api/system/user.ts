@@ -204,3 +204,23 @@ export interface SysUserListParam {
     return requestClient.post('/system/user/resetPassword', { ...params });
   }
   
+  export interface SysUserListByDeptIdParam {
+    deptId: number;
+  }
+  export interface SysUserMini {
+    userId: number;
+    userName: string;
+    nickName: string;
+    avatar: string;
+    tenantId: string;
+    deptId: number;
+  }
+
+  export interface SysUserMiniListRes {
+    items: SysUserMini[];
+    total: number;
+  }
+
+  export async function getSysUserListByDeptIdApi(params: SysUserListByDeptIdParam) {
+    return requestClient.get<SysUserMiniListRes>('/system/user/listByDeptId', { params });
+  }

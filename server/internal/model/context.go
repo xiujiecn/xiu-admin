@@ -8,13 +8,12 @@ type Context struct {
 	Data g.Map     // 自定KV变量，业务模块根据需要设置，不固定
 }
 
+type Role struct {
+	RoleId    int64  // 角色ID
+	DataScope string // 数据范围
+}
+
 // 通用身份模型
 type Identity struct {
-	UUID         string
-	ID           int64   // 用户ID
-	Username     string  // 用户名
-	NickName     string  // 昵称
-	DeptId       int64   // 部门ID
-	TenantId     string  // 租户编号
-	AuthorityIds []int64 // 角色ID
+	BaseClaims
 }

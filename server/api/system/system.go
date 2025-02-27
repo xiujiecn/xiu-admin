@@ -20,6 +20,10 @@ type ISystemV1 interface {
 	GetConfigList(ctx context.Context, req *v1.GetConfigListReq) (res *v1.GetConfigListRes, err error)
 	DeptList(ctx context.Context, req *v1.DeptListReq) (res *v1.DeptListRes, err error)
 	DeptTree(ctx context.Context, req *v1.DeptTreeReq) (res *v1.DeptTreeRes, err error)
+	DeptAdd(ctx context.Context, req *v1.DeptAddReq) (res *v1.DeptAddRes, err error)
+	DeptEdit(ctx context.Context, req *v1.DeptEditReq) (res *v1.DeptEditRes, err error)
+	DeptDelete(ctx context.Context, req *v1.DeptDeleteReq) (res *v1.DeptDeleteRes, err error)
+	DeptView(ctx context.Context, req *v1.DeptViewReq) (res *v1.DeptViewRes, err error)
 	SysDictTypeList(ctx context.Context, req *v1.SysDictTypeListReq) (res *v1.SysDictTypeListRes, err error)
 	SysDictDataList(ctx context.Context, req *v1.SysDictDataListReq) (res *v1.SysDictDataListRes, err error)
 	ListLogininfor(ctx context.Context, req *v1.ListLogininforReq) (res *v1.ListLogininforRes, err error)
@@ -55,4 +59,5 @@ type ISystemV1 interface {
 	DeleteUser(ctx context.Context, req *v1.DeleteUserReq) (res *v1.DeleteUserRes, err error)
 	GetUser(ctx context.Context, req *v1.GetUserReq) (res *v1.GetUserRes, err error)
 	ResetPassword(ctx context.Context, req *v1.ResetPasswordReq) (res *v1.ResetPasswordRes, err error)
+	GetUserListByDeptId(ctx context.Context, req *v1.GetUserListByDeptIdReq) (res *v1.GetUserListByDeptIdRes, err error)
 }

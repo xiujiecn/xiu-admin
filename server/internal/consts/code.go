@@ -25,6 +25,8 @@ var (
 	CodePhoneExists = gcode.New(10010, "手机号已存在", nil)
 	// 邮箱已存在
 	CodeEmailExists = gcode.New(10011, "邮箱已存在", nil)
-	// 用户未登录
-	CodeUserNotLogin = gcode.New(61, "用户未登录", nil)
+	// 登录已过期
+	CodeLoginExpired = gcode.New(10012, "登录已过期", nil)
+	// 部门下有子部门，不能删除
+	CodeDeptHasSub = gcode.New(10013, "部门下有子部门，不能删除", nil)
 )

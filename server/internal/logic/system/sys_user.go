@@ -5,12 +5,14 @@ import (
 	"errors"
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/entity"
 	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
 	"xiujieadmin/utility"
 
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -29,10 +31,20 @@ func init() {
 	service.RegisterSysUser(NewSysUser())
 }
 
+func (l *sSysUser) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) > 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: true,
+			FilterAuth:   true,
+		})
+	}
+	return handler.Model(dao.SysUser.Ctx(ctx), option...)
+}
+
 // 根据用户名获取用户信息
 func (l *sSysUser) GetUserByUsername(ctx context.Context, username string) (user *entity.SysUser, err error) {
 	var data *entity.SysUser
-	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserName, username).Scan(&data)
+	err = l.Model(ctx).Where(dao.SysUser.Columns().UserName, username).Scan(&data)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, gerror.NewCode(consts.CodeUserNotFound, "账号不存在")
@@ -59,7 +71,7 @@ func (l *sSysUser) GetUserByUsername(ctx context.Context, username string) (user
 
 // 根据邮箱获取用户信息
 func (l *sSysUser) GetUserByEmail(ctx context.Context, email string) (user *entity.SysUser, err error) {
-	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().Email, email).Scan(&user)
+	err = l.Model(ctx).Where(dao.SysUser.Columns().Email, email).Scan(&user)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, gerror.NewCode(consts.CodeUserNotFound, "账号不存在")
@@ -86,7 +98,7 @@ func (l *sSysUser) GetUserByEmail(ctx context.Context, email string) (user *enti
 
 // 根据手机号获取用户信息
 func (l *sSysUser) GetUserByPhone(ctx context.Context, phone string) (user *entity.SysUser, err error) {
-	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().Phonenumber, phone).Scan(&user)
+	err = l.Model(ctx).Where(dao.SysUser.Columns().Phonenumber, phone).Scan(&user)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, gerror.NewCode(consts.CodeUserNotFound, "账号不存在")
@@ -127,8 +139,10 @@ func (l *sSysUser) GetUserByUsernameAndPassword(ctx context.Context, username st
 
 // 根据用户ID获取用户信息
 func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUserViewModel, err error) {
-	err = dao.SysUser.Ctx(ctx).WithAll().Where(dao.SysUser.Columns().UserId, id).Scan(&user)
-	// 获取用户角色
+	err = l.Model(ctx).WithAll().Where(dao.SysUser.Columns().UserId, id).Scan(&user)
+	if err != nil {
+		return nil, err
+	}
 	// 获取用户角色
 	userRoles := make([]*entity.SysUserRole, 0)
 	err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, id).Scan(&userRoles)
@@ -175,7 +189,7 @@ func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUs
 }
 
 // 获取用户列表
-func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query model.UserListParam) (items []*model.SysUserListModel, total int, err error) {
+func (l *sSysUser) List(ctx context.Context, page *request.PageInfo, query *model.UserListParam) (items []*model.SysUserListModel, total int, err error) {
 	tenantId := query.TenantId
 	if tenantId == "" {
 		claims, err := service.SysAuth().GetCurrentUser(ctx)
@@ -193,10 +207,10 @@ func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query
 		}
 		deptIds = append(deptIds, subDeptIds...)
 	}
-	g.Log().Infof(ctx, "sSysUser.GetUserList 获取机构列表: deptIds:%+v", deptIds)
+	g.Log().Infof(ctx, "sSysUser.List 获取部门列表: deptIds:%+v", deptIds)
 	// 实现分页查询逻辑
 	var users []*model.SysUserListModel
-	m := dao.SysUser.Ctx(ctx).Page(page.Page, page.PageSize)
+	m := l.Model(ctx)
 	if query.TenantId != "" {
 		m = m.Where(dao.SysUser.Columns().TenantId, query.TenantId)
 	}
@@ -229,7 +243,7 @@ func (l *sSysUser) GetUserList(ctx context.Context, page request.PageInfo, query
 	if err != nil {
 		return nil, 0, err
 	}
-	err = m.WithAll().Scan(&users)
+	err = m.WithAll().Page(page.Page, page.PageSize).Scan(&users)
 	if err != nil {
 		return nil, 0, err
 	}
