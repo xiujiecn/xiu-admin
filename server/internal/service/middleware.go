@@ -6,6 +6,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
@@ -19,6 +21,8 @@ type (
 		CORS(r *ghttp.Request)
 		// Auth 认证处理
 		Auth(r *ghttp.Request)
+		// IsExceptLogin 判断是否需要验证登录
+		IsExceptLogin(ctx context.Context, path string) bool
 	}
 )
 

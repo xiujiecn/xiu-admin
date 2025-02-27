@@ -24,6 +24,7 @@ type SysRoleListParam struct {
 	Status    string   `json:"status" orm:"status"`
 	RoleKey   string   `json:"roleKey"                  description:"角色权限字符串"`
 	CreatedAt []string `json:"createdAt"                description:"创建时间"`
+	RoleIds   []int64  `json:"roleIds"                  description:"角色ID"`
 }
 
 type SysRoleMiniModel struct {

@@ -8,9 +8,12 @@ package service
 import (
 	"context"
 	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/entity"
 	"xiujieadmin/internal/model/request"
+
+	"github.com/gogf/gf/v2/database/gdb"
 )
 
 type (
@@ -38,15 +41,22 @@ type (
 		GetConfigList(ctx context.Context, query *model.SysConfigListParam, page *request.PageInfo) (items []*model.SysConfig, total int, err error)
 	}
 	ISysDept interface {
-		GetDeptList(ctx context.Context, query model.DeptListParam) (items []*model.SysDept, total int, err error)
-		GetDeptById(ctx context.Context, id int64) (dept *model.SysDept, err error)
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		GetDeptList(ctx context.Context, query model.SysDeptListParam) (items []*model.SysDeptListModel, total int, err error)
+		GetDeptById(ctx context.Context, id int64) (dept *model.SysDeptViewModel, err error)
 		// 构建树结构
-		DeptTree(ctx context.Context, parentDept *model.SysDeptTreeModel, deptList []*model.SysDept, ancestors string) (data []*model.SysDeptTreeModel, err error)
+		DeptTree(ctx context.Context, parentDept *model.SysDeptTreeModel, deptList []*model.SysDeptListModel, ancestors string) (data []*model.SysDeptTreeModel, err error)
 		GetDeptTree(ctx context.Context) (items []*model.SysDeptTreeModel, err error)
 		// 递归构建结构
-		RecursionDeptIds(ctx context.Context, parentId int64, deptList []*model.SysDept, data *[]int64) (err error)
+		RecursionDeptIds(ctx context.Context, parentId int64, deptList []*model.SysDeptListModel, data *[]int64) (err error)
 		// 根据父部门id获取部门列表
 		GetDeptIdsByParentId(ctx context.Context, parentId int64) (ids []int64, err error)
+		AddDept(ctx context.Context, dept *model.SysDeptAddModel) (deptId int64, err error)
+		EditDept(ctx context.Context, dept *model.SysDeptEditModel) (deptId int64, err error)
+		DeleteDept(ctx context.Context, dept *model.SysDeptDeleteModel) (deptId int64, err error)
+		// 刷新部门 ancestors
+		RefreshDeptAncestors(ctx context.Context) (err error)
+		GetParentIDAncestors(ctx context.Context, depts []*model.SysDeptViewModel, printId int64, ancestors *string) (err error)
 	}
 	ISysDict interface {
 		GetDictTypeList(ctx context.Context, req *model.SysDictTypeListParam, pageInfo *request.PageInfo) (items []model.SysDictType, total int, err error)
@@ -120,6 +130,7 @@ type (
 		TenantPackageList(ctx context.Context, query *model.SysTenantPackageListParam, page *request.PageInfo) (data []*model.SysTenantPackageListModel, total int, err error)
 	}
 	ISysUser interface {
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		// 根据用户名获取用户信息
 		GetUserByUsername(ctx context.Context, username string) (user *entity.SysUser, err error)
 		// 根据邮箱获取用户信息
@@ -131,7 +142,7 @@ type (
 		// 根据用户ID获取用户信息
 		GetUserById(ctx context.Context, id int64) (user *model.SysUserViewModel, err error)
 		// 获取用户列表
-		GetUserList(ctx context.Context, page request.PageInfo, query model.UserListParam) (items []*model.SysUserListModel, total int, err error)
+		List(ctx context.Context, page *request.PageInfo, query *model.UserListParam) (items []*model.SysUserListModel, total int, err error)
 		// 新增用户
 		AddUser(ctx context.Context, req *model.SysUserAddModel) (data *model.SysUserViewModel, err error)
 		Profile(ctx context.Context) (user *model.UserProfileModel, err error)

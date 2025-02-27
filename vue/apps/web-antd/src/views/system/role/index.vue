@@ -5,12 +5,10 @@ import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { SysRoleListData } from '#/api/system/role';
 import { Page } from '@vben/common-ui';
 
-import { Button, message, Switch,Tag, Modal } from 'ant-design-vue';
-import dayjs from 'dayjs';
-
+import { Button, message, Switch,Tag, Modal, Popconfirm } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysRoleListApi, deleteSysRoleApi } from '#/api/system/role'; 
-
+import { getVxePopupContainer } from '@vben/utils';
 import { useVbenDrawer,useVbenModal } from '@vben/common-ui';
 
 import roleDrawer from './role-drawer.vue';
@@ -220,7 +218,7 @@ function handleDataScope(row: SysRoleListData) {
 
 <template>
   <Page auto-content-height>
-    <Grid title="角色管理">
+    <Grid table-title="角色管理">
       <template #toolbar-tools>
         
         <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
@@ -240,7 +238,9 @@ function handleDataScope(row: SysRoleListData) {
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" @click="handleEdit(row)">修改</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" @click="handleDataScope(row)">数据权限</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" danger @click="handleDelete(row)">删除</Button>
+          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-if="row.roleId != 1" >
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+          </Popconfirm>
         </div>
       </template>
     </Grid>

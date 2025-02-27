@@ -8,9 +8,9 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/util/gconv"
 
 	"xiujieadmin/internal/consts"
+	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/packed/response"
 	"xiujieadmin/internal/service"
@@ -56,19 +56,15 @@ func (s *sMiddleware) Ctx(r *ghttp.Request) {
 	// 初始化登录用户信息
 	data, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
-		// 执行下一步请求逻辑
 		r.Middleware.Next()
 		return
 	}
 	if data != nil {
 		contextModel := new(model.Context)
-		err = gconv.Struct(data.BaseClaims, &contextModel.User)
-		if err != nil {
-			g.Log().Error(ctx, "sMiddleware.Ctx gconv.Struct ", err)
-			r.Middleware.Next()
-			return
+		contextModel.User = &model.Identity{
+			BaseClaims: data.BaseClaims,
 		}
-		service.Context().Init(r, contextModel)
+		contexts.Init(r, contextModel)
 	}
 	r.Middleware.Next()
 }
@@ -98,13 +94,13 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 		return
 	}
 
-	userId := service.Context().GetUserId(ctx)
+	userId := contexts.GetUserId(ctx)
 	if userId == 0 {
 		g.Log().Error(ctx, "sMiddleware.Auth userId is 0", "path", path)
-		response.JsonExit(r, gcode.CodeNotAuthorized.Code(), consts.CodeUserNotLogin.Message())
+		response.JsonExit(r, gcode.CodeNotAuthorized.Code(), consts.CodeLoginExpired.Message())
 		return
 	}
-	if !service.Context().IsSuperAdmin(r.GetCtx()) {
+	if !contexts.IsSuperAdmin(r.GetCtx()) {
 		r.Middleware.Next()
 		return
 	}

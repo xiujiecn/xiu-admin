@@ -43,6 +43,9 @@ func (s *sSysRole) GetRoleList(ctx context.Context, model *model.SysRoleListPara
 		start, end := gtime.NewFromStr(model.CreatedAt[0]), gtime.NewFromStr(model.CreatedAt[1])
 		db = db.WhereBetween(dao.SysRole.Columns().CreatedAt, start, end.EndOfDay())
 	}
+	if len(model.RoleIds) > 0 {
+		db = db.WhereIn(dao.SysRole.Columns().RoleId, model.RoleIds)
+	}
 	total, err = db.Count()
 	if err != nil {
 		return nil, 0, err

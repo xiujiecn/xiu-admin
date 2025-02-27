@@ -5,7 +5,6 @@
 package logic
 
 import (
-	_ "xiujieadmin/internal/logic/context"
 	_ "xiujieadmin/internal/logic/middleware"
 	_ "xiujieadmin/internal/logic/system"
 )

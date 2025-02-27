@@ -7,6 +7,7 @@ import (
 	"time"
 	"xiujieadmin/internal/library/bcache"
 	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
 	"xiujieadmin/utility"
 
@@ -105,16 +106,33 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 	if err != nil {
 		return nil, "", err
 	}
+	rl, _, err := service.SysRole().GetRoleList(ctx, &model.SysRoleListParam{
+		RoleIds: authorityIds,
+	}, &request.PageInfo{
+		Page:     1,
+		PageSize: 5000,
+	})
+	if err != nil {
+		return nil, "", err
+	}
+	roles := make([]model.Role, 0)
+	for _, r := range rl {
+		roles = append(roles, model.Role{
+			RoleId:    r.RoleId,
+			DataScope: r.DataScope,
+		})
+	}
+
 	claims = &model.CustomClaims{
 		BaseClaims: model.BaseClaims{
-			UUID:         strings.ReplaceAll(uuid.New().String(), "-", ""),
-			ID:           user.ID,
-			Username:     user.Username,
-			NickName:     user.NickName,
-			TenantId:     user.TenantId,
-			DeptId:       user.DeptId,
-			AuthorityIds: authorityIds,
-			LoginAt:      time.Now().Unix(),
+			UUID:     strings.ReplaceAll(uuid.New().String(), "-", ""),
+			ID:       user.ID,
+			Username: user.Username,
+			NickName: user.NickName,
+			TenantId: user.TenantId,
+			DeptId:   user.DeptId,
+			Roles:    roles,
+			LoginAt:  time.Now().Unix(),
 		},
 		BufferTime: int64(bt / time.Second),
 		RegisteredClaims: jwt.RegisteredClaims{

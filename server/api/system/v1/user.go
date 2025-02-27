@@ -104,3 +104,14 @@ type ResetPasswordReq struct {
 
 type ResetPasswordRes struct {
 }
+
+type GetUserListByDeptIdReq struct {
+	g.Meta `path:"/user/listByDeptId" method:"get" tags:"系统" summary:"获取部门用户列表"`
+	DeptId int64 `json:"deptId" dc:"部门ID"`
+	request.PageInfo
+}
+
+type GetUserListByDeptIdRes struct {
+	response.PageResult
+	Items []*model.SysUserMiniModel `json:"items" dc:"用户列表"`
+}
