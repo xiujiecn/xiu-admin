@@ -2,12 +2,14 @@ package middleware
 
 import (
 	"context"
+	"net/http"
 	"slices"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/util/gmeta"
 
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/library/contexts"
@@ -27,10 +29,30 @@ func init() {
 	service.RegisterMiddleware(New())
 }
 
+func getContentType(r *ghttp.Request) (contentType string) {
+	contentType = r.Response.Header().Get("Content-Type")
+	if contentType != "" {
+		return
+	}
+
+	mime := gmeta.Get(r.GetHandlerResponse(), "mime").String()
+	if mime == "" {
+		contentType = consts.HTTPContentTypeJson
+	} else {
+		contentType = mime
+	}
+	return
+}
+
 // 响应处理中间件
 func (m *sMiddleware) ResponseHandler(r *ghttp.Request) {
 	r.Middleware.Next()
 	if r.Response.BufferLength() > 0 {
+		return
+	}
+	contentType := getContentType(r)
+	if contentType == consts.HTTPContentTypeExcel {
+		r.Response.Status = http.StatusOK
 		return
 	}
 	err := r.GetError()

@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerV1) RoleList(ctx context.Context, req *v1.RoleListReq) (res *v1.RoleListRes, err error) {
-	data, total, err := service.SysRole().GetRoleList(ctx, &req.SysRoleListParam, &req.PageInfo)
+	data, total, err := service.SysRole().List(ctx, &req.SysRoleListParam)
 	if err != nil {
 		return nil, err
 	}
@@ -23,30 +23,36 @@ func (c *ControllerV1) RoleList(ctx context.Context, req *v1.RoleListReq) (res *
 	}, nil
 }
 func (c *ControllerV1) RoleAdd(ctx context.Context, req *v1.RoleAddReq) (res *v1.RoleAddRes, err error) {
-	err = service.SysRole().AddRole(ctx, &req.SysRoleAddParam)
+	role, err := service.SysRole().Add(ctx, &req.SysRoleAddParam)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.RoleAddRes{}, nil
+	return &v1.RoleAddRes{
+		SysRoleAddModel: *role,
+	}, nil
 }
 func (c *ControllerV1) RoleEdit(ctx context.Context, req *v1.RoleEditReq) (res *v1.RoleEditRes, err error) {
-	err = service.SysRole().EditRole(ctx, &req.SysRoleEditParam)
+	role, err := service.SysRole().Edit(ctx, &req.SysRoleEditParam)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.RoleEditRes{}, nil
+	return &v1.RoleEditRes{
+		SysRoleEditModel: *role,
+	}, nil
 }
 
 func (c *ControllerV1) RoleDelete(ctx context.Context, req *v1.RoleDeleteReq) (res *v1.RoleDeleteRes, err error) {
-	err = service.SysRole().DeleteRole(ctx, &req.SysRoleDeleteParam)
+	role, err := service.SysRole().Delete(ctx, &req.SysRoleDeleteParam)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.RoleDeleteRes{}, nil
+	return &v1.RoleDeleteRes{
+		SysRoleDeleteModel: *role,
+	}, nil
 }
 
 func (c *ControllerV1) RoleView(ctx context.Context, req *v1.RoleViewReq) (res *v1.RoleViewRes, err error) {
-	record, err := service.SysRole().GetRoleView(ctx, req.SysRoleViewParam.RoleId)
+	record, err := service.SysRole().View(ctx, &req.SysRoleViewParam)
 	if err != nil {
 		return nil, err
 	}

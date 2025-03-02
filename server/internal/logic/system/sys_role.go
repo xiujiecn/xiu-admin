@@ -3,13 +3,15 @@ package system
 import (
 	"context"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/do"
 	"xiujieadmin/internal/model/entity"
-	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
 	"xiujieadmin/utility"
 
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -26,46 +28,48 @@ func init() {
 	service.RegisterSysRole(NewSysRole())
 }
 
+func (l *sSysRole) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) > 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: true,
+			FilterAuth:   true,
+		})
+	}
+	return handler.Model(dao.SysRole.Ctx(ctx), option...)
+}
+
 // 获取租户下角色列表
-func (s *sSysRole) GetRoleList(ctx context.Context, model *model.SysRoleListParam, pageInfo *request.PageInfo) (res []*model.SysRoleListModel, total int, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, 0, err
+func (s *sSysRole) List(ctx context.Context, param *model.SysRoleListParam) (res []*model.SysRoleListModel, total int, err error) {
+	db := s.Model(ctx)
+	if param.RoleName != "" {
+		db = db.WhereLike(dao.SysRole.Columns().RoleName, "%"+param.RoleName+"%")
 	}
-	db := dao.SysRole.Ctx(ctx).Where(dao.SysRole.Columns().TenantId, claims.TenantId)
-	if model.RoleName != "" {
-		db = db.WhereLike(dao.SysRole.Columns().RoleName, "%"+model.RoleName+"%")
+	if param.Status != "" {
+		db = db.Where(dao.SysRole.Columns().Status, param.Status)
 	}
-	if model.Status != "" {
-		db = db.Where(dao.SysRole.Columns().Status, model.Status)
-	}
-	if len(model.CreatedAt) == 2 {
-		start, end := gtime.NewFromStr(model.CreatedAt[0]), gtime.NewFromStr(model.CreatedAt[1])
+	if len(param.CreatedAt) == 2 {
+		start, end := gtime.NewFromStr(param.CreatedAt[0]), gtime.NewFromStr(param.CreatedAt[1])
 		db = db.WhereBetween(dao.SysRole.Columns().CreatedAt, start, end.EndOfDay())
 	}
-	if len(model.RoleIds) > 0 {
-		db = db.WhereIn(dao.SysRole.Columns().RoleId, model.RoleIds)
+	if len(param.RoleIds) > 0 {
+		db = db.WhereIn(dao.SysRole.Columns().RoleId, param.RoleIds)
 	}
 	total, err = db.Count()
 	if err != nil {
 		return nil, 0, err
 	}
-	err = db.Page(pageInfo.Page, pageInfo.PageSize).Scan(&res)
+	err = db.Page(param.Page, param.PageSize).Scan(&res)
 	return
 }
 
 // 获取角色详情
-func (s *sSysRole) GetRoleView(ctx context.Context, id int64) (res *model.SysRoleViewModel, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	err = dao.SysRole.Ctx(ctx).Where(dao.SysRole.Columns().RoleId, id).Where(dao.SysRole.Columns().TenantId, claims.TenantId).Scan(&res)
+func (s *sSysRole) View(ctx context.Context, param *model.SysRoleViewParam) (res *model.SysRoleViewModel, err error) {
+	err = s.Model(ctx).Where(dao.SysRole.Columns().RoleId, param.RoleId).Scan(&res)
 	if err != nil {
 		return nil, err
 	}
 	// 获取角色菜单
-	roleMenus, err := s.GetRoleMenu(ctx, id)
+	roleMenus, err := s.GetRoleMenu(ctx, param.RoleId)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +79,7 @@ func (s *sSysRole) GetRoleView(ctx context.Context, id int64) (res *model.SysRol
 	}
 	res.MenuIds = menuIdList
 	// 获取角色部门
-	roleDepts, err := s.GetRoleDept(ctx, id)
+	roleDepts, err := s.GetRoleDept(ctx, param.RoleId)
 	if err != nil {
 		return nil, err
 	}
@@ -106,76 +110,87 @@ func (s *sSysRole) GetRoleListMenu(ctx context.Context, ids []int64) (res []*ent
 }
 
 // 新增角色
-func (s *sSysRole) AddRole(ctx context.Context, model *model.SysRoleAddParam) (err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return err
+func (s *sSysRole) Add(ctx context.Context, param *model.SysRoleAddParam) (role *model.SysRoleAddModel, err error) {
+	user := contexts.GetUser(ctx)
+	if user == nil {
+		return nil, gerror.New("登录已过期")
 	}
 	data := do.SysRole{}
-	gconv.Struct(model, &data)
+	gconv.Struct(param, &data)
 	data.DataScope = "1"
-	data.CreatedBy = claims.BaseClaims.ID
+	data.CreatedBy = user.ID
 	data.CreatedAt = gtime.Now()
-	data.CreatedDept = claims.BaseClaims.DeptId
-	data.TenantId = claims.TenantId
-	data.UpdatedBy = claims.BaseClaims.ID
+	data.CreatedDept = user.DeptId
+	data.TenantId = user.TenantId
+	data.UpdatedBy = user.ID
 	data.UpdatedAt = gtime.Now()
 
-	result, err := dao.SysRole.Ctx(ctx).Data(data).OmitNil().Insert()
+	roleId, err := s.Model(ctx).Data(data).OmitNil().InsertAndGetId()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	roleId, err := result.LastInsertId()
-	if err != nil {
-		return err
+
+	role = &model.SysRoleAddModel{
+		RoleId: roleId,
 	}
 	// 新增角色菜单
-	err = s.RoleMenu(ctx, roleId, model.MenuIds)
+	err = s.RoleMenu(ctx, roleId, param.MenuIds)
 	if err != nil {
-		return err
+		return role, err
 	}
 	return
 }
 
 // 编辑角色
-func (s *sSysRole) EditRole(ctx context.Context, model *model.SysRoleEditParam) (err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return err
+func (s *sSysRole) Edit(ctx context.Context, param *model.SysRoleEditParam) (role *model.SysRoleEditModel, err error) {
+	role = &model.SysRoleEditModel{
+		RoleId: param.RoleId,
+	}
+	user := contexts.GetUser(ctx)
+	if user == nil {
+		return role, gerror.New("登录已过期")
 	}
 	data := do.SysRole{}
-	gconv.Struct(model, &data)
-	data.UpdatedBy = claims.BaseClaims.ID
+	gconv.Struct(param, &data)
+	data.UpdatedBy = user.ID
 	data.UpdatedAt = gtime.Now()
 
-	_, err = dao.SysRole.Ctx(ctx).Data(data).Where(dao.SysRole.Columns().RoleId, model.RoleId).Where(dao.SysRole.Columns().TenantId, claims.TenantId).OmitNil().Update()
+	_, err = dao.SysRole.Ctx(ctx).Data(data).Where(dao.SysRole.Columns().RoleId, param.RoleId).OmitNil().Update()
 	if err != nil {
-		return err
+		return role, err
 	}
 	// 更新角色菜单
-	err = s.RoleMenu(ctx, model.RoleId, model.MenuIds)
+	err = s.RoleMenu(ctx, param.RoleId, param.MenuIds)
 	if err != nil {
-		return err
+		return role, err
 	}
+
 	return
 }
 
 // 删除角色
-func (s *sSysRole) DeleteRole(ctx context.Context, model *model.SysRoleDeleteParam) (err error) {
+func (s *sSysRole) Delete(ctx context.Context, param *model.SysRoleDeleteParam) (role *model.SysRoleDeleteModel, err error) {
+	role = &model.SysRoleDeleteModel{
+		RoleId:  param.RoleId,
+		RoleIds: param.RoleIds,
+	}
 	roleIds := make([]int64, 0)
-	if model.RoleId != 0 {
-		roleIds = append(roleIds, model.RoleId)
+	if param.RoleId != 0 {
+		roleIds = append(roleIds, param.RoleId)
 	} else {
-		roleIds = model.RoleIds
+		roleIds = param.RoleIds
 	}
 	if len(roleIds) == 0 {
-		return gerror.New("请选择要删除的角色")
+		return role, gerror.New("请选择要删除的角色")
 	}
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return err
+	user := contexts.GetUser(ctx)
+	if user == nil {
+		return role, gerror.New("登录已过期")
 	}
-	_, err = dao.SysRole.Ctx(ctx).WhereIn(dao.SysRole.Columns().RoleId, roleIds).Where(dao.SysRole.Columns().TenantId, claims.TenantId).Delete()
+	data := do.SysRole{}
+	data.DeletedBy = user.ID
+	data.DeletedAt = gtime.Now()
+	_, err = s.Model(ctx).WhereIn(dao.SysRole.Columns().RoleId, roleIds).Data(data).OmitNil().Update()
 	return
 }
 

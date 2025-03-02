@@ -30,14 +30,14 @@ func init() {
 	service.RegisterSysAuth(NewSysAuth())
 }
 
-func (s *sSysAuth) Login(ctx context.Context, captchaID string, captchaValue string, username string, password string) (res *model.LoginUserOut, token string, err error) {
+func (s *sSysAuth) Login(ctx context.Context, param *model.LoginParams) (res *model.LoginUserOut, token string, err error) {
 	// 验证验证码
-	err = service.SysCaptcha().VerifyCaptcha(ctx, captchaID, captchaValue)
+	err = service.SysCaptcha().VerifyCaptcha(ctx, param.CaptchaID, param.CaptchaValue)
 	if err != nil {
 		return nil, "", err
 	}
 	// 获取用户信息
-	user, err := service.SysUser().GetUserByUsernameAndPassword(ctx, username, password)
+	user, err := service.SysUser().GetUserByUsernameAndPassword(ctx, param.TenantId, param.Username, param.Password)
 	if err != nil {
 		return nil, "", err
 	}
@@ -106,11 +106,12 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 	if err != nil {
 		return nil, "", err
 	}
-	rl, _, err := service.SysRole().GetRoleList(ctx, &model.SysRoleListParam{
+	rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
+		PageInfo: request.PageInfo{
+			Page:     1,
+			PageSize: 5000,
+		},
 		RoleIds: authorityIds,
-	}, &request.PageInfo{
-		Page:     1,
-		PageSize: 5000,
 	})
 	if err != nil {
 		return nil, "", err

@@ -18,7 +18,7 @@ import (
 
 type (
 	ISysAuth interface {
-		Login(ctx context.Context, captchaID string, captchaValue string, username string, password string) (res *model.LoginUserOut, token string, err error)
+		Login(ctx context.Context, param *model.LoginParams) (res *model.LoginUserOut, token string, err error)
 		// 生成Token
 		GenerateToken(ctx context.Context, user *model.LoginUserOut) (claims *model.CustomClaims, token string, err error)
 		// 解析Token
@@ -92,13 +92,20 @@ type (
 		List(ctx context.Context, query *model.SysOssListParam, pageInfo *request.PageInfo) (items []*model.SysOssListModel, total int, err error)
 	}
 	ISysPost interface {
-		GetPostList(ctx context.Context, query model.SysPostListParam, pageInfo request.PageInfo) (items []*model.SysPostListModel, total int, err error)
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, query model.SysPostListParam) (items []*model.SysPostListModel, total int, err error)
+		View(ctx context.Context, param *model.SysPostViewParam) (post *model.SysPostViewModel, err error)
+		Add(ctx context.Context, param *model.SysPostAddParam) (post *model.SysPostAddModel, err error)
+		Edit(ctx context.Context, param *model.SysPostEditParam) (post *model.SysPostEditModel, err error)
+		Delete(ctx context.Context, param *model.SysPostDeleteParam) (post *model.SysPostDeleteModel, err error)
+		Export(ctx context.Context, param *model.SysPostExportParam) (post *model.SysPostExportModel, err error)
 	}
 	ISysRole interface {
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		// 获取租户下角色列表
-		GetRoleList(ctx context.Context, model *model.SysRoleListParam, pageInfo *request.PageInfo) (res []*model.SysRoleListModel, total int, err error)
+		List(ctx context.Context, param *model.SysRoleListParam) (res []*model.SysRoleListModel, total int, err error)
 		// 获取角色详情
-		GetRoleView(ctx context.Context, id int64) (res *model.SysRoleViewModel, err error)
+		View(ctx context.Context, param *model.SysRoleViewParam) (res *model.SysRoleViewModel, err error)
 		// 获取角色菜单
 		GetRoleMenu(ctx context.Context, id int64) (res []*entity.SysMenu, err error)
 		// 获取角色部门
@@ -106,11 +113,11 @@ type (
 		// 获取角色列表对应菜单
 		GetRoleListMenu(ctx context.Context, ids []int64) (res []*entity.SysRoleMenu, err error)
 		// 新增角色
-		AddRole(ctx context.Context, model *model.SysRoleAddParam) (err error)
+		Add(ctx context.Context, param *model.SysRoleAddParam) (role *model.SysRoleAddModel, err error)
 		// 编辑角色
-		EditRole(ctx context.Context, model *model.SysRoleEditParam) (err error)
+		Edit(ctx context.Context, param *model.SysRoleEditParam) (role *model.SysRoleEditModel, err error)
 		// 删除角色
-		DeleteRole(ctx context.Context, model *model.SysRoleDeleteParam) (err error)
+		Delete(ctx context.Context, param *model.SysRoleDeleteParam) (role *model.SysRoleDeleteModel, err error)
 		RoleMenu(ctx context.Context, roleId int64, menuIds []int64) (err error)
 		// 自定义角色部门数据权限
 		RoleDept(ctx context.Context, roleId int64, deptIds []int64) (err error)
@@ -132,13 +139,13 @@ type (
 	ISysUser interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		// 根据用户名获取用户信息
-		GetUserByUsername(ctx context.Context, username string) (user *entity.SysUser, err error)
+		GetUserByUsername(ctx context.Context, username string, tenantId string) (user *entity.SysUser, err error)
 		// 根据邮箱获取用户信息
 		GetUserByEmail(ctx context.Context, email string) (user *entity.SysUser, err error)
 		// 根据手机号获取用户信息
 		GetUserByPhone(ctx context.Context, phone string) (user *entity.SysUser, err error)
 		// 根据用户名和密码获取用户信息
-		GetUserByUsernameAndPassword(ctx context.Context, username string, password string) (user *entity.SysUser, err error)
+		GetUserByUsernameAndPassword(ctx context.Context, tenantId string, username string, password string) (user *entity.SysUser, err error)
 		// 根据用户ID获取用户信息
 		GetUserById(ctx context.Context, id int64) (user *model.SysUserViewModel, err error)
 		// 获取用户列表

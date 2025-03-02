@@ -2,19 +2,24 @@
 import { h, ref } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { SysPostListData } from '#/api';
 
-import { Page } from '@vben/common-ui';
+import { Page, useVbenDrawer } from '@vben/common-ui';
+import { getVxePopupContainer } from '@vben/utils';
 
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
+import { Button, message, Switch,Tag, Modal, Popconfirm } from 'ant-design-vue';
 import dayjs from 'dayjs';
-
+import { commonDownloadExcel } from '#/utils/file/download';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysPostListApi } from '#/api'; 
+import { getSysPostListApi, deleteSysPostApi, getSysPostExportApi } from '#/api'; 
 import DeptTree from '#/components/dept/dept-tree.vue';
+import postDrawer from './post-drawer.vue';
+
 import {
   MdiPlus,
   MdiEdit,
   MdiDelete,
+  MdiExport,
 } from '@vben/icons';
 
 interface RowType {
@@ -140,6 +145,69 @@ const [Grid, tableApi ] = useVbenVxeGrid({
   formOptions,
   gridOptions,
 });
+
+
+const [PostDrawer, postDrawerApi] = useVbenDrawer({
+  connectedComponent: postDrawer,
+});
+
+function handleView(row: SysPostListData) {
+  const { postId } = row;
+  postDrawerApi.setData({id: postId, update:false,view:true});
+  postDrawerApi.open();
+}
+
+function handleAdd() {
+  postDrawerApi.setData({update:false, view:false});
+  postDrawerApi.open();
+}
+
+function handleEdit(row: SysPostListData) {
+  postDrawerApi.setData({ id: row.postId, update:true, view:false });
+  postDrawerApi.open();
+}
+
+async function handleDelete(row: SysPostListData) {
+  await deleteSysPostApi({ postId: row.postId });
+  message.success("删除成功");
+  await tableApi.query();
+}
+
+async function handleExport() {
+  // 导出
+  const formValues = tableApi.formApi.form.values;
+  // const res = await getSysPostExportApi({
+  //   ...formValues,
+  //   page: 1,
+  //   pageSize: 2000,
+  // });
+  commonDownloadExcel(getSysPostExportApi, '岗位列表',{
+    ...formValues,
+    page: 1,
+    pageSize: 2000,
+  });
+  message.success("导出成功");
+}
+
+
+function handleMultiDelete() {
+  const rows = tableApi.grid.getCheckboxRecords();
+  const ids = rows.map((row: SysPostListData) => row.postId);
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await deleteSysPostApi({ postIds: ids });
+      message.success("删除成功");
+      await tableApi.query();
+    },
+  });
+}
+
+function handleReload() {
+  tableApi.query();
+}
 </script>
 
 <template>
@@ -149,12 +217,12 @@ const [Grid, tableApi ] = useVbenVxeGrid({
       @select="()=> tableApi.reload()" 
       @reload="()=> tableApi.reload()"
       v-model:select-dept-id="selectDeptId" />
-    <Grid>
-      <template #toolbar-actions>
+    <Grid table-title="岗位列表">
+      <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
-        <Button class="mr-2 flex items-center bg-green-500"  disabled :icon="h(MdiEdit)">编辑</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
+        <Button class="mr-2 flex items-center "  :icon="h(MdiExport)" @click="handleExport">导出</Button>
       </template>
       <template #open="{ row }">
         <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" />
@@ -164,12 +232,20 @@ const [Grid, tableApi ] = useVbenVxeGrid({
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1" danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Popconfirm
+            :get-popup-container="getVxePopupContainer"
+            placement="left"
+            title="确认删除？"
+            @confirm="handleDelete(row)"
+          >
+            <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1" danger>删除</Button>
+          </Popconfirm>
         </div>
       </template>
     </Grid>
     </div>
+    <PostDrawer @reload="handleReload" />
   </Page>
 </template>

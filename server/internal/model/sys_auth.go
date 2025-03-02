@@ -20,3 +20,14 @@ type CustomClaims struct {
 	BufferTime int64
 	jwt.RegisteredClaims
 }
+type LoginParams struct {
+	CaptchaID    string `json:"captchaId" dc:"验证码ID"`
+	CaptchaValue string `json:"captchaValue" dc:"验证码值"`
+	Username     string `json:"username" dc:"用户名"`
+	Password     string `json:"password" dc:"密码"`
+	TenantId     string `json:"tenantId" dc:"租户ID"`
+}
+
+type LoginResult struct {
+	Token string
+}

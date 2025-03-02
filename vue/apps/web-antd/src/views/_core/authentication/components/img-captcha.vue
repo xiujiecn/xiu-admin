@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import { Input, Image } from 'ant-design-vue';
 import { getCaptchaApi } from '#/api';
 const emit = defineEmits(['blur', 'change']);
@@ -8,9 +8,21 @@ let imgCaptcha = ref<string>('');
 onMounted(()=>{
   getCaptcha();
 });
+const props = defineProps<{
+  captchaCount?: number;
+}>();
+
+watch(
+  () => props.captchaCount,
+  () => {
+    getCaptcha();
+  },{});
+
+
 const modelValue = defineModel<[string, string]>({
   default: () => [undefined, undefined],
 });
+
 function getCaptcha() {
   getCaptchaApi().then((res) => {
     imgCaptcha.value = res.captchaImage;
@@ -26,7 +38,7 @@ function onChange() {
   <div class="flex w-full gap-1">
     <Input
       placeholder="请输入验证码"
-      class="w-[160px]"
+      class="w-[260px]"
       allow-clear
       :class="{ 'valid-success': !!modelValue[0] }"
       v-model:value="modelValue[0]"

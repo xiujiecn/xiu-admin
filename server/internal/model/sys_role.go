@@ -1,6 +1,8 @@
 package model
 
 import (
+	"xiujieadmin/internal/model/request"
+
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
@@ -20,6 +22,7 @@ type SysRoleListModel struct {
 }
 
 type SysRoleListParam struct {
+	request.PageInfo
 	RoleName  string   `json:"roleName" orm:"role_name"`
 	Status    string   `json:"status" orm:"status"`
 	RoleKey   string   `json:"roleKey"                  description:"角色权限字符串"`
@@ -31,6 +34,9 @@ type SysRoleMiniModel struct {
 	RoleId    int64  `json:"roleId"   orm:"role_id"   description:"角色ID"`
 	RoleName  string `json:"roleName" orm:"role_name" description:"角色名称"`
 	DataScope string `json:"dataScope" orm:"data_scope" description:"数据范围"`
+}
+type SysRoleViewParam struct {
+	RoleId int64 `json:"roleId" orm:"role_id"`
 }
 
 type SysRoleViewModel struct {
@@ -67,6 +73,10 @@ type SysRoleAddParam struct {
 	MenuIds           []int64     `json:"menuIds"           orm:"menu_ids"            description:"菜单ID"`
 }
 
+type SysRoleAddModel struct {
+	RoleId int64 `json:"roleId" orm:"role_id" description:"角色ID"`
+}
+
 type SysRoleEditParam struct {
 	RoleId            int64       `json:"roleId"   orm:"role_id"   description:"角色ID"`
 	RoleName          *string     `json:"roleName"          orm:"role_name"           description:"角色名称"`
@@ -80,13 +90,17 @@ type SysRoleEditParam struct {
 	MenuIds           []int64     `json:"menuIds"           orm:"menu_ids"            description:"菜单ID"`
 }
 
+type SysRoleEditModel struct {
+	RoleId int64 `json:"roleId" orm:"role_id"`
+}
+
 type SysRoleDeleteParam struct {
 	RoleId  int64   `json:"roleId" orm:"role_id"`
 	RoleIds []int64 `json:"roleIds" orm:"role_ids"`
 }
-
-type SysRoleViewParam struct {
-	RoleId int64 `json:"roleId" orm:"role_id"`
+type SysRoleDeleteModel struct {
+	RoleId  int64   `json:"roleId" orm:"role_id"`
+	RoleIds []int64 `json:"roleIds" orm:"role_ids"`
 }
 
 type SysRoleDataScopeEditParam struct {

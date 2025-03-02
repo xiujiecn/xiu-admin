@@ -7,11 +7,19 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 
 	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
 )
 
 func (c *ControllerV1) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRes, err error) {
-	userOut, token, err := service.SysAuth().Login(ctx, req.CaptchaID, req.CaptchaValue, req.Username, req.Password)
+	userOut, token, err := service.SysAuth().Login(ctx, &model.LoginParams{
+		CaptchaID:    req.CaptchaID,
+		CaptchaValue: req.CaptchaValue,
+		Username:     req.Username,
+		Password:     req.Password,
+		TenantId:     req.TenantId,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -36,4 +44,26 @@ func (c *ControllerV1) GetAccessCodes(ctx context.Context, req *v1.GetAccessCode
 		Data: accessCodes,
 	}
 	return res, nil
+}
+func (c *ControllerV1) TenantList(ctx context.Context, req *v1.TenantListReq) (res *v1.TenantListRes, err error) {
+	tenantList, _, err := service.SysTenant().List(ctx, &model.SysTenantListParam{}, &request.PageInfo{})
+	if err != nil {
+		return nil, err
+	}
+	tenantEnabled := false
+	if len(tenantList) > 1 {
+		tenantEnabled = true
+	}
+	voList := make([]v1.TenantListData, 0)
+	for _, tenant := range tenantList {
+		voList = append(voList, v1.TenantListData{
+			CompanyName: tenant.CompanyName,
+			Domain:      tenant.Domain,
+			TenantId:    tenant.TenantId,
+		})
+	}
+	return &v1.TenantListRes{
+		TenantEnabled: tenantEnabled,
+		VoList:        voList,
+	}, nil
 }
