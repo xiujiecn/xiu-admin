@@ -153,12 +153,13 @@ const [PostDrawer, postDrawerApi] = useVbenDrawer({
 
 function handleView(row: SysPostListData) {
   const { postId } = row;
-  postDrawerApi.setData({id: postId, update:false,view:true});
+  postDrawerApi.setData({id: postId,  update:false,view:true});
   postDrawerApi.open();
 }
 
 function handleAdd() {
-  postDrawerApi.setData({update:false, view:false});
+  const deptId = selectDeptId.value?.[0] || '';
+  postDrawerApi.setData({deptId: deptId, update:false, view:false});
   postDrawerApi.open();
 }
 

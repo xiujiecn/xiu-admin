@@ -27,7 +27,7 @@ type PostAddRes struct {
 }
 
 type PostEditReq struct {
-	g.Meta `path:"/post/edit" method:"put" tags:"系统" summary:"编辑岗位"`
+	g.Meta `path:"/post/edit" method:"post" tags:"系统" summary:"编辑岗位"`
 	model.SysPostEditParam
 }
 
@@ -36,7 +36,7 @@ type PostEditRes struct {
 }
 
 type PostDeleteReq struct {
-	g.Meta `path:"/post/delete" method:"delete" tags:"系统" summary:"删除岗位"`
+	g.Meta `path:"/post/delete" method:"post" tags:"系统" summary:"删除岗位"`
 	model.SysPostDeleteParam
 }
 

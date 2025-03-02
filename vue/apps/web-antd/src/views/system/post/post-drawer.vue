@@ -19,6 +19,7 @@ interface ModalProps {
   id?: number | string;
   update: boolean;
   view: boolean;
+  deptId?: string;
 }
 
 
@@ -54,7 +55,7 @@ async function initDeptSelect() {
         // 选中后显示在输入框的值
         treeNodeLabelProp: 'fullName',
       },
-      fieldName: 'postId',
+      fieldName: 'deptId',
     },
   ]);
 }
@@ -81,13 +82,15 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
       return null;
     }
     drawerApi.setState({confirmLoading:true,loading:true})
-    const { id, update, view } = drawerApi.getData() as ModalProps;
+    const { id, update, view, deptId } = drawerApi.getData() as ModalProps;
     isUpdate.value = update;
     isView.value = view;
     await initDeptSelect();
     if (isUpdate.value || isView.value) {
       const record = await getSysPostViewApi({ postId: Number(id) });
       await formApi.setValues(record);
+    }else if (deptId) {
+      await formApi.setValues({ deptId: deptId });
     }
     drawerApi.setState({confirmLoading:false,loading:false})
 
