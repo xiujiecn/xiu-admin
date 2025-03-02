@@ -22,11 +22,13 @@ type SysPostListModel struct {
 
 type SysPostListParam struct {
 	request.PageInfo
-	DeptId       int64  `json:"deptId"        description:"部门id"`
-	PostCode     string `json:"postCode"      description:"岗位编码"`
-	PostCategory string `json:"postCategory"  description:"岗位类别编码"`
-	PostName     string `json:"postName"      description:"岗位名称"`
-	BelongDeptId int64  `json:"belongDeptId"  description:"归属部门id"`
+	DeptId       int64    `json:"deptId"        description:"部门id"`
+	PostCode     string   `json:"postCode"      description:"岗位编码"`
+	PostCategory string   `json:"postCategory"  description:"岗位类别编码"`
+	PostName     string   `json:"postName"      description:"岗位名称"`
+	BelongDeptId int64    `json:"belongDeptId"  description:"归属部门id"`
+	Status       string   `json:"status"        description:"状态"`
+	CreatedAt    []string `json:"createdAt"    description:"创建时间"`
 }
 
 type SysPostMiniModel struct {

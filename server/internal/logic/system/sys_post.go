@@ -64,7 +64,14 @@ func (l *sSysPost) List(ctx context.Context, query model.SysPostListParam) (item
 	if len(deptIds) > 0 {
 		m = m.WhereIn(dao.SysPost.Columns().DeptId, deptIds)
 	}
-
+	if query.Status != "" {
+		m = m.Where(dao.SysPost.Columns().Status, query.Status)
+	}
+	if len(query.CreatedAt) == 2 {
+		startTime := gtime.NewFromStr(query.CreatedAt[0])
+		endTime := gtime.NewFromStr(query.CreatedAt[1])
+		m = m.WhereBetween(dao.SysPost.Columns().CreatedAt, startTime, endTime.EndOfDay())
+	}
 	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
