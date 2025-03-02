@@ -25,6 +25,7 @@ type RoleAddReq struct {
 }
 
 type RoleAddRes struct {
+	model.SysRoleAddModel
 }
 
 type RoleEditReq struct {
@@ -33,6 +34,7 @@ type RoleEditReq struct {
 }
 
 type RoleEditRes struct {
+	model.SysRoleEditModel
 }
 
 type RoleDeleteReq struct {
@@ -41,6 +43,7 @@ type RoleDeleteReq struct {
 }
 
 type RoleDeleteRes struct {
+	model.SysRoleDeleteModel
 }
 
 type RoleViewReq struct {

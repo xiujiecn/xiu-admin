@@ -6,6 +6,7 @@ import (
 
 type LoginReq struct {
 	g.Meta       `path:"/auth/login" method:"post" tags:"系统" summary:"登录"`
+	TenantId     string `json:"tenantId" v:"required#租户ID不能为空" dc:"租户ID"`
 	Username     string `json:"username" v:"required#用户名不能为空" dc:"用户名"`
 	Password     string `json:"password" v:"required#密码不能为空" dc:"密码"`
 	CaptchaID    string `json:"captchaID" dc:"验证码ID"`
@@ -47,4 +48,19 @@ type GetAccessCodesReq struct {
 type GetAccessCodesRes struct {
 	Data   []string `json:"data" dc:"用户权限码"`
 	Status int      `json:"status" dc:"状态码"`
+}
+
+type TenantListReq struct {
+	g.Meta `path:"/auth/getTenantList" method:"get" tags:"系统" summary:"获取租户列表"`
+}
+
+type TenantListData struct {
+	CompanyName string `json:"companyName" dc:"企业名称"`
+	Domain      string `json:"domain" dc:"域名"`
+	TenantId    string `json:"tenantId" dc:"租户ID"`
+}
+
+type TenantListRes struct {
+	TenantEnabled bool             `json:"tenantEnabled" dc:"是否启用租户"`
+	VoList        []TenantListData `json:"voList" dc:"租户列表"`
 }

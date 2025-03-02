@@ -42,9 +42,9 @@ func (l *sSysUser) Model(ctx context.Context, option ...*handler.Option) *gdb.Mo
 }
 
 // 根据用户名获取用户信息
-func (l *sSysUser) GetUserByUsername(ctx context.Context, username string) (user *entity.SysUser, err error) {
+func (l *sSysUser) GetUserByUsername(ctx context.Context, username string, tenantId string) (user *entity.SysUser, err error) {
 	var data *entity.SysUser
-	err = l.Model(ctx).Where(dao.SysUser.Columns().UserName, username).Scan(&data)
+	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserName, username).Where(dao.SysUser.Columns().TenantId, tenantId).Scan(&data)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, gerror.NewCode(consts.CodeUserNotFound, "账号不存在")
@@ -122,9 +122,9 @@ func (l *sSysUser) GetUserByPhone(ctx context.Context, phone string) (user *enti
 }
 
 // 根据用户名和密码获取用户信息
-func (l *sSysUser) GetUserByUsernameAndPassword(ctx context.Context, username string, password string) (user *entity.SysUser, err error) {
+func (l *sSysUser) GetUserByUsernameAndPassword(ctx context.Context, tenantId string, username string, password string) (user *entity.SysUser, err error) {
 	// 判断用户名是否存在
-	user, err = l.GetUserByUsername(ctx, username)
+	user, err = l.GetUserByUsername(ctx, username, tenantId)
 	if err != nil {
 		return nil, err
 	}
