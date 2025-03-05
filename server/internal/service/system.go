@@ -58,9 +58,21 @@ type (
 		RefreshDeptAncestors(ctx context.Context) (err error)
 		GetParentIDAncestors(ctx context.Context, depts []*model.SysDeptViewModel, printId int64, ancestors *string) (err error)
 	}
-	ISysDict interface {
-		GetDictTypeList(ctx context.Context, req *model.SysDictTypeListParam, pageInfo *request.PageInfo) (items []model.SysDictType, total int, err error)
-		GetDictDataList(ctx context.Context, query *model.SysDictDataListParam, pageInfo *request.PageInfo) (items []model.SysDictData, total int, err error)
+	ISysDictData interface {
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, param *model.SysDictDataListParam) (items []model.SysDictDataListModel, total int, err error)
+		View(ctx context.Context, param *model.SysDictDataViewParam) (data *model.SysDictDataViewModel, err error)
+		Add(ctx context.Context, param *model.SysDictDataAddParam) (output *model.SysDictDataAddModel, err error)
+		Edit(ctx context.Context, param *model.SysDictDataEditParam) (output *model.SysDictDataEditModel, err error)
+		Delete(ctx context.Context, param *model.SysDictDataDeleteParam) (output *model.SysDictDataDeleteModel, err error)
+	}
+	ISysDictType interface {
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, param *model.SysDictTypeListParam) (items []model.SysDictTypeListModel, total int, err error)
+		View(ctx context.Context, param *model.SysDictTypeViewParam) (data *model.SysDictTypeViewModel, err error)
+		Add(ctx context.Context, param *model.SysDictTypeAddParam) (output *model.SysDictTypeAddModel, err error)
+		Edit(ctx context.Context, param *model.SysDictTypeEditParam) (output *model.SysDictTypeEditModel, err error)
+		Delete(ctx context.Context, param *model.SysDictTypeDeleteParam) (output *model.SysDictTypeDeleteModel, err error)
 	}
 	ISysLogininfor interface {
 		ListLogininfor(ctx context.Context, query *model.SysLogininforListParam, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error)
@@ -174,7 +186,8 @@ var (
 	localSysClient     ISysClient
 	localSysConfig     ISysConfig
 	localSysDept       ISysDept
-	localSysDict       ISysDict
+	localSysDictData   ISysDictData
+	localSysDictType   ISysDictType
 	localSysLogininfor ISysLogininfor
 	localSysMenu       ISysMenu
 	localSysNotice     ISysNotice
@@ -243,15 +256,26 @@ func RegisterSysDept(i ISysDept) {
 	localSysDept = i
 }
 
-func SysDict() ISysDict {
-	if localSysDict == nil {
-		panic("implement not found for interface ISysDict, forgot register?")
+func SysDictData() ISysDictData {
+	if localSysDictData == nil {
+		panic("implement not found for interface ISysDictData, forgot register?")
 	}
-	return localSysDict
+	return localSysDictData
 }
 
-func RegisterSysDict(i ISysDict) {
-	localSysDict = i
+func RegisterSysDictData(i ISysDictData) {
+	localSysDictData = i
+}
+
+func SysDictType() ISysDictType {
+	if localSysDictType == nil {
+		panic("implement not found for interface ISysDictType, forgot register?")
+	}
+	return localSysDictType
+}
+
+func RegisterSysDictType(i ISysDictType) {
+	localSysDictType = i
 }
 
 func SysLogininfor() ISysLogininfor {

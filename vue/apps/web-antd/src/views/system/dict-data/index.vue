@@ -1,17 +1,17 @@
 <script lang="ts" setup>
 import { h,ref,onMounted } from 'vue';
+import type {  DeepPartial } from '@vben/types';
 import type { VbenFormProps } from '#/adapter/form';
-import type { VxeTableGridOptions } from '#/adapter/vxe-table';
-
-import { Page } from '@vben/common-ui';
-
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
-import dayjs from 'dayjs';
+import type { VxeTableGridOptions,VxeGridListeners } from '#/adapter/vxe-table';
+import type { SysDictDataListModel } from '#/api';
+import { getVxePopupContainer } from '@vben/utils';
+import { Page,useVbenDrawer } from '@vben/common-ui';
+import { Button, message,Tag, Modal,Popconfirm } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysDictDataListApi } from '#/api'; 
+import { getSysDictDataListApi,deleteSysDictDataApi } from '#/api'; 
 import { useRouter } from 'vue-router';
-// 获取url参数
+import dictDataDrawer from './dict-data-drawer.vue';
 
 
 
@@ -85,7 +85,6 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
         return await getSysDictDataListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -94,8 +93,8 @@ const gridOptions: VxeTableGridOptions<RowType> = {
         });
       },
       querySuccess: ({ page, sort, sorts, filters, form, response }) => {
-        dictName.value = response.data.type.dictName;
-        dictType.value = response.data.type.dictType;
+        dictName.value = response.type.dictName;
+        dictType.value = response.type.dictType;
       },
     },
   },
@@ -109,9 +108,19 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid] = useVbenVxeGrid({
-  formOptions,
+const CheckboxChecked = ref(false);
+const gridEvents: DeepPartial<VxeGridListeners> = {
+  checkboxChange: handleCheckboxChange,
+  checkboxAll: handleCheckboxChange,
+};
+
+function handleCheckboxChange() {
+  CheckboxChecked.value = gridApi.grid.getCheckboxRecords().length > 0;
+}
+const [Grid,gridApi] = useVbenVxeGrid({
+  // formOptions,
   gridOptions,
+  gridEvents,
 });
 const labelColor = (row: any) => {
   if (row.listClass == 'primary') {
@@ -134,16 +143,62 @@ const labelColor = (row: any) => {
   }
   return 'default';
 }
+
+const [DictDrawer, dictDrawerApi] = useVbenDrawer({
+  connectedComponent: dictDataDrawer,
+});
+
+
+function handleView(row: SysDictDataListModel) {
+  const { dictCode } = row;
+  dictDrawerApi.setData({id: dictCode, update:false,view:true,dictType:dictType.value});
+  dictDrawerApi.open();
+}
+
+function handleAdd() {
+  dictDrawerApi.setData({update:false, view:false,dictType:dictType.value});
+  dictDrawerApi.open();
+}
+
+function handleEdit(row: SysDictDataListModel) {
+  dictDrawerApi.setData({ id: row.dictCode, update:true, view:false,dictType:dictType.value });
+  dictDrawerApi.open();
+}
+
+async function handleDelete(row: SysDictDataListModel) {
+  await deleteSysDictDataApi({ dictCodes: [row.dictCode] });
+  message.success("删除成功");
+  await handleRefresh();
+}
+async function handleRefresh() {
+  await gridApi.query();
+}
+
+
+function handleMultiDelete() {
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids = rows.map((row: SysDictDataListModel) => row.dictCode);
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await deleteSysDictDataApi({ dictCodes: ids });
+      message.success("删除成功");
+      await handleRefresh();
+    },
+  });
+}
+
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
+    <Grid :table-title="'['+dictName+']' +'['+dictType+']' + '字典数据'">
+      <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
-        <Button class="mr-2 flex items-center bg-green-500"  disabled :icon="h(MdiEdit)">编辑</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
       </template>
       <template #label="{ row }">
         <Tag :color="labelColor(row)">{{ row.dictLabel }}</Tag>
@@ -153,11 +208,14 @@ const labelColor = (row: any) => {
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" >修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+          </Popconfirm>
         </div>
       </template>
     </Grid>
+    <DictDrawer @reload="handleRefresh"/>
   </Page>
 </template>

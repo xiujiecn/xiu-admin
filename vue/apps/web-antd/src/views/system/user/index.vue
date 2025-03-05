@@ -36,7 +36,8 @@ interface RowType {
 const selectDeptId = ref<string[]>([]);
 
 const gridEvents: DeepPartial<VxeGridListeners> = {
-  checkboxChange: handleCheckboxChange
+  checkboxChange: handleCheckboxChange,
+  checkboxAll: handleCheckboxChange,
 }
 
 const formOptions: VbenFormProps = {
@@ -190,7 +191,6 @@ const CheckboxChecked = ref(false);
 
 function handleCheckboxChange() {
   CheckboxChecked.value = tableApi.grid.getCheckboxRecords().length > 0;
-  console.log('vue/apps/web-antd/src/views/system/user/index.vue CheckboxChecked',CheckboxChecked.value);
 }
 
 function handleMultiDelete() {

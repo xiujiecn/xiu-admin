@@ -222,7 +222,7 @@ function handleDataScope(row: SysRoleListData) {
       <template #toolbar-tools>
         
         <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
       </template>
       <template #open="{ row }">
         <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" />
