@@ -167,7 +167,7 @@ function handleMultiDelete() {
     okType: 'danger',
     content: `确认删除选中的${ids.length}条记录吗？`,
     onOk: async () => {
-      await deleteSysDictTypeApi({ dictIds: ids });
+      await deleteSysConfigApi({ configIds: ids });
       message.success("删除成功");
       await handleRefresh();
     },
