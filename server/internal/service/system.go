@@ -38,7 +38,12 @@ type (
 		List(ctx context.Context, query *model.SysClientListParam, pageInfo *request.PageInfo) (items []*model.SysClientListModel, total int, err error)
 	}
 	ISysConfig interface {
-		GetConfigList(ctx context.Context, query *model.SysConfigListParam, page *request.PageInfo) (items []*model.SysConfig, total int, err error)
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, param *model.SysConfigListParam) (items []*model.SysConfigListModel, total int, err error)
+		Add(ctx context.Context, param *model.SysConfigAddParam) (output *model.SysConfigAddModel, err error)
+		Edit(ctx context.Context, param *model.SysConfigEditParam) (output *model.SysConfigEditModel, err error)
+		Delete(ctx context.Context, param *model.SysConfigDeleteParam) (output *model.SysConfigDeleteModel, err error)
+		View(ctx context.Context, param *model.SysConfigViewParam) (output *model.SysConfigViewModel, err error)
 	}
 	ISysDept interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
