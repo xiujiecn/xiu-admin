@@ -4,10 +4,12 @@ import (
 	"context"
 	"xiujieadmin/internal/dao"
 	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/do"
 	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
 
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 type sSysUserOnline struct {
@@ -22,7 +24,9 @@ func init() {
 }
 
 func (s *sSysUserOnline) Add(ctx context.Context, userOnline *model.SysUserOnlineAddModel) (err error) {
-	_, err = dao.SysUserOnline.Ctx(ctx).Data(userOnline).OmitEmpty().Save()
+	data := do.SysUserOnline{}
+	gconv.Struct(userOnline, &data)
+	_, err = dao.SysUserOnline.Ctx(ctx).Data(data).OmitEmpty().Save()
 	return
 }
 

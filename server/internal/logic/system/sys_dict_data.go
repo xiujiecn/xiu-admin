@@ -94,6 +94,7 @@ func (s *sSysDictData) Add(ctx context.Context, param *model.SysDictDataAddParam
 	m := s.Model(ctx)
 	data := do.SysDictData{}
 	gconv.Struct(param, &data)
+	data.TenantId = contexts.GetTenantId(ctx)
 	data.CreatedAt = gtime.Now()
 	data.CreatedBy = contexts.GetUserId(ctx)
 	data.CreatedDept = contexts.GetDeptId(ctx)

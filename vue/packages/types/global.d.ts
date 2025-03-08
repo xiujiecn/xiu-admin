@@ -9,10 +9,12 @@ declare module 'vue-router' {
 
 export interface VbenAdminProAppConfigRaw {
   VITE_GLOB_API_URL: string;
+  VITE_GLOB_CLIENT_ID: string; // 客户端ID
 }
 
 export interface ApplicationConfig {
   apiURL: string;
+  clientId: string; // 客户端ID
 }
 
 declare global {

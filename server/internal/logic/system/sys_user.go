@@ -7,6 +7,7 @@ import (
 	"xiujieadmin/internal/dao"
 	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/do"
 	"xiujieadmin/internal/model/entity"
 	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
@@ -299,14 +300,18 @@ func (l *sSysUser) AddUser(ctx context.Context, req *model.SysUserAddModel) (dat
 	// 随机生成5位字符
 	salt := utility.RandomString(5)
 	password := utility.PasswordEncrypt(req.Password, salt)
-	req.Password = password
-	req.Salt = salt
-	req.CreatedDept = claims.BaseClaims.DeptId
-	req.CreatedBy = claims.BaseClaims.ID
-	req.UpdatedBy = claims.BaseClaims.ID
-	req.CreatedAt = gtime.Now()
-	req.UpdatedAt = gtime.Now()
-	result, err := dao.SysUser.Ctx(ctx).Data(req).Insert()
+
+	dataInsert := do.SysUser{}
+	gconv.Struct(req, &dataInsert)
+	dataInsert.Password = password
+	dataInsert.Salt = salt
+	dataInsert.CreatedDept = claims.BaseClaims.DeptId
+	dataInsert.CreatedBy = claims.BaseClaims.ID
+	dataInsert.CreatedAt = gtime.Now()
+	dataInsert.UpdatedBy = claims.BaseClaims.ID
+	dataInsert.UpdatedAt = gtime.Now()
+	dataInsert.TenantId = claims.BaseClaims.TenantId
+	result, err := dao.SysUser.Ctx(ctx).Data(dataInsert).Insert()
 	if err != nil {
 		return nil, err
 	}

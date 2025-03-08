@@ -36,6 +36,7 @@ import {
   TreeSelect,
   Upload,
 } from 'ant-design-vue';
+import { Tinymce as RichTextarea } from '#/components/tinymce';
 
 const withDefaultPlaceholder = <T extends Component>(
   component: T,
@@ -67,6 +68,7 @@ export type ComponentType =
   | 'RadioGroup'
   | 'RangePicker'
   | 'Rate'
+  | 'RichTextarea'
   | 'Select'
   | 'Space'
   | 'Switch'
@@ -148,6 +150,7 @@ async function initComponentAdapter() {
     TimePicker,
     TreeSelect: withDefaultPlaceholder(TreeSelect, 'select'),
     Upload,
+    RichTextarea,
   };
 
   // 将组件注册到全局共享状态中

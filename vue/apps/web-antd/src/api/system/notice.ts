@@ -24,6 +24,69 @@ export interface SysNoticeListRes {
   total: number;
 }
 
+export interface SysNoticeAddReq {
+  noticeTitle: string;
+  noticeType: string;
+  noticeContent: string;
+  status: string;
+  remark: string;
+} 
+
+export interface SysNoticeEditReq {
+  noticeId: number;
+  noticeTitle?: string;
+  noticeType?: string;
+  noticeContent?: string;
+  status?: string;
+  remark?: string;
+}
+
+export interface SysNoticeDeleteReq {
+  noticeIds: number[];
+}   
+
+export interface SysNoticeViewReq {
+  noticeId : number;
+}
+
+export interface SysNoticeViewRes extends SysNotice {
+}
+
+export interface SysNoticeAddRes {
+  noticeId: number;
+}
+
+export interface SysNoticeEditRes  {
+  noticeId: number;
+} 
+
+export interface SysNoticeDeleteRes  {
+  noticeIds: number[];
+} 
+
+
+
 export async function getSysNoticeListApi(params: SysNoticeListReq) {
   return requestClient.get<SysNoticeListRes>('/system/notice/list', { params });
 }
+
+export async function addSysNoticeApi(params: SysNoticeAddReq | {
+  [x: string]: any;
+}) {
+  return requestClient.post<SysNoticeAddRes>('/system/notice/add', { ...params });
+}
+
+
+export async function editSysNoticeApi(params: SysNoticeEditReq| {
+  [x: string]: any;
+}) {
+  return requestClient.post<SysNoticeEditRes>('/system/notice/edit', { ...params });
+}
+
+export async function deleteSysNoticeApi(params: SysNoticeDeleteReq) {
+  return requestClient.post<SysNoticeDeleteRes>('/system/notice/delete', { ...params });
+} 
+
+export async function getSysNoticeApi(params: SysNoticeViewReq) {
+  return requestClient.get<SysNoticeViewRes>('/system/notice/view', { params });
+} 
