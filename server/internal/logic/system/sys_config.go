@@ -2,10 +2,18 @@ package system
 
 import (
 	"context"
+	"errors"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/request"
+	"xiujieadmin/internal/model/do"
+	"xiujieadmin/internal/model/entity"
 	"xiujieadmin/internal/service"
+
+	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 type sSysConfig struct {
@@ -19,44 +27,130 @@ func init() {
 	service.RegisterSysConfig(NewSysConfig())
 }
 
-func (s *sSysConfig) GetConfigList(ctx context.Context, query *model.SysConfigListParam, page *request.PageInfo) (items []*model.SysConfig, total int, err error) {
-	// 获取当前用户租户ID
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
+func (l *sSysConfig) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) > 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: true,
+			FilterAuth:   true,
+		})
+	}
+	return handler.Model(dao.SysConfig.Ctx(ctx), option...)
+}
+
+func (s *sSysConfig) List(ctx context.Context, param *model.SysConfigListParam) (items []*model.SysConfigListModel, total int, err error) {
+	m := s.Model(ctx)
+
+	if param.ConfigName != "" {
+		m = m.WhereLike(dao.SysConfig.Columns().ConfigName, "%"+param.ConfigName+"%")
+	}
+
+	if param.ConfigKey != "" {
+		m = m.WhereLike(dao.SysConfig.Columns().ConfigKey, "%"+param.ConfigKey+"%")
+	}
+
+	if param.ConfigType != "" {
+		m = m.Where(dao.SysConfig.Columns().ConfigType, param.ConfigType)
+	}
+
+	if param.ConfigValue != "" {
+		m = m.WhereLike(dao.SysConfig.Columns().ConfigValue, "%"+param.ConfigValue+"%")
+	}
+
+	if len(param.CreatedAt) > 0 {
+		startTime := gtime.NewFromStr(param.CreatedAt[0])
+		endTime := gtime.NewFromStr(param.CreatedAt[1])
+		m = m.WhereBetween(dao.SysConfig.Columns().CreatedAt, startTime, endTime.EndOfDay())
+	}
+
+	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
 	}
-	tenantId := claims.TenantId
 
-	db := dao.SysConfig.Ctx(ctx)
-
-	db = db.Where("tenant_id = ?", tenantId)
-
-	if query.ConfigName != "" {
-		db = db.Where("config_name like ?", "%"+query.ConfigName+"%")
-	}
-
-	if query.ConfigKey != "" {
-		db = db.Where("config_key like ?", "%"+query.ConfigKey+"%")
-	}
-
-	if query.ConfigType != "" {
-		db = db.Where("config_type = ?", query.ConfigType)
-	}
-
-	if query.CreatedAt != nil {
-		db = db.Where("created_at >= ?", query.CreatedAt)
-	}
-
-	db = db.Order("created_at desc")
-
-	total, err = db.Count()
+	err = m.Page(param.Page, param.PageSize).Order(dao.SysConfig.Columns().ConfigId, "ASC").Scan(&items)
 	if err != nil {
 		return nil, 0, err
 	}
+	return
+}
 
-	err = db.Page(page.Page, page.PageSize).Scan(&items)
+func (s *sSysConfig) Add(ctx context.Context, param *model.SysConfigAddParam) (output *model.SysConfigAddModel, err error) {
+	m := s.Model(ctx)
+
+	data := &do.SysConfig{}
+	gconv.Struct(param, data)
+	data.TenantId = contexts.GetTenantId(ctx)
+	data.CreatedDept = contexts.GetDeptId(ctx)
+	data.CreatedBy = contexts.GetUserId(ctx)
+	data.CreatedAt = gtime.Now()
+	data.UpdatedBy = contexts.GetUserId(ctx)
+	data.UpdatedAt = gtime.Now()
+
+	lastInsertId, err := m.Data(data).InsertAndGetId()
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
+
+	output = &model.SysConfigAddModel{
+		ConfigId: lastInsertId,
+	}
+	return
+}
+
+func (s *sSysConfig) Edit(ctx context.Context, param *model.SysConfigEditParam) (output *model.SysConfigEditModel, err error) {
+	m := s.Model(ctx)
+
+	data := &do.SysConfig{}
+	gconv.Struct(param, data)
+	data.UpdatedBy = contexts.GetUserId(ctx)
+	data.UpdatedAt = gtime.Now()
+
+	_, err = m.Data(data).Where(dao.SysConfig.Columns().ConfigId, param.ConfigId).Update()
+	if err != nil {
+		return nil, err
+	}
+
+	output = &model.SysConfigEditModel{
+		ConfigId: param.ConfigId,
+	}
+	return
+}
+
+func (s *sSysConfig) Delete(ctx context.Context, param *model.SysConfigDeleteParam) (output *model.SysConfigDeleteModel, err error) {
+	m := s.Model(ctx)
+
+	if len(param.ConfigIds) == 0 {
+		return nil, errors.New("请选择要删除的配置")
+	}
+	m = m.WhereIn(dao.SysConfig.Columns().ConfigId, param.ConfigIds)
+	data := make([]entity.SysConfig, 0)
+	err = m.Scan(&data)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range data {
+		if v.ConfigType == "Y" {
+			return nil, errors.New("系统内置配置不能删除")
+		}
+	}
+
+	_, err = m.Delete()
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.SysConfigDeleteModel{
+		ConfigIds: param.ConfigIds,
+	}, nil
+}
+
+func (s *sSysConfig) View(ctx context.Context, param *model.SysConfigViewParam) (output *model.SysConfigViewModel, err error) {
+	m := s.Model(ctx)
+
+	err = m.Where(dao.SysConfig.Columns().ConfigId, param.ConfigId).Scan(&output)
+	if err != nil {
+		return nil, err
+	}
+
 	return
 }

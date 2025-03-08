@@ -25,6 +25,76 @@ export interface GetSysConfigListRes {
   total: number;
 }
 
+export interface AddSysConfigReq {
+  configName: string;
+  configKey: string;
+  configValue: string;
+  configType: string;
+  remark: string;
+} 
+
+export interface AddSysConfigRes {
+  configId: number;
+}
+
+export interface EditSysConfigReq {
+  configId: number;
+  configName: string;
+  configKey: string;
+  configValue: string;
+  configType: string;
+  remark: string;
+}
+
+export interface EditSysConfigRes {
+  configId: number;
+} 
+
+export interface DeleteSysConfigReq {
+  configIds: number[];
+}
+
+export interface DeleteSysConfigRes {
+  configIds: number[];
+} 
+
+export interface GetSysConfigByIdReq {
+  configId: number;
+}
+
+export interface GetSysConfigByIdRes {
+  configId: number;
+  tenantId: string;
+  configName: string;
+  configKey: string;
+  configValue: string;
+  configType: string;
+  createdDept: number;
+  createdBy: number;
+  createdAt: string;
+  remark: string;
+}
+
 export async function getSysConfigListApi(params: GetSysConfigListReq) {
   return requestClient.get<GetSysConfigListRes>('/system/config/list', { params });
+}
+
+export async function addSysConfigApi(params: AddSysConfigReq | {
+  [x: string]: any;
+}) {
+  return requestClient.post<AddSysConfigRes>('/system/config/add', { ...params });
+}
+
+export async function editSysConfigApi(params: EditSysConfigReq | {
+  [x: string]: any;
+}) {
+  return requestClient.post<EditSysConfigRes>('/system/config/edit', { ...params });
+}
+
+export async function deleteSysConfigApi(params: DeleteSysConfigReq) {
+  return requestClient.post<DeleteSysConfigRes>('/system/config/delete', { ...params });
+} 
+
+export async function getSysConfigByIdApi(params: GetSysConfigByIdReq) {
+  return requestClient.get<GetSysConfigByIdRes>('/system/config/view', { params });
 }
