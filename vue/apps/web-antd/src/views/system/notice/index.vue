@@ -1,22 +1,22 @@
 <script lang="ts" setup>
-import { h } from 'vue';
+import { h, ref } from 'vue';
+import type { DeepPartial } from '@vben/types';
 import type { VbenFormProps } from '#/adapter/form';
-import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
+import type { SysNotice } from '#/api/system/notice';
+import { getVxePopupContainer } from '@vben/utils';
+import { Page, useVbenDrawer } from '@vben/common-ui';
 
-import { Page } from '@vben/common-ui';
-
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
-import dayjs from 'dayjs';
+import { Button, message, Tag, Popconfirm, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysNoticeListApi } from '#/api/system/notice'; 
+import { getSysNoticeListApi, deleteSysNoticeApi } from '#/api/system/notice';
 
 import {
   MdiPlus,
-  MdiEdit,
   MdiDelete,
 } from '@vben/icons';
-
+import noticeDrawer from './notice-drawer.vue';
 interface RowType {
   category: string;
   color: string;
@@ -46,13 +46,13 @@ const formOptions: VbenFormProps = {
       fieldName: 'createdBy',
       label: '创建者',
     },
-    
+
 
     {
       component: 'RangePicker',
-      componentProps:{
-        format:"YYYY-MM-DD",
-        valueFormat:"YYYY-MM-DD",
+      componentProps: {
+        format: "YYYY-MM-DD",
+        valueFormat: "YYYY-MM-DD",
       },
       // defaultValue: [dayjs().subtract(7, 'days'), dayjs()],
       fieldName: 'createdAt',
@@ -88,7 +88,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
+        // message.success(`Query params: ${JSON.stringify(formValues)}`);
         return await getSysNoticeListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -107,31 +107,95 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid] = useVbenVxeGrid({
+
+const gridEvents: DeepPartial<VxeGridListeners> = {
+  checkboxChange: handleCheckboxChange,
+  checkboxAll: handleCheckboxChange,
+};
+
+const CheckboxChecked = ref(false);
+function handleCheckboxChange() {
+  CheckboxChecked.value = gridApi.grid.getCheckboxRecords().length > 0;
+}
+
+
+const [Grid, gridApi] = useVbenVxeGrid({
   formOptions,
   gridOptions,
+  gridEvents,
 });
+
+
+const [NoticeDrawer, noticeDrawerApi] = useVbenDrawer({
+  connectedComponent: noticeDrawer,
+});
+
+
+function handleView(row: SysNotice) {
+  const { noticeId } = row;
+  noticeDrawerApi.setData({ id: noticeId, update: false, view: true });
+  noticeDrawerApi.open();
+}
+
+function handleAdd() {
+  noticeDrawerApi.setData({ update: false, view: false });
+  noticeDrawerApi.open();
+}
+
+function handleEdit(row: SysNotice) {
+  noticeDrawerApi.setData({ id: row.noticeId, update: true, view: false });
+  noticeDrawerApi.open();
+}
+
+async function handleDelete(row: SysNotice) {
+  await deleteSysNoticeApi({ noticeIds: [row.noticeId] });
+  message.success("删除成功");
+  await handleRefresh();
+}
+async function handleRefresh() {
+  await gridApi.query();
+}
+
+
+function handleMultiDelete() {
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids = rows.map((row: SysNotice) => row.noticeId);
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await deleteSysNoticeApi({ noticeIds: ids });
+      message.success("删除成功");
+      await handleRefresh();
+    },
+  });
+}
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
-        
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
-        <Button class="mr-2 flex items-center bg-green-500"  disabled :icon="h(MdiEdit)">编辑</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+    <Grid :table-title="'公告列表'">
+      <template #toolbar-tools>
+
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)"
+          @click="handleMultiDelete">删除</Button>
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '关闭' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
+            @confirm="handleDelete(row)"><Button class="mr-2 border-none p-0" :block="false" type="link"
+              danger>删除</Button></Popconfirm>
         </div>
       </template>
+
     </Grid>
+    <NoticeDrawer @reload="handleRefresh" />
   </Page>
 </template>

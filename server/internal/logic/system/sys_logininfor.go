@@ -4,10 +4,12 @@ import (
 	"context"
 	"xiujieadmin/internal/dao"
 	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/do"
 	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
 
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 type sSysLogininfor struct{}
@@ -54,6 +56,8 @@ func (s *sSysLogininfor) ListLogininfor(ctx context.Context, query *model.SysLog
 }
 
 func (s *sSysLogininfor) AddLogininfor(ctx context.Context, logininfor *model.SysLogininforAddModel) (id int64, err error) {
+	data := do.SysLogininfor{}
+	gconv.Struct(logininfor, &data)
 	result, err := dao.SysLogininfor.Ctx(ctx).Data(logininfor).Save()
 	if err != nil {
 		return 0, err

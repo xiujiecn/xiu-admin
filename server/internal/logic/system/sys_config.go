@@ -75,6 +75,9 @@ func (s *sSysConfig) List(ctx context.Context, param *model.SysConfigListParam) 
 }
 
 func (s *sSysConfig) Add(ctx context.Context, param *model.SysConfigAddParam) (output *model.SysConfigAddModel, err error) {
+	if param == nil || param.ConfigName == "" {
+		return nil, errors.New("配置名称不能为空")
+	}
 	m := s.Model(ctx)
 
 	data := &do.SysConfig{}
@@ -98,13 +101,17 @@ func (s *sSysConfig) Add(ctx context.Context, param *model.SysConfigAddParam) (o
 }
 
 func (s *sSysConfig) Edit(ctx context.Context, param *model.SysConfigEditParam) (output *model.SysConfigEditModel, err error) {
-	m := s.Model(ctx)
+	if param == nil || param.ConfigId == 0 {
+		return nil, errors.New("配置ID不能为空")
+	}
 
 	data := &do.SysConfig{}
 	gconv.Struct(param, data)
 	data.UpdatedBy = contexts.GetUserId(ctx)
 	data.UpdatedAt = gtime.Now()
+	data.ConfigId = nil
 
+	m := s.Model(ctx)
 	_, err = m.Data(data).Where(dao.SysConfig.Columns().ConfigId, param.ConfigId).Update()
 	if err != nil {
 		return nil, err

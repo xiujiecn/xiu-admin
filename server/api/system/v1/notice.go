@@ -2,7 +2,6 @@ package v1
 
 import (
 	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/model/response"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -10,11 +9,46 @@ import (
 
 type SysNoticeListReq struct {
 	g.Meta `path:"/notice/list" method:"get" tags:"公告" summary:"公告列表"`
-	request.PageInfo
-	model.SysNoticeListParam
+	*model.SysNoticeListParam
 }
 
 type SysNoticeListRes struct {
 	response.PageResult
-	Items []*model.SysNotice `json:"items"`
+	Items []*model.SysNoticeListModel `json:"items"`
+}
+
+type SysNoticeAddReq struct {
+	g.Meta `path:"/notice/add" method:"post" tags:"公告" summary:"新增公告"`
+	*model.SysNoticeAddParam
+}
+
+type SysNoticeAddRes struct {
+	*model.SysNoticeAddModel
+}
+
+type SysNoticeEditReq struct {
+	g.Meta `path:"/notice/edit" method:"post" tags:"公告" summary:"编辑公告"`
+	*model.SysNoticeEditParam
+}
+
+type SysNoticeEditRes struct {
+	*model.SysNoticeEditModel
+}
+
+type SysNoticeDeleteReq struct {
+	g.Meta `path:"/notice/delete" method:"post" tags:"公告" summary:"删除公告"`
+	*model.SysNoticeDeleteParam
+}
+
+type SysNoticeDeleteRes struct {
+	*model.SysNoticeDeleteModel
+}
+
+type SysNoticeViewReq struct {
+	g.Meta `path:"/notice/view" method:"get" tags:"公告" summary:"查看公告"`
+	*model.SysNoticeViewParam
+}
+
+type SysNoticeViewRes struct {
+	*model.SysNoticeViewModel
 }

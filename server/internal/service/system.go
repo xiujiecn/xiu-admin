@@ -100,7 +100,12 @@ type (
 		DeleteSysMenu(ctx context.Context, menuId int64) (err error)
 	}
 	ISysNotice interface {
-		GetNoticeList(ctx context.Context, query *model.SysNoticeListParam, page *request.PageInfo) (items []*model.SysNotice, total int, err error)
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, param *model.SysNoticeListParam) (items []*model.SysNoticeListModel, total int, err error)
+		Add(ctx context.Context, param *model.SysNoticeAddParam) (err error)
+		Edit(ctx context.Context, param *model.SysNoticeEditParam) (err error)
+		Delete(ctx context.Context, param *model.SysNoticeDeleteParam) (err error)
+		View(ctx context.Context, param *model.SysNoticeViewParam) (data *model.SysNoticeViewModel, err error)
 	}
 	ISysOperLog interface {
 		GetOperLogList(ctx context.Context, query *model.SysOperLogListParam, page *request.PageInfo) (items []*model.SysOperLogListModel, total int, err error)
