@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"slices"
 
@@ -15,6 +16,7 @@ import (
 	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/packed/response"
+	"xiujieadmin/internal/queues"
 	"xiujieadmin/internal/service"
 )
 
@@ -140,4 +142,25 @@ func (s *sMiddleware) IsExceptLogin(ctx context.Context, path string) bool {
 		}
 	}
 	return false
+}
+
+// OperationLog 操作日志
+func (s *sMiddleware) OperationLog(r *ghttp.Request) {
+	data, err := service.SysOperLog().AnalysisLog(r.GetCtx())
+	if err != nil {
+		g.Log().Error(context.TODO(), "sMiddleware.OperationLog error:%v", err)
+		return
+	}
+	// 写入队列
+	logData, _ := json.Marshal(data)
+	sysOptLogQueue := queues.GetQueue(consts.QueueSysOptLog)
+	if sysOptLogQueue != nil {
+		err = sysOptLogQueue.Push(context.Background(), consts.QueueSysOptLog, logData, 10)
+		if err != nil {
+			g.Log().Error(context.TODO(), "sMiddleware.OperationLog error:%v", err)
+		}
+		g.Log().Info(context.TODO(), "sMiddleware.OperationLog push to queue success,data:%+v", data)
+	} else {
+		g.Log().Error(context.TODO(), "sMiddleware.OperationLog queue not found,data:%+v", data)
+	}
 }

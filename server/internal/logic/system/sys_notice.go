@@ -52,7 +52,7 @@ func (s *sSysNotice) List(ctx context.Context, param *model.SysNoticeListParam) 
 		db = db.Where(dao.SysNotice.Columns().CreatedBy, param.CreatedBy)
 	}
 
-	if param.CreatedAt != nil && len(param.CreatedAt) == 2 {
+	if len(param.CreatedAt) == 2 {
 		createdAt1 := gtime.NewFromStr(param.CreatedAt[0])
 		createdAt2 := gtime.NewFromStr(param.CreatedAt[1])
 
@@ -64,7 +64,7 @@ func (s *sSysNotice) List(ctx context.Context, param *model.SysNoticeListParam) 
 		return nil, 0, err
 	}
 
-	err = db.Page(param.Page, param.PageSize).Scan(&items)
+	err = db.Page(param.Page, param.PageSize).WithAll().Scan(&items)
 	if err != nil {
 		return nil, 0, err
 	}

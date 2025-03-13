@@ -6,11 +6,14 @@ import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table'
 import type { SysNotice } from '#/api/system/notice';
 import { getVxePopupContainer } from '@vben/utils';
 import { Page, useVbenDrawer } from '@vben/common-ui';
-
+import { DictEnum } from '@vben/constants';
+import { getPopupContainer } from '@vben/utils';
+import { getDictOptions } from '#/utils/dict';
 import { Button, message, Tag, Popconfirm, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysNoticeListApi, deleteSysNoticeApi } from '#/api/system/notice';
+import { renderDict } from '#/utils/render';
 
 import {
   MdiPlus,
@@ -37,10 +40,14 @@ const formOptions: VbenFormProps = {
       label: '标题',
     },
     {
-      component: 'Input',
-      fieldName: 'noticeType',
-      label: '类型',
+    component: 'Select',
+    componentProps: {
+      getPopupContainer,
+      options: getDictOptions(DictEnum.SYS_NOTICE_TYPE),
     },
+    fieldName: 'noticeType',
+    label: '公告类型',
+  },
     {
       component: 'Input',
       fieldName: 'createdBy',
@@ -75,9 +82,18 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   columns: [
     { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
     { field: 'noticeTitle', title: '标题' },
-    { field: 'noticeType', title: '类型' },
+    {
+    title: '公告类型',
+    field: 'noticeType',
+    width: 120,
+    slots: {
+      default: ({ row }) => {
+        return renderDict(row.noticeType, DictEnum.SYS_NOTICE_TYPE);
+      },
+    },
+  },
     { field: 'status', title: '状态', slots: { default: 'status' } },
-    { field: 'createdBy', title: '创建者' },
+    { field: 'createdByUser.userName', title: '创建者' },
     { field: 'createdAt', formatter: 'formatDateTime', title: '创建时间' },
     { title: '操作', width: 120, slots: { default: 'action' } }
   ],
