@@ -18,4 +18,8 @@ func InitRouter(ctx context.Context, s *ghttp.Server) {
 		System(ctx, group)
 		Monitor(ctx, group)
 	})
+	//操作日志
+	s.BindHookHandler("/*", ghttp.HookAfterOutput, func(r *ghttp.Request) {
+		service.Middleware().OperationLog(r)
+	})
 }

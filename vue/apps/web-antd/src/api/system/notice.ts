@@ -1,5 +1,5 @@
 import { requestClient } from '#/api/request';
-
+import type { SysUserMini } from '#/api/system/user';
 export interface SysNoticeListReq {
   noticeTitle: string;
   noticeType: string;
@@ -17,6 +17,7 @@ export interface SysNotice {
     createdBy:number;
     createdAt:string;
     remark:string;
+    createdByUser:SysUserMini;
 }
 
 export interface SysNoticeListRes {

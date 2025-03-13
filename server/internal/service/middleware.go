@@ -23,6 +23,8 @@ type (
 		Auth(r *ghttp.Request)
 		// IsExceptLogin 判断是否需要验证登录
 		IsExceptLogin(ctx context.Context, path string) bool
+		// OperationLog 操作日志
+		OperationLog(r *ghttp.Request)
 	}
 )
 

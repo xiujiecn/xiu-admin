@@ -1,16 +1,16 @@
-import type { SysDictData } from '#/api/system/dict';
+import type { SysDictDataListModel } from '#/api/system/dict';
 import { reactive } from 'vue';
 
 import { defineStore } from 'pinia';
 
-export interface DictOption extends SysDictData {
+export interface DictOption extends SysDictDataListModel {
   disabled?: boolean;
   label: string;
   value: number | string;
 }
 
 export function dictToOptions(
-  data: SysDictData[],
+  data: SysDictDataListModel[],
   formatNumber = false,
 ): DictOption[] {
   return data.map((item) => ({
@@ -23,7 +23,7 @@ export function dictToOptions(
 export const useDictStore = defineStore('app-dict', () => {
   const dictOptionsMap = reactive(new Map<string, DictOption[]>());
   const dictRequestCache = reactive(
-    new Map<string, Promise<SysDictData[] | void>>(),
+    new Map<string, Promise<SysDictDataListModel[] | void>>(),
   );
   function getDictOptions(dictName: string): DictOption[] {
     if (!dictName) return [];
@@ -39,7 +39,7 @@ export const useDictStore = defineStore('app-dict', () => {
   }
   function setDictInfo(
     dictName: string,
-    dictValue: SysDictData[],
+    dictValue: SysDictDataListModel[],
     formatNumber = false,
   ) {
     if (

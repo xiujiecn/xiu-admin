@@ -8,6 +8,7 @@ export * from './resize';
 export * from './tippy';
 export * from '@vben-core/form-ui';
 export * from '@vben-core/popup-ui';
+export * from './json-preview';
 
 // 给文档用
 export {

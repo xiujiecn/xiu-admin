@@ -109,6 +109,9 @@ type (
 	}
 	ISysOperLog interface {
 		GetOperLogList(ctx context.Context, query *model.SysOperLogListParam, page *request.PageInfo) (items []*model.SysOperLogListModel, total int, err error)
+		AnalysisLog(ctx context.Context) (data *model.SysOperLogAddParam, err error)
+		ClearOperationLogByDays(ctx context.Context, days int) error
+		RealWrite(ctx context.Context, data entity.SysOperLog) (err error)
 	}
 	ISysOss interface {
 		List(ctx context.Context, query *model.SysOssListParam, pageInfo *request.PageInfo) (items []*model.SysOssListModel, total int, err error)

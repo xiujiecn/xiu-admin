@@ -2,20 +2,16 @@
 import { h } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { SysOperLog } from '#/api/system/oper-log';
+import { Page, useVbenDrawer } from '@vben/common-ui';
 
-import { Page } from '@vben/common-ui';
 
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
-import dayjs from 'dayjs';
+import { Button, message,Tag  } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysOperLogList } from '#/api/system/oper-log'; 
 
-import {
-  MdiPlus,
-  MdiEdit,
-  MdiDelete,
-} from '@vben/icons';
+import viewDrawer from './view-drawer.vue';
 
 interface RowType {
   category: string;
@@ -74,13 +70,13 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
   columns: [
     { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
-    { field: 'businessType', title: '系统模块' },
+    { field: 'businessType', title: '业务类型', slots: { default: 'businessType' } },
     { field: 'method', title: '操作' },
-    { field: 'operatorType', title: '操作人员' },
-    { field: 'operName', title: '部门名称' },
+    { field: 'operName', title: '操作人员' },
+    { field: 'deptName', title: '部门名称' },
     { field: 'operIp', title: '操作地址' },
-    { field: 'status', title: '操作状态' },
-    { field: 'jsonResult', title: '操作时间' },
+    { field: 'status', title: '操作状态', slots: { default: 'status' } },
+    { field: 'operTime', title: '操作时间' },
     { title: '操作', width: 120, slots: { default: 'action' } }
   ],
   exportConfig: {},
@@ -90,7 +86,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
+        // message.success(`Query params: ${JSON.stringify(formValues)}`);
         return await getSysOperLogList({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -113,27 +109,34 @@ const [Grid] = useVbenVxeGrid({
   formOptions,
   gridOptions,
 });
+
+const [ViewDrawer, drawerApi] = useVbenDrawer({
+  connectedComponent: viewDrawer,
+});
+
+function handlePreview(record: SysOperLog) {
+  drawerApi.setData({ record });
+  drawerApi.open();
+}
+
+
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
-        
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
-        <Button class="mr-2 flex items-center bg-green-500"  disabled :icon="h(MdiEdit)">编辑</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+    <Grid table-title="操作日志列表">
+      <template #businessType="{ row }">
+        {{  row.businessType == 1 ? '新增' : row.businessType == 2 ? '修改' : row.businessType == 3 ? '删除' : '其他' }}
       </template>
       <template #status="{ row }">
-        <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '关闭' }}</Tag>
+        <Tag :color="row.status == 0 ? 'green' : 'red'">{{ row.status == 0 ? '正常' : '关闭' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
         </div>
       </template>
     </Grid>
+    <ViewDrawer />
   </Page>
 </template>

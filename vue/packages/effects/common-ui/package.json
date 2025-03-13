@@ -36,6 +36,7 @@
     "tippy.js": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:",
+    "vue-json-pretty": "^2.4.0",
     "vue-tippy": "catalog:"
   },
   "devDependencies": {
