@@ -2,6 +2,7 @@ package model
 
 import (
 	"xiujieadmin/internal/model/entity"
+	"xiujieadmin/internal/model/request"
 
 	"github.com/gogf/gf/v2/os/gtime"
 )
@@ -40,8 +41,16 @@ type SysLogininforViewModel struct {
 }
 
 type SysLogininforListParam struct {
+	request.PageInfo
 	Ipaddr    string   `json:"ipaddr"        description:"登录IP地址"`
 	UserName  string   `json:"userName"      description:"用户账号"`
 	Status    string   `json:"status"        description:"登录状态（0成功 1失败）"`
 	LoginTime []string `json:"loginTime"     description:"访问时间"`
+}
+
+type SysLogininforDeleteParam struct {
+	InfoIds []int64 `json:"infoIds"         description:"访问ID"`
+}
+type SysLogininforDeleteModel struct {
+	InfoIds []int64 `json:"infoIds"         description:"访问ID"`
 }

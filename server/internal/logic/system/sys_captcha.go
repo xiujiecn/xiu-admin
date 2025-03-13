@@ -44,6 +44,10 @@ func (l *sSysCaptcha) GenerateCaptcha(ctx context.Context) (key string, image st
 
 // 验证验证码
 func (l *sSysCaptcha) VerifyCaptcha(ctx context.Context, key string, value string) (err error) {
+	v := store.Get(key, false)
+	if len(v) == 0 {
+		return gerror.NewCode(consts.CodeCaptchaError, "验证码已失效")
+	}
 	ok := store.Verify(key, value, true)
 	if !ok {
 		err = gerror.NewCode(consts.CodeCaptchaError, "验证码错误")

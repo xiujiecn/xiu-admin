@@ -31,35 +31,10 @@ func init() {
 }
 
 func (s *sSysAuth) Login(ctx context.Context, param *model.LoginParams) (res *model.LoginUserOut, token string, err error) {
-	// 验证验证码
-	err = service.SysCaptcha().VerifyCaptcha(ctx, param.CaptchaID, param.CaptchaValue)
-	if err != nil {
-		return nil, "", err
-	}
-	// 获取用户信息
-	user, err := service.SysUser().GetUserByUsernameAndPassword(ctx, param.TenantId, param.Username, param.Password)
-	if err != nil {
-		return nil, "", err
-	}
-	userOut := &model.LoginUserOut{
-		ID:       user.UserId,
-		Username: user.UserName,
-		NickName: user.NickName,
-		Avatar:   user.Avatar,
-		TenantId: user.TenantId,
-		DeptId:   user.DeptId,
-	}
-
-	// 生成token
-	claims, token, err := s.GenerateToken(ctx, userOut)
-	if err != nil {
-		return nil, "", err
-	}
 	ip := g.RequestFromCtx(ctx).GetClientIp()
-	// 保存登录日志
 	logininfor := &model.SysLogininforAddModel{
-		TenantId:      user.TenantId,
-		UserName:      user.UserName,
+		TenantId:      param.TenantId,
+		UserName:      param.Username,
 		ClientKey:     "web",
 		DeviceType:    "web",
 		Ipaddr:        ip,
@@ -70,6 +45,37 @@ func (s *sSysAuth) Login(ctx context.Context, param *model.LoginParams) (res *mo
 		Msg:           "登录成功",
 		LoginTime:     gtime.Now(),
 	}
+	// 验证验证码
+	err = service.SysCaptcha().VerifyCaptcha(ctx, param.CaptchaID, param.CaptchaValue)
+	if err != nil {
+		logininfor.Status = "1"
+		logininfor.Msg = err.Error()
+		return nil, "", err
+	}
+	// 获取用户信息
+	user, err := service.SysUser().GetUserByUsernameAndPassword(ctx, param.TenantId, param.Username, param.Password)
+	if err != nil {
+		logininfor.Status = "1"
+		logininfor.Msg = err.Error()
+		return nil, "", err
+	}
+	userOut := &model.LoginUserOut{
+		ID:       user.UserId,
+		Username: user.UserName,
+		NickName: user.NickName,
+		Avatar:   user.Avatar,
+		TenantId: user.TenantId,
+		DeptId:   user.DeptId,
+	}
+	// 生成token
+	claims, token, err := s.GenerateToken(ctx, userOut)
+	if err != nil {
+		logininfor.Status = "1"
+		logininfor.Msg = err.Error()
+		return nil, "", err
+	}
+
+	// 保存登录日志
 	id, err := service.SysLogininfor().AddLogininfor(ctx, logininfor)
 	if err != nil {
 		return nil, "", err

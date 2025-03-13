@@ -80,8 +80,10 @@ type (
 		Delete(ctx context.Context, param *model.SysDictTypeDeleteParam) (output *model.SysDictTypeDeleteModel, err error)
 	}
 	ISysLogininfor interface {
-		ListLogininfor(ctx context.Context, query *model.SysLogininforListParam, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error)
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, param *model.SysLogininforListParam) (items []*model.SysLogininforListModel, total int, err error)
 		AddLogininfor(ctx context.Context, logininfor *model.SysLogininforAddModel) (id int64, err error)
+		Delete(ctx context.Context, param *model.SysLogininforDeleteParam) (output *model.SysLogininforDeleteModel, err error)
 	}
 	ISysMenu interface {
 		// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单

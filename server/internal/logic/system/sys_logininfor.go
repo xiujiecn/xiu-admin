@@ -2,12 +2,14 @@ package system
 
 import (
 	"context"
+	"errors"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/do"
-	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
 
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 )
@@ -22,33 +24,38 @@ func init() {
 	service.RegisterSysLogininfor(NewSysLogininfor())
 }
 
-func (s *sSysLogininfor) ListLogininfor(ctx context.Context, query *model.SysLogininforListParam, pageInfo *request.PageInfo) (items []*model.SysLogininforListModel, total int, err error) {
-	// 获取当前用户租户编码
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, 0, err
+func (s *sSysLogininfor) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) > 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: true,
+			FilterAuth:   true,
+		})
 	}
-	tenantId := claims.TenantId
-	m := dao.SysLogininfor.Ctx(ctx).Where(dao.SysLogininfor.Columns().TenantId, tenantId)
-	if query.Ipaddr != "" {
-		m = m.WhereLike(dao.SysLogininfor.Columns().Ipaddr, "%"+query.Ipaddr+"%")
+	return handler.Model(dao.SysLogininfor.Ctx(ctx), option...)
+}
+
+func (s *sSysLogininfor) List(ctx context.Context, param *model.SysLogininforListParam) (items []*model.SysLogininforListModel, total int, err error) {
+	m := s.Model(ctx)
+
+	if param.Ipaddr != "" {
+		m = m.WhereLike(dao.SysLogininfor.Columns().Ipaddr, "%"+param.Ipaddr+"%")
 	}
-	if query.UserName != "" {
-		m = m.WhereLike(dao.SysLogininfor.Columns().UserName, "%"+query.UserName+"%")
+	if param.UserName != "" {
+		m = m.WhereLike(dao.SysLogininfor.Columns().UserName, "%"+param.UserName+"%")
 	}
-	if query.Status != "" {
-		m = m.Where(dao.SysLogininfor.Columns().Status, query.Status)
+	if param.Status != "" {
+		m = m.Where(dao.SysLogininfor.Columns().Status, param.Status)
 	}
-	if len(query.LoginTime) == 2 {
-		startTime := gtime.NewFromStr(query.LoginTime[0])
-		endTime := gtime.NewFromStr(query.LoginTime[1])
+	if len(param.LoginTime) == 2 {
+		startTime := gtime.NewFromStr(param.LoginTime[0])
+		endTime := gtime.NewFromStr(param.LoginTime[1])
 		m = m.WhereBetween(dao.SysLogininfor.Columns().LoginTime, startTime, endTime.EndOfDay())
 	}
 	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
 	}
-	err = m.Page(pageInfo.Page, pageInfo.PageSize).Scan(&items)
+	err = m.Page(param.Page, param.PageSize).OrderDesc(dao.SysLogininfor.Columns().InfoId).Scan(&items)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -67,4 +74,19 @@ func (s *sSysLogininfor) AddLogininfor(ctx context.Context, logininfor *model.Sy
 		return 0, err
 	}
 	return id, nil
+}
+
+func (s *sSysLogininfor) Delete(ctx context.Context, param *model.SysLogininforDeleteParam) (output *model.SysLogininforDeleteModel, err error) {
+	m := s.Model(ctx)
+	output = &model.SysLogininforDeleteModel{
+		InfoIds: param.InfoIds,
+	}
+	if len(param.InfoIds) == 0 {
+		return nil, errors.New("请选择要删除的配置")
+	}
+	_, err = m.WhereIn(dao.SysLogininfor.Columns().InfoId, param.InfoIds).Delete()
+	if err != nil {
+		return
+	}
+	return
 }

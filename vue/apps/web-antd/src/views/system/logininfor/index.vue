@@ -1,19 +1,20 @@
 <script lang="ts" setup>
-import { h } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
-import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { DeepPartial } from '@vben/types';
+import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
+import type { SysLogininfor } from '#/api/system/logininfor'
 
-import { Page } from '@vben/common-ui';
+import { h, ref } from 'vue';
+import { getVxePopupContainer } from '@vben/utils';
 
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
-import dayjs from 'dayjs';
+import { Page, useVbenDrawer } from '@vben/common-ui';
+
+import { Button, message, Tag, Modal, Popconfirm } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysLogininforListApi } from '#/api/system/logininfor'; 
-
+import { getSysLogininforListApi, deleteSysLogininforApi } from '#/api/system/logininfor';
+import viewDrawer from './view-drawer.vue';
 import {
-  MdiPlus,
-  MdiEdit,
   MdiDelete,
 } from '@vben/icons';
 
@@ -63,9 +64,9 @@ const formOptions: VbenFormProps = {
     },
     {
       component: 'RangePicker',
-      componentProps:{
-        format:"YYYY-MM-DD",
-        valueFormat:"YYYY-MM-DD",
+      componentProps: {
+        format: "YYYY-MM-DD",
+        valueFormat: "YYYY-MM-DD",
       },
       // defaultValue: [dayjs().subtract(7, 'days'), dayjs()],
       fieldName: 'createdAt',
@@ -106,7 +107,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
+        // message.success(`Query params: ${JSON.stringify(formValues)}`);
         return await getSysLogininforListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -125,31 +126,80 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid] = useVbenVxeGrid({
+const gridEvents: DeepPartial<VxeGridListeners> = {
+  checkboxChange: handleCheckboxChange,
+  checkboxAll: handleCheckboxChange,
+};
+
+const CheckboxChecked = ref(false);
+function handleCheckboxChange() {
+  CheckboxChecked.value = gridApi.grid.getCheckboxRecords().length > 0;
+}
+
+
+const [Grid, gridApi] = useVbenVxeGrid({
   formOptions,
   gridOptions,
+  gridEvents,
 });
+
+
+const [ViewDrawer, drawerApi] = useVbenDrawer({
+  connectedComponent: viewDrawer,
+});
+
+function handlePreview(record: SysLogininfor) {
+  drawerApi.setData({ record });
+  drawerApi.open();
+}
+
+
+async function handleDelete(row: SysLogininfor) {
+  await deleteSysLogininforApi({ infoIds: [row.infoId] });
+  message.success("删除成功");
+  await handleRefresh();
+}
+
+async function handleRefresh() {
+  await gridApi.query();
+}
+
+
+function handleMultiDelete() {
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids = rows.map((row: SysLogininfor) => row.infoId);
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await deleteSysLogininforApi({ infoIds: ids });
+      message.success("删除成功");
+      await handleRefresh();
+    },
+  });
+}
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
-        
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
-        <Button class="mr-2 flex items-center bg-green-500"  disabled :icon="h(MdiEdit)">编辑</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+    <Grid table-title="登录日志列表">
+      <template #toolbar-tools>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '关闭' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
+          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
+            @confirm="handleDelete(row)">
+            <Button class="mr-2 border-none p-0" :block="false" type="link" danger>删除</Button>
+          </Popconfirm>
         </div>
       </template>
     </Grid>
+    <ViewDrawer />
   </Page>
 </template>
