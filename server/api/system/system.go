@@ -40,6 +40,7 @@ type ISystemV1 interface {
 	SysDictDataDelete(ctx context.Context, req *v1.SysDictDataDeleteReq) (res *v1.SysDictDataDeleteRes, err error)
 	SysDictDataView(ctx context.Context, req *v1.SysDictDataViewReq) (res *v1.SysDictDataViewRes, err error)
 	ListLogininfor(ctx context.Context, req *v1.ListLogininforReq) (res *v1.ListLogininforRes, err error)
+	DeleteLogininfor(ctx context.Context, req *v1.DeleteLogininforReq) (res *v1.DeleteLogininforRes, err error)
 	MenuAll(ctx context.Context, req *v1.MenuAllReq) (res *v1.MenuAllRes, err error)
 	MenuList(ctx context.Context, req *v1.MenuListReq) (res *v1.MenuListRes, err error)
 	MenuView(ctx context.Context, req *v1.MenuViewReq) (res *v1.MenuViewRes, err error)

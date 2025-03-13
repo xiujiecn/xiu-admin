@@ -73,11 +73,12 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { field: 'businessType', title: '业务类型', slots: { default: 'businessType' } },
     { field: 'method', title: '操作' },
     { field: 'operName', title: '操作人员' },
-    { field: 'deptName', title: '部门名称' },
-    { field: 'operIp', title: '操作地址' },
+    { field: 'operIp', title: 'IP地址' },
+    { field: 'operLocation', title: 'IP信息' },
     { field: 'status', title: '操作状态', slots: { default: 'status' } },
     { field: 'operTime', title: '操作时间' },
-    { title: '操作', width: 120, slots: { default: 'action' } }
+    { field: 'costTime', title: '操作耗时', slots: { default: 'costTime' } },
+    { title: '操作', width: 50, slots: { default: 'action' } }
   ],
   exportConfig: {},
   height: 'auto',
@@ -130,6 +131,9 @@ function handlePreview(record: SysOperLog) {
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == 0 ? 'green' : 'red'">{{ row.status == 0 ? '正常' : '关闭' }}</Tag>
+      </template>
+      <template #costTime="{ row }">
+        {{ row.costTime }} ms
       </template>
       <template #action="{ row }">
         <div class="flex items-center">

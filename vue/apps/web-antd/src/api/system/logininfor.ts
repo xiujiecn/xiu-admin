@@ -27,6 +27,18 @@ export interface SysLogininforListRes {
   total: number;
 }
 
+export interface SysLogininforDeleteReq {
+  infoIds: number[];
+} 
+
+export interface SysLogininforDeleteRes {
+  infoIds: number[];
+}
+
 export async function getSysLogininforListApi(params: SysLogininforListReq) {
   return requestClient.get<SysLogininforListRes>('/system/logininfor/list', { params });
+}
+
+export async function deleteSysLogininforApi(params: SysLogininforDeleteReq) {
+  return requestClient.post<SysLogininforDeleteRes>('/system/logininfor/delete', { ...params });
 }

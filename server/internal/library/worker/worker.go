@@ -20,7 +20,7 @@ type Worker struct {
 }
 
 type periodTask struct {
-	Expr      string `json:"expr"` // cron expr github.com/robfig/cron/v3
+	Expr      string `json:"expr"` // asynq
 	Group     string `json:"group"`
 	Uid       string `json:"uid"`
 	Payload   []byte `json:"payload"`

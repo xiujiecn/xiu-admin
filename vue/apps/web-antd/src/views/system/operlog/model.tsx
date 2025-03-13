@@ -35,19 +35,27 @@ import type {
       labelMinWidth: 80,
       render(value, { businessType }) {
         const operType = renderDict(businessType, DictEnum.SYS_OPER_TYPE);
-        return `
+        return (
           <div class="flex items-center">
-            <Tag>${value}</Tag>
-            ${operType}
+            <Tag>{value}</Tag>
+            {operType}
           </div>
-        `;
+        )
+        ;
       },
     },
     {
       field: 'operIp',
       label: '操作信息',
       render(_, data) {
-        return `账号: ${data.operName} / ${data.deptName} / ${data.operIp} / ${data.operLocation}`;
+        return (
+          <div class="flex items-center">
+            <Tag>{data.operName}</Tag>
+            {data.deptName}
+            {data.operIp}
+            {data.operLocation}
+          </div>
+        )
       },
     },
     {
@@ -56,18 +64,22 @@ import type {
       render(_, data) {
         const { operUrl, requestMethod } = data;
         const methodTag = renderHttpMethodTag(requestMethod);
-        return `
+        return (
           <span>
-            ${methodTag} ${operUrl}
+            {methodTag} {operUrl}
           </span>
-        `;
+        )
+        ;
       },
     },
     {
       field: 'errorMsg',
       label: '异常信息',
       render(value) {
-        return `<span class="font-bold text-red-600">${value}</span>`;
+        return (
+          <span class="font-bold text-red-600">{value}</span>
+        )
+        ;
       },
       show: (data) => {
         return data && data.errorMsg !== '';
@@ -84,22 +96,24 @@ import type {
       field: 'operParam',
       label: '请求参数',
       render(value) {
-        return `
+        return (
           <div class="max-h-[300px] w-full overflow-y-auto">
-            ${renderJsonPreview(value)}
+            {renderJsonPreview(value)}
           </div>
-        `;
+        )
+        ;
       },
     },
     {
       field: 'jsonResult',
       label: '响应参数',
       render(value) {
-        return `
+        return (
           <div class="max-h-[300px] w-full overflow-y-auto">
-            ${renderJsonPreview(value)}
+            {renderJsonPreview(value)}
           </div>
-        `;
+        )
+        ;
       },
       show(data) {
         return data && data.jsonResult;
@@ -109,7 +123,10 @@ import type {
       field: 'costTime',
       label: '耗时',
       render(value) {
-        return `${value} ms`;
+        return (
+          <span>{value} ms</span>
+        )
+        ;
       },
     },
     {
