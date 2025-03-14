@@ -25,6 +25,7 @@ type SysOssColumns struct {
 	FileName     string // 文件名
 	OriginalName string // 原名
 	FileSuffix   string // 文件后缀名
+	Path         string // 存储路径
 	Url          string // URL地址
 	CreatedDept  string // 创建部门
 	CreatedAt    string // 创建时间
@@ -41,6 +42,7 @@ var sysOssColumns = SysOssColumns{
 	FileName:     "file_name",
 	OriginalName: "original_name",
 	FileSuffix:   "file_suffix",
+	Path:         "path",
 	Url:          "url",
 	CreatedDept:  "created_dept",
 	CreatedAt:    "created_at",

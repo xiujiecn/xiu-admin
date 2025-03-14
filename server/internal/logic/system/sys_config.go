@@ -161,3 +161,12 @@ func (s *sSysConfig) View(ctx context.Context, param *model.SysConfigViewParam) 
 
 	return
 }
+
+func (s *sSysConfig) GetConfigByKey(ctx context.Context, configKey string) (config *entity.SysConfig, err error) {
+	m := s.Model(ctx)
+	err = m.Where(dao.SysConfig.Columns().ConfigKey, configKey).Scan(&config)
+	if err != nil {
+		return nil, err
+	}
+	return
+}

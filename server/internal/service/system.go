@@ -14,6 +14,7 @@ import (
 	"xiujieadmin/internal/model/request"
 
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/net/ghttp"
 )
 
 type (
@@ -44,6 +45,7 @@ type (
 		Edit(ctx context.Context, param *model.SysConfigEditParam) (output *model.SysConfigEditModel, err error)
 		Delete(ctx context.Context, param *model.SysConfigDeleteParam) (output *model.SysConfigDeleteModel, err error)
 		View(ctx context.Context, param *model.SysConfigViewParam) (output *model.SysConfigViewModel, err error)
+		GetConfigByKey(ctx context.Context, configKey string) (config *entity.SysConfig, err error)
 	}
 	ISysDept interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -116,7 +118,23 @@ type (
 		RealWrite(ctx context.Context, data entity.SysOperLog) (err error)
 	}
 	ISysOss interface {
-		List(ctx context.Context, query *model.SysOssListParam, pageInfo *request.PageInfo) (items []*model.SysOssListModel, total int, err error)
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, param *model.SysOssListParam, pageInfo *request.PageInfo) (items []*model.SysOssListModel, total int, err error)
+		View(ctx context.Context, param *model.SysOssViewParam) (output *model.SysOssViewModel, err error)
+		Download(ctx context.Context, param *model.SysOssDownloadParam) (output *model.SysOssDownloadModel, err error)
+		Delete(ctx context.Context, param *model.SysOssDeleteParam) (output *model.SysOssDeleteModel, err error)
+		Upload(ctx context.Context, param *model.SysOssUploadParam) (output *model.SysOssUploadModel, err error)
+		UploadLocal(ctx context.Context, file *ghttp.UploadFile) (result model.UploadResponse, err error)
+		CheckType(ctx context.Context, checkFileType string, file *ghttp.UploadFile) (err error)
+		CheckSize(ctx context.Context, checkFileType string, file *ghttp.UploadFile) (err error)
+	}
+	ISysOssConfig interface {
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, param *model.SysOssConfigListParam) (items []*model.SysOssConfigListModel, total int, err error)
+		View(ctx context.Context, param *model.SysOssConfigViewParam) (item *model.SysOssConfigViewModel, err error)
+		Add(ctx context.Context, param *model.SysOssConfigAddParam) (item *model.SysOssConfigAddModel, err error)
+		Edit(ctx context.Context, param *model.SysOssConfigEditParam) (item *model.SysOssConfigEditModel, err error)
+		Delete(ctx context.Context, param *model.SysOssConfigDeleteParam) (item *model.SysOssConfigDeleteModel, err error)
 	}
 	ISysPost interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -208,6 +226,7 @@ var (
 	localSysNotice     ISysNotice
 	localSysOperLog    ISysOperLog
 	localSysOss        ISysOss
+	localSysOssConfig  ISysOssConfig
 	localSysPost       ISysPost
 	localSysRole       ISysRole
 	localSysSocial     ISysSocial
@@ -346,6 +365,17 @@ func SysOss() ISysOss {
 
 func RegisterSysOss(i ISysOss) {
 	localSysOss = i
+}
+
+func SysOssConfig() ISysOssConfig {
+	if localSysOssConfig == nil {
+		panic("implement not found for interface ISysOssConfig, forgot register?")
+	}
+	return localSysOssConfig
+}
+
+func RegisterSysOssConfig(i ISysOssConfig) {
+	localSysOssConfig = i
 }
 
 func SysPost() ISysPost {

@@ -12,6 +12,12 @@ export default defineConfig(async () => {
             target: 'http://localhost:8199/api/v1',
             ws: true,
           },
+          '/upload': {
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\/upload/, ''),
+            target: 'http://localhost:8199/upload',
+            ws: true,
+          },
         },
       },
     },

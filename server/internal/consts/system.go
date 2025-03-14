@@ -49,3 +49,9 @@ var (
 	SysRoleDataScopePersonal               = "5"
 	SysRoleDataScopeDeptAndBelowOrPersonal = "6"
 )
+
+var (
+	// 上传文件类型: 1文件 2图片
+	SysUploadFileTypeFile = "file"
+	SysUploadFileTypeImg  = "img"
+)

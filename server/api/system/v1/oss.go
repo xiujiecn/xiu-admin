@@ -18,3 +18,21 @@ type SysOssListRes struct {
 	Items []*model.SysOssListModel `json:"items"`
 	response.PageResult
 }
+
+type SysOssViewReq struct {
+	g.Meta `path:"/oss/view" method:"get" tags:"系统" summary:"查看文件"`
+	*model.SysOssViewParam
+}
+
+type SysOssViewRes struct {
+	*model.SysOssViewModel
+}
+
+type SysOssDeleteReq struct {
+	g.Meta `path:"/oss/delete" method:"post" tags:"系统" summary:"删除文件"`
+	*model.SysOssDeleteParam
+}
+
+type SysOssDeleteRes struct {
+	*model.SysOssDeleteModel
+}

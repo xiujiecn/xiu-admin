@@ -10,6 +10,7 @@ export enum DictEnum {
   SYS_SHOW_HIDE = 'sys_show_hide', // 显示状态
   SYS_USER_SEX = 'sys_user_sex', // 性别
   SYS_YES_NO = 'sys_yes_no', // 是否
+  SYS_YES_NO_NUM = 'sys_yes_no_num', // 是否数字
   WF_BUSINESS_STATUS = 'wf_business_status', // 业务状态
   WF_FORM_TYPE = 'wf_form_type', // 表单类型
   WF_TASK_STATUS = 'wf_task_status', // 任务状态

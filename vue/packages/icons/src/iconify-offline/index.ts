@@ -1,5 +1,15 @@
 import { createIconifyOfflineIcon } from '@vben-core/icons';
 import userOutlined from '@iconify/icons-ant-design/user-outlined';
+import androidOutlined from '@iconify/icons-ant-design/android-outlined';
+import baiduOutlined from '@iconify/icons-ant-design/ie-outlined';
+import ieOutlined from '@iconify/icons-ant-design/ie-outlined';
+import windowsOutlined from '@iconify/icons-ant-design/windows-outlined';
+import chromeOutlined from '@iconify/icons-ant-design/chrome-outlined';
+import dingtalkOutlined from '@iconify/icons-ant-design/dingtalk-outlined';
+import uploadOutlined from '@iconify/icons-ant-design/upload-outlined';
+import plusOutlined from '@iconify/icons-ant-design/plus-outlined';
+import deleteOutlined from '@iconify/icons-ant-design/delete-outlined';
+import downloadOutlined from '@iconify/icons-ant-design/download-outlined';
 import comandLine from '@iconify/icons-flat-color-icons/command-line';
 import redisIcon from '@iconify/icons-logos/redis';
 import memoryIcon from '@iconify/icons-la/memory';
@@ -56,31 +66,31 @@ export const GithubOAuthIcon = createIconifyOfflineIcon(
 // 系统相关
 export const AndroidIcon = createIconifyOfflineIcon(
   'ant-design:android-outlined',
-  userOutlined,
+  androidOutlined,
 );
 export const BaiduIcon = createIconifyOfflineIcon(
   'ant-design:baidu-outlined',
-  userOutlined,
+  baiduOutlined,
 );
 export const ChromeIcon = createIconifyOfflineIcon(
   'ant-design:chrome-outlined',
-  userOutlined,
+  chromeOutlined,
 );
 export const DefaultBrowserIcon = createIconifyOfflineIcon(
   'ant-design:ie-outlined',
-    userOutlined,
+    ieOutlined,
   );
 export const DefaultOsIcon = createIconifyOfflineIcon(
   'ant-design:windows-outlined',
-  userOutlined,
+  windowsOutlined,
 );
 export const DingtalkIcon = createIconifyOfflineIcon(
   'ant-design:dingtalk-outlined',
-  userOutlined,
+  dingtalkOutlined,
 );
 export const EdgeIcon = createIconifyOfflineIcon(
   'ant-design:ie-outlined',
-  userOutlined,
+  ieOutlined,
 );
 export const FirefoxIcon = createIconifyOfflineIcon(
   'simple-icons:firefoxbrowser',
@@ -122,4 +132,20 @@ export const UcIcon = createIconifyOfflineIcon(
 export const WindowsIcon = createIconifyOfflineIcon(
   'uiw:windows',
   windowsIcon,
+);
+export const UploadOutlined = createIconifyOfflineIcon(
+  'ant-design:upload-outlined',
+  uploadOutlined,
+);
+export const PlusOutlined = createIconifyOfflineIcon(
+  'ant-design:plus-outlined',
+  plusOutlined,
+);
+export const DeleteOutlined = createIconifyOfflineIcon(
+  'ant-design:delete-outlined',
+  deleteOutlined,
+);
+export const DownloadOutlined = createIconifyOfflineIcon(
+  'ant-design:download-outlined',
+  downloadOutlined,
 );
