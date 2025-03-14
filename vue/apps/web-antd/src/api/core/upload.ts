@@ -18,8 +18,8 @@ export function uploadApi(
   onUploadProgress?: AxiosProgressEvent,
 ) {
   return requestClient.upload(
-    '/resource/oss/upload',
-    { file },
+    '/common/oss/upload',
+    { file,fileType: 'file' },
     { onUploadProgress, timeout: 60_000 },
   );
 }

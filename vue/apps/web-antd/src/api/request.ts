@@ -118,10 +118,14 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
               // 拿到字符串转json对象
               responseData.data = JSON.parse(await blob.text());
           }
+        } else if (headers['content-type']?.includes?.('application/octet-stream')) {
+          // 下载文件
+          return responseData;
         }
         const { code, data, message: msg, ...other } = responseData;
         // 业务状态码为200则请求成功
         const hasSuccess = Reflect.has(responseData, 'code') && code === 0;
+        const hasLoginTimeout = Reflect.has(responseData, 'code') && code === 61;
         if (hasSuccess) {
           let successMsg = msg;
 
@@ -145,6 +149,21 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
           }
           // 没有data 将其他参数包装为data
           return other;
+        }
+        if (hasLoginTimeout) {
+          // 已经在登出过程中 不再执行
+          if (isLogoutProcessing) {
+            return;
+          }
+          isLogoutProcessing = true;
+          const _msg = $t('http.loginTimeout');
+          const userStore = useAuthStore();
+          userStore.logout().finally(() => {
+            message.error(_msg);
+            isLogoutProcessing = false;
+          });
+          // 不再执行下面逻辑
+          return;
         }
       } else if (status == 401) {
         // 已经在登出过程中 不再执行

@@ -17,6 +17,7 @@ type SysOss struct {
 	FileName     interface{} // 文件名
 	OriginalName interface{} // 原名
 	FileSuffix   interface{} // 文件后缀名
+	Path         interface{} // 存储路径
 	Url          interface{} // URL地址
 	CreatedDept  interface{} // 创建部门
 	CreatedAt    *gtime.Time // 创建时间
