@@ -209,6 +209,11 @@ function handleMultiDelete() {
 function handleReload() {
   tableApi.query();
 }
+
+function handleStatusChange(row: SysPostListData) {
+  console.log(row);
+}
+
 </script>
 
 <template>
@@ -226,7 +231,7 @@ function handleReload() {
         <Button class="mr-2 flex items-center "  :icon="h(MdiExport)" @click="handleExport">导出</Button>
       </template>
       <template #open="{ row }">
-        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" />
+        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'"  @change="handleStatusChange(row)" />
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '停用' }}</Tag>
