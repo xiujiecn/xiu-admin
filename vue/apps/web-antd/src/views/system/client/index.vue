@@ -1,21 +1,20 @@
 <script lang="ts" setup>
-import { h } from 'vue';
+import { h,ref } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
-import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
+import type { DeepPartial } from '@vben/types';
+import type { SysClient } from '#/api/system/client';
 
-import { Page } from '@vben/common-ui';
-
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
-import dayjs from 'dayjs';
-
+import { getVxePopupContainer } from '@vben/utils';
+import { Page, useVbenDrawer } from '@vben/common-ui';
+import { Button, message,Tag, Modal, Popconfirm,Switch } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysClientListApi } from '#/api/system/client'; 
+import { getSysClientListApi, postSysClientDeleteApi, postSysClientStatusApi } from '#/api/system/client'; 
+import { MdiPlus, MdiDelete,} from '@vben/icons';
 
-import {
-  MdiPlus,
-  MdiEdit,
-  MdiDelete,
-} from '@vben/icons';
+import { querySchema, columns, } from './model';
+import viewDrawer from './view-drawer.vue';
+import editDrawer from './edit-drawer.vue';
 
 interface RowType {
   category: string;
@@ -30,23 +29,7 @@ const formOptions: VbenFormProps = {
   // 默认展开
   collapsed: false,
   fieldMappingTime: [['date', ['start', 'end']]],
-  schema: [
-    {
-      component: 'Input',
-      fieldName: 'clientId',
-      label: '客户端ID',
-    },
-    {
-      component: 'Input',
-      fieldName: 'clientKey',
-      label: '客户端Key',
-    },
-    {
-      component: 'Input',
-      fieldName: 'clientSecret',
-      label: '客户端Secret',
-    },
-  ],
+  schema: querySchema,
   // 控制表单是否显示折叠按钮
   showCollapseButton: true,
   // 是否在字段值改变时提交表单
@@ -60,27 +43,19 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     highlight: true,
     labelField: 'id',
   },
-  columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
-    { field: 'clientId', title: '客户端ID' },
-    { field: 'clientKey', title: '客户端Key' },
-    { field: 'clientSecret', title: '客户端Secret' },
-    { field: 'grantType', title: '授权类型' },
-    { field: 'deviceType', title: '设备类型' },
-    { field: 'activeTimeout', title: '活跃超时时间' },
-    { field: 'timeout', title: '固定超时' },
-    { field: 'status', title: '状态', slots: { default: 'status' } },
-    { field: 'createdAt', formatter: 'formatDateTime', title: '创建时间' },
-    { title: '操作', width: 120, slots: { default: 'action' } }
-  ],
+  rowConfig: {
+    keyField: 'id',
+  },
+  columns: columns,
   exportConfig: {},
   height: 'auto',
   keepSource: true,
+  showOverflow: false,
   pagerConfig: {},
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
+        // message.success(`Query params: ${JSON.stringify(formValues)}`);
         return await getSysClientListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -99,31 +74,126 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid] = useVbenVxeGrid({
+const gridEvents: DeepPartial<VxeGridListeners> = {
+  checkboxChange: handleCheckboxChange,
+  checkboxAll: handleCheckboxChange,
+};
+
+const CheckboxChecked = ref(false);
+function handleCheckboxChange() {
+  CheckboxChecked.value = gridApi.grid.getCheckboxRecords().length > 0;
+}
+
+const [Grid, gridApi] = useVbenVxeGrid({
   formOptions,
   gridOptions,
+  gridEvents,
 });
+
+
+const [ViewDrawer, drawerApi] = useVbenDrawer({
+  connectedComponent: viewDrawer,
+});
+
+function handlePreview(record: SysClient) {
+  drawerApi.setData({ record });
+  drawerApi.open();
+}
+
+
+
+const [EditDrawer, editDrawerApi] = useVbenDrawer({
+  connectedComponent: editDrawer,
+});
+
+function handleAdd() {
+  editDrawerApi.setData({ update: false, view: false });
+  editDrawerApi.open();
+}
+
+function handleEdit(row: SysClient) {
+  editDrawerApi.setData({ id: row.id, update: true, view: false });
+  editDrawerApi.open();
+}
+
+async function handleDelete(row: SysClient) {
+  if(row.id === 1) {
+    message.error("PC客户端不允许删除");
+    return;
+  }
+  await postSysClientDeleteApi({ ids: [row.id] });
+  message.success("删除成功");
+  await handleRefresh();
+}
+
+async function handleRefresh() {
+  await gridApi.query();
+}
+
+
+function handleMultiDelete() {
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids: string[] = [];
+  for (const row of rows) {
+    if (row.id != 1) {
+      ids.push(row.id);
+    }else {
+      message.error("PC客户端不允许删除");
+      return;
+    }
+  }
+
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await postSysClientDeleteApi({ ids: ids });
+      message.success("删除成功");
+      await handleRefresh();
+    },
+  });
+}
+
+async function handleStatusChange(row: SysClient) {
+  // console.log('vue/apps/web-antd/src/views/system/client/index.vue handleStatusChange',row);
+  if(row.id === 1) {
+    message.error("PC客户端不允许禁用");
+    return;
+  }
+  await postSysClientStatusApi({ id: row.id, status: row.status }); 
+  await message.success("操作成功")
+  await handleRefresh();
+}
+
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
-        
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)">新增</Button>
-        <Button class="mr-2 flex items-center bg-green-500"  disabled :icon="h(MdiEdit)">编辑</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+    <Grid table-title="客户端列表">
+      <template #toolbar-tools>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
       </template>
       <template #status="{ row }">
-        <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '停用' }}</Tag>
+        <!-- pc不允许禁用 禁用了直接登录不了 应该设置disabled -->
+        <!-- 登录提示: 认证权限类型已禁用 -->
+        <Switch
+          v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" :disabled="row.id === 1"
+          @change="handleStatusChange(row)"
+        />
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)">  
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger @click="handleDelete(row)">删除</Button>
+          </Popconfirm>
         </div>
       </template>
     </Grid>
+    <ViewDrawer />
+    <EditDrawer @reload="handleRefresh" />
   </Page>
 </template>

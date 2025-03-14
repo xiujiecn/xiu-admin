@@ -36,7 +36,12 @@ type (
 		VerifyCaptcha(ctx context.Context, key string, value string) (err error)
 	}
 	ISysClient interface {
-		List(ctx context.Context, query *model.SysClientListParam, pageInfo *request.PageInfo) (items []*model.SysClientListModel, total int, err error)
+		List(ctx context.Context, query *model.SysClientListParam) (items []*model.SysClientListModel, total int, err error)
+		View(ctx context.Context, param *model.SysClientViewParam) (item *model.SysClientViewModel, err error)
+		Add(ctx context.Context, param *model.SysClientAddParam) (output *model.SysClientAddModel, err error)
+		Edit(ctx context.Context, param *model.SysClientEditParam) (output *model.SysClientEditModel, err error)
+		Delete(ctx context.Context, param *model.SysClientDeleteParam) (output *model.SysClientDeleteModel, err error)
+		Status(ctx context.Context, param *model.SysClientStatusParam) (output *model.SysClientStatusModel, err error)
 	}
 	ISysConfig interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -125,6 +130,8 @@ type (
 		Delete(ctx context.Context, param *model.SysOssDeleteParam) (output *model.SysOssDeleteModel, err error)
 		Upload(ctx context.Context, param *model.SysOssUploadParam) (output *model.SysOssUploadModel, err error)
 		UploadLocal(ctx context.Context, file *ghttp.UploadFile) (result model.UploadResponse, err error)
+		DownloadLocal(ctx context.Context, file *entity.SysOss) (err error)
+		DeleteLocal(ctx context.Context, file *entity.SysOss) (err error)
 		CheckType(ctx context.Context, checkFileType string, file *ghttp.UploadFile) (err error)
 		CheckSize(ctx context.Context, checkFileType string, file *ghttp.UploadFile) (err error)
 	}
