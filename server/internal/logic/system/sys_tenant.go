@@ -2,11 +2,16 @@ package system
 
 import (
 	"context"
+	"errors"
+	"slices"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/entity"
-	"xiujieadmin/internal/model/request"
+	"xiujieadmin/internal/model/do"
 	"xiujieadmin/internal/service"
+
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 type sSysTenant struct {
@@ -21,34 +26,36 @@ func init() {
 }
 
 // 获取租户信息
-func (l *sSysTenant) GetTenantInfo(ctx context.Context, tenantId string) (data *entity.SysTenant, err error) {
-	err = dao.SysTenant.Ctx(ctx).Where(dao.SysTenant.Columns().TenantId, tenantId).Scan(&data)
-	return
-}
-
-// 获取租户套餐
-func (l *sSysTenant) GetTenantPackage(ctx context.Context, packageId int64) (data *entity.SysTenantPackage, err error) {
-	err = dao.SysTenantPackage.Ctx(ctx).Where(dao.SysTenantPackage.Columns().PackageId, packageId).Scan(&data)
+func (l *sSysTenant) View(ctx context.Context, param *model.SysTenantViewParam) (data *model.SysTenantViewModel, err error) {
+	db := dao.SysTenant.Ctx(ctx)
+	if param.Id != 0 {
+		db = db.Where(dao.SysTenant.Columns().Id, param.Id)
+	} else if param.TenantId != "" {
+		db = db.Where(dao.SysTenant.Columns().TenantId, param.TenantId)
+	} else {
+		return nil, errors.New("参数错误")
+	}
+	err = db.Scan(&data)
 	return
 }
 
 // 获取租户列表
-func (l *sSysTenant) List(ctx context.Context, query *model.SysTenantListParam, page *request.PageInfo) (data []*model.SysTenantListModel, total int, err error) {
+func (l *sSysTenant) List(ctx context.Context, param *model.SysTenantListParam) (data []*model.SysTenantListModel, total int, err error) {
 	db := dao.SysTenant.Ctx(ctx)
-	if query.TenantId != "" {
-		db = db.Where(dao.SysTenant.Columns().TenantId, query.TenantId)
+	if param.TenantId != "" {
+		db = db.Where(dao.SysTenant.Columns().TenantId, param.TenantId)
 	}
-	if query.ContactUserName != "" {
-		db = db.WhereLike(dao.SysTenant.Columns().ContactUserName, "%"+query.ContactUserName+"%")
+	if param.ContactUserName != "" {
+		db = db.WhereLike(dao.SysTenant.Columns().ContactUserName, "%"+param.ContactUserName+"%")
 	}
-	if query.ContactPhone != "" {
-		db = db.WhereLike(dao.SysTenant.Columns().ContactPhone, "%"+query.ContactPhone+"%")
+	if param.ContactPhone != "" {
+		db = db.WhereLike(dao.SysTenant.Columns().ContactPhone, "%"+param.ContactPhone+"%")
 	}
-	if query.CompanyName != "" {
-		db = db.WhereLike(dao.SysTenant.Columns().CompanyName, "%"+query.CompanyName+"%")
+	if param.CompanyName != "" {
+		db = db.WhereLike(dao.SysTenant.Columns().CompanyName, "%"+param.CompanyName+"%")
 	}
-	if query.LicenseNumber != "" {
-		db = db.WhereLike(dao.SysTenant.Columns().LicenseNumber, "%"+query.LicenseNumber+"%")
+	if param.LicenseNumber != "" {
+		db = db.WhereLike(dao.SysTenant.Columns().LicenseNumber, "%"+param.LicenseNumber+"%")
 	}
 
 	total, err = db.Count()
@@ -56,27 +63,91 @@ func (l *sSysTenant) List(ctx context.Context, query *model.SysTenantListParam, 
 		return nil, 0, err
 	}
 
-	err = db.Page(page.Page, page.PageSize).Scan(&data)
+	err = db.Page(param.Page, param.PageSize).OrderAsc(dao.SysTenant.Columns().PackageId).Scan(&data)
 	if err != nil {
 		return nil, 0, err
 	}
 	return data, total, nil
 }
 
-func (l *sSysTenant) TenantPackageList(ctx context.Context, query *model.SysTenantPackageListParam, page *request.PageInfo) (data []*model.SysTenantPackageListModel, total int, err error) {
-	db := dao.SysTenantPackage.Ctx(ctx)
-	if query.PackageName != "" {
-		db = db.WhereLike(dao.SysTenantPackage.Columns().PackageName, "%"+query.PackageName+"%")
-	}
+func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (output *model.SysTenantAddModel, err error) {
+	data := &do.SysTenant{}
+	gconv.Struct(param, &data)
+	data.CreatedAt = gtime.Now()
+	data.CreatedBy = contexts.GetUserId(ctx)
+	data.CreatedDept = contexts.GetDeptId(ctx)
 
-	total, err = db.Count()
+	db := dao.SysTenant.Ctx(ctx)
+	id, err := db.Data(data).OmitNil().InsertAndGetId()
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
+	output = &model.SysTenantAddModel{
+		Id: id,
+	}
+	return
+}
 
-	err = db.Page(page.Page, page.PageSize).Scan(&data)
-	if err != nil {
-		return nil, 0, err
+func (l *sSysTenant) Edit(ctx context.Context, param *model.SysTenantEditParam) (output *model.SysTenantEditModel, err error) {
+	if param.Id == 0 {
+		return nil, errors.New("参数错误")
 	}
-	return data, total, nil
+	data := &do.SysTenant{}
+	gconv.Struct(param, &data)
+	data.UpdatedAt = gtime.Now()
+	data.UpdatedBy = contexts.GetUserId(ctx)
+	db := dao.SysTenant.Ctx(ctx)
+	db = db.Where(dao.SysTenant.Columns().Id, param.Id)
+	_, err = db.Data(data).OmitNil().Update()
+	if err != nil {
+		return nil, err
+	}
+	output = &model.SysTenantEditModel{
+		Id: param.Id,
+	}
+	return
+}
+
+func (l *sSysTenant) Delete(ctx context.Context, param *model.SysTenantDeleteParam) (output *model.SysTenantDeleteModel, err error) {
+	if len(param.Ids) == 0 {
+		return nil, errors.New("参数错误")
+	}
+	if slices.Contains(param.Ids, 1) {
+		return nil, errors.New("不能删除默认租户")
+	}
+	data := &do.SysTenant{}
+	gconv.Struct(param, &data)
+	data.DeletedAt = gtime.Now()
+	data.DeletedBy = contexts.GetUserId(ctx)
+
+	db := dao.SysTenant.Ctx(ctx)
+	db = db.WhereIn(dao.SysTenant.Columns().Id, param.Ids)
+	_, err = db.Data(data).OmitNil().Update()
+	if err != nil {
+		return nil, err
+	}
+	output = &model.SysTenantDeleteModel{
+		Ids: param.Ids,
+	}
+	return
+}
+
+func (l *sSysTenant) Status(ctx context.Context, param *model.SysTenantStatusParam) (output *model.SysTenantStatusModel, err error) {
+	if param.Id == 0 {
+		return nil, errors.New("参数错误")
+	}
+	data := &do.SysTenant{}
+	gconv.Struct(param, &data)
+	data.UpdatedAt = gtime.Now()
+	data.UpdatedBy = contexts.GetUserId(ctx)
+	db := dao.SysTenant.Ctx(ctx)
+	db = db.Where(dao.SysTenant.Columns().Id, param.Id)
+	_, err = db.Data(data).OmitNil().Update()
+	if err != nil {
+		return nil, err
+	}
+	output = &model.SysTenantStatusModel{
+		Id: param.Id,
+	}
+	return
 }

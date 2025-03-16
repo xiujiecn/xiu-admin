@@ -40,12 +40,16 @@ func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListPa
 	m := dao.SysMenu.Ctx(ctx)
 	if claims.TenantId != consts.DefaultSystemTenantCode {
 		// 获取租户信息
-		tenantInfo, err := service.SysTenant().GetTenantInfo(ctx, claims.TenantId)
+		tenantInfo, err := service.SysTenant().View(ctx, &model.SysTenantViewParam{
+			TenantId: claims.TenantId,
+		})
 		if err != nil {
 			return nil, 0, err
 		}
 		// 获取租户套餐
-		tenantPackage, err := service.SysTenant().GetTenantPackage(ctx, tenantInfo.PackageId)
+		tenantPackage, err := service.SysTenantPackage().View(ctx, &model.SysTenantPackageViewParam{
+			PackageId: tenantInfo.PackageId,
+		})
 		if err != nil {
 			return nil, 0, err
 		}
