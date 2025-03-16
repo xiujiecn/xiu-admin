@@ -8,6 +8,7 @@ import { addFullName, cloneDeep } from '@vben/utils';
 import { useVbenForm } from '#/adapter/form';
 import { Alert } from 'ant-design-vue';
 import { addSysTenantApi, editSysTenantApi, getSysTenantViewApi } from '#/api/system/tenant';
+import { getSysTenantPackageListApi } from '#/api/system/tenant_package';
 import { drawerSchema } from './model';
 
 const emit = defineEmits<{ reload: [] }>();
@@ -17,6 +18,25 @@ interface ModalProps {
   view: boolean;
 }
 
+
+async function setupPackageSelect() {
+  const tenantPackageList = await getSysTenantPackageListApi({page:1,pageSize:1000});
+  const options = tenantPackageList.items.map((item: any) => ({
+    label: item.packageName,
+    value: item.packageId,
+  }));
+  formApi.updateSchema([
+    {
+      componentProps: {
+        optionFilterProp: 'label',
+        optionLabelProp: 'label',
+        options,
+        showSearch: true,
+      },
+      fieldName: 'packageId',
+    },
+  ]);
+}
 
 const isUpdate = ref(false);
 const isView = ref(false);
@@ -49,6 +69,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
       return null;
     }
     drawerApi.setState({confirmLoading:true,loading:true})
+    await setupPackageSelect();
     const { id, update, view, } = drawerApi.getData() as ModalProps;
     isUpdate.value = update;
     isView.value = view;
