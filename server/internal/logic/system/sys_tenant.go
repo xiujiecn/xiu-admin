@@ -3,13 +3,18 @@ package system
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
+	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
 	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/do"
 	"xiujieadmin/internal/service"
+	"xiujieadmin/utility"
 
+	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 )
@@ -76,14 +81,79 @@ func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (o
 	data.CreatedAt = gtime.Now()
 	data.CreatedBy = contexts.GetUserId(ctx)
 	data.CreatedDept = contexts.GetDeptId(ctx)
+	err = g.DB().Transaction(context.TODO(), func(ctx context.Context, tx gdb.TX) error {
+		data.TenantId = "100000"
+		id, err := tx.Ctx(ctx).Model(dao.SysTenant.Table()).Data(data).OmitNil().InsertAndGetId()
+		if err != nil {
+			return err
+		}
+		tenantId := fmt.Sprintf("%06d", 100000+id)
+		_, err = tx.Ctx(ctx).Model(dao.SysTenant.Table()).Data(g.Map{
+			dao.SysTenant.Columns().TenantId: tenantId,
+		}).Where(dao.SysTenant.Columns().Id, id).Update()
+		if err != nil {
+			return err
+		}
+		// 创建部门
+		dataDeptInsert := do.SysDept{}
+		dataDeptInsert.TenantId = tenantId
+		dataDeptInsert.DeptName = param.CompanyName
+		dataDeptInsert.ParentId = 0
+		dataDeptInsert.OrderNum = 0
+		dataDeptInsert.Status = consts.SysDeptStatusNormal
+		dataDeptInsert.CreatedBy = contexts.GetUserId(ctx)
+		dataDeptInsert.CreatedAt = gtime.Now()
+		dataDeptInsert.UpdatedBy = contexts.GetUserId(ctx)
+		dataDeptInsert.UpdatedAt = gtime.Now()
+		deptId, err := tx.Ctx(ctx).Model(dao.SysDept.Table()).Data(dataDeptInsert).OmitNil().InsertAndGetId()
+		if err != nil {
+			return err
+		}
 
-	db := dao.SysTenant.Ctx(ctx)
-	id, err := db.Data(data).OmitNil().InsertAndGetId()
+		// 创建系统管理员
+		salt := utility.RandomString(5)
+		password := utility.PasswordEncrypt(param.Password, salt)
+
+		dataUserInsert := do.SysUser{}
+		dataUserInsert.TenantId = tenantId
+		dataUserInsert.DeptId = deptId
+		dataUserInsert.NickName = param.ContactUserName
+		dataUserInsert.UserName = param.Username
+		dataUserInsert.Password = password
+		dataUserInsert.UserType = consts.SysUserTypeSys
+		dataUserInsert.Salt = salt
+		dataUserInsert.Phonenumber = param.ContactPhone
+		dataUserInsert.Email = ""
+		dataUserInsert.Sex = consts.SysUserSexUnknown
+		dataUserInsert.Status = consts.SysUserStatusNormal
+		dataUserInsert.CreatedDept = contexts.GetDeptId(ctx)
+		dataUserInsert.CreatedBy = contexts.GetUserId(ctx)
+		dataUserInsert.CreatedAt = gtime.Now()
+		dataUserInsert.UpdatedBy = contexts.GetUserId(ctx)
+		dataUserInsert.UpdatedAt = gtime.Now()
+
+		userId, err := tx.Ctx(ctx).Model(dao.SysUser.Table()).Data(dataUserInsert).OmitNil().InsertAndGetId()
+		if err != nil {
+			return err
+		}
+		// 修改部门负责人
+		dataDeptUpdate := do.SysDept{}
+		dataDeptUpdate.DeptId = deptId
+		dataDeptUpdate.Leader = userId
+		dataDeptUpdate.UpdatedBy = contexts.GetUserId(ctx)
+		dataDeptUpdate.UpdatedAt = gtime.Now()
+		_, err = tx.Ctx(ctx).Model(dao.SysDept.Table()).Data(dataDeptUpdate).OmitNil().Where(dao.SysDept.Columns().DeptId, deptId).Update()
+		if err != nil {
+			return err
+		}
+		output = &model.SysTenantAddModel{
+			Id: id,
+		}
+		return nil
+	})
 	if err != nil {
+		g.Log().Errorf(ctx, "sSysTenant.Add err: %v", err)
 		return nil, err
-	}
-	output = &model.SysTenantAddModel{
-		Id: id,
 	}
 	return
 }

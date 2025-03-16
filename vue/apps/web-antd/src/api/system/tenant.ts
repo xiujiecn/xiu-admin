@@ -1,5 +1,5 @@
 import { requestClient } from '#/api/request';
-
+import {md5} from 'js-md5';
 export interface SysTenantListParam {
   page: number;
   pageSize: number;
@@ -36,7 +36,6 @@ export interface SysTenantListRes {
 }
 
 export interface SysTenantAddParam {
-  tenantId: string;
   contactUserName: string;
   contactPhone: string;
   companyName: string;
@@ -49,6 +48,8 @@ export interface SysTenantAddParam {
   expireTime: string;
   accountCount: number;
   status: string;
+  username: string;
+  password: string;
 }     
 
 export interface SysTenantAddModel {
@@ -108,6 +109,7 @@ export async function getSysTenantViewApi(params: SysTenantViewParam) {
 export async function addSysTenantApi(params: SysTenantAddParam|{
   [x: string]: any;
 }) {
+  params.password = md5(params.password);
   return requestClient.post<SysTenantAddModel>('/system/tenant/add', { ...params });
 }
 

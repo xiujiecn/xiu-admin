@@ -64,7 +64,7 @@ type SysTenantViewModel struct {
 }
 
 type SysTenantAddParam struct {
-	TenantId        string      `json:"tenantId"         description:"租户编号"`
+	// TenantId        string      `json:"tenantId"         description:"租户编号"`
 	ContactUserName string      `json:"contactUserName"  description:"联系人"`
 	ContactPhone    string      `json:"contactPhone"     description:"联系电话"`
 	CompanyName     string      `json:"companyName"      description:"企业名称"`
@@ -76,26 +76,29 @@ type SysTenantAddParam struct {
 	PackageId       int64       `json:"packageId"        description:"租户套餐编号"`
 	ExpireTime      *gtime.Time `json:"expireTime"       description:"过期时间"`
 	AccountCount    int         `json:"accountCount"     description:"用户数量（-1不限制）"`
-	Status          string      `json:"status"           description:"租户状态（0正常 1停用）"`
+	Status          *string     `json:"status,omitempty" description:"租户状态（0正常 1停用）"`
+	Username        string      `json:"username"         description:"用户账号"`
+	Password        string      `json:"password"         description:"用户密码"`
 }
+
 type SysTenantAddModel struct {
 	Id int64 `json:"id"                   description:"id"`
 }
 
 type SysTenantEditParam struct {
 	Id              int64       `json:"id"              description:"id"`
-	ContactUserName *string     `json:"contactUserName" description:"联系人"`
-	ContactPhone    *string     `json:"contactPhone"    description:"联系电话"`
-	CompanyName     *string     `json:"companyName"     description:"企业名称"`
-	LicenseNumber   *string     `json:"licenseNumber"   description:"统一社会信用代码"`
-	Address         *string     `json:"address"         description:"地址"`
-	Intro           *string     `json:"intro"           description:"企业简介"`
-	Domain          *string     `json:"domain"          description:"域名"`
-	Remark          *string     `json:"remark"          description:"备注"`
-	PackageId       *int64      `json:"packageId"       description:"租户套餐编号"`
-	ExpireTime      *gtime.Time `json:"expireTime"      description:"过期时间"`
-	AccountCount    *int        `json:"accountCount"    description:"用户数量（-1不限制）"`
-	Status          *string     `json:"status"          description:"租户状态（0正常 1停用）"`
+	ContactUserName *string     `json:"contactUserName,omitempty" description:"联系人"`
+	ContactPhone    *string     `json:"contactPhone,omitempty"    description:"联系电话"`
+	CompanyName     *string     `json:"companyName,omitempty"     description:"企业名称"`
+	LicenseNumber   *string     `json:"licenseNumber,omitempty"   description:"统一社会信用代码"`
+	Address         *string     `json:"address,omitempty"         description:"地址"`
+	Intro           *string     `json:"intro,omitempty"           description:"企业简介"`
+	Domain          *string     `json:"domain,omitempty"          description:"域名"`
+	Remark          *string     `json:"remark,omitempty"          description:"备注"`
+	PackageId       *int64      `json:"packageId,omitempty"       description:"租户套餐编号"`
+	ExpireTime      *gtime.Time `json:"expireTime,omitempty"      description:"过期时间"`
+	AccountCount    *int        `json:"accountCount,omitempty"    description:"用户数量（-1不限制）"`
+	Status          *string     `json:"status,omitempty"          description:"租户状态（0正常 1停用）"`
 }
 
 type SysTenantEditModel struct {

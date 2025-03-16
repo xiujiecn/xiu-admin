@@ -3,9 +3,9 @@ import { requestClient } from '#/api/request';
 export interface SysTenantPackageListParam {
   page: number;
   pageSize: number;
-  tenantId: string;
-  contactUserName: string;
-  contactPhone: string;
+  tenantId?: string;
+  contactUserName?: string;
+  contactPhone?: string;
 }
 
 export interface SysTenantPackageListData {

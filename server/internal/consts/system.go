@@ -55,3 +55,22 @@ var (
 	SysUploadFileTypeFile = "file"
 	SysUploadFileTypeImg  = "img"
 )
+
+var (
+	// 用户性别: 0男 1女 2未知
+	SysUserSexMale    = "0"
+	SysUserSexFemale  = "1"
+	SysUserSexUnknown = "2"
+)
+
+var (
+	// 用户类型: pc端  app端
+	SysUserTypeSys = "sys_user"
+	SysUserTypeAPP = "app_user"
+)
+
+var (
+	// 部门状态: 0正常 1停用
+	SysDeptStatusNormal  = "0"
+	SysDeptStatusDisable = "1"
+)
