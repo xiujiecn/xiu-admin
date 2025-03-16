@@ -181,12 +181,22 @@ type (
 	}
 	ISysTenant interface {
 		// 获取租户信息
-		GetTenantInfo(ctx context.Context, tenantId string) (data *entity.SysTenant, err error)
-		// 获取租户套餐
-		GetTenantPackage(ctx context.Context, packageId int64) (data *entity.SysTenantPackage, err error)
+		View(ctx context.Context, param *model.SysTenantViewParam) (data *model.SysTenantViewModel, err error)
 		// 获取租户列表
-		List(ctx context.Context, query *model.SysTenantListParam, page *request.PageInfo) (data []*model.SysTenantListModel, total int, err error)
-		TenantPackageList(ctx context.Context, query *model.SysTenantPackageListParam, page *request.PageInfo) (data []*model.SysTenantPackageListModel, total int, err error)
+		List(ctx context.Context, param *model.SysTenantListParam) (data []*model.SysTenantListModel, total int, err error)
+		Add(ctx context.Context, param *model.SysTenantAddParam) (output *model.SysTenantAddModel, err error)
+		Edit(ctx context.Context, param *model.SysTenantEditParam) (output *model.SysTenantEditModel, err error)
+		Delete(ctx context.Context, param *model.SysTenantDeleteParam) (output *model.SysTenantDeleteModel, err error)
+		Status(ctx context.Context, param *model.SysTenantStatusParam) (output *model.SysTenantStatusModel, err error)
+	}
+	ISysTenantPackage interface {
+		// 获取租户套餐
+		View(ctx context.Context, param *model.SysTenantPackageViewParam) (data *model.SysTenantPackageViewModel, err error)
+		List(ctx context.Context, param *model.SysTenantPackageListParam) (data []*model.SysTenantPackageListModel, total int, err error)
+		Add(ctx context.Context, param *model.SysTenantPackageAddParam) (output *model.SysTenantPackageAddModel, err error)
+		Edit(ctx context.Context, param *model.SysTenantPackageEditParam) (output *model.SysTenantPackageEditModel, err error)
+		Delete(ctx context.Context, param *model.SysTenantPackageDeleteParam) (output *model.SysTenantPackageDeleteModel, err error)
+		Status(ctx context.Context, param *model.SysTenantPackageStatusParam) (output *model.SysTenantPackageStatusModel, err error)
 	}
 	ISysUser interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -221,25 +231,26 @@ type (
 )
 
 var (
-	localSysAuth       ISysAuth
-	localSysCaptcha    ISysCaptcha
-	localSysClient     ISysClient
-	localSysConfig     ISysConfig
-	localSysDept       ISysDept
-	localSysDictData   ISysDictData
-	localSysDictType   ISysDictType
-	localSysLogininfor ISysLogininfor
-	localSysMenu       ISysMenu
-	localSysNotice     ISysNotice
-	localSysOperLog    ISysOperLog
-	localSysOss        ISysOss
-	localSysOssConfig  ISysOssConfig
-	localSysPost       ISysPost
-	localSysRole       ISysRole
-	localSysSocial     ISysSocial
-	localSysTenant     ISysTenant
-	localSysUser       ISysUser
-	localSysUserOnline ISysUserOnline
+	localSysAuth          ISysAuth
+	localSysCaptcha       ISysCaptcha
+	localSysClient        ISysClient
+	localSysConfig        ISysConfig
+	localSysDept          ISysDept
+	localSysDictData      ISysDictData
+	localSysDictType      ISysDictType
+	localSysLogininfor    ISysLogininfor
+	localSysMenu          ISysMenu
+	localSysNotice        ISysNotice
+	localSysOperLog       ISysOperLog
+	localSysOss           ISysOss
+	localSysOssConfig     ISysOssConfig
+	localSysPost          ISysPost
+	localSysRole          ISysRole
+	localSysSocial        ISysSocial
+	localSysTenant        ISysTenant
+	localSysTenantPackage ISysTenantPackage
+	localSysUser          ISysUser
+	localSysUserOnline    ISysUserOnline
 )
 
 func SysAuth() ISysAuth {
@@ -427,6 +438,17 @@ func SysTenant() ISysTenant {
 
 func RegisterSysTenant(i ISysTenant) {
 	localSysTenant = i
+}
+
+func SysTenantPackage() ISysTenantPackage {
+	if localSysTenantPackage == nil {
+		panic("implement not found for interface ISysTenantPackage, forgot register?")
+	}
+	return localSysTenantPackage
+}
+
+func RegisterSysTenantPackage(i ISysTenantPackage) {
+	localSysTenantPackage = i
 }
 
 func SysUser() ISysUser {

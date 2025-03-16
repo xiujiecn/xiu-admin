@@ -8,7 +8,6 @@ import (
 
 	v1 "xiujieadmin/api/system/v1"
 	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
 )
 
@@ -46,7 +45,7 @@ func (c *ControllerV1) GetAccessCodes(ctx context.Context, req *v1.GetAccessCode
 	return res, nil
 }
 func (c *ControllerV1) TenantList(ctx context.Context, req *v1.TenantListReq) (res *v1.TenantListRes, err error) {
-	tenantList, _, err := service.SysTenant().List(ctx, &model.SysTenantListParam{}, &request.PageInfo{})
+	tenantList, _, err := service.SysTenant().List(ctx, &model.SysTenantListParam{})
 	if err != nil {
 		return nil, err
 	}
