@@ -4,6 +4,9 @@ system:
   version: "2.0"
   description: "XiujieIot Server"
   gfmode: "dev"
+  upload:
+    local:
+      path: "resource/upload"
 # 服务配置
 server:
   # 基本配置
@@ -93,7 +96,7 @@ redis:
 router:
   # 不需要验证登录的路由地址
   exceptLogin:
-    - /system/auth/login
-    - /system/auth/refresh
-    - /system/auth/getCaptcha
-    - /system/auth/getTenantList
+    - /api/v1/system/auth/login
+    - /api/v1/system/auth/refresh
+    - /api/v1/system/captcha
+    - /api/v1/system/auth/getTenantList

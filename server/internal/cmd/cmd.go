@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcmd"
 
+	"xiujieadmin/internal/library/websocket"
 	"xiujieadmin/internal/router"
 )
 
@@ -22,6 +23,7 @@ var (
 			}
 			s := g.Server()
 			router.InitRouter(ctx, s)
+			websocket.StartWebSocket(ctx)
 			s.Run()
 			return nil
 		},
