@@ -105,3 +105,17 @@ func IsSuperAdmin(ctx context.Context) bool {
 		return role.RoleId == consts.SuperAdminRoleId
 	})
 }
+func IsWebSocket(ctx context.Context) bool {
+	customCtx := Get(ctx)
+	if customCtx == nil {
+		return false
+	}
+	return customCtx.IsWebSocket
+}
+func SetIsWebSocket(ctx context.Context, isWebSocket bool) {
+	customCtx := Get(ctx)
+	if customCtx == nil {
+		return
+	}
+	customCtx.IsWebSocket = isWebSocket
+}

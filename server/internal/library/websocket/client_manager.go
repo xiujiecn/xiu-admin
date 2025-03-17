@@ -12,28 +12,30 @@ import (
 
 // ClientManager 客户端管理
 type ClientManager struct {
-	Clients         map[*Client]bool      // 全部的连接
-	ClientsLock     sync.RWMutex          // 读写锁
-	Users           map[string]*Client    // 登录的用户 // uuid
-	UserLock        sync.RWMutex          // 读写锁
-	Register        chan *Client          // 连接连接处理
-	Login           chan *login           // 用户登录处理
-	Unregister      chan *Client          // 断开连接处理程序
-	Broadcast       chan *WResponse       // 广播 向全部成员发送数据
-	ClientBroadcast chan *ClientWResponse // 广播 向某个客户端发送数据
-	TagBroadcast    chan *TagWResponse    // 广播 向某个标签成员发送数据
-	UserBroadcast   chan *UserWResponse   // 广播 向某个用户的所有链接发送数据
+	Clients         map[*Client]bool                // 全部的连接
+	ClientsLock     sync.RWMutex                    // 读写锁
+	Users           map[string]*Client              // 登录的用户 // uuid
+	UserLock        sync.RWMutex                    // 读写锁
+	Register        chan *Client                    // 连接连接处理
+	Login           chan *login                     // 用户登录处理
+	Unregister      chan *Client                    // 断开连接处理程序
+	Broadcast       chan *WResponse                 // 广播 向全部成员发送数据
+	ClientBroadcast chan *ClientWResponse           // 广播 向某个客户端发送数据
+	TagBroadcast    chan *TagWResponse              // 广播 向某个标签成员发送数据
+	UserBroadcast   chan *UserWResponse             // 广播 向某个用户的所有链接发送数据
+	TagCallbackMap  map[string]func(client *Client) // 注册标签回调
 }
 
 func NewClientManager() (clientManager *ClientManager) {
 	clientManager = &ClientManager{
-		Clients:       make(map[*Client]bool),
-		Users:         make(map[string]*Client),
-		Register:      make(chan *Client, 1000),
-		Unregister:    make(chan *Client, 1000),
-		Broadcast:     make(chan *WResponse, 1000),
-		TagBroadcast:  make(chan *TagWResponse, 1000),
-		UserBroadcast: make(chan *UserWResponse, 1000),
+		Clients:        make(map[*Client]bool),
+		Users:          make(map[string]*Client),
+		Register:       make(chan *Client, 1000),
+		Unregister:     make(chan *Client, 1000),
+		Broadcast:      make(chan *WResponse, 1000),
+		TagBroadcast:   make(chan *TagWResponse, 1000),
+		UserBroadcast:  make(chan *UserWResponse, 1000),
+		TagCallbackMap: make(map[string]func(client *Client)),
 	}
 	return
 }
@@ -147,6 +149,7 @@ func (manager *ClientManager) EventRegister(client *Client) {
 	if client.UserId > 0 {
 		manager.AddUsers(GetUserKey(client.UserId), client)
 	}
+	g.Log().Info(client.Ctx, "websocket EventRegister.", client.UserId)
 }
 
 // EventLogin 用户登录事件
@@ -160,6 +163,7 @@ func (manager *ClientManager) EventLogin(login *login) {
 
 // EventUnregister 用户断开连接事件
 func (manager *ClientManager) EventUnregister(client *Client) {
+	g.Log().Info(client.Ctx, "websocket EventUnregister.", client.UserId)
 	manager.DelClients(client)
 	// 删除用户连接
 	deleteResult := manager.DelUsers(client)
@@ -285,4 +289,14 @@ func SendToTag(tag string, response *WResponse) {
 		WResponse: response,
 	}
 	clientManager.TagBroadcast <- tagRes
+}
+
+// RegisterTagCallback 注册标签回调
+func RegisterTagCallback(tag string, callback func(client *Client)) {
+	clientManager.TagCallbackMap[tag] = callback
+}
+
+// UnregisterTagCallback 注销标签回调
+func UnregisterTagCallback(tag string) {
+	delete(clientManager.TagCallbackMap, tag)
 }

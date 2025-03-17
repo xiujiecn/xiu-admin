@@ -1,10 +1,12 @@
 package websocket
 
 import (
+	"context"
 	"fmt"
 	"runtime/debug"
 
 	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/guid"
 	"github.com/gorilla/websocket"
 )
@@ -39,10 +41,11 @@ type Client struct {
 	LoginTime     uint64          // 登录时间 登录以后才有
 	isApp         bool            // 是否是app
 	tags          garray.StrArray // 标签
+	Ctx           context.Context // 上下文
 }
 
 // NewClient 初始化
-func NewClient(addr string, socket *websocket.Conn, firstTime uint64) (client *Client) {
+func NewClient(addr string, socket *websocket.Conn, firstTime uint64, ctx context.Context) (client *Client) {
 	client = &Client{
 		Addr:          addr,
 		ID:            guid.S(),
@@ -51,6 +54,7 @@ func NewClient(addr string, socket *websocket.Conn, firstTime uint64) (client *C
 		SendClose:     false,
 		FirstTime:     firstTime,
 		HeartbeatTime: firstTime,
+		Ctx:           ctx,
 	}
 	return
 }
@@ -70,6 +74,7 @@ func (c *Client) read() {
 	for {
 		_, message, err := c.Socket.ReadMessage()
 		if err != nil {
+			g.Log().Info(c.Ctx, "websocket Client.read failed.", err)
 			return
 		}
 		// 处理程序
@@ -93,6 +98,7 @@ func (c *Client) write() {
 		select {
 		case message, ok := <-c.Send:
 			if !ok {
+				g.Log().Info(c.Ctx, "websocket Client.write failed.")
 				// 发送数据错误 关闭连接
 				return
 			}
@@ -130,6 +136,7 @@ func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
 
 // 关闭客户端
 func (c *Client) close() {
+	g.Log().Info(c.Ctx, "websocket Client.close")
 	if c.SendClose {
 		return
 	}

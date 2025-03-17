@@ -4,8 +4,9 @@ import "github.com/gogf/gf/v2/frame/g"
 
 // 上下文结构
 type Context struct {
-	User *Identity // 上下文用户信息
-	Data g.Map     // 自定KV变量，业务模块根据需要设置，不固定
+	User        *Identity // 上下文用户信息
+	IsWebSocket bool      // 是否是WebSocket
+	Data        g.Map     // 自定KV变量，业务模块根据需要设置，不固定
 }
 
 type Role struct {

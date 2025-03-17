@@ -7,15 +7,14 @@ import (
 )
 
 const (
-	Error         = "error"
-	Login         = "login"
-	Join          = "join"
-	Quit          = "quit"
-	IsApp         = "is_app"
-	Ping          = "ping"
-	Joins         = "joins"
-	Quits         = "quits"
-	MonitorServer = "monitor:server" // 监控服务器信息
+	Error = "error"
+	Login = "login"
+	Join  = "join"
+	Quit  = "quit"
+	IsApp = "is_app"
+	Ping  = "ping"
+	Joins = "joins"
+	Quits = "quits"
 )
 
 // ProcessData 处理数据

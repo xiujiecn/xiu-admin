@@ -3,7 +3,11 @@ package utility
 import (
 	"context"
 	"fmt"
+	"io"
 	"net"
+	"net/http"
+	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -149,6 +153,30 @@ func GetLocalIP() (ip string, err error) {
 	}
 	return
 }
+func GetPublicIP() (ip string, err error) {
+	resp, err := http.Get("https://ifconfig.co/ip")
+	if err != nil {
+		fmt.Println("GetPublicIP", err)
+		return
+	}
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			fmt.Println("GetPublicIP Body.Close", err)
+		}
+	}(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("GetPublicIP ReadAll", err)
+		return
+	}
+	ip = string(body)
+	// 去除空格
+	ip = strings.Replace(ip, " ", "", -1)
+	// 去除换行符
+	ip = strings.Replace(ip, "\n", "", -1)
+
+	return
+}
 
 // 获取两个字符串之间的字符串
 func GetBetweenStr(str, start, end string) (result string) {
@@ -179,4 +207,47 @@ func ArrayRightDiff(a, b []int64) []int64 {
 		}
 	}
 	return diff
+}
+
+type fileInfo struct {
+	name string
+	size int64
+}
+
+// WalkDir 获取目录下文件的名称和大小
+func WalkDir(dirname string) ([]fileInfo, error) {
+	var fileInfos []fileInfo
+	err := filepath.Walk(dirname, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			fileInfos = append(fileInfos, fileInfo{name: path, size: info.Size()})
+		}
+		return nil
+	})
+
+	return fileInfos, err
+}
+func DirSize(dirname string) string {
+	var (
+		s        int64
+		files, _ = WalkDir(dirname)
+	)
+	for _, n := range files {
+		s += n.size
+	}
+	return FileSize(s)
+}
+
+// FileSize 字节的单位转换 保留两位小数
+func FileSize(fileSize int64) string {
+	units := []string{"B", "KB", "MB", "GB", "TB", "EB"}
+	var size = float64(fileSize)
+	var i int
+	for i = 0; size > 1024; i++ {
+		size /= 1024
+	}
+	return fmt.Sprintf("%.2f %s", size, units[i])
 }

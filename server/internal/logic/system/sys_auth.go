@@ -201,10 +201,14 @@ func (s *sSysAuth) DeleteToken(ctx context.Context, token string) (err error) {
 func (s *sSysAuth) GetCurrentUser(ctx context.Context) (claims *model.CustomClaims, err error) {
 	// 获取token
 	authorization := g.RequestFromCtx(ctx).Header.Get("Authorization")
-	if authorization == "" {
+	authParam := g.RequestFromCtx(ctx).Get("access_token").String()
+	if authorization == "" && authParam == "" {
 		return nil, gerror.NewCode(gcode.CodeNotImplemented)
 	}
 	token := strings.TrimPrefix(authorization, "Bearer ")
+	if token == "" {
+		token = authParam
+	}
 	// 解析token
 	claims, err = s.ParseToken(ctx, token)
 	if err != nil {

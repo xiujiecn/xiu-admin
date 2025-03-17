@@ -7,5 +7,6 @@ import (
 
 func InitSystemDeferFunc(ctx context.Context) error {
 	queues.Run(ctx)
+	InitMonitor()
 	return nil
 }
