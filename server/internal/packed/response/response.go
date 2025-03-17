@@ -25,6 +25,7 @@ func Json(r *ghttp.Request, code int, message string, data ...interface{}) {
 	} else {
 		responseData = g.Map{}
 	}
+	// g.Log().Infof(r.GetCtx(), "response.Json: %v", responseData)
 	r.Response.WriteJson(JsonResponse{
 		Code:    code,
 		Message: message,

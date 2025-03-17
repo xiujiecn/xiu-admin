@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"xiujieadmin/internal/controller/monitor"
+	"xiujieadmin/internal/library/websocket"
 	"xiujieadmin/internal/service"
 
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -17,5 +18,6 @@ func Monitor(ctx context.Context, group *ghttp.RouterGroup) {
 		group.Bind(
 			monitor.NewV1(),
 		)
+		group.ALL("/ws", websocket.WsPage)
 	})
 }

@@ -117,6 +117,6 @@ function useEcharts(chartRef: Ref<EchartsUIType>) {
   };
 }
 
-export { useEcharts };
+export { useEcharts, echarts };
 
 export type { EchartsUIType };

@@ -29,13 +29,15 @@ func StartWebSocket(ctx context.Context) {
 }
 
 func WsPage(r *ghttp.Request) {
-	g.Log().Infof(r.GetCtx(), "websocket.WsPage UserID:%v cid:%v", contexts.GetUserId(r.GetCtx()), r.Get("cid"))
+	g.Log().Infof(r.GetCtx(), "websocket.WsPage Begin. UserID:%v ", contexts.GetUserId(r.GetCtx()))
+	// r.Response.Header().Set("Content-Type", "text/event-stream")
+	contexts.SetIsWebSocket(r.GetCtx(), true)
 	conn, err := upGrader.Upgrade(r.Response.ResponseWriter, r.Request, nil)
 	if err != nil {
 		return
 	}
 	currentTime := uint64(gtime.Now().Unix())
-	client := NewClient(conn.RemoteAddr().String(), conn, currentTime)
+	client := NewClient(conn.RemoteAddr().String(), conn, currentTime, r.GetCtx())
 
 	client.UserId = uint64(contexts.GetUserId(r.GetCtx()))
 	go client.read()
@@ -44,4 +46,5 @@ func WsPage(r *ghttp.Request) {
 	// 用户连接事件
 	clientManager.Register <- client
 
+	g.Log().Infof(r.GetCtx(), "websocket.WsPage End. UserID:%v", client.UserId)
 }

@@ -52,11 +52,15 @@ func (m *sMiddleware) ResponseHandler(r *ghttp.Request) {
 	if r.Response.BufferLength() > 0 {
 		return
 	}
+	if contexts.IsWebSocket(r.GetCtx()) {
+		return
+	}
 	contentType := getContentType(r)
 	if contentType == consts.HTTPContentTypeExcel {
 		r.Response.Status = http.StatusOK
 		return
 	}
+	g.Log().Infof(r.GetCtx(), "sMiddleware.ResponseHandler,contentType %v", contentType)
 	err := r.GetError()
 	res := r.GetHandlerResponse()
 	var code gcode.Code = gcode.CodeOK
@@ -95,6 +99,11 @@ func (s *sMiddleware) Ctx(r *ghttp.Request) {
 
 // CORS 跨域处理
 func (s *sMiddleware) CORS(r *ghttp.Request) {
+	r.SetCtx(r.GetNeverDoneCtx())
+	if contexts.IsWebSocket(r.GetCtx()) {
+		r.Middleware.Next()
+		return
+	}
 	corsOptions := r.Response.DefaultCORSOptions()
 	corsConfig := g.Cfg().MustGet(context.Background(), "server.allowedDomains").Strings()
 	if len(corsConfig) == 0 {

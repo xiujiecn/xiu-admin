@@ -114,7 +114,10 @@ func (s *sSysOperLog) AnalysisLog(ctx context.Context) (data *model.SysOperLogAd
 	if strings.Contains(path, "/delete") {
 		businessType = 3
 	}
-
+	url := request.URL.String()
+	if len(url) > 100 {
+		url = url[:100] + "..."
+	}
 	data = &model.SysOperLogAddParam{
 		TenantId:      contexts.GetTenantId(ctx),
 		Title:         "",
@@ -124,7 +127,7 @@ func (s *sSysOperLog) AnalysisLog(ctx context.Context) (data *model.SysOperLogAd
 		OperatorType:  operatorType,
 		OperName:      operName,
 		DeptName:      deptName,
-		OperUrl:       request.URL.String(),
+		OperUrl:       url,
 		OperIp:        utility.GetClientIp(ctx),
 		OperLocation:  utility.GetCityByIp(utility.GetClientIp(ctx)),
 		OperParam:     gconv.String(param),

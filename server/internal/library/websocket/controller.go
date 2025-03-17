@@ -34,6 +34,11 @@ func JoinController(client *Client, req *request) {
 
 	if !client.tags.Contains(name) {
 		client.tags.Append(name)
+		if callback, ok := clientManager.TagCallbackMap[name]; ok {
+			if callback != nil {
+				callback(client)
+			}
+		}
 	}
 	client.SendMsg(&WResponse{
 		Event: Join,
@@ -63,6 +68,11 @@ func JoinsController(client *Client, req *request) {
 	for _, name := range gconv.Strings(req.Data["names"]) {
 		if !client.tags.Contains(name) {
 			client.tags.Append(name)
+			if callback, ok := clientManager.TagCallbackMap[name]; ok {
+				if callback != nil {
+					callback(client)
+				}
+			}
 		}
 	}
 	client.SendMsg(&WResponse{
