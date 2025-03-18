@@ -15,6 +15,7 @@ type Record = {
     e: string;
     d: any;
 }
+
 function getWsServerUrl() {
     return 'ws://' + window.location.host + '/api/monitor/ws?access_token=' + encodeURIComponent(String(accessStore.accessToken));
 }
@@ -748,10 +749,10 @@ const memRunOptions: memRunEChartsOption = {
                     {
                         offset: 0,
                         color: 'rgb(55, 162, 255)'
-          },
-          {
-            offset: 1,
-            color: 'rgb(116, 21, 219)'
+                    },
+                    {
+                        offset: 1,
+                        color: 'rgb(116, 21, 219)'
                     }
                 ])
             }
@@ -802,10 +803,10 @@ const diskRunOptions: diskRunEChartsOption = {
                     {
                         offset: 0,
                         color: 'rgb(0, 221, 255)'
-          },
-          {
-            offset: 1,
-            color: 'rgb(77, 119, 255)'
+                    },
+                    {
+                        offset: 1,
+                        color: 'rgb(77, 119, 255)'
                     }
                 ])
             }

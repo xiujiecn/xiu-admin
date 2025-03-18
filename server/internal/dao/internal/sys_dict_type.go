@@ -24,6 +24,7 @@ type SysDictTypeColumns struct {
 	TenantId    string // 租户编号
 	DictName    string // 字典名称
 	DictType    string // 字典类型
+	IsSys       string // 是否系统（0是 1否)
 	CreatedDept string // 创建部门
 	CreatedBy   string // 创建者
 	CreatedAt   string // 创建时间
@@ -38,6 +39,7 @@ var sysDictTypeColumns = SysDictTypeColumns{
 	TenantId:    "tenant_id",
 	DictName:    "dict_name",
 	DictType:    "dict_type",
+	IsSys:       "is_sys",
 	CreatedDept: "created_dept",
 	CreatedBy:   "created_by",
 	CreatedAt:   "created_at",

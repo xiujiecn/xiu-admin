@@ -14,6 +14,7 @@ type SysDictType struct {
 	TenantId    string      `json:"tenantId"    orm:"tenant_id"    description:"租户编号"`
 	DictName    string      `json:"dictName"    orm:"dict_name"    description:"字典名称"`
 	DictType    string      `json:"dictType"    orm:"dict_type"    description:"字典类型"`
+	IsSys       string      `json:"isSys"       orm:"is_sys"       description:"是否系统（0是 1否)"`
 	CreatedDept int64       `json:"createdDept" orm:"created_dept" description:"创建部门"`
 	CreatedBy   int64       `json:"createdBy"   orm:"created_by"   description:"创建者"`
 	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   description:"创建时间"`
