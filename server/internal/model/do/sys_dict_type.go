@@ -16,6 +16,7 @@ type SysDictType struct {
 	TenantId    interface{} // 租户编号
 	DictName    interface{} // 字典名称
 	DictType    interface{} // 字典类型
+	IsSys       interface{} // 是否系统（0是 1否)
 	CreatedDept interface{} // 创建部门
 	CreatedBy   interface{} // 创建者
 	CreatedAt   *gtime.Time // 创建时间
