@@ -13,9 +13,10 @@ import (
 
 // SysSocialDao is the data access object for the table sys_social.
 type SysSocialDao struct {
-	table   string           // table is the underlying table name of the DAO.
-	group   string           // group is the database configuration group name of the current DAO.
-	columns SysSocialColumns // columns contains all the column names of Table for convenient usage.
+	table    string             // table is the underlying table name of the DAO.
+	group    string             // group is the database configuration group name of the current DAO.
+	columns  SysSocialColumns   // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler // handlers for customized model modification.
 }
 
 // SysSocialColumns defines and stores column names for the table sys_social.
@@ -87,11 +88,12 @@ var sysSocialColumns = SysSocialColumns{
 }
 
 // NewSysSocialDao creates and returns a new DAO object for table data access.
-func NewSysSocialDao() *SysSocialDao {
+func NewSysSocialDao(handlers ...gdb.ModelHandler) *SysSocialDao {
 	return &SysSocialDao{
-		group:   "default",
-		table:   "sys_social",
-		columns: sysSocialColumns,
+		group:    "default",
+		table:    "sys_social",
+		columns:  sysSocialColumns,
+		handlers: handlers,
 	}
 }
 
@@ -117,7 +119,11 @@ func (dao *SysSocialDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *SysSocialDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

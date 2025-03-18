@@ -13,9 +13,10 @@ import (
 
 // SysTenantPackageDao is the data access object for the table sys_tenant_package.
 type SysTenantPackageDao struct {
-	table   string                  // table is the underlying table name of the DAO.
-	group   string                  // group is the database configuration group name of the current DAO.
-	columns SysTenantPackageColumns // columns contains all the column names of Table for convenient usage.
+	table    string                  // table is the underlying table name of the DAO.
+	group    string                  // group is the database configuration group name of the current DAO.
+	columns  SysTenantPackageColumns // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler      // handlers for customized model modification.
 }
 
 // SysTenantPackageColumns defines and stores column names for the table sys_tenant_package.
@@ -53,11 +54,12 @@ var sysTenantPackageColumns = SysTenantPackageColumns{
 }
 
 // NewSysTenantPackageDao creates and returns a new DAO object for table data access.
-func NewSysTenantPackageDao() *SysTenantPackageDao {
+func NewSysTenantPackageDao(handlers ...gdb.ModelHandler) *SysTenantPackageDao {
 	return &SysTenantPackageDao{
-		group:   "default",
-		table:   "sys_tenant_package",
-		columns: sysTenantPackageColumns,
+		group:    "default",
+		table:    "sys_tenant_package",
+		columns:  sysTenantPackageColumns,
+		handlers: handlers,
 	}
 }
 
@@ -83,7 +85,11 @@ func (dao *SysTenantPackageDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *SysTenantPackageDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.
