@@ -86,6 +86,15 @@ type (
 		Edit(ctx context.Context, param *model.SysDictTypeEditParam) (output *model.SysDictTypeEditModel, err error)
 		Delete(ctx context.Context, param *model.SysDictTypeDeleteParam) (output *model.SysDictTypeDeleteModel, err error)
 	}
+	ISysJob interface {
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, query *model.SysJobListParam, pageInfo *request.PageInfo) (Data []*model.SysJobListModel, total int, err error)
+		View(ctx context.Context, jobId int64) (Data *model.SysJobViewModel, err error)
+		Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastInsertId int64, err error)
+		Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel) (RowsAffected int64, err error)
+		Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel) (RowsAffected int64, err error)
+	}
+	
 	ISysLogininfor interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		List(ctx context.Context, param *model.SysLogininforListParam) (items []*model.SysLogininforListModel, total int, err error)
@@ -238,6 +247,7 @@ var (
 	localSysDept          ISysDept
 	localSysDictData      ISysDictData
 	localSysDictType      ISysDictType
+	localSysJob           ISysJob
 	localSysLogininfor    ISysLogininfor
 	localSysMenu          ISysMenu
 	localSysNotice        ISysNotice
@@ -328,6 +338,17 @@ func SysDictType() ISysDictType {
 
 func RegisterSysDictType(i ISysDictType) {
 	localSysDictType = i
+}
+
+func SysJob() ISysJob {
+	if localSysJob == nil {
+		panic("implement not found for interface ISysJob, forgot register?")
+	}
+	return localSysJob
+}
+
+func RegisterSysJob(i ISysJob) {
+	localSysJob = i
 }
 
 func SysLogininfor() ISysLogininfor {
