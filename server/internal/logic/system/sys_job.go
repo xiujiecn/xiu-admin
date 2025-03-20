@@ -27,7 +27,7 @@ func NewSysJob() *sSysJob {
 func (s *sSysJob) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
 	if len(option) > 0 {
 		option = append(option, &handler.Option{
-			FilterTenant: true,
+			FilterTenant: false,
 			FilterAuth:   true,
 		})
 	}
@@ -37,13 +37,13 @@ func (s *sSysJob) Model(ctx context.Context, option ...*handler.Option) *gdb.Mod
 func (c *sSysJob) List(ctx context.Context, query *model.SysJobListParam, pageInfo *request.PageInfo) (Data []*model.SysJobListModel, total int, err error) {
 	m := c.Model(ctx)
 	if query.JobName != "" {
-		m.WhereLike(dao.SysJob.Columns().JobName, "%"+strings.Trim(query.JobName, " ")+"%")
+		m = m.WhereLike(dao.SysJob.Columns().JobName, "%"+strings.Trim(query.JobName, " ")+"%")
 	}
 	if query.JobGroup != "" {
-		m.Where(dao.SysJob.Columns().JobGroup, query.JobGroup)
+		m = m.Where(dao.SysJob.Columns().JobGroup, query.JobGroup)
 	}
 	if query.Status != "" {
-		m.Where(dao.SysJob.Columns().Status, query.Status)
+		m = m.Where(dao.SysJob.Columns().Status, query.Status)
 	}
 	t, err := m.Count()
 	if err != nil {
