@@ -15,4 +15,7 @@ export enum DictEnum {
   WF_BUSINESS_STATUS = 'wf_business_status', // 业务状态
   WF_FORM_TYPE = 'wf_form_type', // 表单类型
   WF_TASK_STATUS = 'wf_task_status', // 任务状态
+  SYS_JOB_GROUP = 'sys_job_group', // 任务分组
+  SYS_MISSFIRE_POLICY = 'sys_missfire_policy', // 任务计划执行策略\
+  SYS_JOB_CONCURRENT = 'sys_job_concurrent', // 任务是否并发 
 }
