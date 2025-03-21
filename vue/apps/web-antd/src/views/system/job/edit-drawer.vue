@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue';
-
+import { computed, ref } from 'vue';
 import { useVbenDrawer, useVbenModal } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 import { cloneDeep } from '@vben/utils';
-import {Space, Button, Input } from 'ant-design-vue';
+import { Space, Button, Input } from 'ant-design-vue';
 import { useVbenForm } from '#/adapter/form';
 import { addSysJobApi, updateSysJobApi, viewSysJobApi } from '#/api/system/job';
 import { drawerSchema } from './model';

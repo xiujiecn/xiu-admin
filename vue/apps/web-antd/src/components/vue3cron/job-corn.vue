@@ -348,16 +348,18 @@ defineExpose({
     </div>
   </Card>
   <Row >
-    <Col class="value" :span="20">
+    <Col class="value" :span="19">
       <span> cron预览: </span>
       <Tag color="blue">
         {{ cron }}
       </Tag>
       <span>{秒数} {分钟} {小时} {日期} {月份} {?} {年份}</span>
     </Col>
-    <Col class="button" :span="4">
-      <Button @click="handleChange">{{ text.Save }}</Button>
-      <Button type="primary" @click="close">{{ text.Close }}</Button>
+    <Col :span="2">
+        <Button  @click="handleChange">{{ text.Save }}</Button>
+    </Col>
+    <Col :span="3">
+        <Button  type="primary" @click="close">{{ text.Close }}</Button>
     </Col>
   </Row>
 </template>
