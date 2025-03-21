@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
 
-import { useVbenDrawer } from '@vben/common-ui';
+import { useVbenDrawer, useVbenModal } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 import { cloneDeep } from '@vben/utils';
-
-import { useVbenForm } from '#/adapter/form';
 import {Space, Button, Input } from 'ant-design-vue';
+import { useVbenForm } from '#/adapter/form';
 import { addSysJobApi, updateSysJobApi, viewSysJobApi } from '#/api/system/job';
 import { drawerSchema } from './model';
+import jobCronModel from './job-cron-model.vue';
 
 const emit = defineEmits<{ reload: [] }>();
 interface ModalProps {
@@ -31,6 +31,16 @@ const title = computed(() => {
   }
   return isUpdate.value ? $t('pages.common.edit') : $t('pages.common.add');
 });
+
+const [JobCronModel, jobCronModelApi] = useVbenModal({
+  zIndex: 2001,
+  connectedComponent: jobCronModel,
+});
+
+async function cronExpressionChanged(cron:any){
+  cronExpression.value = cron;
+  formApi.setValues({cronExpression: cron});
+};
 
 const [BasicForm, formApi] = useVbenForm({
   commonConfig: {
@@ -112,20 +122,19 @@ function cronExpressionChange(event: any) {
   formApi.setValues({cronExpression: event.target.value});
 }
 
-
 </script>
-
 <template>
   <BasicDrawer :close-on-click-modal="false" :title="title" class="w-[600px]">
     <BasicForm>
       <template #cronExpression>
         <Space>          
           <Input v-model:value="cronExpression" @change="cronExpressionChange" /> 
-          <Button type="primary" >
+          <Button type="primary" @click="jobCronModelApi.open()">
             设置
           </Button>
         </Space>
       </template>
     </BasicForm>
   </BasicDrawer>
+  <JobCronModel :close-on-click-modal="false" class="w-[800px]" @confirm="cronExpressionChanged($event)" />
 </template>
