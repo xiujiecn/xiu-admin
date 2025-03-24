@@ -101,6 +101,24 @@ func (c *sSysJob) Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel
 	row, err := result.RowsAffected()
 	return row, err
 }
+
+func (c *sSysJob) UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdateStatusModel) (RowsAffected int64, err error) {
+	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	jobUpdate.UpdatedAt = gtime.Now()
+	jobUpdate.UpdatedBy = claims.BaseClaims.ID
+	result, err := c.Model(ctx).Where(dao.SysJob.Columns().JobId, jobUpdate.JobId).Update(jobUpdate)
+
+	if err != nil {
+		return 0, err
+	}
+	row, err := result.RowsAffected()
+	return row, err
+}
+
 func (c *sSysJob) Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel) (RowsAffected int64, err error) {
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
