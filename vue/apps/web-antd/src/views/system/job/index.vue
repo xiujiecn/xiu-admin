@@ -83,7 +83,7 @@ const gridOptions: VxeTableGridOptions<SysJob> = {
       },
     },
     { field: 'invokeTarget', title: '任务方法名' },
-    { field: 'cronExpression', title: 'corn执行表达式' },
+    { field: 'cronExpression', title: 'cron执行表达式' },
     {
       field: 'status',
       slots: { default: 'open' },

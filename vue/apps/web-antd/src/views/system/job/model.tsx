@@ -36,7 +36,7 @@ export const viewSchema: DescItem[] = [
   },
   {
     field: 'cronExpression',
-    label: 'corn表达式'
+    label: 'cron表达式'
   },
   {
     field: 'misfirePolicy',
@@ -107,7 +107,7 @@ export const drawerSchema: VbenFormSchema[] =  [
   {
     component: '#cronExpression',
     fieldName: 'cronExpression',
-    label: 'corn表达式',
+    label: 'cron表达式',
     rules: 'required'
   },
   {
