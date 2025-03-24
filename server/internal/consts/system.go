@@ -74,3 +74,9 @@ var (
 	SysDeptStatusNormal  = "0"
 	SysDeptStatusDisable = "1"
 )
+
+var (
+	// 任务状态: 0正常 1停用
+	SysJobStatusNormal  = "0"
+	SysJobStatusDisable = "1"
+)

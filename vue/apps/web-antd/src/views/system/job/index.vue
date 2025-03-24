@@ -13,7 +13,7 @@ import { DictEnum } from '@vben/constants';
 import { Button, message, Switch, Modal, Popconfirm } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysJobListApi, deleteSysJobApi, updateStatusApi } from '#/api/system/job';
+import { getSysJobListApi, deleteSysJobApi, updateStatusApi, execOnceApi } from '#/api/system/job';
 import viewDrawer from './view-drawer.vue';
 import editDrawer from './edit-drawer.vue';
 import {
@@ -90,7 +90,7 @@ const gridOptions: VxeTableGridOptions<SysJob> = {
       title: '状态',
       width: 100,
     },
-    { title: '操作', width: 120, slots: { default: 'action' } }
+    { title: '操作', width: 200, slots: { default: 'action' } }
   ],
   exportConfig: {},
   height: 'auto',
@@ -192,6 +192,12 @@ async function handleStatusChange(row: SysJob) {
   await gridApi.query();
 }
 
+async function handleExecOnce(row: SysJob) {
+  await execOnceApi({ jobId: row.jobId});
+  message.success('执行成功');
+}
+
+
 </script>
 
 <template>
@@ -208,6 +214,10 @@ async function handleStatusChange(row: SysJob) {
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleUpdate(row)">编辑</Button>
+          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定执行吗？"
+            @confirm="handleExecOnce(row)">
+            <Button class="mr-2 border-none p-0" :block="false" type="link">执行一次</Button>
+          </Popconfirm>
           <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
             @confirm="handleDelete(row)">
             <Button class="mr-2 border-none p-0" :block="false" type="link" danger>删除</Button>

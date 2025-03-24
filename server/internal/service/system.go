@@ -92,10 +92,11 @@ type (
 		View(ctx context.Context, jobId int64) (Data *model.SysJobViewModel, err error)
 		Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastInsertId int64, err error)
 		Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel) (RowsAffected int64, err error)
-		UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdateStatusModel) (RowsAffected int64, err error) 
+		UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdateStatusModel) (RowsAffected int64, err error)
 		Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel) (RowsAffected int64, err error)
+		Exec(ctx context.Context, jobId int64) (err error)
 	}
-	
+
 	ISysLogininfor interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		List(ctx context.Context, param *model.SysLogininforListParam) (items []*model.SysLogininforListModel, total int, err error)

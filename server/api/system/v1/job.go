@@ -62,6 +62,15 @@ type SysJobDeleteReq struct {
 	JobIds []int64 `json:"jobId" dc:"任务ID"`
 }
 
+type SysJobExecReq struct {
+	g.Meta `path:"/job/exec" method:"post" tags:"系统" summary:"执行任务"`
+	JobId  int64 `v:"required" json:"jobId" dc:"任务ID"`
+}
+
 type SysJobDeleteRes struct {
 	JobIds []int64 `json:"jobId" dc:"任务ID"`
+}
+
+type SysJobExecRes struct {
+	JobId int64 `json:"jobId" dc:"任务ID"`
 }

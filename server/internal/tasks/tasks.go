@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 	"sync"
 	"xiujieadmin/internal/library/worker"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/glog"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel"
 )
@@ -207,4 +209,24 @@ func UnmarshalTask(data []byte) (*Task, error) {
 		}
 	}
 	return &task, nil
+}
+
+// CheckFuncName 检查方法名是否存在
+func (tk Tasks) CheckFuncName(funcName string) (actualfuncName string, exists bool) {
+	exist := GetInnerTaskName(funcName)
+	glog.Debug(context.Background(), "CheckFuncName", exist)
+	if exist != "" {
+		return exist, true
+	}
+	return
+}
+
+// ParseParameters 解析参数
+func (tk Tasks) ParseParameters(parseData string) (params []interface{}, err error) {
+	parts := strings.Split(parseData, "|")
+	params = make([]interface{}, len(parts))
+	for i, part := range parts {
+		params[i] = part
+	}
+	return
 }
