@@ -63,6 +63,7 @@ func New(options ...func(*WorkerOptions)) *Worker {
 	}
 	w.ops = ops
 	w.client = asynq.NewClient(rs)
+	w.inspector = asynq.NewInspector(rs)
 	if ops.redisPeriodKey != "" {
 		w.scheduler = asynq.NewScheduler(rs, &asynq.SchedulerOpts{
 			Location: time.Now().Location(),

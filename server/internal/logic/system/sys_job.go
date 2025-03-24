@@ -2,16 +2,26 @@ package system
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/util/gconv"
 
+	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/worker"
 	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
+	"xiujieadmin/internal/model/entity"
 	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
+	"xiujieadmin/internal/tasks"
 )
 
 func init() {
@@ -71,6 +81,14 @@ func (c *sSysJob) Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastIn
 	if err != nil {
 		return 0, err
 	}
+
+	//获取task目录下是否绑定对应的方法
+	_, exist := tasks.TasksInstance().CheckFuncName(jobAdd.InvokeTarget)
+	if !exist {
+		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", jobAdd.InvokeTarget)
+		return 0, gerror.New(errInfo)
+	}
+
 	jobAdd.CreatedDept = claims.BaseClaims.DeptId
 	jobAdd.CreatedAt = gtime.Now()
 	jobAdd.CreatedBy = claims.BaseClaims.ID
@@ -108,6 +126,24 @@ func (c *sSysJob) UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdat
 		return 0, err
 	}
 
+	exists := &model.SysJobViewModel{}
+	if err := c.Model(ctx).Where(dao.SysJob.Columns().JobId, jobUpdate.JobId).Scan(&exists); err != nil {
+		return 0, err
+	}
+
+	if jobUpdate.Status == consts.SysJobStatusNormal {
+		//任务启动
+		err = c.taskRun(ctx, &exists.SysJob)
+		if err != nil {
+			return 0, err
+		}
+	}
+	if jobUpdate.Status == consts.SysJobStatusDisable {
+		//任务停止
+		if err = c.taskStop(ctx, &exists.SysJob); err != nil {
+			return 0, err
+		}
+	}
 	jobUpdate.UpdatedAt = gtime.Now()
 	jobUpdate.UpdatedBy = claims.BaseClaims.ID
 	result, err := c.Model(ctx).Where(dao.SysJob.Columns().JobId, jobUpdate.JobId).Update(jobUpdate)
@@ -117,6 +153,78 @@ func (c *sSysJob) UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdat
 	}
 	row, err := result.RowsAffected()
 	return row, err
+}
+
+func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
+	//获取task目录下是否绑定对应的方法
+	_, exist := tasks.TasksInstance().CheckFuncName(job.InvokeTarget)
+	if !exist {
+		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", job.InvokeTarget)
+		return gerror.New(errInfo)
+	}
+
+	//传参解析
+	paramArr, err := tasks.TasksInstance().ParseParameters(job.JobParams)
+	if err != nil {
+		return err
+	}
+
+	taskData := tasks.Task{
+		ID:         fmt.Sprintf("%s-job-%d", job.InvokeTarget, job.JobId),
+		TaskType:   "Type-" + gconv.String(job.MisfirePolicy),
+		MethodName: job.InvokeTarget,
+		Params:     paramArr,
+		Explain:    job.JobName,
+	}
+	runPayload, _ := json.Marshal(taskData)
+	if job.MisfirePolicy == 1 {
+		_, err := tasks.TasksInstance().Cron(
+			worker.WithTaskCtx(context.Background()),
+			worker.WithTaskUid(taskData.ID),           // 任务ID
+			worker.WithTaskGroup(taskData.MethodName), // 任务组
+			worker.WithTaskExpr(job.CronExpression),
+			worker.WithTaskTimeout(10),
+			worker.WithTaskReplace(true),
+			worker.WithTaskPayload(runPayload),
+		)
+		if err != nil {
+			g.Log().Debug(ctx, taskData.MethodName, taskData.Explain, "启动任务失败")
+			return err
+		}
+	} else {
+		err := tasks.TasksInstance().Once(
+			worker.WithTaskCtx(context.Background()),
+			worker.WithTaskUid(taskData.ID),           // 任务ID
+			worker.WithTaskGroup(taskData.MethodName), // 任务组
+			worker.WithTaskTimeout(10),
+			worker.WithTaskNow(true),
+			worker.WithTaskReplace(true),
+			worker.WithTaskPayload(runPayload),
+		)
+		if err != nil {
+			g.Log().Debug(ctx, taskData.MethodName, taskData.Explain, "启动任务失败")
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *sSysJob) taskStop(ctx context.Context, job *entity.SysJob) error {
+	//获取task目录下是否绑定对应的方法
+	_, exist := tasks.TasksInstance().CheckFuncName(job.InvokeTarget)
+	if !exist {
+		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", job.InvokeTarget)
+		return gerror.New(errInfo)
+	}
+
+	taskJobId := fmt.Sprintf("%s-job-%d", job.InvokeTarget, job.JobId)
+	err := tasks.TasksInstance().Remove(taskJobId)
+	if err != nil {
+		g.Log().Debug(ctx, job.JobName, "启动停止失败")
+		return err
+	}
+	return nil
 }
 
 func (c *sSysJob) Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel) (RowsAffected int64, err error) {
@@ -135,4 +243,50 @@ func (c *sSysJob) Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+func (c *sSysJob) Exec(ctx context.Context, jobId int64) error {
+	exists := &model.SysJobViewModel{}
+	err := c.Model(ctx).Where(dao.SysJob.Columns().JobId, jobId).Scan(&exists)
+	if err != nil {
+		return err
+	}
+
+	actualName, exist := tasks.TasksInstance().CheckFuncName(exists.InvokeTarget)
+	if !exist {
+		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", exists.InvokeTarget)
+		return gerror.New(errInfo)
+	}
+
+	//传参解析
+	paramArr, err := tasks.TasksInstance().ParseParameters(exists.JobParams)
+	if err != nil {
+		g.Log().Error(ctx, "sSysJob.JobRun worker.ParseParameters", err)
+		return err
+	}
+
+	taskData := tasks.Task{
+		ID:         fmt.Sprintf("%s-job-%d", exists.InvokeTarget, exists.JobId),
+		TaskType:   "Type-" + gconv.String(exists.MisfirePolicy),
+		MethodName: actualName,
+		Params:     paramArr,
+		Explain:    exists.JobName,
+	}
+	runPayload, _ := json.Marshal(taskData)
+
+	err = tasks.TasksInstance().Once(
+		worker.WithTaskCtx(context.Background()),
+		worker.WithTaskUid(taskData.ID),           // 任务ID
+		worker.WithTaskGroup(taskData.MethodName), // 任务组
+		worker.WithTaskTimeout(10),
+		worker.WithTaskNow(true),
+		worker.WithTaskReplace(true),
+		worker.WithTaskPayload(runPayload),
+	)
+
+	if err != nil {
+		errInfo := fmt.Sprintf(exists.InvokeTarget, taskData.Explain, "启动任务失败")
+		return errors.New(errInfo)
+	}
+	return nil
 }

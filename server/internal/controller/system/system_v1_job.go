@@ -105,3 +105,14 @@ func (c *ControllerV1) SysJobDelete(ctx context.Context, req *v1.SysJobDeleteReq
 		JobIds: req.JobIds,
 	}, nil
 }
+
+func (c *ControllerV1) SysJobExec(ctx context.Context, req *v1.SysJobExecReq) (res *v1.SysJobExecRes, err error) {
+	err = service.SysJob().Exec(ctx, req.JobId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.SysJobExecRes{
+		JobId: req.JobId,
+	}, nil
+}

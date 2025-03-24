@@ -70,3 +70,8 @@ export async function updateStatusApi(params: SysJobSaveReq|any) {
 export async function deleteSysJobApi(params: SysJobDeleteReq) {
   return requestClient.post<SysJobDeleteRes>('/system/job/delete', { ...params });
 }
+
+export async function execOnceApi(params: {jobId: number}) {
+  return requestClient.post<SysJob>('/system/job/exec', params);
+}
+
