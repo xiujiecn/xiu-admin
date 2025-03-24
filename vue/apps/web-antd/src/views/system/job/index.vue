@@ -10,23 +10,18 @@ import { getVxePopupContainer } from '@vben/utils';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { getDictOptions } from '#/utils/dict';
 import { DictEnum } from '@vben/constants';
-import { Button, message, Tag, Modal, Popconfirm } from 'ant-design-vue';
+import { Button, message, Switch, Modal, Popconfirm } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysJobListApi, deleteSysJobApi } from '#/api/system/job';
+import { getSysJobListApi, deleteSysJobApi, updateStatusApi } from '#/api/system/job';
 import viewDrawer from './view-drawer.vue';
 import editDrawer from './edit-drawer.vue';
 import {
   MdiDelete,
   MdiPlus,
 } from '@vben/icons';
+import { renderDict } from '#/utils/render';
 
-interface RowType {
-  jobId: number;
-  jobName: string;
-
-  
-}
 
 const formOptions: VbenFormProps = {
   // 默认展开
@@ -67,7 +62,7 @@ const formOptions: VbenFormProps = {
   submitOnEnter: false,
 };
 
-const gridOptions: VxeTableGridOptions<RowType> = {
+const gridOptions: VxeTableGridOptions<SysJob> = {
   checkboxConfig: {
     highlight: true,
     labelField: 'jobId',
@@ -76,10 +71,25 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
     { field: 'jobName', title: '任务名称' },
     { field: 'remark', title: '任务描述' },
-    { field: 'jobGroup', title: '任务分组' },
+    { field: 'jobGroup', title: '任务分组',
+      slots: {
+        default: ({ row }) => {
+          let found = renderDict(row.jobGroup, DictEnum.SYS_JOB_GROUP);
+          if (found) {
+            return found;
+          }
+          return row.jobGroup;
+        },
+      },
+    },
     { field: 'invokeTarget', title: '任务方法名' },
     { field: 'cronExpression', title: 'corn执行表达式' },
-    { field: 'status', title: '状态' },
+    {
+      field: 'status',
+      slots: { default: 'open' },
+      title: '状态',
+      width: 100,
+    },
     { title: '操作', width: 120, slots: { default: 'action' } }
   ],
   exportConfig: {},
@@ -176,6 +186,12 @@ function handleUpdate(row: SysJob) {
   drawerEditApi.open();
 }
 
+async function handleStatusChange(row: SysJob) {
+  await updateStatusApi({ jobId: row.jobId, status: row.status });
+  message.success('状态更新成功');
+  await gridApi.query();
+}
+
 </script>
 
 <template>
@@ -185,8 +201,8 @@ function handleUpdate(row: SysJob) {
         <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
         <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
       </template>
-      <template #status="{ row }">
-        <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '关闭' }}</Tag>
+      <template #open="{ row }">
+        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" />
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
@@ -198,6 +214,7 @@ function handleUpdate(row: SysJob) {
           </Popconfirm>
         </div>
       </template>
+     
     </Grid>
     <ViewDrawer />
     <EditDrawer @reload="gridApi.query()" />

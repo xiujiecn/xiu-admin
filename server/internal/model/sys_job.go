@@ -57,6 +57,13 @@ type SysJobUpdateModel struct {
 	UpdatedAt      *gtime.Time `json:"updatedAt"      orm:"updated_at"      description:"更新时间"`
 }
 
+type SysJobUpdateStatusModel struct {
+	JobId     int64       `v:"required" json:"jobId"          orm:"job_id"          description:"任务ID"`
+	Status    string      `v:"required" json:"status"         orm:"status"          description:"状态（0正常 1暂停）"`
+	UpdatedBy int64       `json:"updatedBy"      orm:"updated_by"      description:"更新者"`
+	UpdatedAt *gtime.Time `json:"updatedAt"      orm:"updated_at"      description:"更新时间"`
+}
+
 type SysJobDeleteModel struct {
 	JobIds    []int64     `v:"required" json:"jobId"          orm:"job_id"          description:"任务ID"`
 	DeletedBy int64       `json:"deletedBy"      orm:"deleted_by"      description:"删除人"`

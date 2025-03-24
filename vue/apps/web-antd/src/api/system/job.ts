@@ -63,6 +63,9 @@ export async function addSysJobApi(params: SysJobSaveReq|any) {
 export async function updateSysJobApi(params: SysJobSaveReq|any) {
   return requestClient.post<SysJob>('/system/job/update', params );
 }
+export async function updateStatusApi(params: SysJobSaveReq|any) {
+  return requestClient.post<SysJob>('/system/job/status', params );
+}
 
 export async function deleteSysJobApi(params: SysJobDeleteReq) {
   return requestClient.post<SysJobDeleteRes>('/system/job/delete', { ...params });

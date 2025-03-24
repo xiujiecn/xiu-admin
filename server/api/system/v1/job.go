@@ -50,6 +50,12 @@ type SysJobUpdateRes struct {
 	model.SysJobViewModel
 }
 
+// 更新任务
+type SysJobUpdateStatusReq struct {
+	g.Meta `path:"/job/status" method:"post" tags:"系统" summary:"更新任务状态"`
+	model.SysJobUpdateStatusModel
+}
+
 // 删除任务
 type SysJobDeleteReq struct {
 	g.Meta `path:"/job/delete" method:"post" tags:"系统" summary:"删除任务"`

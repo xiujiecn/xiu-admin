@@ -92,6 +92,7 @@ type (
 		View(ctx context.Context, jobId int64) (Data *model.SysJobViewModel, err error)
 		Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastInsertId int64, err error)
 		Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel) (RowsAffected int64, err error)
+		UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdateStatusModel) (RowsAffected int64, err error) 
 		Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel) (RowsAffected int64, err error)
 	}
 	
