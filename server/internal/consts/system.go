@@ -80,3 +80,9 @@ var (
 	SysJobStatusNormal  = "0"
 	SysJobStatusDisable = "1"
 )
+
+var (
+	// 计划执行策略 0不限制并发 1限制并发
+	SysJobMisfirePolicyMulty = 1
+	SysJobMisfirePolicyOnce  = 2
+)

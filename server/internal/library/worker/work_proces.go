@@ -52,6 +52,7 @@ func RegisterScheduledProcess(p Process) (q *Queue) {
 func (s *Scheduled) Cron(ctx context.Context, topic, cronExpr string, data []byte) (entryID string, err error) {
 	s.topic = topic
 	entryID, err = s.w.Cron(
+		1,
 		WithTaskUid(guid.S()),
 		WithTaskGroup(topic),
 		WithTaskExpr(cronExpr),

@@ -120,6 +120,12 @@ func (c *sSysJob) Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel
 	if err != nil {
 		return 0, err
 	}
+	//获取task目录下是否绑定对应的方法
+	_, exist := tasks.TasksInstance().CheckFuncName(jobUpdate.InvokeTarget)
+	if !exist {
+		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", jobUpdate.InvokeTarget)
+		return 0, gerror.New(errInfo)
+	}
 
 	jobUpdate.UpdatedAt = gtime.Now()
 	jobUpdate.UpdatedBy = claims.BaseClaims.ID
@@ -135,6 +141,11 @@ func (c *sSysJob) Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel
 			return 0, err
 		}
 
+		//任务启动
+		err = c.taskRestart(ctx, &job.SysJob)
+		if err != nil {
+			return row, err
+		}
 	}
 	return row, err
 }
@@ -174,6 +185,22 @@ func (c *sSysJob) UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdat
 	return row, err
 }
 
+// 任务重启
+func (c *sSysJob) taskRestart(ctx context.Context, job *entity.SysJob) (err error) {
+	//任务停止
+	if err = c.taskStop(ctx, job); err != nil {
+		return
+	}
+
+	//任务启动
+	err = c.taskRun(ctx, job)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// 任务启动
 func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
 	//获取task目录下是否绑定对应的方法
 	actualName, exist := tasks.TasksInstance().CheckFuncName(job.InvokeTarget)
@@ -196,8 +223,9 @@ func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
 		Explain:    job.JobName,
 	}
 	runPayload, _ := json.Marshal(taskData)
-	if job.MisfirePolicy == 1 {
+	if job.MisfirePolicy == consts.SysJobMisfirePolicyMulty {
 		entryID, err := tasks.TasksInstance().Cron(
+			job.Concurrent,
 			worker.WithTaskCtx(context.Background()),
 			worker.WithTaskUid(taskData.ID),           // 任务ID
 			worker.WithTaskGroup(taskData.MethodName), // 任务组
@@ -252,6 +280,12 @@ func (c *sSysJob) Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel
 	claims, err := service.SysAuth().GetCurrentUser(ctx)
 	if err != nil {
 		return 0, err
+	}
+
+	exists := &[]*model.SysJobViewModel{}
+	c.Model(ctx).WhereIn(dao.SysJob.Columns().JobId, jobDelete.JobIds).Where(dao.SysJob.Columns().Status, consts.SysJobStatusNormal).Scan(exists)
+	if len(*exists) > 0 {
+		return 0, gerror.New("存在正常运行的任务，请先停止后再删除")
 	}
 
 	jobDelete.DeletedAt = gtime.Now()

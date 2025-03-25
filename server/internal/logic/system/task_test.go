@@ -99,11 +99,12 @@ func TestTask_schedule(t *testing.T) {
 	}
 	runPayload, _ := json.Marshal(taskData)
 	_, err2 := tasks.TasksInstance().Cron(
+		1,
 		worker.WithTaskCtx(context.Background()),
-		worker.WithTaskUid(taskData.ID),           // 任务ID
+		worker.WithTaskUid(taskData.ID), // 任务ID
 		worker.WithTaskGroup(taskData.MethodName), // 任务组
-		//worker.WithTaskExpr("0/2 * * * * *"),
-		worker.WithTaskExpr("@every 2s"),
+		worker.WithTaskExpr("0/2 * * * * *"),
+		//worker.WithTaskExpr("@every 2s"),
 		worker.WithTaskTimeout(10),
 		worker.WithTaskReplace(true),
 		worker.WithTaskPayload(runPayload),
