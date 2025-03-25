@@ -12,11 +12,11 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/hibiken/asynq v0.25.1
 	github.com/mileusna/useragent v1.3.5
 	github.com/mojocn/base64Captcha v1.3.8
 	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil/v3 v3.24.5
+	github.com/xiujiecn/asynq v0.25.10
 	github.com/xuri/excelize/v2 v2.9.0
 	go.opentelemetry.io/otel v1.32.0
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa
