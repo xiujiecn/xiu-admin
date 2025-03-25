@@ -86,3 +86,13 @@ var (
 	SysJobMisfirePolicyMulty = 1
 	SysJobMisfirePolicyOnce  = 2
 )
+var (
+	// 权限码前缀 x-check-permission
+	SysCheckPermissionPrefix      = "cp"
+	SysCheckPermissionRolePrefix  = "cpr:"             // 角色权限码前缀+角色权限
+	SysCheckPermissionMenuPrefix  = "cpm:"             // 菜单权限码前缀+菜单权限
+	SysCheckPermissionDeptPrefix  = "cpd:"             // 部门权限码前缀+部门编码
+	SysCheckPermissionPostPrefix  = "cpp:"             // 岗位权限码前缀+岗位编码
+	SysCheckPermissionUserPrefix  = "cpu:"             // 用户权限码前缀+用户名
+	SysCheckPermissionCurrentUser = "cpc:current:user" // 当前登录用户默认权限
+)

@@ -8,7 +8,7 @@ import (
 )
 
 type SysClientListReq struct {
-	g.Meta `path:"/client/list" method:"get" tags:"系统" summary:"获取客户端列表"`
+	g.Meta `path:"/client/list" method:"get" tags:"系统-客户端管理" summary:"获取客户端列表" x-check-permission:"cpm:system:client:list"`
 	model.SysClientListParam
 }
 
@@ -18,7 +18,7 @@ type SysClientListRes struct {
 }
 
 type SysClientViewReq struct {
-	g.Meta `path:"/client/view" method:"get" tags:"系统" summary:"获取客户端详情"`
+	g.Meta `path:"/client/view" method:"get" tags:"系统-客户端管理" summary:"获取客户端详情" x-check-permission:"cpm:system:client:query"`
 	*model.SysClientViewParam
 }
 
@@ -27,7 +27,7 @@ type SysClientViewRes struct {
 }
 
 type SysClientAddReq struct {
-	g.Meta `path:"/client/add" method:"post" tags:"系统" summary:"添加客户端"`
+	g.Meta `path:"/client/add" method:"post" tags:"系统-客户端管理" summary:"添加客户端" x-check-permission:"cpm:system:client:add"`
 	*model.SysClientAddParam
 }
 
@@ -36,7 +36,7 @@ type SysClientAddRes struct {
 }
 
 type SysClientEditReq struct {
-	g.Meta `path:"/client/edit" method:"post" tags:"系统" summary:"编辑客户端"`
+	g.Meta `path:"/client/edit" method:"post" tags:"系统-客户端管理" summary:"编辑客户端" x-check-permission:"cpm:system:client:edit"`
 	*model.SysClientEditParam
 }
 
@@ -45,7 +45,7 @@ type SysClientEditRes struct {
 }
 
 type SysClientDeleteReq struct {
-	g.Meta `path:"/client/delete" method:"post" tags:"系统" summary:"删除客户端"`
+	g.Meta `path:"/client/delete" method:"post" tags:"系统-客户端管理" summary:"删除客户端" x-check-permission:"cpm:system:client:remove"`
 	*model.SysClientDeleteParam
 }
 
@@ -54,7 +54,7 @@ type SysClientDeleteRes struct {
 }
 
 type SysClientStatusReq struct {
-	g.Meta `path:"/client/status" method:"post" tags:"系统" summary:"修改客户端状态"`
+	g.Meta `path:"/client/status" method:"post" tags:"系统-客户端管理" summary:"修改客户端状态" x-check-permission:"cpm:system:client:edit"`
 	*model.SysClientStatusParam
 }
 

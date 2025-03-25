@@ -2,14 +2,13 @@ package system
 
 import (
 	"context"
-	"strings"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 
 	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/model/response"
@@ -18,18 +17,12 @@ import (
 
 func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *v1.UserInfoRes, err error) {
 	// 获取token
-	authorization := g.RequestFromCtx(ctx).Header.Get("Authorization")
-	if authorization == "" {
-		return nil, gerror.NewCode(gcode.CodeNotImplemented)
-	}
-	token := strings.TrimPrefix(authorization, "Bearer ")
-	// 解析token
-	claims, err := service.SysAuth().ParseToken(ctx, token)
-	if err != nil {
-		return nil, err
+	userId := contexts.GetUserId(ctx)
+	if userId == 0 {
+		return nil, gerror.NewCode(gcode.CodeSecurityReason)
 	}
 	// 获取用户信息
-	user, err := service.SysUser().GetUserById(ctx, claims.BaseClaims.ID)
+	user, err := service.SysUser().GetUserById(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -44,12 +37,6 @@ func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *
 	}, nil
 }
 func (c *ControllerV1) UserList(ctx context.Context, req *v1.UserListReq) (res *v1.UserListRes, err error) {
-	// 获取当前用户信息
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	req.TenantId = claims.BaseClaims.TenantId
 	// 获取用户列表
 	users, total, err := service.SysUser().List(ctx, &req.PageInfo, &req.UserListParam)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 )
 
 type RoleListReq struct {
-	g.Meta `path:"/role/list" method:"get" tags:"系统" summary:"获取角色列表"`
+	g.Meta `path:"/role/list" method:"get" tags:"系统-角色管理" summary:"获取角色列表" x-check-permission:"cpm:system:role:list"`
 	request.PageInfo
 	model.SysRoleListParam
 }
@@ -20,7 +20,7 @@ type RoleListRes struct {
 }
 
 type RoleAddReq struct {
-	g.Meta `path:"/role/add" method:"post" tags:"系统" summary:"新增角色"`
+	g.Meta `path:"/role/add" method:"post" tags:"系统-角色管理" summary:"新增角色" x-check-permission:"cpm:system:role:add"`
 	model.SysRoleAddParam
 }
 
@@ -29,7 +29,7 @@ type RoleAddRes struct {
 }
 
 type RoleEditReq struct {
-	g.Meta `path:"/role/edit" method:"post" tags:"系统" summary:"编辑角色"`
+	g.Meta `path:"/role/edit" method:"post" tags:"系统-角色管理" summary:"编辑角色" x-check-permission:"cpm:system:role:edit"`
 	model.SysRoleEditParam
 }
 
@@ -38,7 +38,7 @@ type RoleEditRes struct {
 }
 
 type RoleDeleteReq struct {
-	g.Meta `path:"/role/delete" method:"post" tags:"系统" summary:"删除角色"`
+	g.Meta `path:"/role/delete" method:"post" tags:"系统-角色管理" summary:"删除角色" x-check-permission:"cpm:system:role:remove"`
 	model.SysRoleDeleteParam
 }
 
@@ -47,7 +47,7 @@ type RoleDeleteRes struct {
 }
 
 type RoleViewReq struct {
-	g.Meta `path:"/role/view" method:"get" tags:"系统" summary:"获取角色详情"`
+	g.Meta `path:"/role/view" method:"get" tags:"系统-角色管理" summary:"获取角色详情" x-check-permission:"cpm:system:role:query"`
 	model.SysRoleViewParam
 }
 
@@ -56,7 +56,7 @@ type RoleViewRes struct {
 }
 
 type RoleDataScopeEditReq struct {
-	g.Meta `path:"/role/dataScope" method:"post" tags:"系统" summary:"编辑角色数据权限"`
+	g.Meta `path:"/role/dataScope" method:"post" tags:"系统-角色管理" summary:"编辑角色数据权限" x-check-permission:"cpm:system:role:edit"`
 	model.SysRoleDataScopeEditParam
 }
 

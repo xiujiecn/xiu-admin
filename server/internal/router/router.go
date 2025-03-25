@@ -24,6 +24,7 @@ func InitRouter(ctx context.Context, s *ghttp.Server) {
 		Monitor(ctx, group)
 		Common(ctx, group)
 		GenCodes(ctx, group)
+		Gen(ctx, group)
 	})
 	//操作日志
 	s.BindHookHandler("/*", ghttp.HookAfterOutput, func(r *ghttp.Request) {

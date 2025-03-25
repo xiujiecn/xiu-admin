@@ -1,3 +1,4 @@
+// 内存缓存管理
 package mcache
 
 import (

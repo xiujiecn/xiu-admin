@@ -18,6 +18,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/mileusna/useragent"
 	"golang.org/x/exp/rand"
@@ -240,6 +241,11 @@ func DirSize(dirname string) string {
 	}
 	return FileSize(s)
 }
+func MergeAbs(path string, fileName ...string) string {
+	var paths = []string{gfile.RealPath(path)}
+	paths = append(paths, fileName...)
+	return gfile.Join(paths...)
+}
 
 // FileSize 字节的单位转换 保留两位小数
 func FileSize(fileSize int64) string {
@@ -250,4 +256,17 @@ func FileSize(fileSize int64) string {
 		size /= 1024
 	}
 	return fmt.Sprintf("%.2f %s", size, units[i])
+}
+
+// UniqueSlice 切片去重
+func UniqueSlice[K comparable](languages []K) []K {
+	result := make([]K, 0, len(languages))
+	temp := map[K]struct{}{}
+	for _, item := range languages {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
 }

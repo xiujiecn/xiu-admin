@@ -5,7 +5,7 @@ import (
 )
 
 type LoginReq struct {
-	g.Meta       `path:"/auth/login" method:"post" tags:"系统" summary:"登录"`
+	g.Meta       `path:"/auth/login" method:"post" tags:"系统-授权" summary:"登录"`
 	TenantId     string `json:"tenantId" v:"required#租户ID不能为空" dc:"租户ID"`
 	Username     string `json:"username" v:"required#用户名不能为空" dc:"用户名"`
 	Password     string `json:"password" v:"required#密码不能为空" dc:"密码"`
@@ -22,7 +22,7 @@ type LoginRes struct {
 }
 
 type RefreshTokenReq struct {
-	g.Meta          `path:"/auth/refresh" method:"post" tags:"系统" summary:"刷新访问令牌"`
+	g.Meta          `path:"/auth/refresh" method:"post" tags:"系统-授权" summary:"刷新访问令牌"`
 	WithCredentials bool `json:"withCredentials" dc:"是否携带凭证"`
 }
 
@@ -32,7 +32,7 @@ type RefreshTokenRes struct {
 }
 
 type LogoutReq struct {
-	g.Meta          `path:"/auth/logout" method:"post" tags:"系统" summary:"退出登录"`
+	g.Meta          `path:"/auth/logout" method:"post" tags:"系统-授权" summary:"退出登录"`
 	WithCredentials bool `json:"withCredentials" dc:"是否携带凭证"`
 }
 
@@ -42,7 +42,7 @@ type LogoutRes struct {
 }
 
 type GetAccessCodesReq struct {
-	g.Meta `path:"/auth/codes" method:"get" tags:"系统" summary:"获取用户权限码"`
+	g.Meta `path:"/auth/codes" method:"get" tags:"系统-授权" summary:"获取用户权限码"`
 }
 
 type GetAccessCodesRes struct {
@@ -51,7 +51,7 @@ type GetAccessCodesRes struct {
 }
 
 type TenantListReq struct {
-	g.Meta `path:"/auth/getTenantList" method:"get" tags:"系统" summary:"获取租户列表"`
+	g.Meta `path:"/auth/getTenantList" method:"get" tags:"系统-授权" summary:"获取租户列表"`
 }
 
 type TenantListData struct {

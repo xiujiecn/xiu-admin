@@ -29,7 +29,7 @@ func init() {
 }
 
 func (l *sSysRole) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
-	if len(option) > 0 {
+	if len(option) == 0 {
 		option = append(option, &handler.Option{
 			FilterTenant: true,
 			FilterAuth:   true,
@@ -155,7 +155,7 @@ func (s *sSysRole) Edit(ctx context.Context, param *model.SysRoleEditParam) (rol
 	data.UpdatedBy = user.ID
 	data.UpdatedAt = gtime.Now()
 
-	_, err = dao.SysRole.Ctx(ctx).Data(data).Where(dao.SysRole.Columns().RoleId, param.RoleId).OmitNil().Update()
+	_, err = s.Model(ctx).Data(data).Where(dao.SysRole.Columns().RoleId, param.RoleId).OmitNil().Update()
 	if err != nil {
 		return role, err
 	}
@@ -265,16 +265,13 @@ func (s *sSysRole) RoleDept(ctx context.Context, roleId int64, deptIds []int64) 
 
 // 编辑角色数据权限
 func (s *sSysRole) EditRoleDataScope(ctx context.Context, model *model.SysRoleDataScopeEditParam) (err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return err
-	}
+
 	data := do.SysRole{}
 	gconv.Struct(model, &data)
-	data.UpdatedBy = claims.BaseClaims.ID
+	data.UpdatedBy = contexts.GetUserId(ctx)
 	data.UpdatedAt = gtime.Now()
 
-	_, err = dao.SysRole.Ctx(ctx).Data(data).Where(dao.SysRole.Columns().RoleId, model.RoleId).Where(dao.SysRole.Columns().TenantId, claims.TenantId).OmitNil().Update()
+	_, err = s.Model(ctx).Data(data).Where(dao.SysRole.Columns().RoleId, model.RoleId).OmitNil().Update()
 	if err != nil {
 		return err
 	}

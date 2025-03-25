@@ -33,8 +33,9 @@ type SysMenuListModel struct {
 }
 
 type SysMenuListParam struct {
-	MenuName string `json:"menuName"`
-	Status   string `json:"status"`
+	MenuName string  `json:"menuName"`
+	Status   string  `json:"status"`
+	MenuIds  []int64 `json:"menuIds"`
 }
 
 type SysMenuViewModel struct {

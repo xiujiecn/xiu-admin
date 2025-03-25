@@ -8,7 +8,7 @@ import (
 )
 
 type SysNoticeListReq struct {
-	g.Meta `path:"/notice/list" method:"get" tags:"公告" summary:"公告列表"`
+	g.Meta `path:"/notice/list" method:"get" tags:"系统-公告管理" summary:"公告列表" x-check-permission:"cpm:system:notice:list"	`
 	*model.SysNoticeListParam
 }
 
@@ -18,7 +18,7 @@ type SysNoticeListRes struct {
 }
 
 type SysNoticeAddReq struct {
-	g.Meta `path:"/notice/add" method:"post" tags:"公告" summary:"新增公告"`
+	g.Meta `path:"/notice/add" method:"post" tags:"系统-公告管理" summary:"新增公告" x-check-permission:"cpm:system:notice:add"`
 	*model.SysNoticeAddParam
 }
 
@@ -27,7 +27,7 @@ type SysNoticeAddRes struct {
 }
 
 type SysNoticeEditReq struct {
-	g.Meta `path:"/notice/edit" method:"post" tags:"公告" summary:"编辑公告"`
+	g.Meta `path:"/notice/edit" method:"post" tags:"系统-公告管理" summary:"编辑公告" x-check-permission:"cpm:system:notice:edit"`
 	*model.SysNoticeEditParam
 }
 
@@ -36,7 +36,7 @@ type SysNoticeEditRes struct {
 }
 
 type SysNoticeDeleteReq struct {
-	g.Meta `path:"/notice/delete" method:"post" tags:"公告" summary:"删除公告"`
+	g.Meta `path:"/notice/delete" method:"post" tags:"系统-公告管理" summary:"删除公告" x-check-permission:"cpm:system:notice:remove"`
 	*model.SysNoticeDeleteParam
 }
 
@@ -45,7 +45,7 @@ type SysNoticeDeleteRes struct {
 }
 
 type SysNoticeViewReq struct {
-	g.Meta `path:"/notice/view" method:"get" tags:"公告" summary:"查看公告"`
+	g.Meta `path:"/notice/view" method:"get" tags:"系统-公告管理" summary:"查看公告" x-check-permission:"cpm:system:notice:query"`
 	*model.SysNoticeViewParam
 }
 

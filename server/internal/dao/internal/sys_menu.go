@@ -24,6 +24,8 @@ type SysMenuColumns struct {
 	MenuId      string // 菜单ID
 	MenuName    string // 菜单名称
 	ParentId    string // 父菜单ID
+	Level       string // 关系树等级
+	Tree        string // 关系树
 	OrderNum    string // 显示顺序
 	Path        string // 路由地址
 	Component   string // 组件路径
@@ -48,6 +50,8 @@ var sysMenuColumns = SysMenuColumns{
 	MenuId:      "menu_id",
 	MenuName:    "menu_name",
 	ParentId:    "parent_id",
+	Level:       "level",
+	Tree:        "tree",
 	OrderNum:    "order_num",
 	Path:        "path",
 	Component:   "component",

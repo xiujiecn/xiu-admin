@@ -34,11 +34,7 @@ func init() {
 
 func (s *sSysOperLog) GetOperLogList(ctx context.Context, query *model.SysOperLogListParam, page *request.PageInfo) (items []*model.SysOperLogListModel, total int, err error) {
 	// 获取当前用户租户编码
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	tenantId := claims.TenantId
+	tenantId := contexts.GetTenantId(ctx)
 
 	db := dao.SysOperLog.Ctx(ctx).Where(dao.SysOperLog.Columns().TenantId, tenantId)
 
@@ -118,6 +114,10 @@ func (s *sSysOperLog) AnalysisLog(ctx context.Context) (data *model.SysOperLogAd
 	if len(url) > 100 {
 		url = url[:100] + "..."
 	}
+	operParam := gconv.String(param)
+	if len(operParam) > 1024 {
+		operParam = "数据过大，未记录"
+	}
 	data = &model.SysOperLogAddParam{
 		TenantId:      contexts.GetTenantId(ctx),
 		Title:         "",
@@ -130,7 +130,7 @@ func (s *sSysOperLog) AnalysisLog(ctx context.Context) (data *model.SysOperLogAd
 		OperUrl:       url,
 		OperIp:        utility.GetClientIp(ctx),
 		OperLocation:  utility.GetCityByIp(utility.GetClientIp(ctx)),
-		OperParam:     gconv.String(param),
+		OperParam:     operParam,
 		JsonResult:    jsonResult,
 		Status:        status,
 		ErrorMsg:      message,

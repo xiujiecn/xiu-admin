@@ -17,4 +17,5 @@ type Role struct {
 // 通用身份模型
 type Identity struct {
 	BaseClaims
+	AccessCodeList []string // 访问码列表
 }

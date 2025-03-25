@@ -30,7 +30,7 @@ func init() {
 }
 
 func (l *sSysDept) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
-	if len(option) > 0 {
+	if len(option) == 0 {
 		option = append(option, &handler.Option{
 			FilterTenant: true,
 			FilterAuth:   true,

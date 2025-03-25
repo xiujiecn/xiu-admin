@@ -9,7 +9,7 @@ import (
 )
 
 type DeptListReq struct {
-	g.Meta `path:"/dept/list" method:"get" tags:"系统" summary:"获取部门列表"`
+	g.Meta `path:"/dept/list" method:"get" tags:"系统-部门管理" summary:"获取部门列表" x-check-permission:"cpm:system:dept:list"`
 	request.PageInfo
 	model.SysDeptListParam
 }
@@ -20,7 +20,7 @@ type DeptListRes struct {
 }
 
 type DeptTreeReq struct {
-	g.Meta `path:"/dept/tree" method:"get" tags:"系统" summary:"获取部门树"`
+	g.Meta `path:"/dept/tree" method:"get" tags:"系统-部门管理" summary:"获取部门树" x-check-permission:"cpm:system:dept:list"`
 }
 
 type DeptTreeRes struct {
@@ -28,7 +28,7 @@ type DeptTreeRes struct {
 }
 
 type DeptAddReq struct {
-	g.Meta `path:"/dept/add" method:"post" tags:"系统" summary:"新增部门"`
+	g.Meta `path:"/dept/add" method:"post" tags:"系统-部门管理" summary:"新增部门" x-check-permission:"cpm:system:dept:add"`
 	model.SysDeptAddModel
 }
 
@@ -37,7 +37,7 @@ type DeptAddRes struct {
 }
 
 type DeptEditReq struct {
-	g.Meta `path:"/dept/edit" method:"post" tags:"系统" summary:"编辑部门"`
+	g.Meta `path:"/dept/edit" method:"post" tags:"系统-部门管理" summary:"编辑部门" x-check-permission:"cpm:system:dept:edit"`
 	model.SysDeptEditModel
 }
 
@@ -46,7 +46,7 @@ type DeptEditRes struct {
 }
 
 type DeptDeleteReq struct {
-	g.Meta `path:"/dept/delete" method:"post" tags:"系统" summary:"删除部门"`
+	g.Meta `path:"/dept/delete" method:"post" tags:"系统-部门管理" summary:"删除部门" x-check-permission:"cpm:system:dept:remove"`
 	model.SysDeptDeleteModel
 }
 
@@ -55,7 +55,7 @@ type DeptDeleteRes struct {
 }
 
 type DeptViewReq struct {
-	g.Meta `path:"/dept/view" method:"get" tags:"系统" summary:"获取部门详情"`
+	g.Meta `path:"/dept/view" method:"get" tags:"系统-部门管理" summary:"获取部门详情" x-check-permission:"cpm:system:dept:query"`
 	model.SysDeptViewModel
 }
 

@@ -33,7 +33,7 @@ func init() {
 }
 
 func (l *sSysPost) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
-	if len(option) > 0 {
+	if len(option) == 0 {
 		option = append(option, &handler.Option{
 			FilterTenant: true,
 			FilterAuth:   true,
@@ -42,7 +42,7 @@ func (l *sSysPost) Model(ctx context.Context, option ...*handler.Option) *gdb.Mo
 	return handler.Model(dao.SysPost.Ctx(ctx), option...)
 }
 
-func (l *sSysPost) List(ctx context.Context, query model.SysPostListParam) (items []*model.SysPostListModel, total int, err error) {
+func (l *sSysPost) List(ctx context.Context, query *model.SysPostListParam) (items []*model.SysPostListModel, total int, err error) {
 	m := l.Model(ctx)
 	deptIds := make([]int64, 0)
 	if query.DeptId != 0 {

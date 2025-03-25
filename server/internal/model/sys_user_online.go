@@ -16,6 +16,7 @@ type SysUserOnlineListParam struct {
 	DeviceType string   `json:"deviceType"     description:"设备类型"`
 	Ipaddr     string   `json:"ipaddr"         description:"登录IP地址"`
 	LoginTime  []string `json:"loginTime"      description:"访问时间"`
+	Token      string   `json:"token"          description:"Token"`
 }
 type SysUserOnlineListModel struct {
 	OnlineId      int64       `json:"onlineId"      orm:"online_id"      description:"访问ID"`

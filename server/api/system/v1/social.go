@@ -9,7 +9,7 @@ import (
 )
 
 type SysSocialListReq struct {
-	g.Meta `path:"/social/list" method:"get" tags:"社交" summary:"社交列表"`
+	g.Meta `path:"/social/list" method:"get" tags:"系统-第三方授权管理" summary:"社交列表" x-check-permission:"cpm:system:social:list"`
 	model.SysSocialListParam
 	request.PageInfo
 }

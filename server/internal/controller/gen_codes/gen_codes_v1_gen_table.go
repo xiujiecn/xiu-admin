@@ -45,3 +45,83 @@ func (c *ControllerV1) SysGenTableAdd(ctx context.Context, req *v1.SysGenTableAd
 	}
 	return res, nil
 }
+func (c *ControllerV1) SysGenTableDelete(ctx context.Context, req *v1.SysGenTableDeleteReq) (res *v1.SysGenTableDeleteRes, err error) {
+	output, err := service.SysGenTable().Delete(ctx, req.SysGenTableDeleteParam)
+	if err != nil {
+		return nil, err
+	}
+	res = &v1.SysGenTableDeleteRes{
+		SysGenTableDeleteModel: output,
+	}
+	return res, nil
+}
+func (c *ControllerV1) SysGenTableSelects(ctx context.Context, req *v1.SysGenTableSelectsReq) (res *v1.SysGenTableSelectsRes, err error) {
+	output, err := service.SysGenTable().Selects(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res = &v1.SysGenTableSelectsRes{
+		SelectsModel: output,
+	}
+	return res, nil
+}
+func (c *ControllerV1) SysGenTableTableSelect(ctx context.Context, req *v1.SysGenTableTableSelectReq) (res *v1.SysGenTableTableSelectRes, err error) {
+	output, err := service.SysGenTable().TableSelect(ctx, req.GenCodesTableSelectParam)
+	if err != nil {
+		return nil, err
+	}
+	res = &v1.SysGenTableTableSelectRes{
+		Items: output,
+	}
+	return res, nil
+}
+func (c *ControllerV1) SysGenTableColumnSelect(ctx context.Context, req *v1.SysGenTableColumnSelectReq) (res *v1.SysGenTableColumnSelectRes, err error) {
+	output, err := service.SysGenTable().ColumnSelect(ctx, req.GenCodesColumnSelectParam)
+	if err != nil {
+		return nil, err
+	}
+	res = &v1.SysGenTableColumnSelectRes{
+		Items: output,
+	}
+	return res, nil
+}
+func (c *ControllerV1) SysGenTablePreview(ctx context.Context, req *v1.SysGenTablePreviewReq) (res *v1.SysGenTablePreviewRes, err error) {
+	output, err := service.SysGenTable().Preview(ctx, req.GenCodesPreviewParam)
+	if err != nil {
+		return nil, err
+	}
+	res = &v1.SysGenTablePreviewRes{
+		GenCodesPreviewModel: output,
+	}
+	return res, nil
+}
+func (c *ControllerV1) SysGenTableBuild(ctx context.Context, req *v1.SysGenTableBuildReq) (res *v1.SysGenTableBuildRes, err error) {
+	output, err := service.SysGenTable().Build(ctx, req.GenCodesBuildParam)
+	if err != nil {
+		return nil, err
+	}
+	res = &v1.SysGenTableBuildRes{
+		GenCodesBuildModel: output,
+	}
+	return res, nil
+}
+func (c *ControllerV1) SysGenTableColumnList(ctx context.Context, req *v1.SysGenTableColumnListReq) (res *v1.SysGenTableColumnListRes, err error) {
+	output, err := service.SysGenTable().ColumnList(ctx, req.GenCodesColumnListParam)
+	if err != nil {
+		return nil, err
+	}
+	res = &v1.SysGenTableColumnListRes{
+		Items: output,
+	}
+	return res, nil
+}
+func (c *ControllerV1) SysGenTableEdit(ctx context.Context, req *v1.SysGenTableEditReq) (res *v1.SysGenTableEditRes, err error) {
+	output, err := service.SysGenTable().Edit(ctx, req.SysGenTableEditParam)
+	if err != nil {
+		return nil, err
+	}
+	res = &v1.SysGenTableEditRes{
+		SysGenTableEditModel: output,
+	}
+	return res, nil
+}

@@ -9,7 +9,7 @@ import (
 )
 
 type SysOssListReq struct {
-	g.Meta `path:"/oss/list" method:"get" tags:"系统" summary:"获取OSS列表"`
+	g.Meta `path:"/oss/list" method:"get" tags:"系统-存储管理" summary:"获取OSS列表" x-check-permission:"cpm:system:oss:list"`
 	model.SysOssListParam
 	request.PageInfo
 }
@@ -20,7 +20,7 @@ type SysOssListRes struct {
 }
 
 type SysOssViewReq struct {
-	g.Meta `path:"/oss/view" method:"get" tags:"系统" summary:"查看文件"`
+	g.Meta `path:"/oss/view" method:"get" tags:"系统-存储管理" summary:"查看文件" x-check-permission:"cpm:system:oss:query"`
 	*model.SysOssViewParam
 }
 
@@ -29,7 +29,7 @@ type SysOssViewRes struct {
 }
 
 type SysOssDeleteReq struct {
-	g.Meta `path:"/oss/delete" method:"post" tags:"系统" summary:"删除文件"`
+	g.Meta `path:"/oss/delete" method:"post" tags:"系统-存储管理" summary:"删除文件" x-check-permission:"cpm:system:oss:remove"`
 	*model.SysOssDeleteParam
 }
 

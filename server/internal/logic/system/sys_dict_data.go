@@ -26,7 +26,7 @@ func init() {
 }
 
 func (l *sSysDictData) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
-	if len(option) > 0 {
+	if len(option) == 0 {
 		option = append(option, &handler.Option{
 			FilterTenant: true,
 			FilterAuth:   true,
@@ -36,12 +36,6 @@ func (l *sSysDictData) Model(ctx context.Context, option ...*handler.Option) *gd
 }
 
 func (s *sSysDictData) List(ctx context.Context, param *model.SysDictDataListParam) (items []model.SysDictDataListModel, total int, err error) {
-	// 获取当前用户租户编码
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	tenantId := claims.TenantId
 	typeData := &model.SysDictTypeViewModel{}
 	// 获取字典类型
 	if param.DictType == "" && param.DictId != 0 {
@@ -61,8 +55,7 @@ func (s *sSysDictData) List(ctx context.Context, param *model.SysDictDataListPar
 	}
 	// 获取字典数据
 	items = make([]model.SysDictDataListModel, 0)
-	m := s.Model(ctx).Where(dao.SysDictData.Columns().TenantId, tenantId)
-	m = m.Where(dao.SysDictData.Columns().DictType, param.DictType)
+	m := s.Model(ctx).Where(dao.SysDictData.Columns().DictType, param.DictType)
 	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err

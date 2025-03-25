@@ -27,7 +27,7 @@ import {
   WindowsIcon,
 } from '@vben/icons';
 
-import { Tag } from 'ant-design-vue';
+import { Tag,Tooltip } from 'ant-design-vue';
 
 import { DictTag } from '#/components/dict';
 
@@ -94,6 +94,12 @@ export function renderJsonPreview(json: any) {
  */
 export function renderIcon(icon: string) {
   return <IconifyIcon icon={icon}></IconifyIcon>;
+}
+
+export function renderTooltip(trigger: any, content: any) {
+  return <Tooltip title={content}>
+    {trigger}
+  </Tooltip>;
 }
 
 /**

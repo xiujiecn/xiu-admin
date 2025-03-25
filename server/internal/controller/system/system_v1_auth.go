@@ -7,6 +7,8 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 
 	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/mcache"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/service"
 )
@@ -34,11 +36,22 @@ func (c *ControllerV1) RefreshToken(ctx context.Context, req *v1.RefreshTokenReq
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }
 func (c *ControllerV1) Logout(ctx context.Context, req *v1.LogoutReq) (res *v1.LogoutRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	token, err := service.SysAuth().GetAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	service.SysUserOnline().DeleteByToken(ctx, token)
+
+	return &v1.LogoutRes{
+		Data:   "退出成功",
+		Status: 200,
+	}, nil
 }
 func (c *ControllerV1) GetAccessCodes(ctx context.Context, req *v1.GetAccessCodesReq) (res *v1.GetAccessCodesRes, err error) {
-	accessCodes := make([]string, 0)
-	accessCodes = append(accessCodes, "123456")
+	accessCodes, err := mcache.GetUserAccessCodeList(ctx, contexts.GetUserId(ctx))
+	if err != nil {
+		return nil, err
+	}
 	res = &v1.GetAccessCodesRes{
 		Data: accessCodes,
 	}

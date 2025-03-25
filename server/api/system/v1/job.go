@@ -10,7 +10,7 @@ import (
 
 // 获取任务列表
 type SysJobListReq struct {
-	g.Meta `path:"/job/list" method:"get" tags:"系统" summary:"获取任务列表"`
+	g.Meta `path:"/job/list" method:"get" tags:"系统-任务管理" summary:"获取任务列表"`
 	model.SysJobListParam
 	request.PageInfo
 }
@@ -22,7 +22,7 @@ type SysJobListRes struct {
 
 // 获取任务详情
 type SysJobViewReq struct {
-	g.Meta `path:"/job/view" method:"get" tags:"系统" summary:"获取任务详情"`
+	g.Meta `path:"/job/view" method:"get" tags:"系统-任务管理" summary:"获取任务详情"`
 	JobId  int64 `v:"required" json:"jobId" dc:"任务ID"`
 }
 
@@ -32,7 +32,7 @@ type SysJobViewRes struct {
 
 // 添加任务
 type SysJobAddReq struct {
-	g.Meta `path:"/job/add" method:"post" tags:"系统" summary:"添加任务"`
+	g.Meta `path:"/job/add" method:"post" tags:"系统-任务管理" summary:"添加任务"`
 	model.SysJobAddModel
 }
 
@@ -42,7 +42,7 @@ type SysJobAddRes struct {
 
 // 更新任务
 type SysJobUpdateReq struct {
-	g.Meta `path:"/job/update" method:"post" tags:"系统" summary:"更新任务"`
+	g.Meta `path:"/job/update" method:"post" tags:"系统-任务管理" summary:"更新任务"`
 	model.SysJobUpdateModel
 }
 
@@ -56,9 +56,11 @@ type SysJobUpdateStatusReq struct {
 	model.SysJobUpdateStatusModel
 }
 
+type SysJobUpdateStatusRes = SysJobUpdateRes
+
 // 删除任务
 type SysJobDeleteReq struct {
-	g.Meta `path:"/job/delete" method:"post" tags:"系统" summary:"删除任务"`
+	g.Meta `path:"/job/delete" method:"post" tags:"系统-任务管理" summary:"删除任务"`
 	JobIds []int64 `json:"jobId" dc:"任务ID"`
 }
 

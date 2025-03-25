@@ -9,10 +9,13 @@ import (
 	v1 "xiujieadmin/api/system/v1"
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/entity"
 	"xiujieadmin/internal/service"
 
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -30,18 +33,44 @@ func init() {
 	service.RegisterSysMenu(NewSysMenu())
 }
 
-// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
-func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error) {
-	// 获取当前用户信息
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
+func (s *sSysMenu) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) == 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: false,
+			FilterAuth:   false,
+		})
+	}
+	return handler.Model(dao.SysMenu.Ctx(ctx), option...)
+}
+
+func (l *sSysMenu) List(ctx context.Context, param *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error) {
+	m := l.Model(ctx)
+	if param.MenuIds != nil {
+		m = m.WhereIn(dao.SysMenu.Columns().MenuId, param.MenuIds)
+	}
+	if param.MenuName != "" {
+		m = m.WhereLike(dao.SysMenu.Columns().MenuName, "%"+param.MenuName+"%")
+	}
+	if param.Status != "" {
+		m = m.Where(dao.SysMenu.Columns().Status, param.Status)
+	}
+	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
 	}
+	err = m.Order(dao.SysMenu.Columns().OrderNum).Page(0, 5000).Scan(&data)
+	return
+}
+
+// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
+func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error) {
+	// 获取当前用户信息
+	tenantId := contexts.GetTenantId(ctx)
 	m := dao.SysMenu.Ctx(ctx)
-	if claims.TenantId != consts.DefaultSystemTenantCode {
+	if tenantId != consts.DefaultSystemTenantCode {
 		// 获取租户信息
 		tenantInfo, err := service.SysTenant().View(ctx, &model.SysTenantViewParam{
-			TenantId: claims.TenantId,
+			TenantId: tenantId,
 		})
 		if err != nil {
 			return nil, 0, err
@@ -55,7 +84,7 @@ func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListPa
 		}
 		if tenantPackage == nil {
 			g.Log().Errorf(ctx, "sSysMenu.GetTenantMenu not found tenantPackage. TenantId:%s PackageId:%d",
-				claims.TenantId, tenantInfo.PackageId)
+				tenantId, tenantInfo.PackageId)
 			return nil, 0, gerror.NewCode(gcode.CodeInternalError, "系统内部错误")
 		}
 		if tenantPackage.MenuIds != "" {
@@ -71,6 +100,10 @@ func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListPa
 	if query.Status != "" {
 		m = m.Where(dao.SysMenu.Columns().Status, query.Status)
 	}
+	if query.MenuIds != nil {
+		m = m.WhereIn(dao.SysMenu.Columns().MenuId, query.MenuIds)
+	}
+
 	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
@@ -105,12 +138,6 @@ func (l *sSysMenu) MenuTree(ctx context.Context, parentMenu *model.SysMenuTree, 
 
 // 获取用户动态路由列表
 func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err error) {
-	// 获取当前用户信息
-	// claims, err := service.SysAuth().GetCurrentUser(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	roleIds := []int64{1}
 	// 判断是否存在超级管理员角色
 	if slices.Contains(roleIds, consts.SuperAdminRoleId) {
@@ -240,12 +267,8 @@ func (l *sSysMenu) GetSysMenuView(ctx context.Context, menuId int64) (data *mode
 }
 
 func (l *sSysMenu) UpdateSysMenu(ctx context.Context, menu *model.SysMenuUpdateModel) (data *model.SysMenuViewModel, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
 	menu.UpdatedAt = gtime.Now()
-	menu.UpdatedBy = claims.BaseClaims.ID
+	menu.UpdatedBy = contexts.GetUserId(ctx)
 	_, err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().MenuId, menu.MenuId).Data(menu).OmitNil().Update(menu)
 	if err != nil {
 		return nil, err
@@ -258,15 +281,11 @@ func (l *sSysMenu) UpdateSysMenu(ctx context.Context, menu *model.SysMenuUpdateM
 }
 
 func (l *sSysMenu) AddSysMenu(ctx context.Context, menu *model.SysMenuAddModel) (data *model.SysMenuViewModel, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	menu.CreatedDept = claims.BaseClaims.DeptId
+	menu.CreatedDept = contexts.GetDeptId(ctx)
 	menu.CreatedAt = gtime.Now()
-	menu.CreatedBy = claims.BaseClaims.ID
+	menu.CreatedBy = contexts.GetUserId(ctx)
 	menu.UpdatedAt = gtime.Now()
-	menu.UpdatedBy = claims.BaseClaims.ID
+	menu.UpdatedBy = contexts.GetUserId(ctx)
 	re, err := dao.SysMenu.Ctx(ctx).Data(menu).Insert()
 	if err != nil {
 		return nil, err
@@ -284,5 +303,18 @@ func (l *sSysMenu) AddSysMenu(ctx context.Context, menu *model.SysMenuAddModel) 
 
 func (l *sSysMenu) DeleteSysMenu(ctx context.Context, menuId int64) (err error) {
 	_, err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().MenuId, menuId).Delete()
+	return
+}
+
+func (s *sSysMenu) GetFastList(ctx context.Context) (res map[int64]*entity.SysMenu, err error) {
+	var models []*entity.SysMenu
+	if err = dao.SysMenu.Ctx(ctx).Scan(&models); err != nil {
+		return
+	}
+
+	res = make(map[int64]*entity.SysMenu, len(models))
+	for _, v := range models {
+		res[v.MenuId] = v
+	}
 	return
 }

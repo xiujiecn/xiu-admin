@@ -9,7 +9,7 @@ import (
 )
 
 type GetOperLogListReq struct {
-	g.Meta `path:"/oper-log/list" method:"get" tags:"操作日志" summary:"操作日志列表"`
+	g.Meta `path:"/oper-log/list" method:"get" tags:"系统-日志管理" summary:"操作日志列表" x-check-permission:"cpm:system:operlog:list"`
 	model.SysOperLogListParam
 	request.PageInfo
 }

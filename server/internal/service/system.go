@@ -26,8 +26,12 @@ type (
 		ParseToken(ctx context.Context, token string) (claims *model.CustomClaims, err error)
 		// 删除Token
 		DeleteToken(ctx context.Context, token string) (err error)
+		// 获取token
+		GetAccessToken(ctx context.Context) (token string, err error)
 		// 根据Token获取当前登录用户信息
 		GetCurrentUser(ctx context.Context) (claims *model.CustomClaims, err error)
+		// 获取用户权限码
+		GetUserAccessCodeList(ctx context.Context, userId int64) (accessCodeList []string, err error)
 	}
 	ISysCaptcha interface {
 		// 生成验证码
@@ -94,10 +98,10 @@ type (
 		Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel) (RowsAffected int64, err error)
 		UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdateStatusModel) (RowsAffected int64, err error)
 		Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel) (RowsAffected int64, err error)
-		Exec(ctx context.Context, jobId int64) (err error)
+		Exec(ctx context.Context, jobId int64) error
+		// 查询所有的状态正常的任务列表，并进行初始注册
 		InitRegister() error
 	}
-
 	ISysLogininfor interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		List(ctx context.Context, param *model.SysLogininforListParam) (items []*model.SysLogininforListModel, total int, err error)
@@ -105,6 +109,8 @@ type (
 		Delete(ctx context.Context, param *model.SysLogininforDeleteParam) (output *model.SysLogininforDeleteModel, err error)
 	}
 	ISysMenu interface {
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		List(ctx context.Context, param *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error)
 		// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
 		GetTenantMenu(ctx context.Context, query *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error)
 		// 构建树结构
@@ -119,6 +125,7 @@ type (
 		UpdateSysMenu(ctx context.Context, menu *model.SysMenuUpdateModel) (data *model.SysMenuViewModel, err error)
 		AddSysMenu(ctx context.Context, menu *model.SysMenuAddModel) (data *model.SysMenuViewModel, err error)
 		DeleteSysMenu(ctx context.Context, menuId int64) (err error)
+		GetFastList(ctx context.Context) (res map[int64]*entity.SysMenu, err error)
 	}
 	ISysNotice interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -157,7 +164,7 @@ type (
 	}
 	ISysPost interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
-		List(ctx context.Context, query model.SysPostListParam) (items []*model.SysPostListModel, total int, err error)
+		List(ctx context.Context, query *model.SysPostListParam) (items []*model.SysPostListModel, total int, err error)
 		View(ctx context.Context, param *model.SysPostViewParam) (post *model.SysPostViewModel, err error)
 		Add(ctx context.Context, param *model.SysPostAddParam) (post *model.SysPostAddModel, err error)
 		Edit(ctx context.Context, param *model.SysPostEditParam) (post *model.SysPostEditModel, err error)
@@ -212,12 +219,12 @@ type (
 	}
 	ISysUser interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
-		// 根据用户名获取用户信息
+		// 根据用户名获取用户信息，不验证当前租户
 		GetUserByUsername(ctx context.Context, username string, tenantId string) (user *entity.SysUser, err error)
-		// 根据邮箱获取用户信息
-		GetUserByEmail(ctx context.Context, email string) (user *entity.SysUser, err error)
-		// 根据手机号获取用户信息
-		GetUserByPhone(ctx context.Context, phone string) (user *entity.SysUser, err error)
+		// 根据邮箱获取用户信息，不验证当前租户
+		GetUserByEmail(ctx context.Context, email string, tenantId string) (user *entity.SysUser, err error)
+		// 根据手机号获取用户信息,不验证当前租户
+		GetUserByPhone(ctx context.Context, phone string, tenantId string) (user *entity.SysUser, err error)
 		// 根据用户名和密码获取用户信息
 		GetUserByUsernameAndPassword(ctx context.Context, tenantId string, username string, password string) (user *entity.SysUser, err error)
 		// 根据用户ID获取用户信息
@@ -234,11 +241,15 @@ type (
 		ResetPassword(ctx context.Context, userId int64, password string) (err error)
 		// 获取用户角色ID列表
 		GetUserRoleIds(ctx context.Context, userId int64) (roleIds []int64, err error)
+		// 获取用户岗位ID列表
+		GetUserPostIds(ctx context.Context, userId int64) (postIds []int64, err error)
 	}
 	ISysUserOnline interface {
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		Add(ctx context.Context, userOnline *model.SysUserOnlineAddModel) (err error)
 		List(ctx context.Context, query *model.SysUserOnlineListParam, page *request.PageInfo) (items []*model.SysUserOnlineListModel, total int, err error)
 		Delete(ctx context.Context, id int64) (err error)
+		DeleteByToken(ctx context.Context, token string) (err error)
 	}
 )
 

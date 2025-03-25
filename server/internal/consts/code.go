@@ -29,4 +29,6 @@ var (
 	CodeLoginExpired = gcode.New(10012, "登录已过期", nil)
 	// 部门下有子部门，不能删除
 	CodeDeptHasSub = gcode.New(10013, "部门下有子部门，不能删除", nil)
+	// 没有权限
+	CodeNoPermission = gcode.New(10014, "没有权限", nil)
 )

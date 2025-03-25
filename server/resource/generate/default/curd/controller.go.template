@@ -1,0 +1,119 @@
+// Package @{.templateGroup}
+// @Link  https://github.com/xiujie/xiujie-admin
+// @Copyright  Copyright (c) @{NowYear} XiuJieZhiLian CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujie/xiujie-admin/blob/master/LICENSE
+// @AutoGenerate Version @{.hgVersion}
+//
+package @{.templateGroup}
+
+import (
+	"context"
+	"@{.importApi}"
+	"xiujieadmin/internal/model/input/form"
+	"@{.importInput}"
+	"@{.importService}"
+)
+
+var (
+	@{.varName} = c@{.varName}{}
+)
+
+type c@{.varName} struct{}
+
+// List 查看@{.tableComment}列表
+func (c *c@{.varName}) @{.varName}List(ctx context.Context, req *v1.@{.varName}ListReq) (res *v1.@{.varName}ListRes, err error) {
+	list, totalCount, err := service.@{.servFunName}().List(ctx, &req.@{.varName}ListParam)
+	if err != nil {
+		return
+	}
+	
+	if list == nil {
+		list = []*@{.templateGroup}in.@{.varName}ListModel{}
+    }
+
+	res = new(v1.@{.varName}ListRes)
+	res.Items = list
+	res.PageResult.Page = req.Page
+	res.PageResult.PageSize = req.PageSize
+	res.PageResult.Total = totalCount
+	return
+}
+@{ if eq .options.Step.HasExport true }
+// Export 导出@{.tableComment}列表
+func (c *c@{.varName}) @{.varName}Export(ctx context.Context, req *v1.@{.varName}ExportReq) (res *v1.@{.varName}ExportRes, err error) {
+    err = service.@{.servFunName}().Export(ctx, &req.@{.varName}ListParam)
+	return
+}
+@{end}
+@{ if eq .options.Step.HasEdit true }
+// Edit 更新@{.tableComment}
+func (c *c@{.varName}) @{.varName}Edit(ctx context.Context, req *v1.@{.varName}EditReq) (res *v1.@{.varName}EditRes, err error) {
+    err = service.@{.servFunName}().Edit(ctx, &req.@{.varName}EditParam)
+	return
+}
+@{end}
+@{ if and (eq .options.Step.HasEdit true) (eq .options.Step.HasMaxSort true) }
+// MaxSort 获取@{.tableComment}最大排序
+func (c *c@{.varName}) @{.varName}MaxSort(ctx context.Context, req *v1.@{.varName}MaxSortReq) (res *v1.@{.varName}MaxSortRes, err error) {
+	data, err := service.@{.servFunName}().MaxSort(ctx, &req.@{.varName}MaxSortParam)
+	if err != nil {
+		return
+	}
+
+	res = new(@{.varName | ToLower}.MaxSortRes)
+	res.@{.varName}MaxSortModel = data
+	return
+}
+@{end}
+@{ if or (eq .options.Step.HasView true) (eq .options.Step.HasEdit true) }
+// View 获取指定@{.tableComment}信息
+func (c *c@{.varName}) @{.varName}View(ctx context.Context, req *v1.@{.varName}ViewReq) (res *v1.@{.varName}ViewRes, err error) {
+	data, err := service.@{.servFunName}().View(ctx, &req.@{.varName}ViewParam)
+	if err != nil {
+		return
+	}
+
+	res = new(v1.@{.varName}ViewRes)
+	res.@{.varName}ViewModel = data
+	return
+}
+@{end}
+@{ if eq .options.Step.HasDel true }
+// Delete 删除@{.tableComment}
+func (c *c@{.varName}) @{.varName}Delete(ctx context.Context, req *v1.@{.varName}DeleteReq) (res *v1.@{.varName}DeleteRes, err error) {
+    err = service.@{.servFunName}().Delete(ctx, &req.@{.varName}DeleteParam)
+	return
+}
+@{end}
+@{ if eq .options.Step.HasStatus true }
+// Status 更新@{.tableComment}状态
+func (c *c@{.varName}) @{.varName}Status(ctx context.Context, req *v1.@{.varName}StatusReq) (res *v1.@{.varName}StatusRes, err error) {
+    err = service.@{.servFunName}().Status(ctx, &req.@{.varName}StatusParam)
+	return
+}
+@{end}
+@{ if eq .options.Step.HasSwitch true }
+// Switch 更新@{.tableComment}开关状态
+func (c *c@{.varName}) @{.varName}Switch(ctx context.Context, req *v1.@{.varName}SwitchReq) (res *v1.@{.varName}SwitchRes, err error) {
+    err = service.@{.servFunName}().Switch(ctx, &req.@{.varName}SwitchParam)
+	return
+}
+@{end}
+@{ if eq .options.Step.IsTreeTable true }
+// TreeOption 获取@{.tableComment}关系树选项
+func (c *c@{.varName}) @{.varName}TreeOption(ctx context.Context, req *v1.@{.varName}TreeOptionReq) (res *v1.@{.varName}TreeOptionRes, err error) {
+    data, err := service.@{.servFunName}().TreeOption(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) > 0 {
+		res = (*@{.varName | ToLower}.TreeOptionRes)(&data)
+	} else {
+		temp := make(@{.varName | ToLower}.TreeOptionRes, 0)
+		res = &temp
+	}
+	return
+}
+@{end}

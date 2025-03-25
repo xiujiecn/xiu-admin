@@ -7,7 +7,7 @@ import (
 )
 
 type SysOssUploadReq struct {
-	g.Meta `path:"/oss/upload" method:"post" tags:"系统" summary:"上传文件"`
+	g.Meta `path:"/oss/upload" method:"post" tags:"系统-存储管理" summary:"上传文件" x-check-permission:"cpm:system.oss.upload"`
 	*model.SysOssUploadParam
 }
 
@@ -15,7 +15,7 @@ type SysOssUploadRes struct {
 	*model.SysOssUploadModel
 }
 type SysOssDownloadReq struct {
-	g.Meta `path:"/oss/download" method:"get" tags:"系统" summary:"下载文件"`
+	g.Meta `path:"/oss/download" method:"get" tags:"系统-存储管理" summary:"下载文件" x-check-permission:"cpm:system.oss.download"`
 	*model.SysOssDownloadParam
 }
 

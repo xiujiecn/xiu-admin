@@ -22,6 +22,21 @@ type (
 		View(ctx context.Context, param *model.SysGenTableViewParam) (output *model.SysGenTableViewModel, err error)
 		// 新增
 		Add(ctx context.Context, param *model.SysGenTableAddParam) (output *model.SysGenTableAddModel, err error)
+		// 修改
+		Edit(ctx context.Context, param *model.SysGenTableEditParam) (output *model.SysGenTableEditModel, err error)
+		Delete(ctx context.Context, param *model.SysGenTableDeleteParam) (output *model.SysGenTableDeleteModel, err error)
+		// 获取选择项
+		Selects(ctx context.Context) (output *model.SelectsModel, err error)
+		// 获取表选择项
+		TableSelect(ctx context.Context, param *model.GenCodesTableSelectParam) (output []*model.GenCodesTableSelectModel, err error)
+		// 获取字段选择项
+		ColumnSelect(ctx context.Context, param *model.GenCodesColumnSelectParam) (output []*model.GenCodesColumnSelectModel, err error)
+		// 获取字段列表
+		ColumnList(ctx context.Context, param *model.GenCodesColumnListParam) (output []*model.GenCodesColumnListModel, err error)
+		// 预览
+		Preview(ctx context.Context, param *model.GenCodesPreviewParam) (output *model.GenCodesPreviewModel, err error)
+		// 构建
+		Build(ctx context.Context, param *model.GenCodesBuildParam) (output *model.GenCodesBuildModel, err error)
 	}
 )
 

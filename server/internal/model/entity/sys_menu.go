@@ -13,6 +13,8 @@ type SysMenu struct {
 	MenuId      int64       `json:"menuId"      orm:"menu_id"      description:"菜单ID"`
 	MenuName    string      `json:"menuName"    orm:"menu_name"    description:"菜单名称"`
 	ParentId    int64       `json:"parentId"    orm:"parent_id"    description:"父菜单ID"`
+	Level       int         `json:"level"       orm:"level"        description:"关系树等级"`
+	Tree        string      `json:"tree"        orm:"tree"         description:"关系树"`
 	OrderNum    int         `json:"orderNum"    orm:"order_num"    description:"显示顺序"`
 	Path        string      `json:"path"        orm:"path"         description:"路由地址"`
 	Component   string      `json:"component"   orm:"component"    description:"组件路径"`

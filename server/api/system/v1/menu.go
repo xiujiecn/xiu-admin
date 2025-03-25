@@ -49,7 +49,7 @@ type RouteMeta struct {
 
 // 获取用户所有菜单
 type MenuAllReq struct {
-	g.Meta `path:"/menu/all" method:"get" tags:"系统" summary:"获取用户所有菜单"`
+	g.Meta `path:"/menu/all" method:"get" tags:"系统-菜单管理" summary:"获取用户所有菜单" x-check-permission:""`
 }
 
 //	type MenuAllRes struct {
@@ -58,7 +58,7 @@ type MenuAllReq struct {
 type MenuAllRes = []*RouteMenu
 
 type MenuListReq struct {
-	g.Meta `path:"/menu/list" method:"get" tags:"系统" summary:"获取菜单列表"`
+	g.Meta `path:"/menu/list" method:"get" tags:"系统-菜单管理" summary:"获取菜单列表" x-check-permission:"cpm:system:menu:list"`
 	model.SysMenuListParam
 }
 
@@ -68,7 +68,7 @@ type MenuListRes struct {
 }
 
 type MenuViewReq struct {
-	g.Meta `path:"/menu/view" method:"get" tags:"系统" summary:"获取菜单详情"`
+	g.Meta `path:"/menu/view" method:"get" tags:"系统-菜单管理" summary:"获取菜单详情" x-check-permission:"cpm:system:menu:query"`
 	MenuId int64 `json:"menuId" dc:"菜单ID"`
 }
 
@@ -77,7 +77,7 @@ type MenuViewRes struct {
 }
 
 type MenuAddReq struct {
-	g.Meta `path:"/menu/add" method:"post" tags:"系统" summary:"添加菜单"`
+	g.Meta `path:"/menu/add" method:"post" tags:"系统-菜单管理" summary:"添加菜单" x-check-permission:"cpm:system:menu:add"`
 	model.SysMenuAddModel
 }
 
@@ -86,7 +86,7 @@ type MenuAddRes struct {
 }
 
 type MenuUpdateReq struct {
-	g.Meta `path:"/menu/update" method:"post" tags:"系统" summary:"更新菜单"`
+	g.Meta `path:"/menu/update" method:"post" tags:"系统-菜单管理" summary:"更新菜单" x-check-permission:"cpm:system:menu:edit"`
 	model.SysMenuUpdateModel
 }
 
@@ -95,7 +95,7 @@ type MenuUpdateRes struct {
 }
 
 type MenuDeleteReq struct {
-	g.Meta `path:"/menu/delete" method:"post" tags:"系统" summary:"删除菜单"`
+	g.Meta `path:"/menu/delete" method:"post" tags:"系统-菜单管理" summary:"删除菜单" x-check-permission:"cpm:system:menu:remove"`
 	MenuId int64 `json:"menuId" dc:"菜单ID"`
 }
 
@@ -103,7 +103,7 @@ type MenuDeleteRes struct {
 }
 
 type MenuTreeReq struct {
-	g.Meta `path:"/menu/tree" method:"get" tags:"系统" summary:"获取菜单树"`
+	g.Meta `path:"/menu/tree" method:"get" tags:"系统-菜单管理" summary:"获取菜单树" x-check-permission:""`
 }
 
 type MenuTreeRes struct {

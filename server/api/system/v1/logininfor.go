@@ -8,7 +8,7 @@ import (
 )
 
 type ListLogininforReq struct {
-	g.Meta `path:"/logininfor/list" method:"get" tags:"系统" summary:"登录信息列表"`
+	g.Meta `path:"/logininfor/list" method:"get" tags:"系统-日志管理" summary:"登录信息列表" x-check-permission:"cpm:system:logininfor:list"`
 	model.SysLogininforListParam
 }
 
@@ -18,7 +18,7 @@ type ListLogininforRes struct {
 }
 
 type DeleteLogininforReq struct {
-	g.Meta `path:"/logininfor/delete" method:"post" tags:"系统" summary:"删除登录信息"`
+	g.Meta `path:"/logininfor/delete" method:"post" tags:"系统-日志管理" summary:"删除登录信息" x-check-permission:"cpm:system:logininfor:remove"`
 	model.SysLogininforDeleteParam
 }
 
