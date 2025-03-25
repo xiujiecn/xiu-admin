@@ -48,8 +48,9 @@ func (tk Tasks) Once(options ...func(*worker.TaskOptions)) error {
 }
 
 // 注册一个任务以由cron表达式运行。
-func (tk Tasks) Cron(options ...func(*worker.TaskOptions)) (entryID string, err error) {
-	return tk.worker.Cron(options...)
+// concurrent 0不限制并发 1限制并发
+func (tk Tasks) Cron(concurrent int, options ...func(*worker.TaskOptions)) (entryID string, err error) {
+	return tk.worker.Cron(concurrent, options...)
 }
 
 // 从任务队列中删除一个任务。

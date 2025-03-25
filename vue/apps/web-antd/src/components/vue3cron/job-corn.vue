@@ -119,7 +119,7 @@ switch (year.value.cronEvery) {
 return years;
 });
 const cron = computed(() => {
-  return `${secondsText.value || '*'} ${minutesText.value || '*'} ${hoursText.value || '*'} ${daysText.value || '*'} ${monthsText.value || '*'} ${weeksText.value || '?'} ${yearsText.value || '*'}`;
+  return `${secondsText.value || '*'} ${minutesText.value || '*'} ${hoursText.value || '*'} ${daysText.value || '*'} ${monthsText.value || '*'} ${weeksText.value || '?'}`;
 });
 
 // 方法
@@ -164,11 +164,7 @@ const tabListNoTitle = [
   {
     key: '5',
     tab: text.value.Month.name,
-  },
-  {
-    key: '6',
-    tab: text.value.Year.name,
-  },
+  }
 ];
 const noTitleKey = ref('1');
 const onTabChange = (value: string) => {
@@ -346,28 +342,6 @@ defineExpose({
         </Radio>
       </RadioGroup>
     </div>
-    <div v-if="noTitleKey === '6'">
-      <RadioGroup v-model:value="year.cronEvery">
-        <Radio :style="radioStyle" value="1">{{ text.Year.every }}</Radio>
-        <Radio :style="radioStyle" value="2">{{ text.Year.interval[0] }}
-          <InputNumber size="small" v-model:value="year.incrementIncrement" :min="1" :max="99"></InputNumber>
-          {{ text.Year.interval[1] }}
-          <InputNumber size="small" v-model:value="year.incrementStart" :min="2018" :max="2118"></InputNumber>
-        </Radio>
-        <Row>
-          <Radio :style="radioStyle" value="3">{{ text.Year.specific }}
-          </Radio>
-          <Select v-model:value="year.specificSpecific" size="small"  mode="multiple" :token-separators="[',']"  :max-tag-count="10" placeholder="请选择" :style="selectStyle">
-            <SelectOption v-for="(val, index) in 100" :key="index" :value="2017 + val">{{ 2017 + val }}</SelectOption>
-          </Select>
-        </Row>
-        <Radio :style="radioStyle" value="4">{{ text.Year.cycle[0] }}
-          <InputNumber size="small" v-model:value="year.rangeStart" :min="2018" :max="2118"></InputNumber>
-          {{ text.Year.cycle[1] }}
-          <InputNumber size="small" v-model:value="year.rangeEnd" :min="2018" :max="2118"></InputNumber>
-        </Radio>
-      </RadioGroup>
-    </div>
   </Card>
   <Row >
     <Col class="value" :span="19">
@@ -375,7 +349,7 @@ defineExpose({
       <Tag color="blue">
         {{ cron }}
       </Tag>
-      <span>{秒数} {分钟} {小时} {日期} {月份} {?} {年份}</span>
+      <span>{秒数} {分钟} {小时} {日期} {月份} {?}</span>
     </Col>
     <Col :span="2">
         <Button  @click="handleChange">{{ text.Save }}</Button>

@@ -141,7 +141,8 @@ func (w *Worker) Once(options ...func(*TaskOptions)) (err error) {
 	return
 }
 
-func (w *Worker) Cron(options ...func(*TaskOptions)) (entryID string, err error) {
+// Cron 注册一个cron任务, 如果concurrent为0,则不限制并发,否则限制并发
+func (w *Worker) Cron(concurrent int, options ...func(*TaskOptions)) (entryID string, err error) {
 	ops := GetDefaultTaskOptions(nil)
 	for _, op := range options {
 		op(ops)
@@ -150,8 +151,13 @@ func (w *Worker) Cron(options ...func(*TaskOptions)) (entryID string, err error)
 		err = errors.New("expr is nil")
 		return
 	}
-
-	entryID, err = w.scheduler.Register(ops.expr, asynq.NewTask(ops.group+".cron", ops.payload, asynq.TaskID(ops.uid)), asynq.Queue(w.ops.group))
+	if concurrent == 0 {
+		// 不限制并发, 不传递任务id，任务ID随机，可并发
+		entryID, err = w.scheduler.Register(ops.expr, asynq.NewTask(ops.group+".cron", ops.payload), asynq.Queue(w.ops.group))
+	} else {
+		// 限制并发, 传递任务id，任务ID固定，不可并发
+		entryID, err = w.scheduler.Register(ops.expr, asynq.NewTask(ops.group+".cron", ops.payload, asynq.TaskID(ops.uid)), asynq.Queue(w.ops.group))
+	}
 	if err != nil {
 		return
 	}
@@ -160,9 +166,17 @@ func (w *Worker) Cron(options ...func(*TaskOptions)) (entryID string, err error)
 }
 
 func (w *Worker) Remove(uid string) (err error) {
-	task, err := w.GetTaskInfo(uid)
-	if task != nil {
-		err = w.inspector.DeleteTask(w.ops.group, uid)
+	entries, err := w.inspector.SchedulerEntries()
+	if err != nil {
+		return
+	}
+	for _, entry := range entries {
+		payload := string(entry.Task.Payload())
+		g.Log().Debug(context.Background(), "server/internal/library/worker/worker.go Remove", "group", w.ops.group, "entryID", entry.ID, "payload", payload)
+		if strings.Contains(string(entry.Task.Payload()), "\""+uid+"\"") {
+			g.Log().Debug(context.Background(), "strings.Contains(string(entry.Task.Payload()), uid) ")
+			err = w.scheduler.Unregister(entry.ID)
+		}
 	}
 	return
 }
