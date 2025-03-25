@@ -347,3 +347,23 @@ func (c *sSysJob) Exec(ctx context.Context, jobId int64) error {
 	}
 	return nil
 }
+
+// 查询所有的状态正常的任务列表，并进行初始注册
+func (c *sSysJob) InitRegister() error {
+	g.Log().Debug(context.Background(), "初始化任务注册")
+	jobs := &[]*model.SysJobViewModel{}
+	err := c.Model(context.Background()).Where(dao.SysJob.Columns().Status, consts.SysJobStatusNormal).Scan(jobs)
+	if err != nil {
+		return err
+	}
+	for _, job := range *jobs {
+		err = c.taskRun(context.Background(), &job.SysJob)
+		if err != nil {
+			g.Log().Error(context.Background(), "初始化注册任务 %s 失败", job.JobName, err)
+			continue
+		}
+		g.Log().Debug(context.Background(), "初始化注册任务 %s 成功", job.JobName)
+	}
+	g.Log().Debug(context.Background(), "初始化任务注册完成")
+	return nil
+}

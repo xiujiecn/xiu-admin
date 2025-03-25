@@ -95,6 +95,7 @@ type (
 		UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdateStatusModel) (RowsAffected int64, err error)
 		Delete(ctx context.Context, jobDelete *model.SysJobDeleteModel) (RowsAffected int64, err error)
 		Exec(ctx context.Context, jobId int64) (err error)
+		InitRegister() error
 	}
 
 	ISysLogininfor interface {
