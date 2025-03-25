@@ -1,0 +1,58 @@
+@{.import}
+
+@{.const}
+
+export class State {@{range .stateItems}
+  public @{.Name} = @{.DefaultValue}; // @{.Dc}@{end}
+
+  constructor(state?: Partial<State>) {
+    if (state) {
+      Object.assign(this, state);
+    }
+  }
+}
+
+export function newState(state: State | Record<string, any> | null): State {
+  if (state !== null) {
+    if (state instanceof State) {
+      return cloneDeep(state);
+    }
+    return new State(state);
+  }
+  return new State();
+}
+
+// 表单验证规则
+@{ if eq .options.Step.HasRules true }@{.rules}@{end}
+
+// 表格搜索表单
+@{ if eq .options.Step.HasSearchForm true }@{.formSchema}@{end}
+
+// 表格列
+@{.columns}
+
+// 表格列接口
+@{.columnsInterface}
+
+// 查看字段列表
+@{.viewSchema}
+
+// 编辑字段列表
+@{.editSchema}
+
+@{ if eq .dictOptions.Has true }
+
+@{end}
+
+@{ if eq .options.Step.IsTreeTable true }
+// 关系树选项
+export const treeOption = ref([]);
+
+// 加载关系树选项
+export function loadTreeOption() {
+  TreeOption().then((res) => {
+    treeOption.value = res;
+  });
+}
+@{end}
+

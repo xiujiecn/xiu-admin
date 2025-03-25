@@ -17,7 +17,7 @@ type UserInfo struct {
 }
 
 type UserInfoReq struct {
-	g.Meta `path:"/user/info" method:"get" tags:"系统" summary:"获取用户信息"`
+	g.Meta `path:"/user/info" method:"get" tags:"系统-用户管理" summary:"获取当前用户信息" x-check-permission:"cpc:current:user"`
 }
 
 type UserInfoRes struct {
@@ -25,7 +25,7 @@ type UserInfoRes struct {
 }
 
 type UserListReq struct {
-	g.Meta `path:"/user/list" method:"get" tags:"系统" summary:"获取用户列表"`
+	g.Meta `path:"/user/list" method:"get" tags:"系统-用户管理" summary:"获取用户列表" x-check-permission:"cpm:system:user:list"`
 	request.PageInfo
 	model.UserListParam
 }
@@ -36,7 +36,7 @@ type UserListRes struct {
 }
 
 type AddUserReq struct {
-	g.Meta `path:"/user/add" method:"post" tags:"系统" summary:"新增用户"`
+	g.Meta `path:"/user/add" method:"post" tags:"系统-用户管理" summary:"新增用户" x-check-permission:"cpm:system:user:add"`
 	model.SysUserAddModel
 }
 
@@ -45,7 +45,7 @@ type AddUserRes struct {
 }
 
 type UserProfileReq struct {
-	g.Meta `path:"/user/profile" method:"get" tags:"系统" summary:"获取当前用户信息"`
+	g.Meta `path:"/user/profile" method:"get" tags:"系统-用户管理" summary:"获取当前用户信息" x-check-permission:"cpc:current:user"`
 }
 
 type UserProfileRes struct {
@@ -53,7 +53,7 @@ type UserProfileRes struct {
 }
 
 type UpdateCurrentUserReq struct {
-	g.Meta `path:"/user/profile/update" method:"post" tags:"系统" summary:"更新当前用户信息"`
+	g.Meta `path:"/user/profile/update" method:"post" tags:"系统-用户管理" summary:"更新当前用户信息" x-check-permission:"cpc:current:user"`
 	model.UpdateCurrentUserModel
 }
 
@@ -62,7 +62,7 @@ type UpdateCurrentUserRes struct {
 }
 
 type UpdateCurrentUserPasswordReq struct {
-	g.Meta `path:"/user/profile/password" method:"post" tags:"系统" summary:"更新当前用户密码"`
+	g.Meta `path:"/user/profile/password" method:"post" tags:"系统-用户管理" summary:"更新当前用户密码" x-check-permission:"cpc:current:user"`
 	model.UpdateCurrentUserPasswordModel
 }
 
@@ -70,7 +70,7 @@ type UpdateCurrentUserPasswordRes struct {
 }
 
 type UpdateUserReq struct {
-	g.Meta `path:"/user/update" method:"post" tags:"系统" summary:"更新用户信息"`
+	g.Meta `path:"/user/update" method:"post" tags:"系统-用户管理" summary:"更新用户信息" x-check-permission:"cpm:system:user:edit"`
 	model.SysUserUpdateModel
 }
 
@@ -79,7 +79,7 @@ type UpdateUserRes struct {
 }
 
 type DeleteUserReq struct {
-	g.Meta  `path:"/user/delete" method:"post" tags:"系统" summary:"删除用户"`
+	g.Meta  `path:"/user/delete" method:"post" tags:"系统-用户管理" summary:"删除用户" x-check-permission:"cpm:system:user:remove"`
 	UserId  int64   `json:"userId" dc:"用户ID"`
 	UserIds []int64 `json:"userIds" dc:"用户ID列表"`
 }
@@ -88,7 +88,7 @@ type DeleteUserRes struct {
 }
 
 type GetUserReq struct {
-	g.Meta `path:"/user/view" method:"get" tags:"系统" summary:"获取用户信息"`
+	g.Meta `path:"/user/view" method:"get" tags:"系统-用户管理" summary:"获取用户信息" x-check-permission:"cpm:system:user:query"`
 	UserId int64 `json:"userId" dc:"用户ID"`
 }
 
@@ -97,7 +97,7 @@ type GetUserRes struct {
 }
 
 type ResetPasswordReq struct {
-	g.Meta   `path:"/user/resetPassword" method:"post" tags:"系统" summary:"重置用户密码"`
+	g.Meta   `path:"/user/resetPassword" method:"post" tags:"系统-用户管理" summary:"重置用户密码" x-check-permission:"cpm:system:user:resetPwd"`
 	UserId   int64  `json:"userId" dc:"用户ID"`
 	Password string `json:"password" dc:"新密码"`
 }
@@ -106,7 +106,7 @@ type ResetPasswordRes struct {
 }
 
 type GetUserListByDeptIdReq struct {
-	g.Meta `path:"/user/listByDeptId" method:"get" tags:"系统" summary:"获取部门用户列表"`
+	g.Meta `path:"/user/listByDeptId" method:"get" tags:"系统-用户管理" summary:"获取部门用户列表" x-check-permission:"cpm:system:user:list"`
 	DeptId int64 `json:"deptId" dc:"部门ID"`
 	request.PageInfo
 }

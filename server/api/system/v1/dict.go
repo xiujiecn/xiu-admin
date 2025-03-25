@@ -9,7 +9,7 @@ import (
 )
 
 type SysDictTypeListReq struct {
-	g.Meta `path:"/dict/list" method:"get" tags:"字典类型" summary:"字典类型列表"`
+	g.Meta `path:"/dict/list" method:"get" tags:"系统-字典管理" summary:"字典类型列表" x-check-permission:"cpm:system:dict:list"`
 	model.SysDictTypeListParam
 }
 
@@ -19,7 +19,7 @@ type SysDictTypeListRes struct {
 }
 
 type SysDictTypeAddReq struct {
-	g.Meta `path:"/dict-type/add" method:"post" tags:"字典类型" summary:"新增字典类型"`
+	g.Meta `path:"/dict-type/add" method:"post" tags:"系统-字典管理" summary:"新增字典类型" x-check-permission:"cpm:system:dict:add"`
 	model.SysDictTypeAddParam
 }
 
@@ -28,7 +28,7 @@ type SysDictTypeAddRes struct {
 }
 
 type SysDictTypeEditReq struct {
-	g.Meta `path:"/dict-type/edit" method:"post" tags:"字典类型" summary:"编辑字典类型"`
+	g.Meta `path:"/dict-type/edit" method:"post" tags:"系统-字典管理" summary:"编辑字典类型" x-check-permission:"cpm:system:dict:edit"`
 	model.SysDictTypeEditParam
 }
 
@@ -37,7 +37,7 @@ type SysDictTypeEditRes struct {
 }
 
 type SysDictTypeDeleteReq struct {
-	g.Meta `path:"/dict-type/delete" method:"post" tags:"字典类型" summary:"删除字典类型"`
+	g.Meta `path:"/dict-type/delete" method:"post" tags:"系统-字典管理" summary:"删除字典类型" x-check-permission:"cpm:system:dict:remove"`
 	model.SysDictTypeDeleteParam
 }
 
@@ -46,7 +46,7 @@ type SysDictTypeDeleteRes struct {
 }
 
 type SysDictTypeViewReq struct {
-	g.Meta `path:"/dict-type/view" method:"get" tags:"字典类型" summary:"字典类型详情"`
+	g.Meta `path:"/dict-type/view" method:"get" tags:"系统-字典管理" summary:"字典类型详情" x-check-permission:"cpm:system:dict:query"`
 	model.SysDictTypeViewParam
 }
 
@@ -55,7 +55,7 @@ type SysDictTypeViewRes struct {
 }
 
 type SysDictDataListReq struct {
-	g.Meta `path:"/dict-data/list/{id}" method:"get" tags:"字典数据" summary:"字典数据列表"`
+	g.Meta `path:"/dict-data/list/{id}" method:"get" tags:"系统-字典管理" summary:"字典数据列表" `
 	request.PageInfo
 	model.SysDictDataListParam
 }
@@ -67,7 +67,7 @@ type SysDictDataListRes struct {
 }
 
 type SysDictDataAddReq struct {
-	g.Meta `path:"/dict-data/add" method:"post" tags:"字典数据" summary:"新增字典数据"`
+	g.Meta `path:"/dict-data/add" method:"post" tags:"系统-字典管理" summary:"新增字典数据" x-check-permission:"cpm:system:dict:add"`
 	model.SysDictDataAddParam
 }
 
@@ -76,7 +76,7 @@ type SysDictDataAddRes struct {
 }
 
 type SysDictDataEditReq struct {
-	g.Meta `path:"/dict-data/edit" method:"post" tags:"字典数据" summary:"编辑字典数据"`
+	g.Meta `path:"/dict-data/edit" method:"post" tags:"系统-字典管理" summary:"编辑字典数据" x-check-permission:"cpm:system:dict:edit"`
 	model.SysDictDataEditParam
 }
 
@@ -85,7 +85,7 @@ type SysDictDataEditRes struct {
 }
 
 type SysDictDataDeleteReq struct {
-	g.Meta `path:"/dict-data/delete" method:"post" tags:"字典数据" summary:"删除字典数据"`
+	g.Meta `path:"/dict-data/delete" method:"post" tags:"系统-字典管理" summary:"删除字典数据" x-check-permission:"cpm:system:dict:remove"`
 	model.SysDictDataDeleteParam
 }
 
@@ -94,7 +94,7 @@ type SysDictDataDeleteRes struct {
 }
 
 type SysDictDataViewReq struct {
-	g.Meta `path:"/dict-data/view" method:"get" tags:"字典数据" summary:"字典数据详情"`
+	g.Meta `path:"/dict-data/view" method:"get" tags:"系统-字典管理" summary:"字典数据详情" x-check-permission:"cpm:system:dict:query"`
 	model.SysDictDataViewParam
 }
 

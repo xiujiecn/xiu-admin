@@ -15,6 +15,8 @@ type SysMenu struct {
 	MenuId      interface{} // 菜单ID
 	MenuName    interface{} // 菜单名称
 	ParentId    interface{} // 父菜单ID
+	Level       interface{} // 关系树等级
+	Tree        interface{} // 关系树
 	OrderNum    interface{} // 显示顺序
 	Path        interface{} // 路由地址
 	Component   interface{} // 组件路径

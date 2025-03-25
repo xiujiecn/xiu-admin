@@ -4,7 +4,7 @@ import "github.com/gogf/gf/v2/frame/g"
 
 // 获取验证码
 type GetCaptchaReq struct {
-	g.Meta `path:"/captcha" method:"get" tags:"系统" summary:"获取验证码"`
+	g.Meta `path:"/captcha" method:"get" tags:"系统-授权" summary:"获取验证码"`
 }
 
 type GetCaptchaRes struct {

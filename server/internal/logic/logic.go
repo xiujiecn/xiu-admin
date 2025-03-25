@@ -5,6 +5,7 @@
 package logic
 
 import (
+	_ "xiujieadmin/internal/logic/gen"
 	_ "xiujieadmin/internal/logic/gen_codes"
 	_ "xiujieadmin/internal/logic/middleware"
 	_ "xiujieadmin/internal/logic/monitor"

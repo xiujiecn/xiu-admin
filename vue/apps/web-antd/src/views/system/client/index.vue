@@ -188,7 +188,7 @@ async function handleStatusChange(row: SysClient) {
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
           <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)">  
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger @click="handleDelete(row)">删除</Button>
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
           </Popconfirm>
         </div>
       </template>

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/do"
@@ -33,7 +34,7 @@ func init() {
 }
 
 func (l *sSysUser) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
-	if len(option) > 0 {
+	if len(option) == 0 {
 		option = append(option, &handler.Option{
 			FilterTenant: true,
 			FilterAuth:   true,
@@ -42,7 +43,7 @@ func (l *sSysUser) Model(ctx context.Context, option ...*handler.Option) *gdb.Mo
 	return handler.Model(dao.SysUser.Ctx(ctx), option...)
 }
 
-// 根据用户名获取用户信息
+// 根据用户名获取用户信息，不验证当前租户
 func (l *sSysUser) GetUserByUsername(ctx context.Context, username string, tenantId string) (user *entity.SysUser, err error) {
 	var data *entity.SysUser
 	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserName, username).Where(dao.SysUser.Columns().TenantId, tenantId).Scan(&data)
@@ -70,9 +71,9 @@ func (l *sSysUser) GetUserByUsername(ctx context.Context, username string, tenan
 	return data, nil
 }
 
-// 根据邮箱获取用户信息
-func (l *sSysUser) GetUserByEmail(ctx context.Context, email string) (user *entity.SysUser, err error) {
-	err = l.Model(ctx).Where(dao.SysUser.Columns().Email, email).Scan(&user)
+// 根据邮箱获取用户信息，不验证当前租户
+func (l *sSysUser) GetUserByEmail(ctx context.Context, email string, tenantId string) (user *entity.SysUser, err error) {
+	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().Email, email).Where(dao.SysUser.Columns().TenantId, tenantId).Scan(&user)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, gerror.NewCode(consts.CodeUserNotFound, "账号不存在")
@@ -97,9 +98,9 @@ func (l *sSysUser) GetUserByEmail(ctx context.Context, email string) (user *enti
 	return user, nil
 }
 
-// 根据手机号获取用户信息
-func (l *sSysUser) GetUserByPhone(ctx context.Context, phone string) (user *entity.SysUser, err error) {
-	err = l.Model(ctx).Where(dao.SysUser.Columns().Phonenumber, phone).Scan(&user)
+// 根据手机号获取用户信息,不验证当前租户
+func (l *sSysUser) GetUserByPhone(ctx context.Context, phone string, tenantId string) (user *entity.SysUser, err error) {
+	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().Phonenumber, phone).Where(dao.SysUser.Columns().TenantId, tenantId).Scan(&user)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, gerror.NewCode(consts.CodeUserNotFound, "账号不存在")
@@ -191,14 +192,6 @@ func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUs
 
 // 获取用户列表
 func (l *sSysUser) List(ctx context.Context, page *request.PageInfo, query *model.UserListParam) (items []*model.SysUserListModel, total int, err error) {
-	tenantId := query.TenantId
-	if tenantId == "" {
-		claims, err := service.SysAuth().GetCurrentUser(ctx)
-		if err != nil {
-			return nil, 0, err
-		}
-		query.TenantId = claims.BaseClaims.TenantId
-	}
 	deptIds := make([]int64, 0)
 	if query.DeptId != 0 {
 		deptIds = append(deptIds, query.DeptId)
@@ -212,9 +205,6 @@ func (l *sSysUser) List(ctx context.Context, page *request.PageInfo, query *mode
 	// 实现分页查询逻辑
 	var users []*model.SysUserListModel
 	m := l.Model(ctx)
-	if query.TenantId != "" {
-		m = m.Where(dao.SysUser.Columns().TenantId, query.TenantId)
-	}
 	if query.UserId != 0 {
 		m = m.Where(dao.SysUser.Columns().UserId, query.UserId)
 	}
@@ -255,17 +245,15 @@ func (l *sSysUser) List(ctx context.Context, page *request.PageInfo, query *mode
 // 新增用户
 func (l *sSysUser) AddUser(ctx context.Context, req *model.SysUserAddModel) (data *model.SysUserViewModel, err error) {
 	// 获取当前登录用户的租户
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
+	if req.TenantId == "" {
+		req.TenantId = contexts.GetTenantId(ctx)
 	}
-	req.TenantId = claims.BaseClaims.TenantId
 	// 判断部门是否存在
 	dept, err := service.SysDept().GetDeptById(ctx, req.DeptId)
 	if err != nil {
 		return nil, err
 	}
-	if dept == nil || dept.TenantId != claims.BaseClaims.TenantId {
+	if dept == nil || dept.TenantId != req.TenantId {
 		return nil, gerror.NewCode(consts.CodeDeptNotFound, "部门不存在")
 	}
 
@@ -305,12 +293,12 @@ func (l *sSysUser) AddUser(ctx context.Context, req *model.SysUserAddModel) (dat
 	gconv.Struct(req, &dataInsert)
 	dataInsert.Password = password
 	dataInsert.Salt = salt
-	dataInsert.CreatedDept = claims.BaseClaims.DeptId
-	dataInsert.CreatedBy = claims.BaseClaims.ID
+	dataInsert.CreatedDept = contexts.GetDeptId(ctx)
+	dataInsert.CreatedBy = contexts.GetUserId(ctx)
 	dataInsert.CreatedAt = gtime.Now()
-	dataInsert.UpdatedBy = claims.BaseClaims.ID
+	dataInsert.UpdatedBy = contexts.GetUserId(ctx)
 	dataInsert.UpdatedAt = gtime.Now()
-	dataInsert.TenantId = claims.BaseClaims.TenantId
+	dataInsert.TenantId = req.TenantId
 	result, err := dao.SysUser.Ctx(ctx).Data(dataInsert).Insert()
 	if err != nil {
 		return nil, err
@@ -349,11 +337,8 @@ func (l *sSysUser) AddUser(ctx context.Context, req *model.SysUserAddModel) (dat
 }
 
 func (l *sSysUser) Profile(ctx context.Context) (user *model.UserProfileModel, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	u, err := l.GetUserById(ctx, claims.BaseClaims.ID)
+
+	u, err := l.GetUserById(ctx, contexts.GetUserId(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -363,15 +348,12 @@ func (l *sSysUser) Profile(ctx context.Context) (user *model.UserProfileModel, e
 }
 
 func (l *sSysUser) UpdateCurrentUser(ctx context.Context, req *model.UpdateCurrentUserModel) (user *model.SysUserViewModel, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
+	userId := contexts.GetUserId(ctx)
+	_, err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, userId).Data(req).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
 	}
-	_, err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, claims.BaseClaims.ID).Data(req).OmitEmpty().Update()
-	if err != nil {
-		return nil, err
-	}
-	user, err = l.GetUserById(ctx, claims.BaseClaims.ID)
+	user, err = l.GetUserById(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -379,12 +361,9 @@ func (l *sSysUser) UpdateCurrentUser(ctx context.Context, req *model.UpdateCurre
 }
 
 func (l *sSysUser) UpdateCurrentUserPassword(ctx context.Context, req *model.UpdateCurrentUserPasswordModel) (err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return err
-	}
+	userId := contexts.GetUserId(ctx)
 	var user *entity.SysUser
-	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, claims.BaseClaims.ID).Scan(&user)
+	err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, userId).Scan(&user)
 	if err != nil {
 		return err
 	}
@@ -398,10 +377,10 @@ func (l *sSysUser) UpdateCurrentUserPassword(ctx context.Context, req *model.Upd
 	}
 	salt := utility.RandomString(5)
 	password := utility.PasswordEncrypt(req.NewPassword, salt)
-	_, err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, claims.BaseClaims.ID).Data(map[string]any{
+	_, err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, userId).Data(map[string]any{
 		dao.SysUser.Columns().Password:  password,
 		dao.SysUser.Columns().Salt:      salt,
-		dao.SysUser.Columns().UpdatedBy: claims.BaseClaims.ID,
+		dao.SysUser.Columns().UpdatedBy: userId,
 		dao.SysUser.Columns().UpdatedAt: gtime.Now(),
 	}).OmitEmpty().Update()
 	if err != nil {
@@ -411,13 +390,10 @@ func (l *sSysUser) UpdateCurrentUserPassword(ctx context.Context, req *model.Upd
 }
 
 func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel) (err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return err
-	}
+	currUserId := contexts.GetUserId(ctx)
 	req.UpdatedAt = gtime.Now()
-	req.UpdatedBy = &claims.BaseClaims.ID
-	_, err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, req.UserId).Data(req).OmitNil().Update()
+	req.UpdatedBy = &currUserId
+	_, err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, req.UserId).Data(req).OmitNil().Update()
 	if err != nil {
 		return err
 	}
@@ -532,13 +508,10 @@ func (l *sSysUser) DeleteUser(ctx context.Context, userIds []int64) (err error) 
 	if len(userIds) == 0 {
 		return errors.New("用户ID列表不能为空")
 	}
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = dao.SysUser.Ctx(ctx).WhereIn(dao.SysUser.Columns().UserId, userIds).Data(map[string]any{
+	currUserId := contexts.GetUserId(ctx)
+	_, err = l.Model(ctx).WhereIn(dao.SysUser.Columns().UserId, userIds).Data(map[string]any{
 		dao.SysUser.Columns().DeletedAt: gtime.Now(),
-		dao.SysUser.Columns().DeletedBy: claims.BaseClaims.ID,
+		dao.SysUser.Columns().DeletedBy: currUserId,
 	}).OmitEmpty().Update()
 	if err != nil {
 		return err
@@ -547,16 +520,13 @@ func (l *sSysUser) DeleteUser(ctx context.Context, userIds []int64) (err error) 
 }
 
 func (l *sSysUser) ResetPassword(ctx context.Context, userId int64, password string) (err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return err
-	}
+	currUserId := contexts.GetUserId(ctx)
 	salt := utility.RandomString(5)
 	password = utility.PasswordEncrypt(password, salt)
-	_, err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, userId).Data(map[string]any{
+	_, err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, userId).Data(map[string]any{
 		dao.SysUser.Columns().Password:  password,
 		dao.SysUser.Columns().Salt:      salt,
-		dao.SysUser.Columns().UpdatedBy: claims.BaseClaims.ID,
+		dao.SysUser.Columns().UpdatedBy: currUserId,
 		dao.SysUser.Columns().UpdatedAt: gtime.Now(),
 	}).OmitEmpty().Update()
 	if err != nil {
@@ -576,4 +546,17 @@ func (l *sSysUser) GetUserRoleIds(ctx context.Context, userId int64) (roleIds []
 		roleIds = append(roleIds, ur.RoleId)
 	}
 	return roleIds, nil
+}
+
+// 获取用户岗位ID列表
+func (l *sSysUser) GetUserPostIds(ctx context.Context, userId int64) (postIds []int64, err error) {
+	upList := make([]*entity.SysUserPost, 0)
+	err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, userId).Scan(&upList)
+	if err != nil {
+		return nil, err
+	}
+	for _, up := range upList {
+		postIds = append(postIds, up.PostId)
+	}
+	return postIds, nil
 }

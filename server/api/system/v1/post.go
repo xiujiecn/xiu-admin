@@ -8,8 +8,8 @@ import (
 )
 
 type PostListReq struct {
-	g.Meta `path:"/post/list" method:"get" tags:"系统" summary:"获取岗位列表"`
-	model.SysPostListParam
+	g.Meta `path:"/post/list" method:"get" tags:"系统-岗位管理" summary:"获取岗位列表" x-check-permission:"cpm:system:post:list"`
+	*model.SysPostListParam
 }
 
 type PostListRes struct {
@@ -18,46 +18,46 @@ type PostListRes struct {
 }
 
 type PostAddReq struct {
-	g.Meta `path:"/post/add" method:"post" tags:"系统" summary:"新增岗位"`
-	model.SysPostAddParam
+	g.Meta `path:"/post/add" method:"post" tags:"系统-岗位管理" summary:"新增岗位" x-check-permission:"cpm:system:post:add"`
+	*model.SysPostAddParam
 }
 
 type PostAddRes struct {
-	model.SysPostAddModel
+	*model.SysPostAddModel
 }
 
 type PostEditReq struct {
-	g.Meta `path:"/post/edit" method:"post" tags:"系统" summary:"编辑岗位"`
-	model.SysPostEditParam
+	g.Meta `path:"/post/edit" method:"post" tags:"系统-岗位管理" summary:"编辑岗位" x-check-permission:"cpm:system:post:edit"`
+	*model.SysPostEditParam
 }
 
 type PostEditRes struct {
-	model.SysPostEditModel
+	*model.SysPostEditModel
 }
 
 type PostDeleteReq struct {
-	g.Meta `path:"/post/delete" method:"post" tags:"系统" summary:"删除岗位"`
-	model.SysPostDeleteParam
+	g.Meta `path:"/post/delete" method:"post" tags:"系统-岗位管理" summary:"删除岗位"`
+	*model.SysPostDeleteParam
 }
 
 type PostDeleteRes struct {
-	model.SysPostDeleteModel
+	*model.SysPostDeleteModel
 }
 
 type PostViewReq struct {
-	g.Meta `path:"/post/view" method:"get" tags:"系统" summary:"获取岗位详情"`
-	model.SysPostViewParam
+	g.Meta `path:"/post/view" method:"get" tags:"系统-岗位管理" summary:"获取岗位详情" x-check-permission:"cpm:system:post:list"`
+	*model.SysPostViewParam
 }
 
 type PostViewRes struct {
-	model.SysPostViewModel
+	*model.SysPostViewModel
 }
 
 type PostExportReq struct {
-	g.Meta `path:"/post/export" method:"post" tags:"系统" summary:"导出岗位"`
-	model.SysPostExportParam
+	g.Meta `path:"/post/export" method:"post" tags:"系统-岗位管理" summary:"导出岗位" x-check-permission:"cpm:system:post:export"`
+	*model.SysPostExportParam
 }
 
 type PostExportRes struct {
-	model.SysPostExportModel
+	*model.SysPostExportModel
 }

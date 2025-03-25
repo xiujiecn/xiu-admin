@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"time"
+	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/library/bcache"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/request"
@@ -188,7 +189,8 @@ func (s *sSysAuth) DeleteToken(ctx context.Context, token string) (err error) {
 		return err
 	}
 	if t.Claims.(*model.CustomClaims).ExpiresAt.Unix() < time.Now().Unix() {
-		return errors.New("token已过期")
+		// return errors.New("token已过期")
+		// g.Log().Debugf(ctx, "sSysAuth.DeleteToken token已过期, token: %s", token)
 	}
 	err = bcache.DelSysAuthToken(ctx, t.Claims.(*model.CustomClaims).BaseClaims.ID, t.Claims.(*model.CustomClaims).BaseClaims.UUID)
 	if err != nil {
@@ -197,17 +199,26 @@ func (s *sSysAuth) DeleteToken(ctx context.Context, token string) (err error) {
 	return nil
 }
 
-// 根据Token获取当前登录用户信息
-func (s *sSysAuth) GetCurrentUser(ctx context.Context) (claims *model.CustomClaims, err error) {
-	// 获取token
+// 获取token
+func (s *sSysAuth) GetAccessToken(ctx context.Context) (token string, err error) {
 	authorization := g.RequestFromCtx(ctx).Header.Get("Authorization")
 	authParam := g.RequestFromCtx(ctx).Get("access_token").String()
 	if authorization == "" && authParam == "" {
-		return nil, gerror.NewCode(gcode.CodeNotImplemented)
+		return "", gerror.NewCode(gcode.CodeNotImplemented)
 	}
-	token := strings.TrimPrefix(authorization, "Bearer ")
+	token = strings.TrimPrefix(authorization, "Bearer ")
 	if token == "" {
 		token = authParam
+	}
+	return token, nil
+}
+
+// 根据Token获取当前登录用户信息
+func (s *sSysAuth) GetCurrentUser(ctx context.Context) (claims *model.CustomClaims, err error) {
+	// 获取token
+	token, err := s.GetAccessToken(ctx)
+	if err != nil {
+		return nil, err
 	}
 	// 解析token
 	claims, err = s.ParseToken(ctx, token)
@@ -215,4 +226,76 @@ func (s *sSysAuth) GetCurrentUser(ctx context.Context) (claims *model.CustomClai
 		return nil, err
 	}
 	return claims, nil
+}
+
+// 获取用户权限码
+func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (accessCodeList []string, err error) {
+	accessCodeList = make([]string, 0)
+
+	// 角色权限码
+	roleIds, err := service.SysUser().GetUserRoleIds(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+	rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
+		PageInfo: request.PageInfo{
+			Page:     1,
+			PageSize: 5000,
+		},
+		RoleIds: roleIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, r := range rl {
+		accessCodeList = append(accessCodeList, consts.SysCheckPermissionRolePrefix+r.RoleKey)
+	}
+
+	// 菜单权限码
+	// 获取角色菜单列表
+	rmList, err := service.SysRole().GetRoleListMenu(ctx, roleIds)
+	if err != nil {
+		return nil, err
+	}
+	g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuList: %v", rmList)
+	menuIds := make([]int64, 0)
+	for _, menu := range rmList {
+		menuIds = append(menuIds, menu.MenuId)
+	}
+	// 获取用户角色菜单
+	menuList, _, err := service.SysMenu().List(ctx, &model.SysMenuListParam{
+		MenuIds: menuIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range menuList {
+		accessCodeList = append(accessCodeList, consts.SysCheckPermissionMenuPrefix+m.Perms)
+	}
+	// 获取用户岗位信息
+	postIds, err := service.SysUser().GetUserPostIds(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+	pl, _, err := service.SysPost().List(ctx, &model.SysPostListParam{
+		PageInfo: request.PageInfo{
+			Page:     1,
+			PageSize: 5000,
+		},
+		PostIds: postIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range pl {
+		accessCodeList = append(accessCodeList, consts.SysCheckPermissionPostPrefix+p.PostCode)
+	}
+	// 获取用户信息
+	user, err := service.SysUser().GetUserById(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+	accessCodeList = append(accessCodeList, consts.SysCheckPermissionUserPrefix+user.UserName)
+	accessCodeList = append(accessCodeList, consts.SysCheckPermissionCurrentUser)
+	return accessCodeList, nil
 }

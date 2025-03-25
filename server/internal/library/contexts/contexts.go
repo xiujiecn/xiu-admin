@@ -119,3 +119,15 @@ func SetIsWebSocket(ctx context.Context, isWebSocket bool) {
 	}
 	customCtx.IsWebSocket = isWebSocket
 }
+
+// GetAccessCodeList 获取上下文变量中的访问码列表
+func GetAccessCodeList(ctx context.Context) []string {
+	user := GetUser(ctx)
+	if user == nil {
+		return nil
+	}
+	if len(user.AccessCodeList) == 0 {
+		return nil
+	}
+	return user.AccessCodeList
+}

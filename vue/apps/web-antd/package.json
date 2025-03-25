@@ -26,6 +26,7 @@
     "#/*": "./src/*"
   },
   "dependencies": {
+    "@highlightjs/vue-plugin": "^2.1.0",
     "@tinymce/tinymce-vue": "^6.1.0",
     "@vben/access": "workspace:*",
     "@vben/common-ui": "workspace:*",
@@ -43,13 +44,14 @@
     "@vben/utils": "workspace:*",
     "@vueuse/core": "catalog:",
     "ant-design-vue": "catalog:",
-    "dayjs": "catalog:",
-    "tinymce": "^7.3.0",
-    "js-md5": "^0.8.3",
-    "pinia": "catalog:",
-    "vue": "catalog:",
-    "lodash-es": "^4.17.21",
     "cropperjs": "^1.6.2",
+    "dayjs": "catalog:",
+    "highlight.js": "^11.11.1",
+    "js-md5": "^0.8.3",
+    "lodash-es": "^4.17.21",
+    "pinia": "catalog:",
+    "tinymce": "^7.3.0",
+    "vue": "catalog:",
     "vue-router": "catalog:"
   },
   "devDependencies": {

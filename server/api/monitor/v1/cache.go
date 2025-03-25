@@ -5,7 +5,7 @@ import (
 )
 
 type RedisInfoReq struct {
-	g.Meta `path:"/cache" method:"get" tags:"监控" summary:"获取缓存监控信息"`
+	g.Meta `path:"/cache" method:"get" tags:"监控-缓存监控" summary:"获取缓存监控信息" x-check-permission:"cpm:monitor:cache:list"`
 }
 
 type RedisInfoRes struct {

@@ -48,7 +48,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
     if (!isOpen) {
       return null;
     }
-    drawerApi.setState({confirmLoading:true,loading:true})
+    drawerApi.setState({ confirmLoading: true, loading: true })
     const { id, update, view, } = drawerApi.getData() as ModalProps;
     isUpdate.value = update;
     isView.value = view;
@@ -58,27 +58,35 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
       record.grantTypeList = grantType.split(',');
       await formApi.setValues(record);
     }
-    drawerApi.setState({confirmLoading:false,loading:false})
+    drawerApi.setState({ confirmLoading: false, loading: false })
 
     if (view) {
-      drawerApi.setState({ showConfirmButton: false});
-      formApi.setState({ commonConfig: { componentProps:{
-        readonly:true,
-        "only-read":true,
-      } } });
-    }else{
-      drawerApi.setState({ showConfirmButton: true});
-      formApi.setState({ commonConfig: { componentProps:{
-        readonly:false,
-        "only-read":false,
-      }} });
+      drawerApi.setState({ showConfirmButton: false });
+      formApi.setState({
+        commonConfig: {
+          componentProps: {
+            readonly: true,
+            "only-read": true,
+          }
+        }
+      });
+    } else {
+      drawerApi.setState({ showConfirmButton: true });
+      formApi.setState({
+        commonConfig: {
+          componentProps: {
+            readonly: false,
+            "only-read": false,
+          }
+        }
+      });
     }
   },
 });
 
 async function handleConfirm() {
   try {
-    drawerApi.setState({confirmLoading:true,loading:true})
+    drawerApi.setState({ confirmLoading: true, loading: true })
     const { valid } = await formApi.validate();
     if (!valid) {
       return;
@@ -87,13 +95,13 @@ async function handleConfirm() {
     // formApi.getValues拿到的是一个readonly对象，不能直接修改，需要cloneDeep
     const data = cloneDeep(await formApi.getValues());
     data.grantType = data.grantTypeList.join(',');
-    await (isUpdate.value ? postSysClientEditApi (data) : postSysClientAddApi(data));
+    await (isUpdate.value ? postSysClientEditApi(data) : postSysClientAddApi(data));
     emit('reload');
     await handleCancel();
   } catch (error) {
     console.error(error);
   } finally {
-    drawerApi.setState({confirmLoading:false,loading:false})
+    drawerApi.setState({ confirmLoading: false, loading: false })
   }
 }
 
@@ -109,11 +117,7 @@ async function handleCancel() {
     <BasicForm>
       <template #tip>
         <div class="ml-7 w-full">
-          <Alert
-            message="私有桶使用自定义域名无法预览, 但可以正常上传/下载"
-            show-icon
-            type="warning"
-          />
+          <Alert message="私有桶使用自定义域名无法预览, 但可以正常上传/下载" show-icon type="warning" />
         </div>
       </template>
     </BasicForm>

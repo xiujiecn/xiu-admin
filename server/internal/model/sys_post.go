@@ -29,6 +29,7 @@ type SysPostListParam struct {
 	BelongDeptId int64    `json:"belongDeptId"  description:"归属部门id"`
 	Status       string   `json:"status"        description:"状态"`
 	CreatedAt    []string `json:"createdAt"    description:"创建时间"`
+	PostIds      []int64  `json:"postIds"      description:"岗位ID"`
 }
 
 type SysPostMiniModel struct {
@@ -97,9 +98,9 @@ type SysPostViewModel struct {
 }
 
 type SysPostExportParam struct {
-	SysPostListParam
+	*SysPostListParam
 }
 
 type SysPostExportModel struct {
-	SysPostListModel
+	*SysPostListModel
 }

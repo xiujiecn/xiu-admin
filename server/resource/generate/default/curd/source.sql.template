@@ -1,0 +1,74 @@
+-- XJAdmin自动生成菜单权限SQL 通常情况下只在首次生成代码时自动执行一次
+-- 如需再次执行请先手动删除生成的菜单权限和SQL文件：@{.generatePath}
+-- Version: @{.hgVersion}
+-- Date: @{.nowTime}
+-- Link https://github.com/xiujie/xiujie-admin
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+
+--
+-- 数据库： `@{.dbName}`
+--
+
+-- --------------------------------------------------------
+
+--
+-- 插入表中的数据 `@{.menuTable}`
+--
+
+
+SET @now := now();
+
+
+-- 菜单目录
+INSERT INTO `@{.menuTable}` (    `menu_id`, `menu_name`, `parent_id`, `level`, `tree`,     `order_num`, `path`, `component`, `query_param`, `is_frame`,     `is_cache`, `menu_type`, `visible`, `status`, `perms`,     `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (    NULL, '@{.tableComment}', '@{.options.Menu.Pid}', @{.dirLevel}, '@{.dirTree}',     '@{.options.Menu.Sort}', '@{.varName | LcFirst}', '@{.mainComponent}', '', 1,     0, 'M', '0', '0', '',     '@{.options.Menu.Icon}', 103, 1, @now, NULL, NULL, '');
+
+
+SET @dirId = LAST_INSERT_ID();
+
+
+-- 菜单页面
+-- 列表
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '@{.tableComment}列表', @dirId, '@{.listLevel}', CONCAT('@{.dirTree}tr_', @dirId,' '),'10', 'index', 'gen/@{.componentPrefix}/index', '', 1, 0, 'C', '0', '0', 'gen:@{.apiPrefix}:list', '@{.options.Menu.Icon}', 103, 1, @now, 1, @now, '');
+
+
+SET @listId = LAST_INSERT_ID();
+@{ if or (eq .options.Step.HasView true) (eq .options.Step.HasEdit true) }
+-- 详情
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '@{.tableComment}详情', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:view', '', 103, 1, @now, NULL, NULL, '');
+@{end}
+
+-- 菜单按钮
+@{ if eq .options.Step.HasEdit true }
+-- 编辑
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '编辑/新增@{.tableComment}', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:edit', '', 103, 1, @now, NULL, NULL, '');
+@{end}
+
+SET @editId = LAST_INSERT_ID();
+@{ if and (eq .options.Step.HasEdit true) (eq .options.Step.HasMaxSort true) }
+-- 获取最大排序
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '获取@{.tableComment}最大排序', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:maxSort', '', 103, 1, @now, NULL, NULL, '');
+@{end}
+@{ if eq .options.Step.HasDel true }
+-- 删除
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '删除@{.tableComment}', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:delete', '', 103, 1, @now, NULL, NULL, '');
+@{end}
+@{ if eq .options.Step.HasStatus true }
+-- 更新状态
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '修改@{.tableComment}状态', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:status', '', 103, 1, @now, NULL, NULL, '');
+@{end}
+@{ if eq .options.Step.HasSwitch true }
+-- 操作开关
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '操作@{.tableComment}开关', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:switch', '', 103, 1, @now, NULL, NULL, '');
+@{end}
+@{ if eq .options.Step.HasExport true }
+-- 导出
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '导出@{.tableComment}', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:export', '', 103, 1, @now, NULL, NULL, '');
+@{end}
+@{ if eq .options.Step.IsTreeTable true }
+-- 关系树选项
+INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '获取@{.tableComment}关系树选项', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:treeOption', '', 103, 1, @now, NULL, NULL, '');
+@{end}
+COMMIT;

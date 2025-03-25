@@ -8,7 +8,7 @@ import (
 )
 
 type GetConfigListReq struct {
-	g.Meta `path:"/config/list" method:"get" tags:"系统配置" summary:"获取系统配置列表"`
+	g.Meta `path:"/config/list" method:"get" tags:"系统-配置管理" summary:"获取系统配置列表" x-check-permission:"cpm:system:config:list"`
 	model.SysConfigListParam
 }
 
@@ -18,7 +18,7 @@ type GetConfigListRes struct {
 }
 
 type AddConfigReq struct {
-	g.Meta `path:"/config/add" method:"post" tags:"系统配置" summary:"添加系统配置"`
+	g.Meta `path:"/config/add" method:"post" tags:"系统-配置管理" summary:"添加系统配置" x-check-permission:"cpm:system:config:add"`
 	model.SysConfigAddParam
 }
 
@@ -27,7 +27,7 @@ type AddConfigRes struct {
 }
 
 type EditConfigReq struct {
-	g.Meta `path:"/config/edit" method:"post" tags:"系统配置" summary:"编辑系统配置"`
+	g.Meta `path:"/config/edit" method:"post" tags:"系统-配置管理" summary:"编辑系统配置" x-check-permission:"cpm:system:config:edit"`
 	model.SysConfigEditParam
 }
 
@@ -36,7 +36,7 @@ type EditConfigRes struct {
 }
 
 type DeleteConfigReq struct {
-	g.Meta `path:"/config/delete" method:"post" tags:"系统配置" summary:"删除系统配置"`
+	g.Meta `path:"/config/delete" method:"post" tags:"系统-配置管理" summary:"删除系统配置" x-check-permission:"cpm:system:config:remove"`
 	model.SysConfigDeleteParam
 }
 
@@ -45,7 +45,7 @@ type DeleteConfigRes struct {
 }
 
 type GetConfigByIdReq struct {
-	g.Meta `path:"/config/view" method:"get" tags:"系统配置" summary:"获取系统配置详情"`
+	g.Meta `path:"/config/view" method:"get" tags:"系统-配置管理" summary:"获取系统配置详情" x-check-permission:"cpm:system:config:query"`
 	model.SysConfigViewParam
 }
 

@@ -28,7 +28,7 @@ async function handleOpenChange(open: boolean) {
   }
   const { record } = drawerApi.getData() as { record: SysClient };
   console.log("vue/apps/web-antd/src/views/system/client/view-drawer.vue record", record);
-  const record2 = await getSysClientViewApi ({ id: Number(record.id) });
+  const record2 = await getSysClientViewApi({ id: Number(record.id) });
   console.log("vue/apps/web-antd/src/views/system/client/view-drawer.vue record2", record2);
   setDescProps({ data: record2 }, true);
 }

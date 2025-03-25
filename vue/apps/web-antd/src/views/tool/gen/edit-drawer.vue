@@ -8,7 +8,7 @@ import { addFullName, cloneDeep } from '@vben/utils';
 import { useVbenForm } from '#/adapter/form';
 import { Alert } from 'ant-design-vue';
 import { addSysGenTableApi, getSysGenTableViewApi } from '#/api/gen_codes/gen_table';
-import { drawerSchema } from './model';
+import { drawerSchema, getSelectList, setSelectListObj } from './model';
 
 const emit = defineEmits<{ reload: [] }>();
 interface ModalProps {
@@ -41,6 +41,36 @@ const [BasicForm, formApi] = useVbenForm({
   wrapperClass: 'grid-cols-3 gap-x-4',
 });
 
+const loadSelectList = () => {
+
+  const genTypeOptions = getSelectList('genType');
+  const genTypeValue = genTypeOptions?.[0]?.value;
+  const dbOptions = getSelectList('db');
+
+  formApi.updateSchema([
+    {
+      componentProps: {
+        options: genTypeOptions,
+        defaultValue: genTypeValue,
+      },
+      fieldName: 'genType',
+    },
+    {
+      componentProps: {
+        options: dbOptions,
+      },
+      fieldName: 'dbName',
+    },
+    {
+      componentProps: {
+        options: [],
+      },
+      fieldName: 'tableName',
+    },
+  ]);
+  formApi.setFieldValue('genType', genTypeValue);
+}
+
 const [BasicDrawer, drawerApi] = useVbenDrawer({
   onCancel: handleCancel,
   onConfirm: handleConfirm,
@@ -48,36 +78,45 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
     if (!isOpen) {
       return null;
     }
-    drawerApi.setState({confirmLoading:true,loading:true})
+    drawerApi.setState({ confirmLoading: true, loading: true })
+    loadSelectList();
     const { id, update, view, } = drawerApi.getData() as ModalProps;
     isUpdate.value = update;
     isView.value = view;
     if (isUpdate.value || isView.value) {
-      const record = await getSysGenTableViewApi  ({ tableId: Number(id) });
+      const record = await getSysGenTableViewApi({ tableId: Number(id) });
 
       await formApi.setValues(record);
     }
-    drawerApi.setState({confirmLoading:false,loading:false})
+    drawerApi.setState({ confirmLoading: false, loading: false })
 
     if (view) {
-      drawerApi.setState({ showConfirmButton: false});
-      formApi.setState({ commonConfig: { componentProps:{
-        readonly:true,
-        "only-read":true,
-      } } });
-    }else{
-      drawerApi.setState({ showConfirmButton: true});
-      formApi.setState({ commonConfig: { componentProps:{
-        readonly:false,
-        "only-read":false,
-      }} });
+      drawerApi.setState({ showConfirmButton: false });
+      formApi.setState({
+        commonConfig: {
+          componentProps: {
+            readonly: true,
+            "only-read": true,
+          }
+        }
+      });
+    } else {
+      drawerApi.setState({ showConfirmButton: true });
+      formApi.setState({
+        commonConfig: {
+          componentProps: {
+            readonly: false,
+            "only-read": false,
+          }
+        }
+      });
     }
   },
 });
 
 async function handleConfirm() {
   try {
-    drawerApi.setState({confirmLoading:true,loading:true})
+    drawerApi.setState({ confirmLoading: true, loading: true })
     const { valid } = await formApi.validate();
     if (!valid) {
       return;
@@ -85,14 +124,13 @@ async function handleConfirm() {
     // 这个用于提交
     // formApi.getValues拿到的是一个readonly对象，不能直接修改，需要cloneDeep
     const data = cloneDeep(await formApi.getValues());
-    data.grantType = data.grantTypeList.join(',');
     await (addSysGenTableApi(data));
     emit('reload');
     await handleCancel();
   } catch (error) {
     console.error(error);
   } finally {
-    drawerApi.setState({confirmLoading:false,loading:false})
+    drawerApi.setState({ confirmLoading: false, loading: false })
   }
 }
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"slices"
+	"strings"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -14,6 +15,7 @@ import (
 
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/mcache"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/packed/response"
 	"xiujieadmin/internal/queues"
@@ -131,13 +133,49 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 	if userId == 0 {
 		g.Log().Error(ctx, "sMiddleware.Auth userId is 0", "path", path)
 		response.JsonExit(r, gcode.CodeNotAuthorized.Code(), consts.CodeLoginExpired.Message())
+		// r.Response.WriteStatus(http.StatusUnauthorized)
 		return
 	}
 	if !contexts.IsSuperAdmin(r.GetCtx()) {
 		r.Middleware.Next()
 		return
 	}
-	// TODO: 检查API权限
+	// 权限验证
+	serveHandler := r.GetServeHandler()
+	userAccessCodeList, err := mcache.GetUserAccessCodeList(ctx, userId)
+	if err != nil {
+		g.Log().Errorf(ctx, "sMiddleware.Auth GetUserAccessCodeList error: %v", err)
+		response.JsonExit(r, gcode.CodeNotAuthorized.Code(), consts.CodeLoginExpired.Message())
+		return
+	}
+	if serveHandler != nil {
+		// g.Log().Infof(ctx, "sMiddleware.Auth serveHandler GetMetaTag(x-check-permission): %+v", serveHandler.GetMetaTag("x-check-permission"))
+		accessCode := serveHandler.GetMetaTag("x-check-permission")
+		if accessCode != "" {
+			accessCodeList := strings.Split(accessCode, ",")
+			hasPermission := false
+			for _, code := range accessCodeList {
+				if strings.HasPrefix(code, consts.SysCheckPermissionPrefix) {
+					accessCodeItemList := strings.Split(code, "&")
+					hasItem := true
+					for _, item := range accessCodeItemList {
+						if !slices.Contains(userAccessCodeList, item) {
+							hasItem = false
+							break
+						}
+					}
+					if hasItem {
+						hasPermission = true
+						break
+					}
+				}
+			}
+			if !hasPermission {
+				response.JsonExit(r, consts.CodeNoPermission.Code(), consts.CodeNoPermission.Message())
+				return
+			}
+		}
+	}
 	r.Middleware.Next()
 }
 
