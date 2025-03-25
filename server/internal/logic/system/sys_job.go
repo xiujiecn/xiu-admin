@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -15,6 +16,7 @@ import (
 
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/library/worker"
 	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
@@ -77,9 +79,9 @@ func (c *sSysJob) View(ctx context.Context, jobId int64) (Data *model.SysJobView
 }
 
 func (c *sSysJob) Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastInsertId int64, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return 0, err
+	claims := contexts.GetUser(ctx)
+	if claims == nil {
+		return 0, gerror.NewCode(gcode.CodeMissingParameter, "用户信息不存在")
 	}
 
 	//获取task目录下是否绑定对应的方法
@@ -116,9 +118,9 @@ func (c *sSysJob) Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastIn
 }
 
 func (c *sSysJob) Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel) (RowsAffected int64, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return 0, err
+	claims := contexts.GetUser(ctx)
+	if claims == nil {
+		return 0, gerror.NewCode(gcode.CodeMissingParameter, "用户信息不存在")
 	}
 	//获取task目录下是否绑定对应的方法
 	_, exist := tasks.TasksInstance().CheckFuncName(jobUpdate.InvokeTarget)
@@ -151,9 +153,9 @@ func (c *sSysJob) Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel
 }
 
 func (c *sSysJob) UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdateStatusModel) (RowsAffected int64, err error) {
-	claims, err := service.SysAuth().GetCurrentUser(ctx)
-	if err != nil {
-		return 0, err
+	claims := contexts.GetUser(ctx)
+	if claims == nil {
+		return 0, gerror.NewCode(gcode.CodeMissingParameter, "用户信息不存在")
 	}
 
 	exists := &model.SysJobViewModel{}
