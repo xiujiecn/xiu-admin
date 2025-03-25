@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/dromara/carbon/v2"
-	"github.com/hibiken/asynq"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/xiujiecn/asynq"
 )
 
 type Worker struct {
@@ -67,18 +68,20 @@ func New(options ...func(*WorkerOptions)) *Worker {
 	if ops.redisPeriodKey != "" {
 		w.scheduler = asynq.NewScheduler(rs, &asynq.SchedulerOpts{
 			Location: time.Now().Location(),
-			LogLevel: 4, // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
+			LogLevel: 1, // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
 		})
 		go func() {
 			if err := w.scheduler.Run(); err != nil {
+				g.Log().Error(context.Background(), "server/internal/library/worker/worker.go New 启动调度器失败", err)
 				panic(err)
 			}
+			g.Log().Info(context.Background(), "server/internal/library/worker/worker.go New 启动调度器成功", "group", w.ops.group)
 		}()
 	}
 	svr := asynq.NewServer(rs, asynq.Config{
 		Concurrency: 10,                            // 最大同时执行的任务数量
 		Queues:      map[string]int{ops.group: 10}, // 队列名称和优先级
-		LogLevel:    4,                             // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
+		LogLevel:    1,                             // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
 	})
 	go func() {
 		h := &taskHandlerBase{w: w}
@@ -92,6 +95,7 @@ func New(options ...func(*WorkerOptions)) *Worker {
 			w.clearArchived()
 		}()
 	}
+	g.Log().Debug(context.Background(), "server/internal/library/worker/worker.go New", "group", w.ops.group)
 	return w
 }
 
@@ -147,17 +151,28 @@ func (w *Worker) Cron(options ...func(*TaskOptions)) (entryID string, err error)
 		return
 	}
 
-	entryID, err = w.scheduler.Register(ops.expr, asynq.NewTask(ops.group+".cron", ops.payload, asynq.TaskID(ops.uid)))
+	entryID, err = w.scheduler.Register(ops.expr, asynq.NewTask(ops.group+".cron", ops.payload, asynq.TaskID(ops.uid)), asynq.Queue(w.ops.group))
 	if err != nil {
 		return
 	}
-
+	g.Log().Debug(context.Background(), "server/internal/library/worker/worker.go Cron", "group", w.ops.group, "entryID", entryID)
 	return
 }
 
 func (w *Worker) Remove(uid string) (err error) {
-	err = w.inspector.DeleteTask(w.ops.group, uid)
+	task, err := w.GetTaskInfo(uid)
+	if task != nil {
+		err = w.inspector.DeleteTask(w.ops.group, uid)
+	}
 	return
+}
+
+func (w *Worker) GetTaskInfo(uid string) (task *asynq.TaskInfo, err error) {
+	task, err = w.inspector.GetTaskInfo(w.ops.group, uid)
+	if err != nil {
+		return
+	}
+	return task, nil
 }
 
 func (w *Worker) RemoveCron(entryID string) (err error) {

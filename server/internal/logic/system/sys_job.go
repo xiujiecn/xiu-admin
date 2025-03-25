@@ -99,6 +99,18 @@ func (c *sSysJob) Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastIn
 	if err != nil {
 		return 0, err
 	}
+	lastInserId, _ := result.LastInsertId()
+	if lastInserId > 0 && jobAdd.Status == consts.SysJobStatusNormal {
+		job := &model.SysJobViewModel{}
+		if err := c.Model(ctx).Where(dao.SysJob.Columns().JobId, lastInserId).Scan(&job); err != nil {
+			return lastInserId, err
+		}
+		//任务启动
+		err = c.taskRun(ctx, &job.SysJob)
+		if err != nil {
+			return lastInserId, err
+		}
+	}
 
 	return result.LastInsertId()
 }
@@ -117,6 +129,13 @@ func (c *sSysJob) Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel
 		return 0, err
 	}
 	row, err := result.RowsAffected()
+	if row > 0 && jobUpdate.Status == consts.SysJobStatusNormal {
+		job := &model.SysJobViewModel{}
+		if err := c.Model(ctx).Where(dao.SysJob.Columns().JobId, jobUpdate.JobId).Scan(&job); err != nil {
+			return 0, err
+		}
+
+	}
 	return row, err
 }
 
@@ -157,7 +176,7 @@ func (c *sSysJob) UpdateStatus(ctx context.Context, jobUpdate *model.SysJobUpdat
 
 func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
 	//获取task目录下是否绑定对应的方法
-	_, exist := tasks.TasksInstance().CheckFuncName(job.InvokeTarget)
+	actualName, exist := tasks.TasksInstance().CheckFuncName(job.InvokeTarget)
 	if !exist {
 		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", job.InvokeTarget)
 		return gerror.New(errInfo)
@@ -172,13 +191,13 @@ func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
 	taskData := tasks.Task{
 		ID:         fmt.Sprintf("%s-job-%d", job.InvokeTarget, job.JobId),
 		TaskType:   "Type-" + gconv.String(job.MisfirePolicy),
-		MethodName: job.InvokeTarget,
+		MethodName: actualName,
 		Params:     paramArr,
 		Explain:    job.JobName,
 	}
 	runPayload, _ := json.Marshal(taskData)
 	if job.MisfirePolicy == 1 {
-		_, err := tasks.TasksInstance().Cron(
+		entryID, err := tasks.TasksInstance().Cron(
 			worker.WithTaskCtx(context.Background()),
 			worker.WithTaskUid(taskData.ID),           // 任务ID
 			worker.WithTaskGroup(taskData.MethodName), // 任务组
@@ -191,6 +210,7 @@ func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
 			g.Log().Debug(ctx, taskData.MethodName, taskData.Explain, "启动任务失败")
 			return err
 		}
+		g.Log().Debug(ctx, taskData.MethodName, taskData.Explain, "启动任务成功", "entryID", entryID)
 	} else {
 		err := tasks.TasksInstance().Once(
 			worker.WithTaskCtx(context.Background()),
@@ -219,6 +239,7 @@ func (c *sSysJob) taskStop(ctx context.Context, job *entity.SysJob) error {
 	}
 
 	taskJobId := fmt.Sprintf("%s-job-%d", job.InvokeTarget, job.JobId)
+
 	err := tasks.TasksInstance().Remove(taskJobId)
 	if err != nil {
 		g.Log().Debug(ctx, job.JobName, "启动停止失败")

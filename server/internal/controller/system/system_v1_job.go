@@ -72,7 +72,7 @@ func (c *ControllerV1) SysJobUpdate(ctx context.Context, req *v1.SysJobUpdateReq
 	}, nil
 }
 
-func (c *ControllerV1) SysStatus(ctx context.Context, req *v1.SysJobUpdateStatusReq) (res *v1.SysJobUpdateRes, err error) {
+func (c *ControllerV1) SysJobStatus(ctx context.Context, req *v1.SysJobUpdateStatusReq) (res *v1.SysJobUpdateRes, err error) {
 	effectedRow, err := service.SysJob().UpdateStatus(ctx, &req.SysJobUpdateStatusModel)
 	if err != nil {
 		return nil, err

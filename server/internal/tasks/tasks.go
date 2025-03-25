@@ -61,6 +61,25 @@ func (tk Tasks) RemoveCron(entryID string) error {
 	return tk.worker.RemoveCron(entryID)
 }
 
+func (tk Tasks) GetTask(uid string) (task *Task, err error) {
+	taskInfo, err := tk.worker.GetTaskInfo(uid)
+	if taskInfo == nil {
+		return nil, errors.New("task not found")
+	}
+
+	if taskInfo.Payload == nil {
+		return nil, errors.New("task payload not found")
+	}
+
+	taskData := &Task{}
+
+	err = json.Unmarshal(taskInfo.Payload, &taskData)
+	if err != nil {
+		return nil, err
+	}
+	return taskData, nil
+}
+
 func NewTasks() (tk *Tasks, err error) {
 	defer func() {
 		e := recover()
@@ -75,6 +94,7 @@ func NewTasks() (tk *Tasks, err error) {
 				payload: p,
 			})
 		}),
+		worker.WithWorkerRedisPeriodKey("TaskSchedule"),
 	)
 	if w.Error != nil {
 		err = errors.WithMessage(w.Error, "initialize worker failed")
@@ -96,6 +116,7 @@ type task struct {
 
 // process 处理任务
 func process(t task) (err error) {
+	g.Log().Debug(t.ctx, "server/internal/tasks/tasks.go payload", t.payload)
 	tr := otel.Tracer("task")
 	_, span := tr.Start(t.ctx, "Task")
 	defer span.End()
@@ -104,7 +125,7 @@ func process(t task) (err error) {
 	if err != nil {
 		return err
 	}
-
+	g.Log().Debug(t.ctx, "server/internal/tasks/tasks.go taskData", taskData)
 	err = CallMethod(&taskData)
 	if err != nil {
 		fmt.Println("CallMethod err:", err.Error())
