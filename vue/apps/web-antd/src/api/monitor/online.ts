@@ -30,7 +30,7 @@ export interface SysUserOnlineListRes {
 }
 
 export interface SysUserOnlineDeleteReq {
-  id: number;
+  ids: number[];
 }
 
 export interface SysUserOnlineDeleteRes {
@@ -41,7 +41,7 @@ export const getSysUserOnlineListApi = (params: SysUserOnlineListReq) => {
 };
 
 export const deleteSysUserOnlineApi = (params: SysUserOnlineDeleteReq) => {
-  return requestClient.delete<SysUserOnlineDeleteRes>('/system/user-online/delete', { params });
+  return requestClient.post<SysUserOnlineDeleteRes>('/system/user-online/delete', { ...params });
 };
 
 

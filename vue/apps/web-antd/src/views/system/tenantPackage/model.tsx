@@ -27,7 +27,7 @@ export const querySchema: VbenFormSchema[] = [
   },
 ];
 export const columns: VxeGridProps['columns'] = [
-  { align: 'left', title: '套餐ID', type: 'checkbox', width: 80 },
+  { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
   {
     title: '套餐名称',
     field: 'packageName',
@@ -40,6 +40,7 @@ export const columns: VxeGridProps['columns'] = [
     title: '状态',
     field: 'status',
     slots: { default: 'status' },
+    width: 65,
   },
   { title: '操作', width: 120, slots: { default: 'action' } },
 ];

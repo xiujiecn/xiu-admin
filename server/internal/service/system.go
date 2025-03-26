@@ -248,7 +248,7 @@ type (
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		Add(ctx context.Context, userOnline *model.SysUserOnlineAddModel) (err error)
 		List(ctx context.Context, query *model.SysUserOnlineListParam, page *request.PageInfo) (items []*model.SysUserOnlineListModel, total int, err error)
-		Delete(ctx context.Context, id int64) (err error)
+		Delete(ctx context.Context, ids []int64) (err error)
 		DeleteByToken(ctx context.Context, token string) (err error)
 	}
 )

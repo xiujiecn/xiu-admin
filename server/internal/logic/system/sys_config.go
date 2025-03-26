@@ -3,8 +3,10 @@ package system
 import (
 	"context"
 	"errors"
+	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
 	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/event"
 	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/do"
@@ -97,6 +99,7 @@ func (s *sSysConfig) Add(ctx context.Context, param *model.SysConfigAddParam) (o
 	output = &model.SysConfigAddModel{
 		ConfigId: lastInsertId,
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeySysConfigUpdate, data.TenantId, data.ConfigKey)
 	return
 }
 
@@ -120,6 +123,7 @@ func (s *sSysConfig) Edit(ctx context.Context, param *model.SysConfigEditParam) 
 	output = &model.SysConfigEditModel{
 		ConfigId: param.ConfigId,
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeySysConfigUpdate, contexts.GetTenantId(ctx), data.ConfigKey)
 	return
 }
 
@@ -145,7 +149,7 @@ func (s *sSysConfig) Delete(ctx context.Context, param *model.SysConfigDeletePar
 	if err != nil {
 		return nil, err
 	}
-
+	event.EventsInstance().Emit(ctx, consts.EventKeySysConfigUpdate, contexts.GetTenantId(ctx))
 	return &model.SysConfigDeleteModel{
 		ConfigIds: param.ConfigIds,
 	}, nil

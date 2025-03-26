@@ -6,6 +6,8 @@ import type { VxeTableGridOptions,VxeGridListeners } from '#/adapter/vxe-table';
 import type { SysDictTypeListModel } from '#/api/system/dict';
 import { getVxePopupContainer } from '@vben/utils';
 import { Page,useVbenDrawer } from '@vben/common-ui';
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 
 import { Button, message, Popconfirm,Tag, Modal } from 'ant-design-vue';
 
@@ -186,9 +188,11 @@ function handleMultiDelete() {
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:dict:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:dict:edit'">修改</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-access:code="'cpm:system:dict:remove'">
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:system:dict:remove'">删除</Button>
-          </Popconfirm>
+          <AccessControl :codes="['cpm:system:dict:remove']" type="code">
+            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

@@ -79,10 +79,12 @@ const columnsCollapseData = computed(() => {
                 key: 'name',
                 width: 100,
                 dataIndex: 'name',  
+                align: 'center',
             },
             {
                 title: '字段描述',
                 key: 'dc',
+                align: 'center',
                 dataIndex: 'dc',
                 width: 100,
                 customRender({text,record}: any) {
@@ -102,42 +104,49 @@ const columnsCollapseData = computed(() => {
                 key: 'name',
                 width: 100,
                 dataIndex: 'name',
+                align: 'center',
             },
             {
                 title: '物理类型',
                 key: 'sqlType',
                 width: 80,
                 dataIndex: 'sqlType',
+                align: 'center',
             },
             {
                 title: 'Go属性',
                 key: 'goName',
-                    width: 100,
+                width: 100,
                 dataIndex: 'goName',
+                align: 'center',
             },
             {
                 title: 'Go类型',
                 key: 'goType',
                 width: 80,
                 dataIndex: 'goType',
+                align: 'center',
             },
             {
                 title: 'Ts属性',
                 key: 'tsName',
                 width: 100,
                 dataIndex: 'tsName',
+                align: 'center',
             },
             {
                 title: 'Ts类型',
                 key: 'tsType',
                 width: 80,
                 dataIndex: 'tsType',
+                align: 'center',
             },
             {
                 title: '字段描述',
                 key: 'dc',
                 width: 100,
                 dataIndex: 'dc',
+                align: 'center',
                 customRender({record}: any) {
                     return h(Input, {
                         value: record.dc,
@@ -169,23 +178,21 @@ const slaveColumns = computed(() => {
         key: 'id',
         dataIndex: 'id',
         width: 30,
+        align: 'center',
         customRender(opt: any) {
             return opt.index + 1;
         },
     },
     {
         title(_column: any) {
-            return h('div', null, [
+            return h('div', {
+                class: 'flex items-center font-bold justify-center',
+            }, [
                 renderTooltip(
                     h(
-                        Button,
+                        'span',
                         {
-                            type: 'text',
-                            strong: true,
-                            size: 'small',
-                            text: true,
-                            class: 'items-center font-bold',
-                            // iconPlacement: 'right',
+                            class: 'flex items-center font-bold',
                         },
                         [
                             h('span', { class: 'mr-1' }, '字段'),
@@ -273,10 +280,11 @@ const slaveColumns = computed(() => {
                 title: '查询条件',
                 key: 'queryWhere',
                 width: 90,
+                align: 'center',
                 dataIndex: 'queryWhere',
                 customRender({record}: any) {
                     return h(Select, {
-                        class: 'w-[100px]',
+                        class: 'w-full',
                         consistentMenuWidth: false,
                         value: record.queryWhere,
                         disabled: record.name === 'id',
@@ -291,10 +299,11 @@ const slaveColumns = computed(() => {
                 title: '排列方式',
                 key: 'align',
                 width: 80,
+                align: 'center',
                 dataIndex: 'align',
                 customRender({record}: any) {
                     return h(Select, {
-                        class: 'w-[80px]',
+                        class: 'w-full',
                         consistentMenuWidth: false,
                         value: record.align,
                         options: selectListObj.tableAlign ?? [],
@@ -308,24 +317,22 @@ const slaveColumns = computed(() => {
                 title(_column:any) {
                     return renderTooltip(
                         h(
-                            Button,
+                            'div',
                             {
-                                strong: true,
-                                size: 'small',
-                                text: true,
-                                iconPlacement: 'right',
+                                class: 'flex items-center font-bold justify-center',
                             },
-                            { default: () => '列宽', icon: renderIcon("ant-design:question-circle-outlined") }
+                            ['列宽', renderIcon("ant-design:question-circle-outlined") ] 
                         ),
                         '选填。设定固定值时表格生成自动计算scroll-x，未设定默认每列按100计算'
                     );
                 },
                 key: 'width',
-                width: 50,
+                width: 80,
+                align: 'center',
                 dataIndex: 'width',
                 customRender({record}: any) {
                     return h(InputNumber, {
-                        class: 'w-[50px]',
+                        class: 'w-full',
                         value: record.width,
                         placeholder: ' ',
                         min: -1,
@@ -462,7 +469,7 @@ function onMoveFieldDrop(e: any) {
             <Button type="primary" @click="syncColumns(getIndex())">同步字段</Button>
             <Button type="primary" @click="onHandleMoveFieldButton">移动字段</Button>
         </div>
-        <Table :columns="slaveColumns" :data-source="dataSource" :pagination="false" />
+        <Table bordered :columns="slaveColumns" :data-source="dataSource" :pagination="false" />
     </div>
     <MoveFieldModal
     :fullscreen-button="false"

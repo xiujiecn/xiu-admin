@@ -5,7 +5,8 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions,VxeGridListeners } from '#/adapter/vxe-table';
 import type { SysUserListData } from '#/api/system/user';
 import { deleteSysUser } from '#/api/system/user';
-
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 import { Page, useVbenDrawer, useVbenModal } from '@vben/common-ui';
 
 import { Button, message, Switch, Modal, Popconfirm } from 'ant-design-vue';
@@ -236,20 +237,22 @@ async function handleStatusChange(row: SysUserListData) {
     <Grid class="flex-1" table-title="用户列表"    >
       <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:user:add'">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:user:remove'">删除</Button>
       </template>
       <template #open="{ row }">
-        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" />
+        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" :disabled="!hasAccessByCodes(['cpm:system:user:edit'])" />
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleResetPassword(row)">重置密码</Button>
-          <Popconfirm placement="left" title="确定删除吗？" @confirm="handleDelete(row)">
-            <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1" danger >删除</Button>
-          </Popconfirm>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:user:query'">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:user:edit'">修改</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleResetPassword(row)" v-access:code="'cpm:system:user:resetPwd'">重置密码</Button>
+          <AccessControl :codes="['cpm:system:user:remove']" type="code">
+            <Popconfirm placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1" danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

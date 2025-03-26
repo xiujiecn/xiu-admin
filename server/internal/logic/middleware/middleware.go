@@ -14,6 +14,7 @@ import (
 	"github.com/gogf/gf/v2/util/gmeta"
 
 	"xiujieadmin/internal/consts"
+	"xiujieadmin/internal/library/bcache"
 	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/library/mcache"
 	"xiujieadmin/internal/model"
@@ -136,6 +137,28 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 		// r.Response.WriteStatus(http.StatusUnauthorized)
 		return
 	}
+	// 是否校验强行退出用户
+	forceLogout, err := mcache.GetSystemConfig(ctx, consts.ConfigOnlineForceLogout, consts.ConfigOnlineForceLogoutFalse)
+	if err != nil {
+		g.Log().Errorf(ctx, "sMiddleware.Auth GetSystemConfig error: %v", err)
+		response.JsonExit(r, gcode.CodeNotAuthorized.Code(), consts.CodeLoginExpired.Message())
+		return
+	}
+	if forceLogout == consts.ConfigOnlineForceLogoutTrue {
+		uuid := contexts.GetUserUuid(ctx)
+		token, err := bcache.GetSysAuthTokenReject(ctx, userId, uuid)
+		if err != nil {
+			g.Log().Errorf(ctx, "sMiddleware.Auth GetSysAuthTokenReject error: %v", err)
+			response.JsonExit(r, gcode.CodeNotAuthorized.Code(), consts.CodeLoginExpired.Message())
+			return
+		}
+		if token != "" {
+			g.Log().Infof(ctx, "sMiddleware.Auth token is reject, userId: %d, uuid: %s, token: %s", userId, uuid, token)
+			response.JsonExit(r, gcode.CodeNotAuthorized.Code(), consts.CodeLoginExpired.Message())
+			return
+		}
+	}
+	// 超级管理员
 	if contexts.IsSuperAdmin(r.GetCtx()) {
 		r.Middleware.Next()
 		return

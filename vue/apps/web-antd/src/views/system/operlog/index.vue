@@ -4,7 +4,8 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { SysOperLog } from '#/api/system/oper-log';
 import { Page, useVbenDrawer } from '@vben/common-ui';
-
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 
 import { Button, message,Tag  } from 'ant-design-vue';
 

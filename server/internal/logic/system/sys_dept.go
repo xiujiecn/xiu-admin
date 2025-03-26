@@ -6,6 +6,7 @@ import (
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
 	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/event"
 	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/do"
@@ -159,6 +160,7 @@ func (l *sSysDept) AddDept(ctx context.Context, dept *model.SysDeptAddModel) (de
 	if err != nil {
 		return 0, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeySysDeptUpdate, deptId)
 	return deptId, nil
 }
 
@@ -180,6 +182,7 @@ func (l *sSysDept) EditDept(ctx context.Context, dept *model.SysDeptEditModel) (
 	if err != nil {
 		return 0, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeySysDeptUpdate, dept.DeptId)
 	return dept.DeptId, nil
 }
 
@@ -195,6 +198,7 @@ func (l *sSysDept) DeleteDept(ctx context.Context, dept *model.SysDeptDeleteMode
 	if err != nil {
 		return dept.DeptId, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeySysDeptUpdate, dept.DeptId)
 	return dept.DeptId, nil
 }
 

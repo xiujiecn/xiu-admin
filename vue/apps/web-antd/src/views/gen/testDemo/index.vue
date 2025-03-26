@@ -153,11 +153,13 @@
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:gen:testDemo:edit'">
             修改
           </Button>
-          <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" v-access:code="'cpm:gen:testDemo:delete'">
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:gen:testDemo:delete'">
-              删除
-            </Button>
-          </Popconfirm>
+          <AccessControl :codes="['cpm:gen:testDemo:delete']" type="code">
+            <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >
+                删除
+              </Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

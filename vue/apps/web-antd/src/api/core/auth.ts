@@ -64,6 +64,13 @@ export interface TenantResp {
 }
 
 /**
+ * 获取用户权限码
+ */
+export interface GetAccessCodesResult {
+  data: string[];
+}
+
+/**
  * 登录
  */
 export async function loginApi(data: AuthApi.LoginParams) {
@@ -92,7 +99,7 @@ export async function logoutApi() {
  * 获取用户权限码
  */
 export async function getAccessCodesApi() {
-  return requestClient.get<string[]>('/system/auth/codes');
+  return requestClient.get<GetAccessCodesResult>('/system/auth/codes');
 }
 
 /**

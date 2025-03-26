@@ -3,6 +3,8 @@ import { h } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { SysDeptListData } from '#/api/system/dept';
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { getVxePopupContainer } from '@vben/utils';
@@ -176,9 +178,11 @@ async function handleRefresh() {
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:dept:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:dept:edit'">修改</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-if="row.deptId != 1" v-access:code="'cpm:system:dept:remove'">
-            <Button class="mr-2 border-none p-0" :block="false" type="link" danger v-access:code="'cpm:system:dept:remove'">删除</Button>
-          </Popconfirm>
+          <AccessControl :codes="['cpm:system:dept:remove']" type="code">
+            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link" danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

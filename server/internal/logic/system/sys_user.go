@@ -5,9 +5,8 @@ import (
 	"errors"
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
-	"xiujieadmin/internal/library/bcache"
 	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/library/mcache"
+	"xiujieadmin/internal/library/event"
 	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/do"
@@ -359,8 +358,7 @@ func (l *sSysUser) UpdateCurrentUser(ctx context.Context, req *model.UpdateCurre
 	if err != nil {
 		return nil, err
 	}
-	mcache.UserChangeClearCache(ctx, userId)
-	bcache.UserChangeClearCache(ctx, userId)
+	event.EventsInstance().Emit(ctx, consts.EventKeyUserUpdate, userId)
 	return user, nil
 }
 
@@ -505,8 +503,8 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 			return err
 		}
 	}
-	mcache.UserChangeClearCache(ctx, req.UserId)
-	bcache.UserChangeClearCache(ctx, req.UserId)
+
+	event.EventsInstance().Emit(ctx, consts.EventKeyUserUpdate, req.UserId)
 	return nil
 }
 
@@ -522,6 +520,7 @@ func (l *sSysUser) DeleteUser(ctx context.Context, userIds []int64) (err error) 
 	if err != nil {
 		return err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyUserDelete, userIds)
 	return nil
 }
 
@@ -538,6 +537,7 @@ func (l *sSysUser) ResetPassword(ctx context.Context, userId int64, password str
 	if err != nil {
 		return err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyUserUpdate, userId)
 	return nil
 }
 

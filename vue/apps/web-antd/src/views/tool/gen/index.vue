@@ -15,6 +15,8 @@ import { useRouter } from 'vue-router';
 import { querySchema, columns, setSelectListObj } from './model';
 import viewDrawer from './view-drawer.vue';
 import editDrawer from './edit-drawer.vue';
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 
 interface RowType {
   category: string;
@@ -167,11 +169,13 @@ const handleClickDevelop = (tableId: number) => {
           <Button class="mr-2 border-none p-0" :block="false" type="link"
             @click="handleClickDevelop(row.tableId)" v-access:code="'cpm:tool:gen:develop'">生成配置</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:tool:gen:query'">查看</Button>
-          <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"
-            @confirm="handleDelete(row)" v-access:code="'cpm:tool:gen:remove'">
-            <Button class="mr-2 border-none p-0" :block="false" type="link" danger
-              v-access:code="'cpm:tool:gen:remove'">删除</Button>
-          </Popconfirm>
+          <AccessControl :codes="['cpm:tool:gen:remove']" type="code">
+            <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"
+              @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link" danger
+                v-access:code="'cpm:tool:gen:remove'">删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

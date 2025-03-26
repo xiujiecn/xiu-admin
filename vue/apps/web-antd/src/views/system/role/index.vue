@@ -15,7 +15,8 @@ import roleDrawer from './role-drawer.vue';
 import roleDataScopeModal from './role-data-scope-modal.vue';
 import { authScopeOptions } from './model';
 
-
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 
 import {
   MdiPlus,
@@ -238,9 +239,11 @@ function handleDataScope(row: SysRoleListData) {
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:role:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" @click="handleEdit(row)" v-access:code="'cpm:system:role:edit'" >修改</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.roleId != 1" @click="handleDataScope(row)" v-access:code="'cpm:system:role:edit'">数据权限</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-if="row.roleId != 1" v-access:code="'cpm:system:role:remove'">
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:system:role:remove'">删除</Button>
-          </Popconfirm>
+          <AccessControl :codes="['cpm:system:role:remove']" type="code">
+            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-if="row.roleId != 1" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

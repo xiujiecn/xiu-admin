@@ -189,9 +189,11 @@ async function handleStatusChange(row: SysClient) {
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:client:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:client:edit'">修改</Button>
-          <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" v-access:code="'cpm:system:client:remove'">  
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger  v-access:code="'cpm:system:client:remove'">删除</Button>
-          </Popconfirm>
+          <AccessControl :codes="['cpm:system:client:remove']" type="code">
+            <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" >  
+              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger  >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

@@ -212,20 +212,24 @@ async function handleExecOnce(row: SysJob) {
       
       <template #open="{ row }">
         <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" 
-        :disabled="!hasAccessByCodes(['cpm:system:job:edit'])" />
+        :disabled="!hasAccessByCodes(['cpm:system:job:update'])" />
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:job:view'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleUpdate(row)" v-access:code="'cpm:system:job:update'">编辑</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定执行吗？"
-            @confirm="handleExecOnce(row)" v-access:code="'cpm:system:job:exec'">
+          <AccessControl :codes="['cpm:system:job:exec']" type="code">
+            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定执行吗？"
+              @confirm="handleExecOnce(row)" >
               <Button class="mr-2 border-none p-0" :block="false" type="link">执行一次</Button>
-          </Popconfirm>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
-            @confirm="handleDelete(row)" v-access:code="'cpm:system:job:delete'">
-            <Button class="mr-2 border-none p-0" :block="false" type="link" danger v-access:code="'cpm:system:job:delete'">删除</Button>
-          </Popconfirm>
+            </Popconfirm>
+          </AccessControl>
+          <AccessControl :codes="['cpm:system:job:delete']" type="code">
+            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
+              @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link" danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
      

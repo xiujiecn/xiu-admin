@@ -46,7 +46,7 @@ export const useUserStore = defineStore('core-user', {
       // 设置角色信息
       const roles = userInfo?.roles ?? [];
       this.setUserRoles(roles);
-      console.log('vue/packages/stores/src/modules/user.ts','userInfo',this.userInfo);
+      // console.log('vue/packages/stores/src/modules/user.ts','userInfo',this.userInfo);
     },
     setUserRoles(roles: string[]) {
       this.userRoles = roles;

@@ -2,6 +2,7 @@ package system
 
 import (
 	"context"
+	"errors"
 
 	v1 "xiujieadmin/api/system/v1"
 	"xiujieadmin/internal/model/response"
@@ -24,7 +25,10 @@ func (c *ControllerV1) SysUserOnlineList(ctx context.Context, req *v1.SysUserOnl
 }
 
 func (c *ControllerV1) SysUserOnlineDelete(ctx context.Context, req *v1.SysUserOnlineDeleteReq) (res *v1.SysUserOnlineDeleteRes, err error) {
-	err = service.SysUserOnline().Delete(ctx, req.ID)
+	if len(req.Ids) == 0 {
+		return nil, errors.New("ids不能为空")
+	}
+	err = service.SysUserOnline().Delete(ctx, req.Ids)
 	if err != nil {
 		return nil, err
 	}

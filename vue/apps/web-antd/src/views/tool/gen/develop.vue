@@ -1,6 +1,7 @@
 <script lang="ts" setup>
+import { Page } from '@vben/common-ui';
 import { ref, defineAsyncComponent, onMounted, shallowRef, markRaw,h } from 'vue';
-import { message, Tabs, Card, Button, Space, Table, Modal } from 'ant-design-vue';
+import { message, Tabs, Card, Button, Space, Table, Modal, Spin } from 'ant-design-vue';
 import { useVbenForm } from '#/adapter/form';
 import { useRoute } from 'vue-router';
 import { isJsonString } from '#/utils/is';
@@ -331,35 +332,41 @@ async function handleBuildPreview(type: string) {
 </script>
 
 <template>
-  <Card class="m-4">
-    <Tabs size="large">
-      <template #rightExtra>
-        <Space >
-          <Button type="primary" @click="handlePreviewCode" :disabled="loading"   :loading="loading" v-access:code="'cpm:tool:gen:preview'">预览代码</Button>
-          <Button class="bg-green-500" @click="handleBuildBtn" :disabled="loading" :loading="loading" v-access:code="'cpm:tool:gen:code'">提交生成</Button>
-          <Button type="dashed" @click="handleSaveConfig" :disabled="loading" :loading="loading" v-access:code="'cpm:tool:gen:edit'">仅保存配置</Button>
-        </Space>
+  <Page auto-content-height>
+    <div v-if="loading" class="z-[1000] absolute left-0 top-0 flex h-full w-full items-center justify-center bg-[rgba(255,255,255,0.3)]">  
+      <Spin tip="加载中..." class="z-[2001]" />
+    </div>
 
-      </template>
-      <Tabs.TabPane tab="基本信息" key="1">
-        <Card title="基本设置">
-          <BaseForm />
-        </Card>
-        <Card title="关联表设置" class="mt-3">
-          <template #extra><Button type="primary" @click="handleAddJoin">添加关联表</Button></template>
-          <div v-for="(item, index) in joinFromList" :key="index" class="flex items-center gap-x-2">
-            <component :is="item.From" :key="index" class="m-0" />
-            <Button danger @click="handleDeleteJoin(index)">删除</Button>
-          </div>
-        </Card>
-      </Tabs.TabPane>
-      <Tabs.TabPane tab="主表字段" key="2" class="overflow-auto">
-        <EditMasterCell  v-model:value="genInfo" :selectList="getSelectList" />
-      </Tabs.TabPane>
-      <Tabs.TabPane :tab="`关联字段-${item.linkTable}`"  class="overflow-auto" v-for="(item, _) in joinFromList" :key="item.uuid">
-        <EditSlaveCell  v-model:value="genInfo" :selectList="getSelectList" :uuid="item.uuid" />
-      </Tabs.TabPane>
-    </Tabs>
-  </Card>
-  <PreviewTab  :previewModel="previewModel" :showModal="showPreviewModal" @BuildPreview="handleBuildPreview" />
+    <Card  >
+      <Tabs size="large"  >
+        <template #rightExtra>
+          <Space >
+            <Button type="primary" @click="handlePreviewCode" :disabled="loading"   :loading="loading" v-access:code="'cpm:tool:gen:preview'">预览代码</Button>
+            <Button class="bg-green-500" @click="handleBuildBtn" :disabled="loading" :loading="loading" v-access:code="'cpm:tool:gen:code'">提交生成</Button>
+            <Button type="dashed" @click="handleSaveConfig" :disabled="loading" :loading="loading" v-access:code="'cpm:tool:gen:edit'">仅保存配置</Button>
+          </Space>
+
+        </template>
+        <Tabs.TabPane tab="基本信息" key="1" >
+          <Card title="基本设置" >
+            <BaseForm />
+          </Card>
+          <Card title="关联表设置" class="mt-3">
+            <template #extra><Button type="primary" @click="handleAddJoin">添加关联表</Button></template>
+            <div v-for="(item, index) in joinFromList" :key="index" class="flex items-center gap-x-2">
+              <component :is="item.From" :key="index" class="m-0" />
+              <Button danger @click="handleDeleteJoin(index)">删除</Button>
+            </div>
+          </Card>
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="主表字段" key="2" class="overflow-auto">
+          <EditMasterCell  v-model:value="genInfo" :selectList="getSelectList" />
+        </Tabs.TabPane>
+        <Tabs.TabPane :tab="`关联字段-${item.linkTable}`"  class="overflow-auto" v-for="(item, _) in joinFromList" :key="item.uuid">
+          <EditSlaveCell  v-model:value="genInfo" :selectList="getSelectList" :uuid="item.uuid" />
+        </Tabs.TabPane>
+      </Tabs>
+    </Card>
+    <PreviewTab  :previewModel="previewModel" :showModal="showPreviewModal" @BuildPreview="handleBuildPreview" />
+  </Page>
 </template>

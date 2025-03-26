@@ -14,6 +14,8 @@ import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysPostListApi, deleteSysPostApi, getSysPostExportApi } from '#/api'; 
 import DeptTree from '#/components/dept/dept-tree.vue';
 import postDrawer from './post-drawer.vue';
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 
 import {
   MdiPlus,
@@ -240,15 +242,17 @@ function handleStatusChange(row: SysPostListData) {
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:post:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:post:edit'">修改</Button>
-          <Popconfirm
-            :get-popup-container="getVxePopupContainer"
-            placement="left"
-            title="确认删除？"
-            @confirm="handleDelete(row)"
-            v-access:code="'cpm:system:post:remove'"
+          <AccessControl :codes="['cpm:system:post:remove']" type="code">
+            <Popconfirm
+              :get-popup-container="getVxePopupContainer"
+              placement="left"
+              title="确认删除？"
+              @confirm="handleDelete(row)"
+              v-access:code="'cpm:system:post:remove'"
           >
-            <Button class="mr-2 border-none p-0" :block="false" type="link" danger v-access:code="'cpm:system:post:remove'">删除</Button>
-          </Popconfirm>
+              <Button class="mr-2 border-none p-0" :block="false" type="link" danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>
