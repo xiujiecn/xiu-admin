@@ -133,7 +133,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
   toolbarConfig: {
     custom: true,
-    export: true,
+    export: false,
     refresh: true,
     resizable: true,
     search: true,
@@ -226,9 +226,9 @@ function handleStatusChange(row: SysPostListData) {
     <Grid table-title="岗位列表">
       <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
-        <Button class="mr-2 flex items-center "  :icon="h(MdiExport)" @click="handleExport">导出</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:post:add'">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:post:remove'">删除</Button>
+        <Button class="mr-2 flex items-center "  :icon="h(MdiExport)" @click="handleExport" v-access:code="'cpm:system:post:export'">导出</Button>
       </template>
       <template #open="{ row }">
         <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'"  @change="handleStatusChange(row)" />
@@ -238,15 +238,16 @@ function handleStatusChange(row: SysPostListData) {
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:post:query'">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:post:edit'">修改</Button>
           <Popconfirm
             :get-popup-container="getVxePopupContainer"
             placement="left"
             title="确认删除？"
             @confirm="handleDelete(row)"
+            v-access:code="'cpm:system:post:remove'"
           >
-            <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1" danger>删除</Button>
+            <Button class="mr-2 border-none p-0" :block="false" type="link" danger v-access:code="'cpm:system:post:remove'">删除</Button>
           </Popconfirm>
         </div>
       </template>

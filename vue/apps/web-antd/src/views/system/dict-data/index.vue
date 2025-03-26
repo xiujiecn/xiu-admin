@@ -197,8 +197,8 @@ function handleMultiDelete() {
     <Grid :table-title="'['+dictName+']' +'['+dictType+']' + '字典数据'">
       <template #toolbar-tools>
         
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:dict:add'">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:dict:remove'">删除</Button>
       </template>
       <template #label="{ row }">
         <Tag :color="labelColor(row)">{{ row.dictLabel }}</Tag>
@@ -208,10 +208,10 @@ function handleMultiDelete() {
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:dict:query'">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:dict:edit'">修改</Button>
+          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-access:code="'cpm:system:dict:remove'">
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:system:dict:remove'">删除</Button>
           </Popconfirm>
         </div>
       </template>

@@ -3,10 +3,12 @@ package system
 import (
 	"context"
 	"errors"
+	"slices"
 	"strings"
 	"time"
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/library/bcache"
+	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
@@ -68,6 +70,23 @@ func (s *sSysAuth) Login(ctx context.Context, param *model.LoginParams) (res *mo
 		TenantId: user.TenantId,
 		DeptId:   user.DeptId,
 	}
+	// 构建临时的上下文
+	identity := &model.Identity{
+		BaseClaims: model.BaseClaims{
+			ID:       user.UserId,
+			Username: user.UserName,
+			NickName: user.NickName,
+			TenantId: user.TenantId,
+			DeptId:   user.DeptId,
+			Roles:    []model.Role{},
+			LoginAt:  time.Now().Unix(),
+		},
+	}
+	contextModel := new(model.Context)
+	contextModel.User = identity
+
+	ctx = contexts.Set(ctx, contextModel)
+
 	// 生成token
 	claims, token, err := s.GenerateToken(ctx, userOut)
 	if err != nil {
@@ -130,7 +149,7 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 			DataScope: r.DataScope,
 		})
 	}
-
+	g.Log().Infof(ctx, "sSysAuth.GenerateToken roles: %v", roles)
 	claims = &model.CustomClaims{
 		BaseClaims: model.BaseClaims{
 			UUID:     strings.ReplaceAll(uuid.New().String(), "-", ""),
@@ -237,58 +256,66 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 	if err != nil {
 		return nil, err
 	}
-	rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
-		PageInfo: request.PageInfo{
-			Page:     1,
-			PageSize: 5000,
-		},
-		RoleIds: roleIds,
-	})
-	if err != nil {
-		return nil, err
+	if len(roleIds) > 0 {
+		rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
+			PageInfo: request.PageInfo{
+				Page:     1,
+				PageSize: 5000,
+			},
+			RoleIds: roleIds,
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, r := range rl {
+			accessCodeList = append(accessCodeList, consts.SysCheckPermissionRolePrefix+r.RoleKey)
+		}
 	}
-	for _, r := range rl {
-		accessCodeList = append(accessCodeList, consts.SysCheckPermissionRolePrefix+r.RoleKey)
-	}
-
+	g.Log().Infof(ctx, "sSysAuth.GetUserAccessCodeList roleIds: %v", roleIds)
 	// 菜单权限码
 	// 获取角色菜单列表
 	rmList, err := service.SysRole().GetRoleListMenu(ctx, roleIds)
 	if err != nil {
 		return nil, err
 	}
-	g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuList: %v", rmList)
 	menuIds := make([]int64, 0)
 	for _, menu := range rmList {
 		menuIds = append(menuIds, menu.MenuId)
 	}
-	// 获取用户角色菜单
-	menuList, _, err := service.SysMenu().List(ctx, &model.SysMenuListParam{
-		MenuIds: menuIds,
-	})
-	if err != nil {
-		return nil, err
+	g.Log().Infof(ctx, "sSysAuth.GetUserAccessCodeList menuIds: %v", menuIds)
+	if len(menuIds) > 0 {
+		// 获取用户角色菜单
+		menuList, _, err := service.SysMenu().List(ctx, &model.SysMenuListParam{
+			MenuIds: menuIds,
+		})
+		if err != nil {
+			return nil, err
+		}
+		g.Log().Infof(ctx, "sSysAuth.GetUserAccessCodeList menuList: %v", menuList)
+		for _, m := range menuList {
+			accessCodeList = append(accessCodeList, consts.SysCheckPermissionMenuPrefix+m.Perms)
+		}
 	}
-	for _, m := range menuList {
-		accessCodeList = append(accessCodeList, consts.SysCheckPermissionMenuPrefix+m.Perms)
-	}
+	g.Log().Infof(ctx, "sSysAuth.GetUserAccessCodeList accessCodeList: %v", accessCodeList)
 	// 获取用户岗位信息
 	postIds, err := service.SysUser().GetUserPostIds(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
-	pl, _, err := service.SysPost().List(ctx, &model.SysPostListParam{
-		PageInfo: request.PageInfo{
-			Page:     1,
-			PageSize: 5000,
-		},
-		PostIds: postIds,
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, p := range pl {
-		accessCodeList = append(accessCodeList, consts.SysCheckPermissionPostPrefix+p.PostCode)
+	if len(postIds) > 0 {
+		pl, _, err := service.SysPost().List(ctx, &model.SysPostListParam{
+			PageInfo: request.PageInfo{
+				Page:     1,
+				PageSize: 5000,
+			},
+			PostIds: postIds,
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range pl {
+			accessCodeList = append(accessCodeList, consts.SysCheckPermissionPostPrefix+p.PostCode)
+		}
 	}
 	// 获取用户信息
 	user, err := service.SysUser().GetUserById(ctx, userId)
@@ -297,5 +324,6 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 	}
 	accessCodeList = append(accessCodeList, consts.SysCheckPermissionUserPrefix+user.UserName)
 	accessCodeList = append(accessCodeList, consts.SysCheckPermissionCurrentUser)
+	accessCodeList = slices.Compact(accessCodeList)
 	return accessCodeList, nil
 }

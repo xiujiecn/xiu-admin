@@ -137,7 +137,7 @@ function handlePreview(record: SysOperLog) {
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:monitor:operlog:query'">查看</Button>
         </div>
       </template>
     </Grid>

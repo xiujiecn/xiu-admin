@@ -42,7 +42,8 @@ type LogoutRes struct {
 }
 
 type GetAccessCodesReq struct {
-	g.Meta `path:"/auth/codes" method:"get" tags:"系统-授权" summary:"获取用户权限码"`
+	g.Meta  `path:"/auth/codes" method:"get" tags:"系统-授权" summary:"获取用户权限码"`
+	IsCache bool `json:"isCache" dc:"是否从缓存中获取"`
 }
 
 type GetAccessCodesRes struct {

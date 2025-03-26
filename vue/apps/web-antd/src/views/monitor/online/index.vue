@@ -104,14 +104,14 @@ const [Grid] = useVbenVxeGrid({
   <Page auto-content-height>
     <Grid>
       <template #toolbar-actions>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)">删除</Button>
+        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)" v-access:code="'cpm:monitor:online:batchLogout'">删除</Button>
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '关闭' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger>删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:monitor:online:forceLogout'">删除</Button>
         </div>
       </template>
     </Grid>

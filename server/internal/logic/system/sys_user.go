@@ -5,7 +5,9 @@ import (
 	"errors"
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
+	"xiujieadmin/internal/library/bcache"
 	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/mcache"
 	"xiujieadmin/internal/library/xgorm/handler"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/do"
@@ -357,6 +359,8 @@ func (l *sSysUser) UpdateCurrentUser(ctx context.Context, req *model.UpdateCurre
 	if err != nil {
 		return nil, err
 	}
+	mcache.UserChangeClearCache(ctx, userId)
+	bcache.UserChangeClearCache(ctx, userId)
 	return user, nil
 }
 
@@ -501,6 +505,8 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 			return err
 		}
 	}
+	mcache.UserChangeClearCache(ctx, req.UserId)
+	bcache.UserChangeClearCache(ctx, req.UserId)
 	return nil
 }
 

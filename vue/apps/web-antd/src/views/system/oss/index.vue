@@ -209,11 +209,10 @@ function isImageFile(ext: string) {
         <Tooltip title="预览图片" class="mr-2 flex items-center ">
             <Switch v-model:checked="preview" />
         </Tooltip>
-        <Button class="mr-2 flex items-center " @click="handleClickOssConfig">OSS配置</Button>
-        <Button class="mr-2 flex items-center " type="primary" @click="fileUploadApi.open">文件上传</Button>
-        <Button class="mr-2 flex items-center " type="primary" @click="imageUploadApi.open">图片上传</Button>
-        <Button class="mr-2 flex items-center " type="primary" @click="handleMultiDelete"
-          :disabled="!CheckboxChecked">删除</Button>
+        <Button class="mr-2 flex items-center " @click="handleClickOssConfig" v-access:code="'cpm:system:ossConfig:list'">OSS配置</Button>
+        <Button class="mr-2 flex items-center " type="primary" @click="fileUploadApi.open" v-access:code="'cpm:system:oss:upload'">文件上传</Button>
+        <Button class="mr-2 flex items-center " type="primary" @click="imageUploadApi.open" v-access:code="'cpm:system:oss:upload'">图片上传</Button>
+        <Button class="mr-2 flex items-center " type="primary" @click="handleMultiDelete" v-access:code="'cpm:system:oss:remove'">删除</Button>
       </template>
       <template #url="{ row }">
         <!-- placeholder为图片未加载时显示的占位图 -->
@@ -239,10 +238,10 @@ function isImageFile(ext: string) {
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleDownload(row)">下载</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleDownload(row)" v-access:code="'cpm:system:oss:download'">下载</Button>
           <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确认删除？"
-            @confirm="handleDelete(row)">
-            <Button class="mr-2 border-none p-0" :block="false" type="link" danger>删除</Button>
+            @confirm="handleDelete(row)" v-access:code="'cpm:system:oss:remove'">
+            <Button class="mr-2 border-none p-0" :block="false" type="link" danger v-access:code="'cpm:system:oss:remove'">删除</Button>
           </Popconfirm>
         </div>
       </template>

@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 
 	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/library/bcache"
 	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/library/mcache"
 	"xiujieadmin/internal/model"
@@ -36,24 +37,33 @@ func (c *ControllerV1) RefreshToken(ctx context.Context, req *v1.RefreshTokenReq
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }
 func (c *ControllerV1) Logout(ctx context.Context, req *v1.LogoutReq) (res *v1.LogoutRes, err error) {
-	token, err := service.SysAuth().GetAccessToken(ctx)
-	if err != nil {
-		return nil, err
-	}
+	token, _ := service.SysAuth().GetAccessToken(ctx)
 	service.SysUserOnline().DeleteByToken(ctx, token)
-
+	mcache.UserLogoutClearCache(ctx, contexts.GetUserId(ctx))
+	bcache.UserLogoutClearCache(ctx, contexts.GetUserId(ctx))
 	return &v1.LogoutRes{
 		Data:   "退出成功",
 		Status: 200,
 	}, nil
 }
 func (c *ControllerV1) GetAccessCodes(ctx context.Context, req *v1.GetAccessCodesReq) (res *v1.GetAccessCodesRes, err error) {
-	accessCodes, err := mcache.GetUserAccessCodeList(ctx, contexts.GetUserId(ctx))
-	if err != nil {
-		return nil, err
-	}
-	res = &v1.GetAccessCodesRes{
-		Data: accessCodes,
+	if req.IsCache {
+		accessCodes, err := mcache.GetUserAccessCodeList(ctx, contexts.GetUserId(ctx))
+		if err != nil {
+			return nil, err
+		}
+		res = &v1.GetAccessCodesRes{
+			Data: accessCodes,
+		}
+	} else {
+		accessCodes, err := service.SysAuth().GetUserAccessCodeList(ctx, contexts.GetUserId(ctx))
+		if err != nil {
+			return nil, err
+		}
+		mcache.SetUserAccessCodeList(ctx, contexts.GetUserId(ctx), accessCodes)
+		res = &v1.GetAccessCodesRes{
+			Data: accessCodes,
+		}
 	}
 	return res, nil
 }

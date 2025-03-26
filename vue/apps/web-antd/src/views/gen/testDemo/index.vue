@@ -7,6 +7,8 @@
   import { getVxePopupContainer } from '@vben/utils';
   import { Page, useVbenDrawer } from '@vben/common-ui';
   import { useVbenVxeGrid } from '#/adapter/vxe-table';
+  import { AccessControl, useAccess } from '@vben/access';
+  const { hasAccessByCodes } = useAccess();
   import { commonDownloadExcel } from '#/utils/file/download';
   import { List, Export, Delete } from '#/api/gen/testDemo';
   import { MdiPlus, MdiExport, MdiDelete }  from '@vben/icons';
@@ -133,26 +135,26 @@
   <Page auto-content-height>
     <Grid table-title="测试单表">
       <template #toolbar-tools>
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:gen:testDemo:edit'">
           新增
         </Button>
-        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:gen:testDemo:delete'">
           删除
         </Button>
-        <Button class="mr-2 flex items-center" type="primary" :icon="h(MdiExport)" @click="handleExport">
+        <Button class="mr-2 flex items-center" type="primary" :icon="h(MdiExport)" @click="handleExport" v-access:code="'cpm:gen:testDemo:export'">
           导出
         </Button>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:gen:testDemo:view'">
             查看
           </Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:gen:testDemo:edit'">
             修改
           </Button>
-          <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)">
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >
+          <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" v-access:code="'cpm:gen:testDemo:delete'">
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:gen:testDemo:delete'">
               删除
             </Button>
           </Popconfirm>

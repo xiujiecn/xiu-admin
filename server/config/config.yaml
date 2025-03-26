@@ -92,6 +92,18 @@ redis:
     idleTimeout: "60s" #连接最大空闲时间，使用时间字符串例如30s/2m/2d
     ClientName: "SystemCache"
 
+# Queue配置
+queue:
+  type: "asynq" # 队列类型
+  asynq:
+    redis:
+      address: 192.168.158.200:6379
+      db: 0
+      pass: redis123456@@
+      user:
+    concurrency: 10 # 最大同时执行的任务数量
+    logLevel: 4 # 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
+
 # 路由配置
 router:
   # 不需要验证登录的路由地址

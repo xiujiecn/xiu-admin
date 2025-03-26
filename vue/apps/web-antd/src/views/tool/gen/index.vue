@@ -157,20 +157,20 @@ const handleClickDevelop = (tableId: number) => {
   <Page auto-content-height>
     <Grid table-title="代码生成">
       <template #toolbar-tools>
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">导入生成</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:tool:gen:import'">导入生成</Button>
         <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)"
-          @click="handleMultiDelete">删除</Button>
+          @click="handleMultiDelete" v-access:code="'cpm:tool:gen:remove'">删除</Button>
       </template>
 
       <template #action="{ row }">
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link"
-            @click="handleClickDevelop(row.tableId)">生成配置</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
+            @click="handleClickDevelop(row.tableId)" v-access:code="'cpm:tool:gen:develop'">生成配置</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:tool:gen:query'">查看</Button>
           <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"
-            @confirm="handleDelete(row)">
+            @confirm="handleDelete(row)" v-access:code="'cpm:tool:gen:remove'">
             <Button class="mr-2 border-none p-0" :block="false" type="link" danger
-              @click="handleDelete(row)">删除</Button>
+              v-access:code="'cpm:tool:gen:remove'">删除</Button>
           </Popconfirm>
         </div>
       </template>

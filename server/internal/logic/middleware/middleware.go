@@ -136,7 +136,7 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 		// r.Response.WriteStatus(http.StatusUnauthorized)
 		return
 	}
-	if !contexts.IsSuperAdmin(r.GetCtx()) {
+	if contexts.IsSuperAdmin(r.GetCtx()) {
 		r.Middleware.Next()
 		return
 	}
@@ -160,6 +160,7 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 					hasItem := true
 					for _, item := range accessCodeItemList {
 						if !slices.Contains(userAccessCodeList, item) {
+							g.Log().Errorf(ctx, "sMiddleware.Auth userAccessCodeList not contains item: %v, userAccessCodeList: %v", item, userAccessCodeList)
 							hasItem = false
 							break
 						}
