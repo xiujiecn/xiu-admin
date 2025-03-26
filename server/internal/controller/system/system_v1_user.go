@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 
 	v1 "xiujieadmin/api/system/v1"
+	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/request"
@@ -26,6 +27,43 @@ func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *
 	if err != nil {
 		return nil, err
 	}
+	menus, err := service.SysMenu().GetUserMenu(ctx)
+	if err != nil {
+		return nil, err
+	}
+	homePath := ""
+	firstMenu := ""
+	if len(menus) > 0 {
+		for _, menu := range menus {
+			if menu.ParentId == 0 && menu.Path == "analytics" {
+				homePath = "/analytics"
+				break
+			}
+			if firstMenu == "" && menu.MenuType == consts.SysMenuTypeMenu {
+				firstMenu = menu.Path
+				if menu.ParentId != 0 {
+					for _, menu2 := range menus {
+						if menu2.MenuId == menu.ParentId {
+							firstMenu = menu2.Path + "/" + firstMenu
+							if menu2.ParentId != 0 {
+								for _, menu3 := range menus {
+									if menu3.MenuId == menu2.ParentId {
+										firstMenu = menu3.Path + "/" + firstMenu
+										break
+									}
+								}
+							}
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+	if homePath == "" {
+		homePath = "/" + firstMenu
+	}
+
 	return &v1.UserInfoRes{
 		UserInfo: v1.UserInfo{
 			Id:       user.UserId,
@@ -33,6 +71,7 @@ func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *
 			Nickname: user.NickName,
 			Avatar:   user.Avatar,
 			Email:    user.Email,
+			HomePath: homePath,
 		},
 	}, nil
 }

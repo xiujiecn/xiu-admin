@@ -68,7 +68,7 @@ func New(options ...func(*WorkerOptions)) *Worker {
 	if ops.redisPeriodKey != "" {
 		w.scheduler = asynq.NewScheduler(rs, &asynq.SchedulerOpts{
 			Location: time.Now().Location(),
-			LogLevel: 1, // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
+			LogLevel: asynq.LogLevel(g.Cfg().MustGet(context.Background(), "queue.asynq.logLevel").Int()), // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
 		})
 		go func() {
 			if err := w.scheduler.Run(); err != nil {
@@ -79,9 +79,9 @@ func New(options ...func(*WorkerOptions)) *Worker {
 		}()
 	}
 	svr := asynq.NewServer(rs, asynq.Config{
-		Concurrency: 10,                            // 最大同时执行的任务数量
-		Queues:      map[string]int{ops.group: 10}, // 队列名称和优先级
-		LogLevel:    1,                             // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
+		Concurrency: g.Cfg().MustGet(context.Background(), "queue.asynq.concurrency").Int(),              // 最大同时执行的任务数量
+		Queues:      map[string]int{ops.group: 10},                                                       // 队列名称和优先级
+		LogLevel:    asynq.LogLevel(g.Cfg().MustGet(context.Background(), "queue.asynq.logLevel").Int()), // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
 	})
 	go func() {
 		h := &taskHandlerBase{w: w}

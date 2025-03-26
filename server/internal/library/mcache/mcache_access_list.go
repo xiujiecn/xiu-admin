@@ -8,6 +8,11 @@ import (
 	"xiujieadmin/internal/service"
 )
 
+func init() {
+	RegisterUserChangeClearCache(consts.UserAccessCodeList, RemoveUserAccessCodeList)
+	RegisterUserLogoutClearCache(consts.UserAccessCodeList, RemoveUserAccessCodeList)
+}
+
 func GetUserAccessCodeList(ctx context.Context, userId int64) ([]string, error) {
 	accessCodeList, err := Instance().Get(ctx, fmt.Sprintf(consts.UserAccessCodeList, userId))
 	if err != nil || accessCodeList == nil {

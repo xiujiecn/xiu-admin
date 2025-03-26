@@ -2,6 +2,8 @@ package system
 
 import (
 	"context"
+	"slices"
+	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/dao"
 	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/library/xgorm/handler"
@@ -105,6 +107,22 @@ func (s *sSysRole) GetRoleDept(ctx context.Context, id int64) (res []*entity.Sys
 
 // 获取角色列表对应菜单
 func (s *sSysRole) GetRoleListMenu(ctx context.Context, ids []int64) (res []*entity.SysRoleMenu, err error) {
+	res = make([]*entity.SysRoleMenu, 0)
+	if slices.Contains(ids, consts.SuperAdminRoleId) {
+		menus, _, err := service.SysMenu().List(ctx, &model.SysMenuListParam{
+			Status: consts.SysMenuStatusNormal,
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, menu := range menus {
+			res = append(res, &entity.SysRoleMenu{
+				RoleId: consts.SuperAdminRoleId,
+				MenuId: menu.MenuId,
+			})
+		}
+		return res, nil
+	}
 	err = dao.SysRoleMenu.Ctx(ctx).WhereIn(dao.SysRoleMenu.Columns().RoleId, ids).Scan(&res)
 	return
 }

@@ -14,6 +14,7 @@ type UserInfo struct {
 	Nickname string `json:"realName" dc:"昵称"`
 	Avatar   string `json:"avatar" dc:"头像"`
 	Email    string `json:"email" dc:"邮箱"`
+	HomePath string `json:"homePath" dc:"首页路径"`
 }
 
 type UserInfoReq struct {

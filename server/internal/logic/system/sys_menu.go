@@ -138,7 +138,11 @@ func (l *sSysMenu) MenuTree(ctx context.Context, parentMenu *model.SysMenuTree, 
 
 // 获取用户动态路由列表
 func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err error) {
-	roleIds := []int64{1}
+	roles := contexts.GetRoles(ctx)
+	roleIds := make([]int64, 0)
+	for _, role := range roles {
+		roleIds = append(roleIds, role.RoleId)
+	}
 	// 判断是否存在超级管理员角色
 	if slices.Contains(roleIds, consts.SuperAdminRoleId) {
 		// 获取所有菜单
@@ -150,7 +154,7 @@ func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err
 	if err != nil {
 		return nil, err
 	}
-	g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuList: %v", menuList)
+	// g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuList: %v", menuList)
 	menuIds := make([]int64, 0)
 	for _, menu := range menuList {
 		menuIds = append(menuIds, menu.MenuId)

@@ -194,20 +194,20 @@ function handleMultiDelete() {
     <Grid :table-title="'公告列表'">
       <template #toolbar-tools>
 
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:notice:add'">新增</Button>
         <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)"
-          @click="handleMultiDelete">删除</Button>
+          @click="handleMultiDelete" v-access:code="'cpm:system:notice:remove'">删除</Button>
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '关闭' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:notice:query'">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:notice:edit'">修改</Button>
           <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
-            @confirm="handleDelete(row)"><Button class="mr-2 border-none p-0" :block="false" type="link"
-              danger>删除</Button></Popconfirm>
+            @confirm="handleDelete(row)" v-access:code="'cpm:system:notice:remove'"><Button class="mr-2 border-none p-0" :block="false" type="link"
+              danger v-access:code="'cpm:system:notice:remove'">删除</Button></Popconfirm>
         </div>
       </template>
 

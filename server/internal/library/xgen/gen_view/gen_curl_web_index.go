@@ -106,6 +106,8 @@ func (l *gCurd) webIndexTplData(ctx context.Context, in *genmodel.CurdPreviewPar
 	importBuffer.WriteString("  import { getVxePopupContainer } from '@vben/utils';\n")
 	importBuffer.WriteString("  import { Page, useVbenDrawer } from '@vben/common-ui';\n")
 	importBuffer.WriteString("  import { useVbenVxeGrid } from '#/adapter/vxe-table';\n")
+	importBuffer.WriteString("  import { AccessControl, useAccess } from '@vben/access';\n")
+	importBuffer.WriteString("  const { hasAccessByCodes } = useAccess();\n")
 	if in.Options.Step.HasExport {
 		importBuffer.WriteString("  import { commonDownloadExcel } from '#/utils/file/download';\n")
 	}

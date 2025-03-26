@@ -335,9 +335,9 @@ async function handleBuildPreview(type: string) {
     <Tabs size="large">
       <template #rightExtra>
         <Space >
-          <Button type="primary" @click="handlePreviewCode" :disabled="loading"   :loading="loading">预览代码</Button>
-          <Button class="bg-green-500" @click="handleBuildBtn" :disabled="loading" :loading="loading">提交生成</Button>
-          <Button type="dashed" @click="handleSaveConfig" :disabled="loading" :loading="loading">仅保存配置</Button>
+          <Button type="primary" @click="handlePreviewCode" :disabled="loading"   :loading="loading" v-access:code="'cpm:tool:gen:preview'">预览代码</Button>
+          <Button class="bg-green-500" @click="handleBuildBtn" :disabled="loading" :loading="loading" v-access:code="'cpm:tool:gen:code'">提交生成</Button>
+          <Button type="dashed" @click="handleSaveConfig" :disabled="loading" :loading="loading" v-access:code="'cpm:tool:gen:edit'">仅保存配置</Button>
         </Space>
 
       </template>

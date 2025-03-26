@@ -11,11 +11,13 @@ import { Button, message,Tag, Modal, Popconfirm,Switch } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysClientListApi, postSysClientDeleteApi, postSysClientStatusApi } from '#/api/system/client'; 
 import { MdiPlus, MdiDelete,} from '@vben/icons';
+import { AccessControl, useAccess } from '@vben/access';
 
 import { querySchema, columns, } from './model';
 import viewDrawer from './view-drawer.vue';
 import editDrawer from './edit-drawer.vue';
 
+const { hasAccessByCodes } = useAccess();
 interface RowType {
   category: string;
   color: string;
@@ -172,23 +174,23 @@ async function handleStatusChange(row: SysClient) {
   <Page auto-content-height>
     <Grid table-title="客户端列表">
       <template #toolbar-tools>
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:client:add'">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:client:remove'">删除</Button>
       </template>
       <template #status="{ row }">
         <!-- pc不允许禁用 禁用了直接登录不了 应该设置disabled -->
         <!-- 登录提示: 认证权限类型已禁用 -->
         <Switch
-          v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" :disabled="row.id === 1"
+          v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" :disabled="row.id === 1 || !hasAccessByCodes(['cpm:system:client:edit'])"
           @change="handleStatusChange(row)"
         />
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
-          <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)">  
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:client:query'">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:client:edit'">修改</Button>
+          <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" v-access:code="'cpm:system:client:remove'">  
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger  v-access:code="'cpm:system:client:remove'">删除</Button>
           </Popconfirm>
         </div>
       </template>

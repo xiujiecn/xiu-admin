@@ -8,7 +8,7 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 import { getVxePopupContainer } from '@vben/utils';
 import { Button, message,Tag, Modal, Popconfirm,Switch } from 'ant-design-vue';
 import dayjs from 'dayjs';
-
+import { AccessControl, useAccess } from '@vben/access';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysTenantListApi, deleteSysTenantApi, statusSysTenantApi } from '#/api/system/tenant';
 import {
@@ -19,6 +19,8 @@ import {
 import { querySchema, columns, } from './model';
 import viewDrawer from './view-drawer.vue';
 import editDrawer from './edit-drawer.vue';
+
+const { hasAccessByCodes } = useAccess();
 
 interface RowType {
   category: string;
@@ -171,21 +173,21 @@ async function handleStatusChange(row: SysTenantListData) {
   <Page auto-content-height>
     <Grid table-title="租户列表">
       <template #toolbar-tools>
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:tenant:add'">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:tenant:remove'">删除</Button>
       </template>
       <template #status="{ row }">
         <Switch
-          v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" :disabled="row.id === 1"
+          v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" :disabled="row.id === 1 || !hasAccessByCodes(['cpm:system:tenant:edit'])"
           @change="handleStatusChange(row)"
         />
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
-          <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)">  
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:tenant:query'">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:tenant:edit'"     >修改</Button>
+          <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" v-access:code="'cpm:system:tenant:remove'">  
+            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:system:tenant:remove'">删除</Button>
           </Popconfirm>
         </div>
       </template>

@@ -14,6 +14,8 @@ import { Button, message, Switch, Modal, Popconfirm } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysJobListApi, deleteSysJobApi, updateStatusApi, execOnceApi } from '#/api/system/job';
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 import viewDrawer from './view-drawer.vue';
 import editDrawer from './edit-drawer.vue';
 import {
@@ -204,23 +206,25 @@ async function handleExecOnce(row: SysJob) {
   <Page auto-content-height>
     <Grid table-title="定时任务列表">
       <template #toolbar-tools>
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete">删除</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:job:add'">新增</Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:job:delete'">删除</Button>
       </template>
+      
       <template #open="{ row }">
-        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" />
+        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" 
+        :disabled="!hasAccessByCodes(['cpm:system:job:edit'])" />
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleUpdate(row)">编辑</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:job:view'">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleUpdate(row)" v-access:code="'cpm:system:job:update'">编辑</Button>
           <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定执行吗？"
-            @confirm="handleExecOnce(row)">
-            <Button class="mr-2 border-none p-0" :block="false" type="link">执行一次</Button>
+            @confirm="handleExecOnce(row)" v-access:code="'cpm:system:job:exec'">
+              <Button class="mr-2 border-none p-0" :block="false" type="link">执行一次</Button>
           </Popconfirm>
           <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
-            @confirm="handleDelete(row)">
-            <Button class="mr-2 border-none p-0" :block="false" type="link" danger>删除</Button>
+            @confirm="handleDelete(row)" v-access:code="'cpm:system:job:delete'">
+            <Button class="mr-2 border-none p-0" :block="false" type="link" danger v-access:code="'cpm:system:job:delete'">删除</Button>
           </Popconfirm>
         </div>
       </template>

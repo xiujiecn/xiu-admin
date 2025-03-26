@@ -51,11 +51,12 @@ export const useAuthStore = defineStore('auth', () => {
           fetchUserInfo(),
           getAccessCodesApi(),
         ]);
-        console.log('vue/apps/web-antd/src/store/auth.ts','fetchUserInfoResult',fetchUserInfoResult);
+        // console.log('vue/apps/web-antd/src/store/auth.ts','fetchUserInfoResult',fetchUserInfoResult);
         userInfo = fetchUserInfoResult;
 
         userStore.setUserInfo(userInfo);
-        accessStore.setAccessCodes(accessCodes);
+        // console.log('vue/apps/web-antd/src/store/auth.ts','accessCodes',accessCodes);
+        accessStore.setAccessCodes(accessCodes.data);
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
@@ -64,7 +65,7 @@ export const useAuthStore = defineStore('auth', () => {
             ? await onSuccess?.()
             : await router.push(userInfo.homePath || DEFAULT_HOME_PATH);
         }
-        console.log('vue/apps/web-antd/src/store/auth.ts','userInfo.realName',userInfo?.realName);
+        // console.log('vue/apps/web-antd/src/store/auth.ts','userInfo.realName',userInfo?.realName);
         if (userInfo?.realName) {
           notification.success({
             description: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,

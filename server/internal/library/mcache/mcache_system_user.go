@@ -7,7 +7,13 @@ import (
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/service"
+
+	"github.com/gogf/gf/v2/util/gconv"
 )
+
+func init() {
+	RegisterUserChangeClearCache(consts.UserInfo, RemoveUserInfo)
+}
 
 func GetUserInfo(ctx context.Context, userId int64) (*model.SysUserMiniModel, error) {
 	userInfo, err := Instance().Get(ctx, fmt.Sprintf(consts.UserInfo, userId))
@@ -16,14 +22,9 @@ func GetUserInfo(ctx context.Context, userId int64) (*model.SysUserMiniModel, er
 		if err != nil {
 			return nil, err
 		}
-		miniUser := &model.SysUserMiniModel{
-			UserId:   user.UserId,
-			UserName: user.UserName,
-			NickName: user.NickName,
-			Avatar:   user.Avatar,
-			TenantId: user.TenantId,
-			DeptId:   user.DeptId,
-		}
+
+		miniUser := &model.SysUserMiniModel{}
+		gconv.Struct(miniUser, user)
 		Instance().Set(ctx, fmt.Sprintf(consts.UserInfo, userId), miniUser, time.Hour*24)
 		return miniUser, nil
 	}

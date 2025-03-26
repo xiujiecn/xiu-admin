@@ -30,10 +30,10 @@ func GetDefaultWorkerOptions(ops *WorkerOptions) *WorkerOptions {
 	if ops != nil {
 		return ops
 	}
-	addr := g.Cfg().MustGet(context.Background(), "redis.default.address").String()
-	pass := g.Cfg().MustGet(context.Background(), "redis.default.pass").String()
-	db := g.Cfg().MustGet(context.Background(), "redis.default.db").Int()
-	user := g.Cfg().MustGet(context.Background(), "redis.default.user").String()
+	addr := g.Cfg().MustGet(context.Background(), "queue.asynq.redis.address").String()
+	pass := g.Cfg().MustGet(context.Background(), "queue.asynq.redis.pass").String()
+	db := g.Cfg().MustGet(context.Background(), "queue.asynq.redis.db").Int()
+	user := g.Cfg().MustGet(context.Background(), "queue.asynq.redis.user").String()
 	if user == "" {
 		user = "default"
 	}

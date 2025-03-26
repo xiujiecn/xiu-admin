@@ -9,14 +9,28 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
+type ContextKey struct {
+	name string
+}
+
+var contextKey = &ContextKey{
+	name: consts.ContextKey,
+}
+
 // Init初始化上下文对象指针到上下文对象中，以便后续的请求流程中可以修改。
 func Init(r *ghttp.Request, customCtx *model.Context) {
-	r.SetCtxVar(consts.ContextKey, customCtx)
+	r.SetCtxVar(contextKey, customCtx)
+}
+
+// Set设置本地上下文
+func Set(ctx context.Context, customCtx *model.Context) context.Context {
+	ctx = context.WithValue(ctx, contextKey, customCtx)
+	return ctx
 }
 
 // Get 获取上下文变量；
 func Get(ctx context.Context) *model.Context {
-	customCtx, ok := ctx.Value(consts.ContextKey).(*model.Context)
+	customCtx, ok := ctx.Value(contextKey).(*model.Context)
 	if !ok {
 		return nil
 	}
@@ -90,6 +104,15 @@ func GetRoles(ctx context.Context) []model.Role {
 		return nil
 	}
 	return user.Roles
+}
+
+// GetLoginAt 获取上下文变量中的登录时间
+func GetLoginAt(ctx context.Context) int64 {
+	user := GetUser(ctx)
+	if user == nil {
+		return 0
+	}
+	return user.LoginAt
 }
 
 // IsSystemTenant 判断是否是系统租户

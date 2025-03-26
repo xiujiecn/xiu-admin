@@ -4,6 +4,8 @@ import { cloneDeep } from 'lodash-es';
 import { useVbenModal } from '@vben/common-ui';
 import { Tabs, TabPane, Space, Tag, Button, message, Textarea } from 'ant-design-vue';
 import { type GenCodesPreviewRes } from '#/api/gen_codes/gen_table';
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 import hljs from 'highlight.js/lib/core';
 import go from 'highlight.js/lib/languages/go';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -98,10 +100,15 @@ const [ModalPerview, modalPerviewApi] = useVbenModal({
     cancelText: '关闭',
     confirmText: '生成代码',
     onConfirm: function () {
-        emit('BuildPreview', '');
+        if (hasAccessByCodes(['cpm:tool:gen:code'])) {
+            emit('BuildPreview', '');
+        }else {
+            message.warning('您没有生成代码的权限');
+        }
         modalPerviewApi.close();
     },
     onCancel: function () {
+        modalPerviewApi.close();
     },
     onClosed: function () {
         // props.showModal.value = false;

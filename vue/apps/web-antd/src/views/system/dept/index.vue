@@ -167,17 +167,17 @@ async function handleRefresh() {
         
         <Button class="mr-2 flex items-center"  @click="expandAll">展开</Button>
         <Button class="mr-2 flex items-center"  @click="collapseAll">折叠</Button>
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd">新增</Button>
+        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:dept:add'">新增</Button>
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '停用' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)">修改</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-if="row.deptId != 1" >
-            <Button class="mr-2 border-none p-0" :block="false" type="link" danger >删除</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:dept:query'">查看</Button>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:dept:edit'">修改</Button>
+          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" v-if="row.deptId != 1" v-access:code="'cpm:system:dept:remove'">
+            <Button class="mr-2 border-none p-0" :block="false" type="link" danger v-access:code="'cpm:system:dept:remove'">删除</Button>
           </Popconfirm>
         </div>
       </template>
