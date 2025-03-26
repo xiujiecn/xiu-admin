@@ -72,7 +72,7 @@ const formOptions: VbenFormProps = {
         valueFormat: "YYYY-MM-DD",
       },
       // defaultValue: [dayjs().subtract(7, 'days'), dayjs()],
-      fieldName: 'createdAt',
+      fieldName: 'loginTime',
       label: '登录时间',
     },
   ],
