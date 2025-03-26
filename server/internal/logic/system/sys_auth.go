@@ -9,6 +9,7 @@ import (
 	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/library/bcache"
 	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/event"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/model/request"
 	"xiujieadmin/internal/service"
@@ -116,6 +117,7 @@ func (s *sSysAuth) Login(ctx context.Context, param *model.LoginParams) (res *mo
 		LoginTime:     gtime.Now(),
 		ExpireTime:    gtime.NewFromTime(claims.ExpiresAt.Time),
 	})
+	event.EventsInstance().Emit(ctx, consts.EventKeyUserLogin, user.UserId)
 	return userOut, token, nil
 }
 
@@ -207,14 +209,15 @@ func (s *sSysAuth) DeleteToken(ctx context.Context, token string) (err error) {
 	if err != nil {
 		return err
 	}
-	if t.Claims.(*model.CustomClaims).ExpiresAt.Unix() < time.Now().Unix() {
-		// return errors.New("token已过期")
-		// g.Log().Debugf(ctx, "sSysAuth.DeleteToken token已过期, token: %s", token)
+	timeout := t.Claims.(*model.CustomClaims).ExpiresAt.Unix() - time.Now().Unix()
+	if timeout <= 0 {
+		return nil
 	}
 	err = bcache.DelSysAuthToken(ctx, t.Claims.(*model.CustomClaims).BaseClaims.ID, t.Claims.(*model.CustomClaims).BaseClaims.UUID)
 	if err != nil {
 		return err
 	}
+	bcache.SetSysAuthTokenReject(ctx, t.Claims.(*model.CustomClaims).BaseClaims.ID, t.Claims.(*model.CustomClaims).BaseClaims.UUID, token, time.Duration(timeout)*time.Second)
 	return nil
 }
 

@@ -6,6 +6,8 @@ import type { SysOssConfigListData } from '#/api/system/oss-config';
 import type { DeepPartial } from '@vben/types';
 import { getVxePopupContainer } from '@vben/utils';
 import { Page, useVbenDrawer } from '@vben/common-ui';
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 
 import { Button, message, Tag, Modal, Popconfirm } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -158,9 +160,13 @@ function handleMultiDelete() {
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:ossConfig:list'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:ossConfig:edit'">修改</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
-            @confirm="handleDelete(row)" v-access:code="'cpm:system:ossConfig:remove'"><Button class="mr-2 border-none p-0" :block="false" type="link"
-              danger v-access:code="'cpm:system:ossConfig:remove'">删除</Button></Popconfirm>
+          <AccessControl :codes="['cpm:system:ossConfig:remove']" type="code">
+            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
+              @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link"
+                danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

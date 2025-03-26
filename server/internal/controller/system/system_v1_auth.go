@@ -7,8 +7,9 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 
 	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/library/bcache"
+	"xiujieadmin/internal/consts"
 	"xiujieadmin/internal/library/contexts"
+	"xiujieadmin/internal/library/event"
 	"xiujieadmin/internal/library/mcache"
 	"xiujieadmin/internal/model"
 	"xiujieadmin/internal/service"
@@ -39,8 +40,7 @@ func (c *ControllerV1) RefreshToken(ctx context.Context, req *v1.RefreshTokenReq
 func (c *ControllerV1) Logout(ctx context.Context, req *v1.LogoutReq) (res *v1.LogoutRes, err error) {
 	token, _ := service.SysAuth().GetAccessToken(ctx)
 	service.SysUserOnline().DeleteByToken(ctx, token)
-	mcache.UserLogoutClearCache(ctx, contexts.GetUserId(ctx))
-	bcache.UserLogoutClearCache(ctx, contexts.GetUserId(ctx))
+	event.EventsInstance().Emit(ctx, consts.EventKeyUserLogout, contexts.GetUserId(ctx))
 	return &v1.LogoutRes{
 		Data:   "退出成功",
 		Status: 200,

@@ -10,7 +10,8 @@ import { DictEnum } from '@vben/constants';
 import { getPopupContainer } from '@vben/utils';
 import { getDictOptions } from '#/utils/dict';
 import { Button, message, Tag, Popconfirm, Modal } from 'ant-design-vue';
-
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysNoticeListApi, deleteSysNoticeApi } from '#/api/system/notice';
 import { renderDict } from '#/utils/render';
@@ -205,9 +206,13 @@ function handleMultiDelete() {
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:notice:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:notice:edit'">修改</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
-            @confirm="handleDelete(row)" v-access:code="'cpm:system:notice:remove'"><Button class="mr-2 border-none p-0" :block="false" type="link"
-              danger v-access:code="'cpm:system:notice:remove'">删除</Button></Popconfirm>
+          <AccessControl :codes="['cpm:system:notice:remove']" type="code">
+            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
+              @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link"
+              danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
 

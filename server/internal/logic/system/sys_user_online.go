@@ -2,6 +2,7 @@ package system
 
 import (
 	"context"
+	"errors"
 	"xiujieadmin/internal/dao"
 	"xiujieadmin/internal/library/contexts"
 	"xiujieadmin/internal/library/xgorm/handler"
@@ -74,24 +75,34 @@ func (s *sSysUserOnline) List(ctx context.Context, query *model.SysUserOnlineLis
 	return
 }
 
-func (s *sSysUserOnline) Delete(ctx context.Context, id int64) (err error) {
-	var data model.SysUserOnlineViewModel
-	err = s.Model(ctx).Where(dao.SysUserOnline.Columns().OnlineId, id).Scan(&data)
+func (s *sSysUserOnline) Delete(ctx context.Context, ids []int64) (err error) {
+	if len(ids) == 0 {
+		return errors.New("ids不能为空")
+	}
+	var data = make([]*model.SysUserOnlineViewModel, 0)
+	err = s.Model(ctx).WhereIn(dao.SysUserOnline.Columns().OnlineId, ids).Scan(&data)
 	if err != nil {
 		return err
 	}
-	service.SysAuth().DeleteToken(ctx, data.Token)
-	_, err = s.Model(ctx).Where(dao.SysUserOnline.Columns().OnlineId, id).Delete()
+	for _, v := range data {
+		service.SysAuth().DeleteToken(ctx, v.Token)
+	}
+	_, err = s.Model(ctx).WhereIn(dao.SysUserOnline.Columns().OnlineId, ids).Delete()
+	if err != nil {
+		return err
+	}
 	return
 }
 
 func (s *sSysUserOnline) DeleteByToken(ctx context.Context, token string) (err error) {
-	var data model.SysUserOnlineViewModel
+	var data *model.SysUserOnlineViewModel
 	err = s.Model(ctx).Where(dao.SysUserOnline.Columns().Token, token).Scan(&data)
 	if err != nil {
 		return err
 	}
-	service.SysAuth().DeleteToken(ctx, data.Token)
+	if data != nil && data.Token != "" {
+		service.SysAuth().DeleteToken(ctx, data.Token)
+	}
 	_, err = s.Model(ctx).Where(dao.SysUserOnline.Columns().Token, token).Delete()
 	return
 }

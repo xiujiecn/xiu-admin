@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import { h } from 'vue';
+import { h, ref } from 'vue';
 import type { VbenFormProps } from '#/adapter/form';
-import type { VxeTableGridOptions } from '#/adapter/vxe-table';
-
+import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
+import type { DeepPartial } from '@vben/types';
 import { Page } from '@vben/common-ui';
-
-import { Button, message, Switch,Tag  } from 'ant-design-vue';
+import { getVxePopupContainer } from '@vben/utils';
+import { Button, message, Switch,Tag, Modal, Popconfirm } from 'ant-design-vue';
 import dayjs from 'dayjs';
+import { AccessControl, useAccess } from '@vben/access';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysUserOnlineListApi, deleteSysUserOnlineApi } from '#/api/monitor/online';
+import { getSysUserOnlineListApi, deleteSysUserOnlineApi, type SysUserOnline } from '#/api/monitor/online';
 import {
   MdiPlus,
   MdiEdit,
@@ -75,7 +76,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        message.success(`Query params: ${JSON.stringify(formValues)}`);
+        // message.success(`Query params: ${JSON.stringify(formValues)}`);
         return await getSysUserOnlineListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -94,24 +95,61 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
 };
 
-const [Grid] = useVbenVxeGrid({
+const gridEvents: DeepPartial<VxeGridListeners> = {
+  checkboxChange: handleCheckboxChange,
+  checkboxAll: handleCheckboxChange,
+};
+
+const CheckboxChecked = ref(false);
+function handleCheckboxChange() {
+  CheckboxChecked.value = gridApi.grid.getCheckboxRecords().length > 0;
+}
+const [Grid, gridApi] = useVbenVxeGrid({
   formOptions,
   gridOptions,
+  gridEvents,
 });
+
+async function handleDelete(row: SysUserOnline) {
+  await deleteSysUserOnlineApi({ ids: [row.onlineId] });
+  message.success("删除成功");
+  await gridApi.query();
+}
+
+
+function handleMultiDelete() {
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids = rows.map((row) => row.onlineId);
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await deleteSysUserOnlineApi({ ids: ids.map(Number) });
+      message.success("删除成功");
+      await gridApi.query();
+    },
+  });
+}
+
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid>
-      <template #toolbar-actions>
-        <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)" v-access:code="'cpm:monitor:online:batchLogout'">删除</Button>
+    <Grid table-title="在线用户">
+      <template #toolbar-tools>
+        <Button class="mr-2 flex items-center" type="primary"  :disabled="!CheckboxChecked" :icon="h(MdiDelete)"  v-access:code="'cpm:monitor:online:batchLogout'" @click="handleMultiDelete">批量删除</Button>
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '关闭' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:monitor:online:forceLogout'">删除</Button>
+          <AccessControl :codes="['cpm:monitor:online:forceLogout']" type="code">
+            <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" >  
+              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

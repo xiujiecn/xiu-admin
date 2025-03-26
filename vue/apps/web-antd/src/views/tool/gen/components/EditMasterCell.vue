@@ -203,17 +203,14 @@ const masterColumns = computed(() => {
     },
     {
         title(_column: any) {
-            return h('div', null, [
+            return h('div', {
+                class: 'flex items-center font-bold justify-center',
+            }, [
                 renderTooltip(
                     h(
-                        Button,
+                        'span',
                         {
-                            type: 'text',
-                            strong: true,
-                            size: 'small',
-                            text: true,
-                            class: 'items-center font-bold',
-                            // iconPlacement: 'right',
+                            class: 'flex items-center font-bold',
                         },
                         [
                             h('span', { class: 'mr-1' }, '字段'),
@@ -245,22 +242,20 @@ const masterColumns = computed(() => {
     {
         width: 800,
         title(_column: any) {
-            return renderTooltip(
-                h(
-                    Button,
-                    {
-                        type: 'text',
-                        strong: true,
-                        size: 'small',
-                        text: true,
-                        iconPlacement: 'right',
-                        class: 'font-bold ',
+            return h('div', {
+                class: 'flex items-center font-bold justify-center',
+            }, [
+                renderTooltip(
+                    h(
+                        'div',
+                        {
+                        class: 'flex items-center font-bold',
                     },
-                    // { default: () => '新增/编辑表单', icon: renderIcon("ant-design:question-circle-outlined") }
-                    [h('span', { class: 'mr-1' }, '新增/编辑表单'), renderIcon("ant-design:question-circle-outlined")]
+                    ['新增/编辑表单', renderIcon("ant-design:question-circle-outlined")]
                 ),
                 '勾选编辑以后会在新增、编辑表单中显示该字段;当同时勾选列表查询时，会优先使用配置的表单组件'
-            );
+                )
+            ]);
         },
         key: 'edit',
         align: 'center',
@@ -328,6 +323,7 @@ const masterColumns = computed(() => {
                 width: 100,
                 minWidth: 100,
                 dataIndex: 'formMode',
+                align: 'center',
                 customRender({record}: any) {
                     return h(Select, {
                         consistentMenuWidth: false,
@@ -347,6 +343,7 @@ const masterColumns = computed(() => {
                 key: 'dictType',
                 width: 100,
                 dataIndex: 'dictType',
+                align: 'center',
                 customRender({record}: any) {
                     if (record.dictType == 0) {
                         record.dictType = null;
@@ -374,6 +371,7 @@ const masterColumns = computed(() => {
                 key: 'formRole',
                 width: 100,
                 dataIndex: 'formRole',
+                align: 'center',
                 customRender({record}: any) {
                     return h(Select, {
                         class: 'w-[120px]',
@@ -388,20 +386,20 @@ const masterColumns = computed(() => {
                 },
             },
             {
+                align: 'center',
                 title(_column:any) {
-                    return h(Space, { inline: true }, [
+                    return h('div', {
+                        class: 'font-bold justify-center',
+                    }, [
                         renderTooltip(
                             h(
-                                Button,
+                                'div',
                                 {
-                                    strong: true,
-                                    size: 'small',
-                                    text: true,
-                                    iconPlacement: 'right',
+                                    class: 'flex items-center font-bold justify-center',
                                 },
-                                { default: () => '栅格', icon: renderIcon("ant-design:question-circle-outlined") }
+                                ['栅格', renderIcon("ant-design:question-circle-outlined") ]
                             ),
-                            '表单每行摆放组件的个数。响应式栅格，小屏幕自动转为每行摆放一个组件。参考文档：https://www.naiveui.com/zh-CN/os-theme/components/grid#responsive-item.vue'
+                            '表单每行摆放组件的个数。响应式栅格，小屏幕自动转为每行摆放一个组件。'
                         ),
                         h(Select, {
                             style: { width: '100px' },
@@ -491,6 +489,7 @@ const masterColumns = computed(() => {
             },
             {
                 title: '查询条件',
+                align: 'center',
                 key: 'queryWhere',
                 width: 90,
                 dataIndex: 'queryWhere',
@@ -509,6 +508,7 @@ const masterColumns = computed(() => {
             },
             {
                 title: '排列方式',
+                align: 'center',
                 key: 'align',
                 width: 80,
                 dataIndex: 'align',
@@ -528,24 +528,21 @@ const masterColumns = computed(() => {
                 title(_column:any) {
                     return renderTooltip(
                         h(
-                            Button,
+                            'div',
                             {
-                                strong: true,
-                                size: 'small',
-                                text: true,
-                                iconPlacement: 'right',
+                                class: 'flex items-center font-bold justify-center',
                             },
-                            { default: () => '列宽', icon: renderIcon("ant-design:question-circle-outlined") }
+                            [ '列宽', renderIcon("ant-design:question-circle-outlined") ]
                         ),
                         '选填。设定固定值时表格生成自动计算scroll-x，未设定默认每列按100计算'
                     );
                 },
                 key: 'width',
-                width: 50,
+                width: 80,
                 dataIndex: 'width',
                 customRender({record}: any) {
                     return h(InputNumber, {
-                        class: 'w-[50px]',
+                        class: 'w-[60px]',
                         value: record.width,
                         placeholder: ' ',
                         min: -1,
@@ -675,7 +672,7 @@ function onMoveFieldDrop(e: any) {
             <Button type="primary" @click="syncColumns">同步字段</Button>
             <Button type="primary" @click="onHandleMoveFieldButton">移动字段</Button>
         </div>
-        <Table :columns="masterColumns" :data-source="dataSource" :pagination="false" />
+        <Table bordered :columns="masterColumns" :data-source="dataSource" :pagination="false" />
     </div>
     <MoveFieldModal
     :fullscreen-button="false"

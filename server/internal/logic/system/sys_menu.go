@@ -203,6 +203,7 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 			}
 			item := &v1.RouteMenu{
 				Id:        menu.MenuId,
+				ParentId:  menu.ParentId,
 				Path:      menu.Path,
 				Redirect:  nil,
 				Name:      fmt.Sprintf("menu_%d", menu.MenuId),

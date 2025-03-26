@@ -3,9 +3,12 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { DeepPartial } from '@vben/types';
 import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
 import type { SysLogininfor } from '#/api/system/logininfor'
+import { AccessControl, useAccess } from '@vben/access';
+const { hasAccessByCodes } = useAccess();
 
 import { h, ref } from 'vue';
 import { getVxePopupContainer } from '@vben/utils';
+
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
 
@@ -193,10 +196,12 @@ function handleMultiDelete() {
       <template #action="{ row }">
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:monitor:logininfor:query'">查看</Button>
-          <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
-            @confirm="handleDelete(row)" v-access:code="'cpm:monitor:logininfor:remove'">
-            <Button class="mr-2 border-none p-0" :block="false" type="link" danger v-access:code="'cpm:monitor:logininfor:remove'" >删除</Button>
-          </Popconfirm>
+          <AccessControl :codes="['cpm:monitor:logininfor:remove']" type="code">
+            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？"
+              @confirm="handleDelete(row)" >
+              <Button class="mr-2 border-none p-0" :block="false" type="link" danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

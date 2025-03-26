@@ -185,9 +185,13 @@ async function handleStatusChange(row: RowType) {
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:gen:@{.varName | LcFirst}:edit'">修改</Button>
           @{end}
           @{ if eq .options.Step.HasDel true }
-          <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" v-access:code="'cpm:gen:@{.varName | LcFirst}:delete'">  
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:gen:@{.varName | LcFirst}:delete'">删除</Button>
-          </Popconfirm>
+          <AccessControl :codes="['cpm:gen:@{.varName | LcFirst}:delete']" type="code">
+            <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" >  
+              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >
+                删除
+              </Button>
+            </Popconfirm>
+          </AccessControl>
           @{end}
         </div>
       </template>

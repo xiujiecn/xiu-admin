@@ -56,7 +56,9 @@ export const useAuthStore = defineStore('auth', () => {
 
         userStore.setUserInfo(userInfo);
         // console.log('vue/apps/web-antd/src/store/auth.ts','accessCodes',accessCodes);
-        accessStore.setAccessCodes(accessCodes.data);
+        if (accessCodes.data) {
+          accessStore.setAccessCodes(accessCodes.data);
+        }
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);

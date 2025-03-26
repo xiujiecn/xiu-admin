@@ -62,7 +62,7 @@ export const useAccessStore = defineStore('core-access', {
       return findMenu(this.accessMenus, path);
     },
     setAccessCodes(codes: string[]) {
-      console.log('vue/packages/stores/src/modules/access.ts setAccessCodes', codes);
+      // console.log('vue/packages/stores/src/modules/access.ts setAccessCodes', codes);
       this.accessCodes = codes;
     },
     setAccessMenus(menus: MenuRecordRaw[]) {

@@ -185,10 +185,12 @@ async function handleStatusChange(row: SysTenantListData) {
       <template #action="{ row }">
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:tenant:query'">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:tenant:edit'"     >修改</Button>
-          <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" v-access:code="'cpm:system:tenant:remove'">  
-            <Button class="mr-2 border-none p-0" :block="false" type="link"  danger v-access:code="'cpm:system:tenant:remove'">删除</Button>
-          </Popconfirm>
+          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:tenant:edit'"    >修改</Button>
+          <AccessControl :codes="['cpm:system:tenant:remove']" type="code" >
+            <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" v-if="row.id != 1" >  
+              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
+            </Popconfirm>
+          </AccessControl>
         </div>
       </template>
     </Grid>

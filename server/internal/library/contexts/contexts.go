@@ -61,6 +61,15 @@ func GetUserId(ctx context.Context) int64 {
 	return user.ID
 }
 
+// GetUserUuid 获取上下文变量中的用户UUID
+func GetUserUuid(ctx context.Context) string {
+	user := GetUser(ctx)
+	if user == nil {
+		return ""
+	}
+	return user.UUID
+}
+
 // GetUserName 获取上下文变量中的用户名
 func GetUserName(ctx context.Context) string {
 	user := GetUser(ctx)
