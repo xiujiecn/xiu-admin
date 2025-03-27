@@ -6,13 +6,13 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/library/event"
-	"xiujieadmin/internal/library/mcache"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/event"
+	"xiuadmin/internal/library/mcache"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/service"
 )
 
 func (c *ControllerV1) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRes, err error) {

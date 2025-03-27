@@ -1,9 +1,9 @@
 // Package @{.templateGroup}
-// @Link  https://github.com/xiujie/xiujie-admin
-// @Copyright  Copyright (c) @{NowYear} XiuJieZhiLian CLI
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) @{NowYear} XiuAdmin CLI
 // @Author  Lxj <li@xiujie.cn>
-// @License  https://github.com/xiujie/xiujie-admin/blob/master/LICENSE
-// @AutoGenerate Version @{.hgVersion}
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
+// @AutoGenerate Version @{.xiuVersion}
 //
 package @{.templateGroup}
 
@@ -16,21 +16,21 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
-	"xiujieadmin/internal/dao"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/library/xgorm"
-	"xiujieadmin/internal/library/xgorm/handler"
-	"xiujieadmin/internal/library/xgorm/hook"
+	"xiuadmin/internal/dao"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/xgorm"
+	"xiuadmin/internal/library/xgorm/handler"
+	"xiuadmin/internal/library/xgorm/hook"
 	"@{.importInput}"
 	"@{.importService}"
-	"xiujieadmin/utility/convert"
-	"xiujieadmin/utility/excel"
-	"xiujieadmin/utility/validate"
-	@{ if eq .options.Step.IsAddon true }isc "xiujieadmin/internal/service"@{end}
-	@{ if eq .options.Step.IsTreeTable true }"xiujieadmin/utility/tree"@{end}
-	@{ if eq .options.Step.HasFuncDict true }"xiujieadmin/internal/library/dict"@{end}
-	@{ if eq .options.Step.HasFuncDict true }"xiujieadmin/internal/model"@{end}
+	"xiuadmin/utility/convert"
+	"xiuadmin/utility/excel"
+	"xiuadmin/utility/validate"
+	@{ if eq .options.Step.IsAddon true }isc "xiuadmin/internal/service"@{end}
+	@{ if eq .options.Step.IsTreeTable true }"xiuadmin/utility/tree"@{end}
+	@{ if eq .options.Step.HasFuncDict true }"xiuadmin/internal/library/dict"@{end}
+	@{ if eq .options.Step.HasFuncDict true }"xiuadmin/internal/model"@{end}
 )
 
 type s@{.servFunName} struct{}
@@ -128,7 +128,7 @@ func (s *s@{.servFunName}) Export(ctx context.Context, in *@{.templateGroup}in.@
 // Edit 修改/新增@{.tableComment}
 func (s *s@{.servFunName}) Edit(ctx context.Context, in *@{.templateGroup}in.@{.varName}EditParam) (err error) {
 @{.edit.unique}	return g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
-		@{ if eq .options.Step.IsTreeTable true }in.Pid, in.Level, in.Tree, err = hgorm.AutoUpdateTree(ctx, &dao.@{.daoName}, in.@{.pk.GoName}, in.Pid)
+		@{ if eq .options.Step.IsTreeTable true }in.Pid, in.Level, in.Tree, err = xgorm.AutoUpdateTree(ctx, &dao.@{.daoName}, in.@{.pk.GoName}, in.Pid)
 		if err != nil {
 			return err
 		}@{end}

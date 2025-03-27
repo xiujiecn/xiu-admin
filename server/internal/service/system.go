@@ -7,11 +7,11 @@ package service
 
 import (
 	"context"
-	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/library/xgorm/handler"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/entity"
-	"xiujieadmin/internal/model/request"
+	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/library/xgorm/handler"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/entity"
+	"xiuadmin/internal/model/request"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/net/ghttp"

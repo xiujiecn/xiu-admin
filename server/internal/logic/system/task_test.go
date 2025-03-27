@@ -1,3 +1,8 @@
+// package system_test
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package system_test
 
 import (
@@ -6,11 +11,11 @@ import (
 	"fmt"
 	"testing"
 	"time"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/dao"
-	"xiujieadmin/internal/library/worker"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/tasks"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/dao"
+	"xiuadmin/internal/library/worker"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/tasks"
 
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 	"github.com/gogf/gf/v2/frame/g"

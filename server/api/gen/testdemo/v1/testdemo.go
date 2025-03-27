@@ -1,14 +1,14 @@
 // Package testdemo
-// @Link  https://github.com/xiujie/xiujie-admin
-// @Copyright  Copyright (c) 2025 XiuJieZhiLian CLI
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
 // @Author  Lxj <li@xiujie.cn>
-// @License  https://github.com/xiujie/xiujie-admin/blob/master/LICENSE
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 // @AutoGenerate Version
 package v1 //testdemo
 
 import (
-	"xiujieadmin/internal/model/genin"
-	"xiujieadmin/internal/model/response"
+	"xiuadmin/internal/model/genin"
+	"xiuadmin/internal/model/response"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

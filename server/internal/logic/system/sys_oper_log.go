@@ -1,16 +1,21 @@
+// package system
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package system
 
 import (
 	"context"
 	"strings"
-	"xiujieadmin/internal/dao"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/library/mcache"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/entity"
-	"xiujieadmin/internal/model/request"
-	"xiujieadmin/internal/service"
-	"xiujieadmin/utility"
+	"xiuadmin/internal/dao"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/mcache"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/entity"
+	"xiuadmin/internal/model/request"
+	"xiuadmin/internal/service"
+	"xiuadmin/utility"
 
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gcode"

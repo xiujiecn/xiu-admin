@@ -5,7 +5,7 @@
 package gen_codes
 
 import (
-	"xiujieadmin/api/gen_codes"
+	"xiuadmin/api/gen_codes"
 )
 
 type ControllerV1 struct{}

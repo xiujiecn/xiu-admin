@@ -1,17 +1,22 @@
+// package system
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package system
 
 import (
 	"context"
 	"slices"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/dao"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/library/xgorm/handler"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/do"
-	"xiujieadmin/internal/model/entity"
-	"xiujieadmin/internal/service"
-	"xiujieadmin/utility"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/dao"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/xgorm/handler"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/do"
+	"xiuadmin/internal/model/entity"
+	"xiuadmin/internal/service"
+	"xiuadmin/utility"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"

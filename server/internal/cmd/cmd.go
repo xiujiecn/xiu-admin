@@ -1,3 +1,8 @@
+// Package cmd
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package cmd
 
 import (
@@ -6,8 +11,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcmd"
 
-	"xiujieadmin/internal/library/websocket"
-	"xiujieadmin/internal/router"
+	"xiuadmin/internal/library/websocket"
+	"xiuadmin/internal/router"
 )
 
 var (
@@ -22,6 +27,7 @@ var (
 				return err
 			}
 			s := g.Server()
+			s.SetDumpRouterMap(false)
 			router.InitRouter(ctx, s)
 			websocket.StartWebSocket(ctx)
 			s.Run()

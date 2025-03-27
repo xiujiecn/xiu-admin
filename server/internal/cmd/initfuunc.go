@@ -1,11 +1,16 @@
+// Package cmd
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package cmd
 
 import (
 	"context"
-	"xiujieadmin/internal/library/xgen"
-	"xiujieadmin/internal/queues"
-	"xiujieadmin/internal/service"
-	"xiujieadmin/internal/tasks"
+	"xiuadmin/internal/library/xgen"
+	"xiuadmin/internal/queues"
+	"xiuadmin/internal/service"
+	"xiuadmin/internal/tasks"
 
 	"github.com/gogf/gf/v2/util/gmode"
 )

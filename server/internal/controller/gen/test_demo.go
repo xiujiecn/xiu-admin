@@ -1,16 +1,16 @@
 // Package gen
-// @Link  https://github.com/xiujie/xiujie-admin
-// @Copyright  Copyright (c) 2025 XiuJieZhiLian CLI
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
 // @Author  Lxj <li@xiujie.cn>
-// @License  https://github.com/xiujie/xiujie-admin/blob/master/LICENSE
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 // @AutoGenerate Version
 package gen
 
 import (
 	"context"
-	v1 "xiujieadmin/api/gen/testdemo/v1"
-	"xiujieadmin/internal/model/genin"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/gen/testdemo/v1"
+	"xiuadmin/internal/model/genin"
+	"xiuadmin/internal/service"
 )
 
 var (

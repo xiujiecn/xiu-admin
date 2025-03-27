@@ -1,12 +1,17 @@
+// package queues
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package queues
 
 import (
 	"context"
 	"encoding/json"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/library/worker"
-	"xiujieadmin/internal/model/entity"
-	"xiujieadmin/internal/service"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/library/worker"
+	"xiuadmin/internal/model/entity"
+	"xiuadmin/internal/service"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

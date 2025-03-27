@@ -1,3 +1,8 @@
+// package genview
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package genview
 
 import (
@@ -5,14 +10,14 @@ import (
 	"runtime"
 	"slices"
 	"strings"
-	"xiujieadmin/internal/dao"
-	genconsts "xiujieadmin/internal/library/xgen/gen_consts"
-	genmodel "xiujieadmin/internal/library/xgen/gen_model"
-	"xiujieadmin/internal/library/xgorm"
-	"xiujieadmin/internal/service"
-	"xiujieadmin/utility"
-	"xiujieadmin/utility/tree"
-	version "xiujieadmin/utility/version"
+	"xiuadmin/internal/dao"
+	genconsts "xiuadmin/internal/library/xgen/gen_consts"
+	genmodel "xiuadmin/internal/library/xgen/gen_model"
+	"xiuadmin/internal/library/xgorm"
+	"xiuadmin/internal/service"
+	"xiuadmin/utility"
+	"xiuadmin/utility/tree"
+	version "xiuadmin/utility/version"
 
 	"github.com/gogf/gf/v2/container/gvar"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -456,9 +461,9 @@ func (l *gCurd) loadView(ctx context.Context, in *genmodel.CurdPreviewParam) (er
 	importApi := gstr.Replace(temp.ApiPath, "./", modName+"/") + "/" + strings.ToLower(in.In.VarName) + "/v1"
 	importInput := gstr.Replace(temp.InputPath, "./", modName+"/")
 	importController := gstr.Replace(temp.ControllerPath, "./", modName+"/")
-	importService := "xiujieadmin/internal/service"
+	importService := "xiuadmin/internal/service"
 	if temp.IsAddon {
-		importService = "xiujieadmin/addons/" + in.In.AddonName + "/service"
+		importService = "xiuadmin/addons/" + in.In.AddonName + "/service"
 	}
 
 	in.Options.ImportWebApi = "#/api/gen/" + gstr.LcFirst(in.In.VarName)

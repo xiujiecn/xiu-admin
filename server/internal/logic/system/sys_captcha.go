@@ -1,10 +1,15 @@
+// package system
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package system
 
 import (
 	"context"
 	"time"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/service"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/service"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"

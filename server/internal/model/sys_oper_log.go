@@ -1,7 +1,12 @@
+// package model
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package model
 
 import (
-	"xiujieadmin/internal/model/entity"
+	"xiuadmin/internal/model/entity"
 
 	"github.com/gogf/gf/v2/os/gtime"
 )

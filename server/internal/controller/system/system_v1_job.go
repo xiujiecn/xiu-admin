@@ -6,10 +6,10 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/response"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/response"
+	"xiuadmin/internal/service"
 )
 
 func (c *ControllerV1) SysJobList(ctx context.Context, req *v1.SysJobListReq) (res *v1.SysJobListRes, err error) {

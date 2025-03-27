@@ -1,9 +1,9 @@
 // Package genrouter
-// @Link  https://github.com/xiujie/xiujie-admin
-// @Copyright  Copyright (c) @{NowYear} XiuJieZhiLian CLI
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) @{NowYear} XiuAdmin CLI
 // @Author  Lxj <li@xiujie.cn>
-// @License  https://github.com/xiujie/xiujie-admin/blob/master/LICENSE
-// @AutoGenerate Version @{.hgVersion}
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
+// @AutoGenerate Version @{.xiuVersion}
 //
 package genrouter
 

@@ -3,9 +3,9 @@ package gen_codes
 import (
 	"context"
 
-	v1 "xiujieadmin/api/gen_codes/v1"
-	"xiujieadmin/internal/model/response"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/gen_codes/v1"
+	"xiuadmin/internal/model/response"
+	"xiuadmin/internal/service"
 )
 
 func (c *ControllerV1) SysGenTableList(ctx context.Context, req *v1.SysGenTableListReq) (res *v1.SysGenTableListRes, err error) {

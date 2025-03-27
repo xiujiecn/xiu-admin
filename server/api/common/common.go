@@ -7,7 +7,7 @@ package common
 import (
 	"context"
 
-	"xiujieadmin/api/common/v1"
+	"xiuadmin/api/common/v1"
 )
 
 type ICommonV1 interface {

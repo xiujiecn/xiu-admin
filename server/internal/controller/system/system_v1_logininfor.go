@@ -3,9 +3,9 @@ package system
 import (
 	"context"
 
-	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/model/response"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/model/response"
+	"xiuadmin/internal/service"
 )
 
 func (c *ControllerV1) ListLogininfor(ctx context.Context, req *v1.ListLogininforReq) (res *v1.ListLogininforRes, err error) {

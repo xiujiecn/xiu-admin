@@ -1,10 +1,15 @@
+// Package contexts
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package contexts
 
 import (
 	"context"
 	"slices"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/model"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/model"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 )

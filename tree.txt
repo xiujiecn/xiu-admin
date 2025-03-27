@@ -1,0 +1,87 @@
+.
+├── LICENSE
+├── README.md
+├── docs
+├── server
+│   ├── Makefile
+│   ├── README.MD
+│   ├── api
+│   │   ├── common
+│   │   │   └── v1
+│   │   ├── gen
+│   │   │   └── testdemo
+│   │   ├── gen_codes
+│   │   │   └── v1
+│   │   ├── monitor
+│   │   │   └── v1
+│   │   └── system
+│   │       └── v1
+│   ├── config
+│   │   ├── config.yaml
+│   │   └── config_default.yaml
+│   ├── go.mod
+│   ├── go.sum
+│   ├── hack
+│   │   ├── config.yaml
+│   │   ├── hack-cli.mk
+│   │   └── hack.mk
+│   ├── internal
+│   │   ├── cmd
+│   │   ├── consts
+│   │   ├── controller
+│   │   ├── dao
+│   │   ├── library
+│   │   │   ├── addons
+│   │   │   ├── bcache
+│   │   │   ├── cache
+│   │   │   ├── contexts
+│   │   │   ├── event
+│   │   │   ├── mcache
+│   │   │   ├── websocket
+│   │   │   ├── worker
+│   │   │   ├── xgen
+│   │   │   └── xgorm
+│   │   ├── logic
+│   │   │   ├── gen
+│   │   │   ├── middleware
+│   │   │   ├── monitor
+│   │   │   └── system
+│   │   ├── model
+│   │   ├── packed
+│   │   │   ├── packed.go
+│   │   │   └── response
+│   │   ├── queues
+│   │   ├── router
+│   │   ├── service
+│   │   └── tasks
+│   ├── main.go
+│   ├── manifest
+│   ├── resource
+│   └── utility
+└── vue
+    ├── README.md
+    ├── README.zh-CN.md
+    ├── apps
+    │   └── web-antd
+    │       ├── node_modules
+    │       ├── package.json
+    │       ├── postcss.config.mjs
+    │       ├── public
+    │       ├── src
+    │       │    ├── adapter
+    │       │    ├── api
+    │       │    ├── app.vue
+    │       │    ├── bootstrap.ts
+    │       │    ├── components
+    │       │    ├── layouts
+    │       │    ├── locales
+    │       │    ├── main.ts
+    │       │    ├── preferences.ts
+    │       │    ├── router
+    │       │    ├── store
+    │       │    ├── utils
+    │       │    └── views
+
+ 
+
+551 directories, 505 files

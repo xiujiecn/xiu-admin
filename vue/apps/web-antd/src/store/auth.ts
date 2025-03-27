@@ -13,6 +13,15 @@ import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
 import { $t } from '#/locales';
 import {md5} from 'js-md5';
 
+/**
+ * @description 认证相关状态管理
+ * @Link  https://github.com/xiujiecn/xiu-admin
+ * @Copyright  Copyright (c) 2025 XiuAdmin CLI
+ * @Author  Lxj <li@xiujie.cn>
+ * @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
+ * @date 2024-03-21
+ */
+
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
   const userStore = useUserStore();

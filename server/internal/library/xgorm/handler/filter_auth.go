@@ -1,12 +1,17 @@
+// package handler
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package handler
 
 import (
 	"context"
 	"fmt"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/model/entity"
-	"xiujieadmin/utility/convert"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/model/entity"
+	"xiuadmin/utility/convert"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"

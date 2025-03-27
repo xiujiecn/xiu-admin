@@ -7,8 +7,8 @@ package service
 
 import (
 	"context"
-	"xiujieadmin/internal/library/xgorm/handler"
-	"xiujieadmin/internal/model"
+	"xiuadmin/internal/library/xgorm/handler"
+	"xiuadmin/internal/model"
 
 	"github.com/gogf/gf/v2/database/gdb"
 )

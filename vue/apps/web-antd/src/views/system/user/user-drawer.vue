@@ -1,3 +1,11 @@
+<!--
+ * @description 用户编辑抽屉组件
+ * @Link  https://github.com/xiujiecn/xiu-admin
+ * @Copyright  Copyright (c) 2025 XiuAdmin CLI
+ * @Author  Lxj <li@xiujie.cn>
+ * @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
+ * @date 2024-03-21
+-->
 <script setup lang="ts">
 import type { SysRoleMini } from '#/api/system/role';
 import type {  SysUserViewModel,  } from '#/api/system/user';

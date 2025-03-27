@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"xiujieadmin/internal/dao/internal"
+	"xiuadmin/internal/dao/internal"
 )
 
 // testDemoDao is the data access object for the table test_demo.

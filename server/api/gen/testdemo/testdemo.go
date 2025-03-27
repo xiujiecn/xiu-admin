@@ -7,7 +7,7 @@ package testdemo
 import (
 	"context"
 
-	"xiujieadmin/api/gen/testdemo/v1"
+	"xiuadmin/api/gen/testdemo/v1"
 )
 
 type ITestdemoV1 interface {

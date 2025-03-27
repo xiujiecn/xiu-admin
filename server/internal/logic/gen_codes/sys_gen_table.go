@@ -1,15 +1,20 @@
+// package gen_codes
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package gen_codes
 
 import (
 	"context"
-	"xiujieadmin/internal/dao"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/library/xgen"
-	genconsts "xiujieadmin/internal/library/xgen/gen_consts"
-	"xiujieadmin/internal/library/xgorm/handler"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/do"
-	"xiujieadmin/internal/service"
+	"xiuadmin/internal/dao"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/xgen"
+	genconsts "xiuadmin/internal/library/xgen/gen_consts"
+	"xiuadmin/internal/library/xgorm/handler"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/do"
+	"xiuadmin/internal/service"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/encoding/gjson"

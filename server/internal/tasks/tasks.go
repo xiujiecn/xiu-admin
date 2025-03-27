@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
-	"xiujieadmin/internal/library/worker"
+	"xiuadmin/internal/library/worker"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"

@@ -1,8 +1,13 @@
+// package gendao
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package gendao
 
 import (
 	"context"
-	genmodel "xiujieadmin/internal/library/xgen/gen_model"
+	genmodel "xiuadmin/internal/library/xgen/gen_model"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcfg"

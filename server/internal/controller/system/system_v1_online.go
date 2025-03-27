@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/model/response"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/model/response"
+	"xiuadmin/internal/service"
 )
 
 func (c *ControllerV1) SysUserOnlineList(ctx context.Context, req *v1.SysUserOnlineListReq) (res *v1.SysUserOnlineListRes, err error) {

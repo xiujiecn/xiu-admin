@@ -3,10 +3,10 @@ package system
 import (
 	"context"
 
-	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/response"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/response"
+	"xiuadmin/internal/service"
 )
 
 func (c *ControllerV1) SysDictTypeList(ctx context.Context, req *v1.SysDictTypeListReq) (res *v1.SysDictTypeListRes, err error) {

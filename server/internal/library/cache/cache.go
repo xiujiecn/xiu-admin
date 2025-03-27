@@ -1,8 +1,13 @@
+// Package cache
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package cache
 
 import (
 	"context"
-	"xiujieadmin/internal/library/cache/file"
+	"xiuadmin/internal/library/cache/file"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcache"

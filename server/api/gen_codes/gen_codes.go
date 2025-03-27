@@ -7,7 +7,7 @@ package gen_codes
 import (
 	"context"
 
-	"xiujieadmin/api/gen_codes/v1"
+	"xiuadmin/api/gen_codes/v1"
 )
 
 type IGenCodesV1 interface {

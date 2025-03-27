@@ -1,12 +1,17 @@
+// package system
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package system
 
 import (
 	"context"
-	"xiujieadmin/internal/dao"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/request"
-	"xiujieadmin/internal/service"
+	"xiuadmin/internal/dao"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/request"
+	"xiuadmin/internal/service"
 )
 
 type sSysSocial struct {

@@ -3,7 +3,7 @@ package tasks
 import (
 	"context"
 	"time"
-	"xiujieadmin/internal/service"
+	"xiuadmin/internal/service"
 
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/util/gconv"

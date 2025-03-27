@@ -1,4 +1,4 @@
-module xiujieadmin
+module xiuadmin
 
 go 1.23.0
 
