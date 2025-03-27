@@ -1,3 +1,8 @@
+// package version
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package version
 
 import (
@@ -19,14 +24,14 @@ func ShowLogo(buildVersion, buildTime, commitID string) {
 	CommitID = commitID
 	//版本号
 
-	fmt.Println("   _  __     __     ___        __            _      \n  | |/ /    / /    /   |  ____/ /____ ___   (_)____ \n  |   /__  / /    / /| | / __  // __ `__ \\ / // __ \\\n /   |/ /_/ /    / ___ |/ /_/ // / / / / // // / / /\n/_/|_|\\____/    /_/  |_|\\__,_//_/ /_/ /_//_//_/ /_/ ")
+	fmt.Println(" __  __ _             _        _             _        \n \\ \\/ /(_) _   _     / \\    __| | _ __ ___  (_) _ __  \n  \\  / | || | | |   / _ \\  / _` || '_ ` _ \\ | || '_ \\ \n  /  \\ | || |_| |  / ___ \\| (_| || | | | | || || | | |\n /_/\\_\\|_| \\__,_| /_/   \\_\\\\__,_||_| |_| |_||_||_| |_|")
 	fmt.Println("")
 
 	fmt.Println("Version   ：", buildVersion)
 	fmt.Println("BuildTime ：", buildTime)
 	fmt.Println("CommitID  ：", commitID)
 	fmt.Println("")
-	fmt.Println("Copyright:", "XiuJieZhiLian Technology Co.,Ltd")
+	fmt.Println("Copyright:", "XiuAdmin Technology Co.,Ltd")
 }
 
 func AppName(ctx context.Context) string {

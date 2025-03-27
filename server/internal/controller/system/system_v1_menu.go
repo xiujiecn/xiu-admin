@@ -3,8 +3,8 @@ package system
 import (
 	"context"
 
-	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/service"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"

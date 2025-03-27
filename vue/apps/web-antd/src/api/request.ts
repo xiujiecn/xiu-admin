@@ -1,6 +1,12 @@
 /**
- * 该文件可自行根据业务逻辑进行调整
+ * @description 请求客户端配置
+ * @Link  https://github.com/xiujiecn/xiu-admin
+ * @Copyright  Copyright (c) 2025 XiuAdmin CLI
+ * @Author  Lxj <li@xiujie.cn>
+ * @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
+ * @date 2024-03-21
  */
+
 import type { RequestClientOptions, HttpResponse } from '@vben/request';
 
 import { useAppConfig } from '@vben/hooks';

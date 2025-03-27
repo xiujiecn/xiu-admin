@@ -7,7 +7,7 @@ package service
 
 import (
 	"context"
-	"xiujieadmin/internal/model"
+	"xiuadmin/internal/model"
 )
 
 type (

@@ -1,8 +1,13 @@
+// package handler
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package handler
 
 import (
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/utility/convert"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/utility/convert"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/text/gstr"

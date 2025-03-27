@@ -1,3 +1,8 @@
+// package xgen
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package xgen
 
 import (
@@ -5,14 +10,14 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"xiujieadmin/internal/library/addons"
-	genconsts "xiujieadmin/internal/library/xgen/gen_consts"
-	gendao "xiujieadmin/internal/library/xgen/gen_dao"
-	genmodel "xiujieadmin/internal/library/xgen/gen_model"
-	genview "xiujieadmin/internal/library/xgen/gen_view"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/request"
-	"xiujieadmin/internal/service"
+	"xiuadmin/internal/library/addons"
+	genconsts "xiuadmin/internal/library/xgen/gen_consts"
+	gendao "xiuadmin/internal/library/xgen/gen_dao"
+	genmodel "xiuadmin/internal/library/xgen/gen_model"
+	genview "xiuadmin/internal/library/xgen/gen_view"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/request"
+	"xiuadmin/internal/service"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"

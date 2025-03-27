@@ -5,7 +5,7 @@
 package common
 
 import (
-	"xiujieadmin/api/common"
+	"xiuadmin/api/common"
 )
 
 type ControllerV1 struct{}

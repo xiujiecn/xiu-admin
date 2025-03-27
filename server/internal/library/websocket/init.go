@@ -1,9 +1,14 @@
+// Package websocket
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package websocket
 
 import (
 	"context"
 	"net/http"
-	"xiujieadmin/internal/library/contexts"
+	"xiuadmin/internal/library/contexts"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"

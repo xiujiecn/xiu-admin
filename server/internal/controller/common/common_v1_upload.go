@@ -3,8 +3,8 @@ package common
 import (
 	"context"
 
-	v1 "xiujieadmin/api/common/v1"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/common/v1"
+	"xiuadmin/internal/service"
 )
 
 func (c *ControllerV1) SysOssUpload(ctx context.Context, req *v1.SysOssUploadReq) (res *v1.SysOssUploadRes, err error) {

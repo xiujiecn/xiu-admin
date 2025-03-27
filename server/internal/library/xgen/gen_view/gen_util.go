@@ -1,3 +1,8 @@
+// package genview
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package genview
 
 import (
@@ -8,10 +13,10 @@ import (
 	"strings"
 	"unicode"
 
-	genmodel "xiujieadmin/internal/library/xgen/gen_model"
-	"xiujieadmin/internal/library/xgen/gen_view/gohtml"
-	"xiujieadmin/utility"
-	version "xiujieadmin/utility/version"
+	genmodel "xiuadmin/internal/library/xgen/gen_model"
+	"xiuadmin/internal/library/xgen/gen_view/gohtml"
+	"xiuadmin/utility"
+	version "xiuadmin/utility/version"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"

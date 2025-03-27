@@ -7,7 +7,7 @@ package monitor
 import (
 	"context"
 
-	"xiujieadmin/api/monitor/v1"
+	"xiuadmin/api/monitor/v1"
 )
 
 type IMonitorV1 interface {

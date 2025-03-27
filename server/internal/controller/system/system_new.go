@@ -5,7 +5,7 @@
 package system
 
 import (
-	"xiujieadmin/api/system"
+	"xiuadmin/api/system"
 )
 
 type ControllerV1 struct{}

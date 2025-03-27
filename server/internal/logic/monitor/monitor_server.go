@@ -1,3 +1,8 @@
+// package monitor
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package monitor
 
 import (
@@ -7,9 +12,9 @@ import (
 	"runtime"
 	"strconv"
 	"time"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/service"
-	"xiujieadmin/utility"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/service"
+	"xiuadmin/utility"
 
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"

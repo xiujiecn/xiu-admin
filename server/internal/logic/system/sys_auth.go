@@ -1,3 +1,8 @@
+// package system
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package system
 
 import (
@@ -6,14 +11,14 @@ import (
 	"slices"
 	"strings"
 	"time"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/library/bcache"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/library/event"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/request"
-	"xiujieadmin/internal/service"
-	"xiujieadmin/utility"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/library/bcache"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/event"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/request"
+	"xiuadmin/internal/service"
+	"xiuadmin/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"

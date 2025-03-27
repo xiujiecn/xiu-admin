@@ -1,8 +1,13 @@
+// package hook
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package hook
 
 import (
 	"context"
-	"xiujieadmin/utility"
+	"xiuadmin/utility"
 
 	"github.com/gogf/gf/v2/container/gvar"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -84,8 +89,8 @@ var MemberSummary = gdb.HookHandler{
 			if record["deleted_by"].Int64() > 0 {
 				record["deletedBySumma"] = gvar.New(findMember(record["deleted_by"]))
 			}
-			if record["member_id"].Int64() > 0 {
-				record["memberBySumma"] = gvar.New(findMember(record["member_id"]))
+			if record["user_id"].Int64() > 0 {
+				record["memberBySumma"] = gvar.New(findMember(record["user_id"]))
 			}
 		}
 		return

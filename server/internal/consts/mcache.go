@@ -1,3 +1,8 @@
+// Package consts
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package consts
 
 // 内存缓存KEY常量 注明 key组成和 过期时间 清理方式

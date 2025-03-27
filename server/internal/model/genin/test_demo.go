@@ -1,16 +1,16 @@
 // Package genin
-// @Link  https://github.com/xiujie/xiujie-admin
-// @Copyright  Copyright (c) 2025 XiuJieZhiLian CLI
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
 // @Author  Lxj <li@xiujie.cn>
-// @License  https://github.com/xiujie/xiujie-admin/blob/master/LICENSE
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 // @AutoGenerate Version
 package genin
 
 import (
 	"context"
-	"xiujieadmin/internal/library/xgorm/hook"
-	"xiujieadmin/internal/model/entity"
-	"xiujieadmin/internal/model/request"
+	"xiuadmin/internal/library/xgorm/hook"
+	"xiuadmin/internal/model/entity"
+	"xiuadmin/internal/model/request"
 
 	"github.com/gogf/gf/v2/os/gtime"
 )

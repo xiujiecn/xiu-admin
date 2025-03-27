@@ -1,10 +1,15 @@
+// package xgorm
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package xgorm
 
 import (
 	"context"
 	"slices"
-	gormmodel "xiujieadmin/internal/library/xgorm/gorm_model"
-	"xiujieadmin/utility/tree"
+	gormmodel "xiuadmin/internal/library/xgorm/gorm_model"
+	"xiuadmin/utility/tree"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"

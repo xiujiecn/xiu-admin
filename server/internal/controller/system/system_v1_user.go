@@ -7,13 +7,13 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	v1 "xiujieadmin/api/system/v1"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/model/request"
-	"xiujieadmin/internal/model/response"
-	"xiujieadmin/internal/service"
+	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/model/request"
+	"xiuadmin/internal/model/response"
+	"xiuadmin/internal/service"
 )
 
 func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *v1.UserInfoRes, err error) {

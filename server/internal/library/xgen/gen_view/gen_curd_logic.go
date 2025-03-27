@@ -1,3 +1,8 @@
+// package genview
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package genview
 
 import (
@@ -5,8 +10,8 @@ import (
 	"context"
 	"fmt"
 
-	genconsts "xiujieadmin/internal/library/xgen/gen_consts"
-	genmodel "xiujieadmin/internal/library/xgen/gen_model"
+	genconsts "xiuadmin/internal/library/xgen/gen_consts"
+	genmodel "xiuadmin/internal/library/xgen/gen_model"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"

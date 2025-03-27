@@ -1,7 +1,12 @@
+// package genmodel
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package genmodel
 
 import (
-	genconsts "xiujieadmin/internal/library/xgen/gen_consts"
+	genconsts "xiuadmin/internal/library/xgen/gen_consts"
 
 	"github.com/gogf/gf/v2/util/gconv"
 )

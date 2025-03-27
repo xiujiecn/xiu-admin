@@ -1,3 +1,11 @@
+/**
+ * @description 定时任务模型定义
+ * @Link  https://github.com/xiujiecn/xiu-admin
+ * @Copyright  Copyright (c) 2025 XiuAdmin CLI
+ * @Author  Lxj <li@xiujie.cn>
+ * @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
+ * @date 2024-03-21
+ */
 import type {
     VbenFormSchema,
   } from '@vben/common-ui';

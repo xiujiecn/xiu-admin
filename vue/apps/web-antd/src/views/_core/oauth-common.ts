@@ -1,3 +1,12 @@
+/**
+ * @description OAuth授权相关公共方法
+ * @Link  https://github.com/xiujiecn/xiu-admin
+ * @Copyright  Copyright (c) 2025 XiuAdmin CLI
+ * @Author  Lxj <li@xiujie.cn>
+ * @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
+ * @date 2024-03-21
+ */
+
 import type { Component } from 'vue';
 
 import {

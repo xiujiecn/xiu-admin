@@ -1,3 +1,8 @@
+// package middleware
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package middleware
 
 import (
@@ -13,14 +18,14 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gmeta"
 
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/library/bcache"
-	"xiujieadmin/internal/library/contexts"
-	"xiujieadmin/internal/library/mcache"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/packed/response"
-	"xiujieadmin/internal/queues"
-	"xiujieadmin/internal/service"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/library/bcache"
+	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/mcache"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/packed/response"
+	"xiuadmin/internal/queues"
+	"xiuadmin/internal/service"
 )
 
 type sMiddleware struct {

@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"xiujieadmin/internal/dao/internal"
+	"xiuadmin/internal/dao/internal"
 )
 
 // internalSysDictDataDao is an internal type for wrapping the internal DAO implementation.

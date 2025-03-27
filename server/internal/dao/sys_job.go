@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"xiujieadmin/internal/dao/internal"
+	"xiuadmin/internal/dao/internal"
 )
 
 // sysJobDao is the data access object for the table sys_job.

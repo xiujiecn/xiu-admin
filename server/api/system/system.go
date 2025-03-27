@@ -7,7 +7,7 @@ package system
 import (
 	"context"
 
-	"xiujieadmin/api/system/v1"
+	"xiuadmin/api/system/v1"
 )
 
 type ISystemV1 interface {

@@ -1,12 +1,17 @@
+// package system_test
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package system_test
 
 import (
 	"context"
 	"fmt"
 	"testing"
-	"xiujieadmin/internal/consts"
-	"xiujieadmin/internal/model"
-	"xiujieadmin/internal/service"
+	"xiuadmin/internal/consts"
+	"xiuadmin/internal/model"
+	"xiuadmin/internal/service"
 
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 	"github.com/gogf/gf/v2/frame/g"

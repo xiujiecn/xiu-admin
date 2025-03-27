@@ -1,8 +1,13 @@
+// package model
+// @Link  https://github.com/xiujiecn/xiu-admin
+// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Author  Lxj <li@xiujie.cn>
+// @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package model
 
 import (
-	genmodel "xiujieadmin/internal/library/xgen/gen_model"
-	"xiujieadmin/internal/model/request"
+	genmodel "xiuadmin/internal/library/xgen/gen_model"
+	"xiuadmin/internal/model/request"
 
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"

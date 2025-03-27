@@ -1,3 +1,11 @@
+<!--
+ * @description 个人中心-账号绑定组件
+ * @Link  https://github.com/xiujiecn/xiu-admin
+ * @Copyright  Copyright (c) 2025 XiuAdmin CLI
+ * @Author  Lxj <li@xiujie.cn>
+ * @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
+ * @date 2024-03-21
+-->
 <script setup lang="tsx">
 import type { VxeGridProps } from '@vben/plugins/vxe-table';
 
