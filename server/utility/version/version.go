@@ -1,6 +1,6 @@
 // package version
 // @Link  https://github.com/xiujiecn/xiu-admin
-// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Copyright  Copyright (c) 2025 LiXiujie
 // @Author  Lxj <li@xiujie.cn>
 // @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package version
@@ -31,9 +31,9 @@ func ShowLogo(buildVersion, buildTime, commitID string) {
 	fmt.Println("BuildTime ：", buildTime)
 	fmt.Println("CommitID  ：", commitID)
 	fmt.Println("")
-	fmt.Println("Copyright:", "XiuAdmin Technology Co.,Ltd")
+	fmt.Println("Copyright:", "XiuJieZhiLian Technology Co.,Ltd")
 }
 
 func AppName(ctx context.Context) string {
-	return g.Cfg().MustGet(ctx, "system.appName", "XJAdmin").String()
+	return g.Cfg().MustGet(ctx, "system.appName", "XiuAdmin").String()
 }

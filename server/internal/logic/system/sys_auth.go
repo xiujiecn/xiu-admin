@@ -1,6 +1,6 @@
 // package system
 // @Link  https://github.com/xiujiecn/xiu-admin
-// @Copyright  Copyright (c) 2025 XiuAdmin CLI
+// @Copyright  Copyright (c) 2025 LiXiujie
 // @Author  Lxj <li@xiujie.cn>
 // @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 package system
@@ -130,7 +130,7 @@ func (s *sSysAuth) Login(ctx context.Context, param *model.LoginParams) (res *mo
 func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) (claims *model.CustomClaims, token string, err error) {
 	ets := g.Cfg().MustGet(ctx, "jwt.expiresTime", "7d").String()
 	bts := g.Cfg().MustGet(ctx, "jwt.bufferTime", "1d").String()
-	iss := g.Cfg().MustGet(ctx, "jwt.issuer", "XiujieAdmin").String()
+	iss := g.Cfg().MustGet(ctx, "jwt.issuer", "XiuAdmin").String()
 	sk := g.Cfg().MustGet(ctx, "jwt.signingKey", "39c54195e73304e74a8429b178965865").String()
 	et, _ := utility.ParseDuration(ets)
 	bt, _ := utility.ParseDuration(bts)
@@ -170,7 +170,7 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 		},
 		BufferTime: int64(bt / time.Second),
 		RegisteredClaims: jwt.RegisteredClaims{
-			Audience:  jwt.ClaimStrings{"XiujieAdmin"},           // 受众
+			Audience:  jwt.ClaimStrings{"XiuAdmin"},              // 受众
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(et)),    // 过期时间 7天  配置文件
 			NotBefore: jwt.NewNumericDate(time.Now().Add(-1000)), // 签名生效时间
 			Issuer:    iss,                                       // 发行人
