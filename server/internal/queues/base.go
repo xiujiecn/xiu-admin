@@ -7,6 +7,7 @@ package queues
 
 import (
 	"context"
+	"errors"
 	"xiuadmin/internal/library/worker"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -33,4 +34,15 @@ func Run(ctx context.Context) {
 		queues[name] = worker.RegisterQueueProcess(*process)
 		g.Log().Infof(ctx, "queues[%s] register success", name)
 	}
+}
+
+func Push(ctx context.Context, topic string, data []byte, timeout int) (err error) {
+	queue := GetQueue(topic)
+	if queue != nil {
+		err = queue.Push(context.Background(), topic, data, timeout)
+	} else {
+		g.Log().Errorf(ctx, "server/internal/queues/base.go Push queue[%s] not found", topic)
+		return errors.New("queue not found")
+	}
+	return
 }

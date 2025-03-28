@@ -1,14 +1,11 @@
-## 生产部署
+---
+outline: deep
+---
 
-目录
+# 生产部署
 
-- 编译配置
-- 编译
-- 修改生产配置文件
-- 启动服务
-- Nginx配置
 
-### 编译配置
+## 编译配置
 
 - 配置文件：server/hack/config.yaml，以下是默认配置
 ```yaml
@@ -27,7 +24,7 @@ gfcli:
 ```
 
 
-### 编译
+## 编译
 
 - 以下方式任选其一即可
 
@@ -65,17 +62,17 @@ pnpm run build 或 npm run build
 ```
 
 
-### 修改生产配置文件
+## 修改生产配置文件
 - 配置文件：server/manifest/config/config.yaml
 > 如关闭debug、mode设为生产环境、修改数据库地址、缓存驱动、队列驱动、日志路径等
 
 
 
-### 启动服务
+## 启动服务
 > 这里可以接使用gf官方推荐的启动方式，请参考：https://goframe.org/pages/viewpage.action?pageId=1114403
 
 
-### Nginx配置
+## Nginx配置
 ```
       # websocket
       location ^~ /socket  {

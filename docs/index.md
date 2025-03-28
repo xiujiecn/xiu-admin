@@ -39,7 +39,7 @@ features:
     title: 路由模式
     details: 得益于 GoFrame 提供了规范化的路由注册方式，无需注解自动生成api文档。
   - icon: 📦
-    title: 模块化设计
+    title: 架构清晰
     details: 面向接口开发，模块化设计，可插拔式开发，可轻松将插件迁移到新项目中。
 ---
 

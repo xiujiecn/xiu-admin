@@ -1,6 +1,9 @@
-# 平台简介
+---
+title: 平台简介
+layout: doc
+---
 
-## 平台简介
+# 平台简介
 
 XiuAdmin基于全新GoFrame2+Vue3+VueVbenAdmin开发的全栖框架，适合大型中后台完整应用开发。
 

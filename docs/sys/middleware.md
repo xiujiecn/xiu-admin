@@ -1,18 +1,14 @@
-## 中间件/拦截器
+---
+outline: deep
+---
 
-目录
+# 中间件/拦截器
 
-- 介绍
-- 全局中间件
-- 鉴权中间件
-- 响应中间件
-- 更多
-
-### 介绍
+## 介绍
 - 在xiuadmin中，中间件/拦截器主要作用于web请求的上下文预设、跨域请求处理、鉴权处理、请求拦截和请求结束后统一响应处理等。
 
 
-### 全局中间件
+## 全局中间件
 ```go
 package main
 
@@ -37,7 +33,7 @@ func main()  {
 }
 
 ```
-### 鉴权中间件
+## 鉴权中间件
 ```go
 package main
 
@@ -56,7 +52,7 @@ func main()  {
 	// 一个简单例子
 	s := g.Server()
 	s.Group("/api", func(group *ghttp.RouterGroup) {
-		group.Middleware(service.Middleware().Ctx) // 必须解析用户AccessToken
+		group.Middleware(service.Middleware().Ctx) // 必须的,解析用户AccessToken,保存用户ID、角色信息到上下文中
 		group.Middleware(service.Middleware().Auth)
 		group.Bind(
 			member.Member, // 管理员
@@ -67,11 +63,11 @@ func main()  {
 
 ```
 
-### 响应中间件
-- 文件路径：server/internal/logic/middleware/response.go
+## 响应中间件
+- 文件路径：server/internal/logic/middleware/middleware.go
 
 
-#### 常用响应类型
+### 常用响应类型
 
 - xiuadmin为一些常用的响应类型做了统一格式封装，例如：`application/json`、`text/xml`、`text/html`、`text/event-stream`等，默认使用`application/json`。
 - 下面我们以`text/xml`为例简单演示几种使用方法：
@@ -113,7 +109,7 @@ func (c *cHello) Hello(ctx context.Context, req *user.HelloReq) (res *user.Hello
 ![./images/sys-middleware-com-response.png](./images/sys-middleware-com-response.png)
 
 
-#### 自定义响应
+### 自定义响应
 - 在实际开发中，可能需要使用自定义的响应类型，由于响应中间件是全局的，因此您需要对其进行单独处理。
 - 推荐以下几种处理方案，可做参考：
 1. 使用`ghttp.ExitAll()`，需要注意的是此方法会终止后续所有的http处理
@@ -142,7 +138,7 @@ func main()  {
 2. 在`server/internal/logic/middleware/response.go`中根据请求的独有特征进行单独的处理，兼容后续http处理。
 
 
-#### 重写响应错误提示
+### 重写响应错误提示
 
 - 在实际开发中，我们可能想要隐藏一些敏感错误，返回给客户端友好的错误提示，但开发者同时又想需要看到真实的敏感错误。对此xiuadmin已经进行了过滤处理，下面是一个简单的例子：
 
@@ -209,7 +205,7 @@ Stack:
 ![./images/sys-middleware-error-log.png](./images/sys-middleware-error-log.png)
 
 
-#### 重写错误码
+### 重写错误码
 - xiuadmin默认使用了gf内置的错误码进行业务处理，通常情况下成功状态码为`0`，失败状态码为`-1`
 - 查看gf内置错误码：https://goframe.org/pages/viewpage.action?pageId=30739587
 - 以下是自定义错误码的简单例子：
@@ -239,6 +235,6 @@ func test() error {
 }
 ```
 
-### 更多
+## 更多
 - 更多关于中间件/拦截器的介绍请参考：https://goframe.org/pages/viewpage.action?pageId=55289881
 

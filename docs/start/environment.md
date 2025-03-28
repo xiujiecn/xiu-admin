@@ -1,12 +1,11 @@
-## 环境搭建
+---
+outline: deep
+---
 
-目录
+# 环境搭建
 
-- 前端环境
-- 后端环境
-- 使用说明
 
-### 前端环境
+## 前端环境
 
 1. 前往https://nodejs.org/zh-cn/下载当前版本node
 2. 命令行运行 `node -v` 若控制台输出版本号则node安装成功
@@ -14,7 +13,7 @@
 4. 安装pnpm：`npm install -g pnpm`
 5. 命令行运行 `pnpm -v` 若控制台输出版本号则前端环境搭建成功
 
-### 后端环境
+## 后端环境
 1. 下载golang安装 版本号需>=1.23
 2. 国际: https://golang.org/dl/
 3. 国内: https://golang.google.cn/dl/
@@ -22,7 +21,7 @@
 5. 开发工具推荐 [Goland](https://www.jetbrains.com/go/)
 
 
-### 使用说明
+## 使用说明
 
 > 需要本地具有 git node golang 环境
 
