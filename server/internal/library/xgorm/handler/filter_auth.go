@@ -66,16 +66,16 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 		}
 	}
 	deptFilterField := ""
-	if gstr.InArray(fields, "created_dept") {
-		deptFilterField = "created_dept"
-	} else if gstr.InArray(fields, "dept_id") {
+	if gstr.InArray(fields, "dept_id") {
 		deptFilterField = "dept_id"
+	} else if gstr.InArray(fields, "created_dept") {
+		deptFilterField = "created_dept"
 	}
 	userFilterField := ""
-	if gstr.InArray(fields, "created_by") {
-		userFilterField = "created_by"
-	} else if gstr.InArray(fields, "user_id") {
+	if gstr.InArray(fields, "user_id") {
 		userFilterField = "user_id"
+	} else if gstr.InArray(fields, "created_by") {
+		userFilterField = "created_by"
 	}
 
 	if len(deptIds) > 0 && len(userIds) > 0 {
