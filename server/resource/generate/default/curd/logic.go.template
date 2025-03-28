@@ -1,6 +1,6 @@
 // Package @{.templateGroup}
 // @Link  https://github.com/xiujiecn/xiu-admin
-// @Copyright  Copyright (c) @{NowYear} XiuAdmin CLI
+// @Copyright  Copyright (c) @{NowYear} LiXiujie
 // @Author  Lxj <li@xiujie.cn>
 // @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
 // @AutoGenerate Version @{.xiuVersion}
