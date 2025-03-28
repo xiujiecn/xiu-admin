@@ -28,7 +28,7 @@ features:
     details: 基于 GoFrame2、Vue3、VueVbenAdmin、TypeScript、Vite、Pinia、VueUse等最新技术栈。
   - icon: 🦄
     title: 高生产率
-    details: 极强的可扩展性，应用化、模块化、插件化机制敏捷开发，几分钟即可搭建一个应用开发骨架。
+    details: 极强的可扩展性，应用化、模块化、插件化机制敏捷开发，几分钟即可搭建一个应用开发框架。
   - icon: 💡
     title: 快速生成代码
     details: 无需编写代码，只需创建表进行简单配置就能生成一个完善的 CURD、树表等常用的开发代码，其中所需表单控件也是勾选即可直接生成。

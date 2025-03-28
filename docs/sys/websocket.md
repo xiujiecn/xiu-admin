@@ -41,7 +41,6 @@ func InitMonitor() {
 
 #### 2.广播给订阅指定`标签`消息
 - 以下是功能案例中的一个简单演示，实现了消息处理接口，并将收到的消息原样发送给客户端
-- 文件路径：server/addons/hgexample/controller/websocket/handler/index.go
 ```go
 	websocket.SendToTag(consts.WSTagMonitorServer, &websocket.WResponse{
 		Event: fmt.Sprintf(consts.WSEventMonitorServer, consts.MonitorServerHost),
