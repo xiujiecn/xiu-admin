@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: 文档
-      link: /markdown-examples
+      link: /guide/index
     - theme: alt
       text: 在线演示
       link: https://demo.xiuadmin.com

@@ -63,7 +63,7 @@ const { hasAccessByCodes } = useAccess();
 
 ### 菜单表主要字段解释
 
-- 代码片段：[server/internal/model/entity/sys_menu.go](../../server/internal/model/entity/sys_menu.go)
+- 代码片段：`../../server/internal/model/entity/sys_menu.go`
 
 ```go
 type SysMenu struct {
