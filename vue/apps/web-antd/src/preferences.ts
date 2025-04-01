@@ -20,7 +20,7 @@ export const overridesPreferences = defineOverridesPreferences({
   },
   copyright: {
     enable: true,
-    companyName: "济南秀杰智联科技有限公司",
+    companyName: "李秀杰",
     companySiteLink: "https://www.xiujiezhilian.cn",
     date: "2024-2025",
     icp: "鲁ICP备2024117944号-1",

@@ -104,11 +104,6 @@ func (c *cHello) Hello(ctx context.Context, req *user.HelloReq) (res *user.Hello
 }
 ```
 
-- 浏览器中访问响应内容如下：
-
-![./images/sys-middleware-com-response.png](./images/sys-middleware-com-response.png)
-
-
 ### 自定义响应
 - 在实际开发中，可能需要使用自定义的响应类型，由于响应中间件是全局的，因此您需要对其进行单独处理。
 - 推荐以下几种处理方案，可做参考：
@@ -200,9 +195,6 @@ Stack:
         E:/Users/Administrator/Desktop/gosrc/xiuadmin_dev/server/internal/logic/middleware/init.go:90
 
 ```
-
-- 如果你开启了访问日志，那么日志记录中会详细记录本次请求的相关信息，内容如下：
-![./images/sys-middleware-error-log.png](./images/sys-middleware-error-log.png)
 
 
 ### 重写错误码

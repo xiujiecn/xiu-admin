@@ -17,8 +17,6 @@ outline: deep
 
 - [生成配置](/code/config.md)
 - [生成CURD](/code/curd.md)
-- [生成关联表CURD](/code/curd-join.md)
-- [生成树型CURD](/code/tree.md)
-- [生成业务模板](/code/business.md)
-- [生成模板开发](/code/template-dev.md)
+- [生成关联表](/code/curd-join.md)
+- [生成模板开发](/code/template.md)
 - [生成常见问题](/code/help.md)

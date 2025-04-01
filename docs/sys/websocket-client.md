@@ -4,7 +4,7 @@ outline: deep
 
 # WebSocket客户端
 
-- [WebSocket服务器](websocket-server.md)
+- [WebSocket服务器](websocket.md)
 
 ## 前端使用WebSocket示例
 路径 `vue/apps/web-antd/src/views/monitor/server/index.vue`

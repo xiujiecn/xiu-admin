@@ -47,7 +47,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       collapsed: false,
       items: [
         { text: '环境部署', link: '/start/environment' },
-        { text: '项目启动', link: '/start/install' },
+        { text: '系统安装', link: '/start/install' },
         { text: '生产部署', link: '/start/deploy' },
         { text: '常见问题', link: '/start/issue' },
       ]

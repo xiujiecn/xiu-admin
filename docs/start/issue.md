@@ -40,7 +40,7 @@ outline: deep
 
 - http服务没有启动或正在启动
 
-详细请参考 - [系统安装](installation.md)
+详细请参考 - [系统安装](install.md)
 
 
 #### 3、cannot find "hack/config.yaml" in following paths:
