@@ -13,9 +13,16 @@ import (
 )
 
 type Payload struct {
-	Group   string `json:"group"`
-	Uid     string `json:"uid"`
-	Payload []byte `json:"payload"`
+	IsAggregate bool   `json:"isAggregate"`
+	Group       string `json:"group"`
+	Uid         string `json:"uid"`
+	Payload     []byte `json:"payload"`
+}
+
+type AggregatorOptions struct {
+	GroupGracePeriod int // 组的优雅延迟时间(秒)
+	GroupMaxDelay    int // 组的最大延迟时间(秒)
+	GroupMaxSize     int // 组的最大大小
 }
 
 type WorkerOptions struct {
@@ -29,6 +36,7 @@ type WorkerOptions struct {
 	clearArchived  int                                        //清除已归档任务的时间间隔
 	timeout        int                                        //任务超时时间
 	redisPeriodKey string                                     //redis周期任务键
+	aggregator     *AggregatorOptions                         //聚合器选项
 }
 
 func GetDefaultWorkerOptions(ops *WorkerOptions) *WorkerOptions {
@@ -108,6 +116,12 @@ func WithWorkerTimeout(timeout int) func(*WorkerOptions) {
 func WithWorkerRedisPeriodKey(redisPeriodKey string) func(*WorkerOptions) {
 	return func(o *WorkerOptions) {
 		GetDefaultWorkerOptions(o).redisPeriodKey = redisPeriodKey
+	}
+}
+
+func WithWorkerAggregator(aggregator *AggregatorOptions) func(*WorkerOptions) {
+	return func(o *WorkerOptions) {
+		GetDefaultWorkerOptions(o).aggregator = aggregator
 	}
 }
 

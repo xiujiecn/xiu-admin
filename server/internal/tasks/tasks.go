@@ -9,11 +9,12 @@ import (
 	"reflect"
 	"strings"
 	"sync"
-	"xiuadmin/internal/library/worker"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/pkg/errors"
+	"github.com/robfig/cron/v3"
 	"go.opentelemetry.io/otel"
 )
 
@@ -26,8 +27,29 @@ type Task struct {
 	Explain    string        //任务描述
 }
 
+type TaskOptions struct {
+	Uid        string
+	Payload    []byte
+	Expr       *string         // 仅周期任务
+	In         *time.Duration  // 仅一次性任务 当前时间的延迟
+	At         *time.Time      // 仅一次性任务 指定时间
+	Now        *bool           // 仅一次性任务 当前时间
+	Replace    bool            // 仅一次性任务 是否替换已存在的任务
+	Ctx        context.Context // 仅一次性任务
+	MaxRetry   int
+	Timeout    int // 限制并发堵塞超时时间
+	Concurrent int // 0不限制并发 1限制并发
+}
+type taskInfo struct {
+	entryID int
+	option  TaskOptions
+	run     bool
+}
+
 type Tasks struct {
-	worker *worker.Worker
+	cron    *cron.Cron
+	lock    sync.Mutex
+	taskMap map[string]*taskInfo
 }
 
 var (
@@ -35,137 +57,212 @@ var (
 	once     sync.Once
 )
 
-func TasksInstance() *Tasks {
+func TasksInstance(ctx context.Context) *Tasks {
 	once.Do(func() {
-		instance, _ = NewTasks() // Initialize only once
+		instance, _ = NewTasks(ctx) // Initialize only once
 	})
 	return instance
 }
 
 // Once 注册一个任务以运行一次。
-func (tk Tasks) Once(options ...func(*worker.TaskOptions)) error {
-	return tk.worker.Once(options...)
+func (tk *Tasks) Once(ctx context.Context, taskOptions TaskOptions) error {
+	// return tk.worker.Once(options...)
+	info := &taskInfo{
+		entryID: 0,
+		option:  taskOptions,
+		run:     false,
+	}
+	spec := ""
+	if taskOptions.Expr != nil && *taskOptions.Expr != "" {
+		spec = *taskOptions.Expr
+	} else if taskOptions.In != nil {
+		spec = fmt.Sprintf("@every %s", *taskOptions.In)
+	} else if taskOptions.At != nil {
+		spec = fmt.Sprintf("@every %s", time.Until(*taskOptions.At).String())
+	} else if taskOptions.Now != nil && *taskOptions.Now {
+		go func() {
+			tk.process(ctx, info)
+		}()
+		g.Log().Infof(ctx, "Tasks.Once end. info: %+v", info)
+		return nil
+	} else {
+		return errors.New("expr is required")
+	}
+	tk.lock.Lock()
+	tk.taskMap[taskOptions.Uid] = info
+	tk.lock.Unlock()
+	entryID, _ := tk.cron.AddFunc(spec, func() {
+		tk.process(ctx, info)
+		tk.lock.Lock()
+		delete(tk.taskMap, taskOptions.Uid)
+		tk.lock.Unlock()
+	})
+	tk.lock.Lock()
+	info, ok := tk.taskMap[taskOptions.Uid]
+	if ok {
+		info.entryID = int(entryID)
+	}
+	tk.lock.Unlock()
+	g.Log().Infof(ctx, "Tasks.Once end. info: %+v", info)
+	return nil
 }
 
 // 注册一个任务以由cron表达式运行。
-// concurrent 0不限制并发 1限制并发
-func (tk Tasks) Cron(concurrent int, options ...func(*worker.TaskOptions)) (entryID string, err error) {
-	return tk.worker.Cron(concurrent, options...)
+func (tk *Tasks) Cron(ctx context.Context, taskOptions TaskOptions) (id string, err error) {
+	spec := ""
+	if taskOptions.Expr != nil && *taskOptions.Expr != "" {
+		spec = *taskOptions.Expr
+	} else {
+		return "", errors.New("expr is required")
+	}
+	tk.lock.Lock()
+	tk.taskMap[taskOptions.Uid] = &taskInfo{
+		entryID: 0,
+		option:  taskOptions,
+		run:     false,
+	}
+	tk.lock.Unlock()
+	entryID, _ := tk.cron.AddFunc(spec, func() {
+		tk.lock.Lock()
+		info, ok := tk.taskMap[taskOptions.Uid]
+		g.Log().Infof(ctx, "Tasks.Cron AddFunc func begin. uid: %s, spec: %s, ok: %v", taskOptions.Uid, spec, ok)
+		if !ok {
+			tk.lock.Unlock()
+			return
+		}
+		tk.lock.Unlock()
+		start := time.Now()
+		for {
+			if taskOptions.Timeout > 0 && time.Since(start) > time.Second*time.Duration(taskOptions.Timeout) {
+				g.Log().Infof(ctx, "Tasks.Cron AddFunc func timeout. uid: %s, spec: %s, timeout: %d, start: %s", taskOptions.Uid, spec, taskOptions.Timeout, start.Format("2006-01-02 15:04:05"))
+				return
+			}
+			tk.lock.Lock()
+			if info.run && info.option.Concurrent == 1 {
+				tk.lock.Unlock()
+				time.Sleep(time.Second * 1)
+				continue
+			}
+			info.run = true
+			tk.lock.Unlock()
+			break
+		}
+		tk.process(ctx, info)
+		tk.lock.Lock()
+		info.run = false
+		tk.lock.Unlock()
+	})
+	tk.lock.Lock()
+	info, ok := tk.taskMap[taskOptions.Uid]
+	if ok {
+		info.entryID = int(entryID)
+	}
+	tk.lock.Unlock()
+	nextTime := tk.cron.Entry(entryID).Next
+	nextTimeStr := nextTime.Format("2006-01-02 15:04:05")
+	sub := nextTime.Sub(time.Now())
+	g.Log().Infof(ctx, "Tasks.Cron end.	entryID: %d, uid: %s, spec: %s, nextTime:%s, sub:%v", info.entryID, info.option.Uid, spec, nextTimeStr, sub)
+	return gconv.String(info.entryID), nil
 }
 
 // 从任务队列中删除一个任务。
-func (tk Tasks) Remove(uid string) error {
-	return tk.worker.Remove(uid)
+func (tk *Tasks) Remove(uid string) error {
+	tk.lock.Lock()
+	info, ok := tk.taskMap[uid]
+	if ok {
+		tk.cron.Remove(cron.EntryID(info.entryID))
+		delete(tk.taskMap, uid)
+	}
+	tk.lock.Unlock()
+	return nil
 }
 
-func (tk Tasks) RemoveCron(entryID string) error {
-	return tk.worker.RemoveCron(entryID)
+func (tk *Tasks) RemoveCron(entryID string) error {
+	tk.lock.Lock()
+	for _, info := range tk.taskMap {
+		if gconv.String(info.entryID) == entryID {
+			tk.cron.Remove(cron.EntryID(info.entryID))
+			delete(tk.taskMap, info.option.Uid)
+			break
+		}
+	}
+	tk.lock.Unlock()
+	return nil
 }
 
 func (tk Tasks) GetTask(uid string) (task *Task, err error) {
-	taskInfo, err := tk.worker.GetTaskInfo(uid)
-	if taskInfo == nil {
+	tk.lock.Lock()
+	info, ok := tk.taskMap[uid]
+	if !ok {
 		return nil, errors.New("task not found")
 	}
+	tk.lock.Unlock()
 
-	if taskInfo.Payload == nil {
-		return nil, errors.New("task payload not found")
-	}
+	taskRun := &Task{}
 
-	taskData := &Task{}
-
-	err = json.Unmarshal(taskInfo.Payload, &taskData)
+	err = json.Unmarshal(info.option.Payload, &taskRun)
 	if err != nil {
 		return nil, err
 	}
-	return taskData, nil
+	return taskRun, nil
 }
 
-func NewTasks() (tk *Tasks, err error) {
+func NewTasks(ctx context.Context) (tk *Tasks, err error) {
 	defer func() {
 		e := recover()
 		if e != nil {
 			err = errors.Errorf("%v", e)
 		}
 	}()
-	w := worker.New(
-		worker.WithWorkerHandler(func(ctx context.Context, p worker.Payload) error {
-			return process(task{
-				ctx:     ctx,
-				payload: p,
-			})
-		}),
-		worker.WithWorkerRedisPeriodKey("TaskSchedule"),
+	// logger := &TaskLog{ctx: ctx}
+	c := cron.New(cron.WithLocation(time.Local),
+		cron.WithSeconds(),
+		// cron.WithChain(cron.SkipIfStillRunning(logger)),
 	)
-	if w.Error != nil {
-		err = errors.WithMessage(w.Error, "initialize worker failed")
-		return
-	}
-
+	// w := worker.New(
+	// 	worker.WithWorkerHandler(func(ctx context.Context, p worker.Payload) error {
+	// 		return process(task{
+	// 			ctx:     ctx,
+	// 			payload: p,
+	// 		})
+	// 	}),
+	// 	worker.WithWorkerRedisPeriodKey("TaskSchedule"),
+	// )
+	// if w.Error != nil {
+	// 	err = errors.WithMessage(w.Error, "initialize worker failed")
+	// 	return
+	// }
+	c.Start()
 	tk = &Tasks{
-		worker: w,
+		cron:    c,
+		taskMap: make(map[string]*taskInfo),
 	}
-	g.Log().Debug(context.Background(), "initialize worker success")
+	g.Log().Debug(ctx, "NewTasks initialize tasks success")
 	return
 }
 
-type task struct {
-	ctx     context.Context
-	payload worker.Payload
-	task    Task
-}
-
-// process 处理任务
-func process(t task) (err error) {
-	g.Log().Debug(t.ctx, "server/internal/tasks/tasks.go payload", t.payload)
+func (tk *Tasks) process(ctx context.Context, t *taskInfo) (err error) {
+	g.Log().Debug(ctx, "Tasks.process payload", t.option.Payload)
 	tr := otel.Tracer("task")
-	_, span := tr.Start(t.ctx, "Task")
+	_, span := tr.Start(ctx, "Task")
 	defer span.End()
-	var taskData Task
-	err = json.Unmarshal(t.payload.Payload, &taskData)
+	var taskRun Task
+	err = json.Unmarshal(t.option.Payload, &taskRun)
 	if err != nil {
 		return err
 	}
-	g.Log().Debug(t.ctx, "server/internal/tasks/tasks.go taskData", taskData)
-	err = CallMethod(&taskData)
+	g.Log().Debug(ctx, "Tasks.process task", taskRun)
+	err = CallMethod(ctx, &taskRun)
 	if err != nil {
 		fmt.Println("CallMethod err:", err.Error())
 		return err
 	}
+	g.Log().Debug(ctx, "Tasks.process end. task", taskRun)
 	return
 }
 
 // CallMethod 调用任务的实际方法
-func CallMethod(task *Task) (err error) {
-	// 判断task.Params是否为nil
-	if task.Params == nil {
-		task.Params = []interface{}{}
-	} else {
-		var paramsData []interface{}
-		// 判断task.Params内的值是否为基本类型
-		for _, param := range task.Params {
-			switch reflect.TypeOf(param).Kind() {
-			case reflect.Float64:
-				// 如果是数字 ，检查是否可以转换为整数
-				v := param.(float64)
-				if v == float64(int64(v)) {
-					// 如果可以转换为整数，则转换为int类型
-					paramsData = append(paramsData, int64(v))
-				} else {
-					// 如果不能转换为整数，则保留为float64类型
-					paramsData = append(paramsData, v)
-				}
-			case reflect.String, reflect.Bool:
-				// 对于字符串、布尔和空值，直接添加到Params中
-				paramsData = append(paramsData, param)
-				// 可以添加更多的类型处理
-			default:
-				panic("unhandled default case")
-			}
-		}
-		task.Params = paramsData
-	}
-
+func CallMethod(ctx context.Context, task *Task) (err error) {
 	// 获取TaskModel的反射值
 	taskValue := reflect.ValueOf(task)
 	// 准备要调用的方法的参数
@@ -188,6 +285,40 @@ func CallMethod(task *Task) (err error) {
 			return
 		}
 		g.Log().Debug(context.Background(), "执行的任务：", task.MethodName)
+		for i := 0; i < method.Type().NumIn(); i++ {
+			switch method.Type().In(i).Kind() {
+			case reflect.Float32:
+				args[i] = reflect.ValueOf(gconv.Float32(task.Params[i]))
+			case reflect.Float64:
+				args[i] = reflect.ValueOf(gconv.Float64(task.Params[i]))
+			case reflect.Uint64:
+				args[i] = reflect.ValueOf(gconv.Uint64(task.Params[i]))
+			case reflect.Int64:
+				args[i] = reflect.ValueOf(gconv.Int64(task.Params[i]))
+			case reflect.Int:
+				args[i] = reflect.ValueOf(gconv.Int(task.Params[i]))
+			case reflect.Int32:
+				args[i] = reflect.ValueOf(gconv.Int32(task.Params[i]))
+			case reflect.Int16:
+				args[i] = reflect.ValueOf(gconv.Int16(task.Params[i]))
+			case reflect.Int8:
+				args[i] = reflect.ValueOf(gconv.Int8(task.Params[i]))
+			case reflect.Uint:
+				args[i] = reflect.ValueOf(gconv.Uint(task.Params[i]))
+			case reflect.Uint32:
+				args[i] = reflect.ValueOf(gconv.Uint32(task.Params[i]))
+			case reflect.Uint16:
+				args[i] = reflect.ValueOf(gconv.Uint16(task.Params[i]))
+			case reflect.Uint8:
+				args[i] = reflect.ValueOf(gconv.Uint8(task.Params[i]))
+			case reflect.String:
+				args[i] = reflect.ValueOf(gconv.String(task.Params[i]))
+			case reflect.Bool:
+				args[i] = reflect.ValueOf(gconv.Bool(task.Params[i]))
+			default:
+				args[i] = reflect.ValueOf(task.Params[i])
+			}
+		}
 		if len(task.Params) > 0 {
 			method.Call(args)
 		} else {
@@ -234,9 +365,9 @@ func UnmarshalTask(data []byte) (*Task, error) {
 }
 
 // CheckFuncName 检查方法名是否存在
-func (tk Tasks) CheckFuncName(funcName string) (actualfuncName string, exists bool) {
+func (tk *Tasks) CheckFuncName(funcName string) (actualfuncName string, exists bool) {
 	exist := GetInnerTaskName(funcName)
-	glog.Debug(context.Background(), "CheckFuncName", exist)
+	g.Log().Debug(context.Background(), "CheckFuncName", exist)
 	if exist != "" {
 		return exist, true
 	}
@@ -244,7 +375,7 @@ func (tk Tasks) CheckFuncName(funcName string) (actualfuncName string, exists bo
 }
 
 // ParseParameters 解析参数
-func (tk Tasks) ParseParameters(parseData string) (params []interface{}, err error) {
+func (tk *Tasks) ParseParameters(parseData string) (params []interface{}, err error) {
 	parts := strings.Split(parseData, "|")
 	params = make([]interface{}, len(parts))
 	for i, part := range parts {

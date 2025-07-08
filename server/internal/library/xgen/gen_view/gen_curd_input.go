@@ -186,9 +186,20 @@ func (l *gCurd) genStructFieldDefinition(in *genmodel.CurdPreviewParam, field *g
 		if inputType == InputTypeUpdateFields && field.GoName == "UpdatedBy" {
 			return true
 		}
-
+		if inputType == InputTypeUpdateFields && field.GoName == "UpdatedAt" {
+			return true
+		}
 		// 创建人
 		if inputType == InputTypeInsertFields && field.GoName == "CreatedBy" {
+			return true
+		}
+		if inputType == InputTypeInsertFields && field.GoName == "CreatedAt" {
+			return true
+		}
+		if inputType == InputTypeInsertFields && field.GoName == "CreatedDept" {
+			return true
+		}
+		if inputType == InputTypeInsertFields && field.GoName == "TenantId" {
 			return true
 		}
 		return false

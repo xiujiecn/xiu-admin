@@ -46,3 +46,12 @@ func Push(ctx context.Context, topic string, data []byte, timeout int) (err erro
 	}
 	return
 }
+
+func Stop(ctx context.Context) {
+	for name, _ := range processes {
+		queue := GetQueue(name)
+		if queue != nil {
+			queue.Stop()
+		}
+	}
+}

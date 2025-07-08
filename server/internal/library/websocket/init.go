@@ -12,11 +12,13 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gorilla/websocket"
 )
 
 var (
+	mctx          = gctx.GetInitCtx()  // 上下文
 	clientManager = NewClientManager() // 管理者
 )
 var upGrader = websocket.Upgrader{
@@ -31,6 +33,11 @@ func StartWebSocket(ctx context.Context) {
 	g.Log().Info(ctx, "启动：WebSocket")
 	go clientManager.start()
 	go clientManager.ping(ctx)
+}
+
+func StopWebSocket(ctx context.Context) {
+	g.Log().Info(ctx, "停止：WebSocket")
+	clientManager.closeSignal <- struct{}{}
 }
 
 func WsPage(r *ghttp.Request) {

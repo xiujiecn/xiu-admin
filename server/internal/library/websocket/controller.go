@@ -44,6 +44,7 @@ func JoinController(client *Client, req *request) {
 				callback(client)
 			}
 		}
+		AddTagCount(name)
 	}
 	client.SendMsg(&WResponse{
 		Event: Join,
@@ -56,6 +57,7 @@ func QuitController(client *Client, req *request) {
 	name := gconv.String(req.Data["name"])
 	if client.tags.Contains(name) {
 		client.tags.RemoveValue(name)
+		DelTagCount(name)
 	}
 	client.SendMsg(&WResponse{
 		Event: Quit,
@@ -68,7 +70,7 @@ func PingController(client *Client) {
 	client.Heartbeat(currentTime)
 }
 
-// JoinController 加入
+// JoinsController 加入
 func JoinsController(client *Client, req *request) {
 	for _, name := range gconv.Strings(req.Data["names"]) {
 		if !client.tags.Contains(name) {
@@ -78,6 +80,7 @@ func JoinsController(client *Client, req *request) {
 					callback(client)
 				}
 			}
+			AddTagCount(name)
 		}
 	}
 	client.SendMsg(&WResponse{
@@ -91,6 +94,7 @@ func QuitsController(client *Client, req *request) {
 	for _, name := range gconv.Strings(req.Data["names"]) {
 		if client.tags.Contains(name) {
 			client.tags.RemoveValue(name)
+			DelTagCount(name)
 		}
 	}
 	client.SendMsg(&WResponse{

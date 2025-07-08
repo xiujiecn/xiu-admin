@@ -218,6 +218,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
 
 export const requestClient = createRequestClient(apiURL, {
   responseReturn: 'data',
+  timeout: 30000,
 });
 
-export const baseRequestClient = new RequestClient({ baseURL: apiURL });
+export const baseRequestClient = new RequestClient({ baseURL: apiURL, timeout: 30000, });

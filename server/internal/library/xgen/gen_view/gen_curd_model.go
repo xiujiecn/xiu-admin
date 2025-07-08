@@ -66,11 +66,11 @@ import type { DescItem } from '#/components/description';
 
 	// 导入工具类
 	if len(in.Options.Step.ImportModel.UtilsIs) > 0 {
-		importBuffer.WriteString("import " + ImportWebMethod(in.Options.Step.ImportModel.UtilsIs) + " from '@/utils/is';\n")
+		importBuffer.WriteString("import " + ImportWebMethod(in.Options.Step.ImportModel.UtilsIs) + " from '#/utils/is';\n")
 	}
 
 	if len(in.Options.Step.ImportModel.UtilsUrl) > 0 {
-		importBuffer.WriteString("import " + ImportWebMethod(in.Options.Step.ImportModel.UtilsUrl) + " from '@/utils/urlUtils';\n")
+		importBuffer.WriteString("import " + ImportWebMethod(in.Options.Step.ImportModel.UtilsUrl) + " from '#/utils/urlUtils';\n")
 	}
 
 	if len(in.Options.Step.ImportModel.UtilsDate) > 0 {
@@ -294,7 +294,20 @@ func (l *gCurd) genWebModelFormSchemaEach(buffer *bytes.Buffer, fields []*genmod
 				continue
 			}
 			if field.Name == in.Pk.Name {
-				buffer.WriteString(fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    dependencies: {   show: () => false,    triggerFields: [''],   },\n    componentProps: {\n      placeholder: '',\n      onUpdateValue: (e: any) => {\n        console.log(e);\n      },\n    },\n  },\n", field.TsName, "Input", field.Dc))
+				buffer.WriteString(fmt.Sprintf(` {
+					fieldName: '%s',
+					component: '%s',
+					label: '%s',
+					dependencies: {   show: () => false,    triggerFields: [''],   },
+					componentProps: {
+						placeholder: '',
+						onUpdateValue: (e: any) => {
+							console.log(e);
+						},   
+					},
+					formItemClass: 'col-span-%d',
+				},`, field.TsName, "Input", field.Dc, field.FormGridSpan))
+
 				continue
 			}
 		} else {
@@ -365,13 +378,38 @@ func (l *gCurd) genWebModelFormSchemaEach(buffer *bytes.Buffer, fields []*genmod
 
 		// 查询用户摘要
 		if field.IsQuery && in.Options.Step.HasQueryMemberSummary && IsMemberSummaryField(field.Name) {
-			buffer.WriteString(fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    componentProps: {\n      placeholder: '请输入ID|用户名|姓名|手机号',\n      onUpdateValue: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "Input", field.Dc, rules))
+			buffer.WriteString(fmt.Sprintf(`  {
+				fieldName: '%s',
+				component: '%s',
+				label: '%s',
+				componentProps: {
+					placeholder: '请输入ID|用户名|姓名|手机号',
+					onUpdateValue: (e: any) => {
+						console.log(e);
+					},   
+				},  
+				rules:%v,
+				formItemClass: 'col-span-%d',
+			},`, field.TsName, "Input", field.Dc, rules, field.FormGridSpan))
+
 			continue
 		}
 
 		var (
-			defaultComponent = fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    componentProps: {\n      placeholder: '请输入%s',\n      onUpdateValue: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "Input", field.Dc, field.Dc, rules)
-			component        string
+			defaultComponent = fmt.Sprintf(`  {
+				fieldName: '%s',
+				component: '%s',
+				label: '%s',
+				componentProps: {
+					placeholder: '请输入%s',
+					onUpdateValue: (e: any) => {
+						console.log(e);
+					},   
+				},  
+				rules:%v,
+				formItemClass: 'col-span-%d',
+			},`, field.TsName, "Input", field.Dc, field.Dc, rules, field.FormGridSpan)
+			component string
 		)
 
 		// 这里根据编辑表单组件来进行推断，如果没有则使用默认input，这可能会导致和查询条件所需参数不符的情况
@@ -380,31 +418,120 @@ func (l *gCurd) genWebModelFormSchemaEach(buffer *bytes.Buffer, fields []*genmod
 			component = defaultComponent
 
 		case FMInputNumber:
-			component = fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    componentProps: {\n      placeholder: '请输入%s',\n      onUpdateValue: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "InputNumber", field.Dc, field.Dc, rules)
-
+			component = fmt.Sprintf(`  {
+				fieldName: '%s',
+				component: '%s',
+				label: '%s',
+				componentProps: {
+					placeholder: '请输入%s',
+					onUpdateValue: (e: any) => {
+						console.log(e);
+					},   
+				},  rules:%v,
+				formItemClass: 'col-span-%d',
+			},`, field.TsName, "InputNumber", field.Dc, field.Dc, rules, field.FormGridSpan)
 		case FMDate:
-			component = fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    componentProps: {\n      type: '%s',\n      clearable: true,\n      shortcuts: %s,\n      onUpdateValue: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "RangePicker", field.Dc, "date", "'FMDate'", rules)
+			component = fmt.Sprintf(`  {
+				fieldName: '%s',
+				component: '%s',
+				label: '%s',
+				componentProps: {
+					type: '%s',
+					clearable: true,
+					shortcuts: %s,
+					onUpdateValue: (e: any) => {
+						console.log(e);
+					},   
+				},  rules:%v,
+				formItemClass: 'col-span-%d',
+			},`, field.TsName, "DatePicker", field.Dc, "date", "'FMDate'", rules, field.FormGridSpan)
 			in.Options.Step.ImportModel.UtilsDate = append(in.Options.Step.ImportModel.UtilsDate, "defShortcuts")
 
 		case FMDateRange:
-			component = fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    componentProps: {\n      type: '%s',\n      clearable: true,\n      valueFormat: %s,\n      onUpdateValue: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "RangePicker", field.Dc, "daterange", "'YYYY-MM-DD HH:mm:ss'", rules)
+			component = fmt.Sprintf(`  {
+				fieldName: '%s',
+				component: '%s',
+				label: '%s',
+				componentProps: {
+					type: '%s',
+					clearable: true,
+					valueFormat: %s,
+					onUpdateValue: (e: any) => {
+						console.log(e);
+					},   
+				},  rules:%v,
+				formItemClass: 'col-span-%d',
+			},`, field.TsName, "RangePicker", field.Dc, "datetimerange", "'FMDateRange'", rules, field.FormGridSpan)
+			in.Options.Step.ImportModel.UtilsDate = append(in.Options.Step.ImportModel.UtilsDate, "defRangeShortcuts")
+
 			// in.Options.Step.ImportModel.UtilsDate = append(in.Options.Step.ImportModel.UtilsDate, "defRangeShortcuts")
 
 		case FMTime:
-			component = fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    componentProps: {\n      type: '%s',\n      clearable: true,\n      shortcuts: %s,\n      onUpdateValue: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "DatePicker", field.Dc, "datetime", "'FMTime'", rules)
+			component = fmt.Sprintf(`  {
+				fieldName: '%s',
+				component: '%s',
+				label: '%s',
+				componentProps: {
+					type: '%s',
+					clearable: true,
+					showTime: true,
+					shortcuts: %s,
+					onUpdateValue: (e: any) => {
+						console.log(e);
+					},   
+				},  rules:%v,
+				formItemClass: 'col-span-%d',
+			},`, field.TsName, "DatePicker", field.Dc, "datetime", "'FMTime'", rules, field.FormGridSpan)
 			in.Options.Step.ImportModel.UtilsDate = append(in.Options.Step.ImportModel.UtilsDate, "defShortcuts")
 
 		case FMTimeRange:
-			component = fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    componentProps: {\n      type: '%s',\n      clearable: true,\n      shortcuts: %s,\n      onUpdateValue: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "RangePicker", field.Dc, "datetimerange", "'FMTimeRange'", rules)
+			component = fmt.Sprintf(`  {
+				fieldName: '%s',
+				component: '%s',
+				label: '%s',
+				componentProps: {
+					type: '%s',
+					clearable: true,
+					shortcuts: %s,
+					showTime: true,
+					onUpdateValue: (e: any) => {
+						console.log(e);
+					},   
+				},  rules:%v,
+				formItemClass: 'col-span-%d',
+			},`, field.TsName, "RangePicker", field.Dc, "datetimerange", "'FMTimeRange'", rules, field.FormGridSpan)
+
 			in.Options.Step.ImportModel.UtilsDate = append(in.Options.Step.ImportModel.UtilsDate, "defRangeShortcuts")
 
 		case FMSwitch:
 			fallthrough
 		case FMRadio:
-			component = fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    giProps: {\n      //span: 24,\n    },\n    componentProps: {\n      options: %v,\n      onUpdateChecked: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "RadioGroup", field.Dc, l.genWebDictOption(in.Options.DictMap[field.TsName]), rules)
+			component = fmt.Sprintf(`  {
+			fieldName: '%s',
+			component: '%s',
+			label: '%s',
+			componentProps: {
+				options: %v
+			},
+			rules:%v,
+			formItemClass: 'col-span-%d',
+		},
+		`, field.TsName, "RadioGroup", field.Dc, l.genWebDictOption(in.Options.DictMap[field.TsName]), rules, field.FormGridSpan)
 
 		case FMCheckbox:
-			component = fmt.Sprintf("  {\n    fieldName: '%s',\n    component: '%s',\n    label: '%s',\n    giProps: {\n      span: 1,\n    },\n    componentProps: {\n      placeholder: '请选择%s',\n      options: %v,\n      onUpdateChecked: (e: any) => {\n        console.log(e);\n      },\n    },\n  rules:%v\n},\n", field.TsName, "NCheckbox", field.Dc, field.Dc, l.genWebDictOption(in.Options.DictMap[field.TsName]), rules)
+			component = fmt.Sprintf(`  {
+			fieldName: '%s',
+			component: '%s',
+			label: '%s',
+			componentProps: {
+				placeholder: '请选择%s',
+				options: %v
+			},
+			rules:%v,
+			formItemClass: 'col-span-%d',
+		},
+		`, field.TsName, "CheckboxGroup", field.Dc, field.Dc,
+				l.genWebDictOption(in.Options.DictMap[field.TsName]), rules, field.FormGridSpan)
 
 		case FMSelect:
 			component = fmt.Sprintf(`  {    
@@ -419,9 +546,10 @@ func (l *gCurd) genWebModelFormSchemaEach(buffer *bytes.Buffer, fields []*genmod
 					console.log(e);    
 				},  
 			},
-			rules:%v
+			rules:%v,
+			formItemClass: 'col-span-%d',
 		},
-		`, field.TsName, "Select", field.Dc, field.Dc, l.genWebDictOption(in.Options.DictMap[field.TsName]), rules)
+		`, field.TsName, "Select", field.Dc, field.Dc, l.genWebDictOption(in.Options.DictMap[field.TsName]), rules, field.FormGridSpan)
 
 		case FMSelectMultiple:
 			component = fmt.Sprintf(`  {    
@@ -437,9 +565,10 @@ func (l *gCurd) genWebModelFormSchemaEach(buffer *bytes.Buffer, fields []*genmod
 					console.log(e);    
 				},  	
 			},
-			rules:%v
+			rules:%v,
+			formItemClass: 'col-span-%d',
 		},
-		`, field.TsName, "Select", field.Dc, field.Dc, l.genWebDictOption(in.Options.DictMap[field.TsName]), rules)
+		`, field.TsName, "Select", field.Dc, field.Dc, l.genWebDictOption(in.Options.DictMap[field.TsName]), rules, field.FormGridSpan)
 
 		default:
 			component = defaultComponent

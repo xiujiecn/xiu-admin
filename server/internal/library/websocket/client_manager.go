@@ -8,6 +8,7 @@ package websocket
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
 	"sync"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -29,6 +30,9 @@ type ClientManager struct {
 	TagBroadcast    chan *TagWResponse              // 广播 向某个标签成员发送数据
 	UserBroadcast   chan *UserWResponse             // 广播 向某个用户的所有链接发送数据
 	TagCallbackMap  map[string]func(client *Client) // 注册标签回调
+	closeSignal     chan struct{}                   // 关闭信号
+	TagCountMap     map[string]int                  // 标签map
+	TagLock         sync.RWMutex                    // 标签读写锁
 }
 
 func NewClientManager() (clientManager *ClientManager) {
@@ -41,6 +45,9 @@ func NewClientManager() (clientManager *ClientManager) {
 		TagBroadcast:   make(chan *TagWResponse, 1000),
 		UserBroadcast:  make(chan *UserWResponse, 1000),
 		TagCallbackMap: make(map[string]func(client *Client)),
+		closeSignal:    make(chan struct{}, 1),
+		TagCountMap:    make(map[string]int),
+		TagLock:        sync.RWMutex{},
 	}
 	return
 }
@@ -70,16 +77,17 @@ func (manager *ClientManager) GetClients() (clients map[*Client]bool) {
 }
 
 // ClientsRange 遍历
-func (manager *ClientManager) ClientsRange(f func(client *Client, value bool) (result bool)) {
+func (manager *ClientManager) ClientsRange(f func(client *Client, value bool) bool) {
 	manager.ClientsLock.RLock()
-	defer manager.ClientsLock.RUnlock()
+	defer func() {
+		manager.ClientsLock.RUnlock()
+	}()
 	for key, value := range manager.Clients {
-		result := f(key, value)
-		if result == false {
-			return
+		r := f(key, value)
+		if !r {
+			break
 		}
 	}
-	return
 }
 
 // GetClientsLen 获取客户端总数
@@ -100,6 +108,11 @@ func (manager *ClientManager) DelClients(client *Client) {
 	manager.ClientsLock.Lock()
 	defer manager.ClientsLock.Unlock()
 	if _, ok := manager.Clients[client]; ok {
+		// 删除标签
+		client.tags.Iterator(func(k int, name string) bool {
+			DelTagCount(name)
+			return true
+		})
 		delete(manager.Clients, client)
 	}
 }
@@ -172,12 +185,13 @@ func (manager *ClientManager) EventUnregister(client *Client) {
 	manager.DelClients(client)
 	// 删除用户连接
 	deleteResult := manager.DelUsers(client)
-	if deleteResult == false {
+	if !deleteResult {
 		// 不是当前连接的客户端
 		return
 	}
 	// 关闭 chan
 	// close(client.Send)
+	client.close()
 }
 
 // ClearTimeoutConnections 定时清理超时连接
@@ -211,6 +225,12 @@ func (manager *ClientManager) ping(ctx context.Context) {
 
 // 管道处理程序
 func (manager *ClientManager) start() {
+	defer func() {
+		if r := recover(); r != nil {
+			g.Log().Warningf(mctx, "websocket start recover:%+v, stack:%+v", r, string(debug.Stack()))
+			return
+		}
+	}()
 	for {
 		select {
 		case conn := <-manager.Register:
@@ -258,6 +278,9 @@ func (manager *ClientManager) start() {
 					conn.SendMsg(message.WResponse)
 				}
 			}
+		case <-manager.closeSignal:
+			g.Log().Debug(mctx, "websocket closeSignal exit.")
+			return
 		}
 
 	}
@@ -289,6 +312,11 @@ func SendToUser(userID uint64, response *WResponse) {
 
 // SendToTag 发送某个标签
 func SendToTag(tag string, response *WResponse) {
+	count := GetTagCount(tag)
+	if count == 0 {
+		return
+	}
+
 	tagRes := &TagWResponse{
 		Tag:       tag,
 		WResponse: response,
@@ -298,10 +326,50 @@ func SendToTag(tag string, response *WResponse) {
 
 // RegisterTagCallback 注册标签回调
 func RegisterTagCallback(tag string, callback func(client *Client)) {
+	clientManager.TagLock.Lock()
+	defer clientManager.TagLock.Unlock()
 	clientManager.TagCallbackMap[tag] = callback
 }
 
 // UnregisterTagCallback 注销标签回调
 func UnregisterTagCallback(tag string) {
+	clientManager.TagLock.Lock()
+	defer clientManager.TagLock.Unlock()
 	delete(clientManager.TagCallbackMap, tag)
+}
+
+// 添加标签订阅计数
+func AddTagCount(tag string) {
+	clientManager.TagLock.Lock()
+	defer clientManager.TagLock.Unlock()
+	if _, ok := clientManager.TagCountMap[tag]; !ok {
+		clientManager.TagCountMap[tag] = 1
+	} else {
+		clientManager.TagCountMap[tag]++
+	}
+}
+
+// 删除标签订阅计数
+func DelTagCount(tag string) {
+	clientManager.TagLock.Lock()
+	defer clientManager.TagLock.Unlock()
+	count, ok := clientManager.TagCountMap[tag]
+	if ok {
+		if count > 0 {
+			clientManager.TagCountMap[tag]--
+		} else {
+			delete(clientManager.TagCountMap, tag)
+		}
+	}
+}
+
+// GetTagCount 获取标签订阅计数
+func GetTagCount(tag string) (count int) {
+	clientManager.TagLock.RLock()
+	defer clientManager.TagLock.RUnlock()
+	count, ok := clientManager.TagCountMap[tag]
+	if ok {
+		return count
+	}
+	return 0
 }

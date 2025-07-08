@@ -3,21 +3,31 @@
 // @Copyright  Copyright (c) 2025 LiXiujie
 // @Author  Lxj <li@xiujie.cn>
 // @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
-package queues
+package httpqueues
 
 import (
 	"context"
 	"encoding/json"
+	"xiuadmin/internal/cmd/inithttp"
 	"xiuadmin/internal/consts"
-	"xiuadmin/internal/library/worker"
 	"xiuadmin/internal/model/entity"
 	"xiuadmin/internal/service"
 
+	"xiuadmin/utility/queue"
+
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 )
 
 func init() {
-	RegisterQueueProcess(consts.QueueSysOptLog, SysOptLogQueue)
+	// memqueue.Register(gctx.New(), SysOptLogQueue)
+	inithttp.RegisterHttpInitFunc("init "+consts.QueueSysOptLog, func(ctx context.Context) error {
+		queue.NewConsumer(gctx.New(), SysOptLogQueue, &queue.Config{
+			Workers: 100,
+		})
+		queue.NewProducer(gctx.New(), queue.QueueTypeMemory, consts.QueueSysOptLog, &queue.Config{})
+		return nil
+	})
 }
 
 type qSysOperLog struct{}
@@ -28,12 +38,13 @@ func (q *qSysOperLog) GetTopic() string {
 	return consts.QueueSysOptLog
 }
 
-func (q *qSysOperLog) Handle(ctx context.Context, p worker.Payload) error {
-	if p.Payload == nil || q.GetTopic() != p.Group {
-		return nil
-	}
+func (q *qSysOperLog) GetType() queue.QueueType {
+	return queue.QueueTypeMemory
+}
+
+func (q *qSysOperLog) Handle(ctx context.Context, p queue.Payload) error {
 	var data entity.SysOperLog
-	if err := json.Unmarshal(p.Payload, &data); err != nil {
+	if err := json.Unmarshal(p.Data, &data); err != nil {
 		g.Log().Error(ctx, "qSysOperLog.Handle json.Unmarshal err.", err)
 		return err
 	}
