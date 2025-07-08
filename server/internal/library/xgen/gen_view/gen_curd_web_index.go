@@ -109,7 +109,7 @@ func (l *gCurd) webIndexTplData(ctx context.Context, in *genmodel.CurdPreviewPar
 	importBuffer.WriteString("  import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';\n")
 	importBuffer.WriteString("  import type { DeepPartial } from '@vben/types';\n")
 	importBuffer.WriteString("  import { getVxePopupContainer } from '@vben/utils';\n")
-	importBuffer.WriteString("  import { Page, useVbenDrawer } from '@vben/common-ui';\n")
+	importBuffer.WriteString("  import { Page, useVbenDrawer, useVbenModal } from '@vben/common-ui';\n")
 	importBuffer.WriteString("  import { useVbenVxeGrid } from '#/adapter/vxe-table';\n")
 	importBuffer.WriteString("  import { AccessControl, useAccess } from '@vben/access';\n")
 	importBuffer.WriteString("  const { hasAccessByCodes } = useAccess();\n")
@@ -174,5 +174,6 @@ func (l *gCurd) webIndexTplData(ctx context.Context, in *genmodel.CurdPreviewPar
 	}
 	data["isSearchForm"] = isSearchForm
 	data["import"] = importBuffer.String()
+	data["isEditModal"] = in.Options.Step.IsEditModal
 	return data, nil
 }

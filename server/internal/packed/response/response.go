@@ -45,7 +45,7 @@ func JsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
 
 // 向前端返回Excel文件 参数 content 为上面生成的io.ReadSeeker， fileTag 为返回前端的文件名
 func Excel(r *ghttp.Request, content io.ReadSeeker, fileTag string) {
-	fileName := fmt.Sprintf("%s%s%s.xlsx", gtime.Now().Format("20060102150405"), `_`, fileTag)
+	fileName := fmt.Sprintf("%s%s%s.xlsx", gtime.Now().Format("Ymdhis"), `_`, fileTag)
 	r.Response.Header().Set("Content-Type", "application/vnd.ms-excel")
 	r.Response.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
 	http.ServeContent(r.Response.Writer, r.Request, fileTag, time.Now(), content)
@@ -53,7 +53,7 @@ func Excel(r *ghttp.Request, content io.ReadSeeker, fileTag string) {
 
 // 向前端返回Json文件 参数 content 为上面生成的io.ReadSeeker， fileTag 为返回前端的文件名
 func JsonFile(r *ghttp.Request, content io.ReadSeeker, fileTag string) {
-	fileName := fmt.Sprintf("%s%s%s.json", gtime.Now().Format("20060102150405"), `_`, fileTag)
+	fileName := fmt.Sprintf("%s%s%s.json", gtime.Now().Format("Ymdhis"), `_`, fileTag)
 	r.Response.Header().Set("Content-Type", "application/json")
 	r.Response.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
 	http.ServeContent(r.Response.Writer, r.Request, fileTag, time.Now(), content)

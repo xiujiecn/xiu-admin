@@ -31,7 +31,7 @@ type (
 )
 
 var (
-	localGenTestDemo     IGenTestDemo
+	localGenTestDemo IGenTestDemo
 )
 
 func GenTestDemo() IGenTestDemo {

@@ -25,6 +25,8 @@ type (
 		IsExceptLogin(ctx context.Context, path string) bool
 		// OperationLog 操作日志
 		OperationLog(r *ghttp.Request)
+		// ResponseHandlerRaw 返回处理中间件
+		ResponseHandlerRaw(r *ghttp.Request)
 	}
 )
 

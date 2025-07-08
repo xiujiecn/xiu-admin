@@ -227,7 +227,7 @@ export const columns: VxeGridProps['columns'] = [
     },
   },
   { field: 'createdAt', formatter: 'formatDateTime', title: '创建时间' },
-  { title: '操作', width: 120, slots: { default: 'action' } },
+  { title: '操作', width: 160, slots: { default: 'action' } },
 ];
 
 export const viewSchema: DescItem[] = [
@@ -607,6 +607,10 @@ export const developBaseSchema: VbenFormSchema[] = [
         {
           label: '生成字典选项',
           value: 'genFuncDict',
+        },
+        {
+          label: '新增修改模态框',
+          value: 'genEditModal',
         },
         {
           label: '强制覆盖',

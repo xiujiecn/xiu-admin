@@ -6,6 +6,9 @@
 package consts
 
 const (
+	EventKeyServerClose = "server_close" // 服务关闭  args=[]
+)
+const (
 	EventKeyUserLogin  = "user_login"  // 用户登录  args=[uid,]
 	EventKeyUserLogout = "user_logout" // 用户退出  args=[uid,]
 	EventKeyUserCreate = "user_create" // 用户创建  args=[uid,]

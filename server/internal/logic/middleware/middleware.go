@@ -7,7 +7,6 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"slices"
 	"strings"
@@ -24,8 +23,8 @@ import (
 	"xiuadmin/internal/library/mcache"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/packed/response"
-	"xiuadmin/internal/queues"
 	"xiuadmin/internal/service"
+	"xiuadmin/utility/queue"
 )
 
 type sMiddleware struct {
@@ -68,7 +67,7 @@ func (m *sMiddleware) ResponseHandler(r *ghttp.Request) {
 		r.Response.Status = http.StatusOK
 		return
 	}
-	g.Log().Infof(r.GetCtx(), "sMiddleware.ResponseHandler,contentType %v", contentType)
+	// g.Log().Infof(r.GetCtx(), "sMiddleware.ResponseHandler,contentType %v", contentType)
 	err := r.GetError()
 	res := r.GetHandlerResponse()
 	var code gcode.Code = gcode.CodeOK
@@ -211,13 +210,7 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 // IsExceptLogin 判断是否需要验证登录
 func (s *sMiddleware) IsExceptLogin(ctx context.Context, path string) bool {
 	pathList := g.Cfg().MustGet(ctx, "router.exceptLogin").Strings()
-
-	for i := 0; i < len(pathList); i++ {
-		if slices.Contains(pathList, path) {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(pathList, path)
 }
 
 // OperationLog 操作日志
@@ -229,6 +222,27 @@ func (s *sMiddleware) OperationLog(r *ghttp.Request) {
 		return
 	}
 	// 写入队列
-	logData, _ := json.Marshal(data)
-	queues.Push(context.Background(), consts.QueueSysOptLog, logData, 10)
+	// logData, _ := json.Marshal(data)
+	queue.Push(r.GetCtx(), consts.QueueSysOptLog, data)
+}
+
+// ResponseHandlerRaw 返回处理中间件
+func (s *sMiddleware) ResponseHandlerRaw(r *ghttp.Request) {
+	r.Middleware.Next()
+	// 如果已经有返回内容，那么该中间件什么也不做
+	if r.Response.BufferLength() > 0 {
+		g.Log().Infof(r.Context(), "ResponseHandler r.Response.BufferLength()  %d buf:%s", r.Response.BufferLength(), r.Response.BufferString())
+		return
+	}
+
+	var (
+		err = r.GetError()
+		res = r.GetHandlerResponse()
+	)
+	if err != nil {
+		r.Response.WriteJson(res)
+		r.ExitAll()
+	} else {
+		r.Response.WriteJson(res)
+	}
 }

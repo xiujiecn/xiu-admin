@@ -10,9 +10,10 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	"xiuadmin/utility/uuid32"
+
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/util/guid"
 	"github.com/gorilla/websocket"
 )
 
@@ -47,19 +48,21 @@ type Client struct {
 	isApp         bool            // 是否是app
 	tags          garray.StrArray // 标签
 	Ctx           context.Context // 上下文
+	closeSignal   chan struct{}   // 关闭信号
 }
 
 // NewClient 初始化
 func NewClient(addr string, socket *websocket.Conn, firstTime uint64, ctx context.Context) (client *Client) {
 	client = &Client{
 		Addr:          addr,
-		ID:            guid.S(),
+		ID:            uuid32.New(),
 		Socket:        socket,
 		Send:          make(chan *WResponse, 100),
 		SendClose:     false,
 		FirstTime:     firstTime,
 		HeartbeatTime: firstTime,
 		Ctx:           ctx,
+		closeSignal:   make(chan struct{}, 1),
 	}
 	return
 }
@@ -101,6 +104,9 @@ func (c *Client) write() {
 	}()
 	for {
 		select {
+		case <-c.closeSignal:
+			g.Log().Infof(mctx, "websocket client exit, user:%+v", c.UserId)
+			return
 		case message, ok := <-c.Send:
 			if !ok {
 				g.Log().Info(c.Ctx, "websocket Client.write failed.")
@@ -128,7 +134,6 @@ func (c *Client) SendMsg(msg *WResponse) {
 // Heartbeat 心跳更新
 func (c *Client) Heartbeat(currentTime uint64) {
 	c.HeartbeatTime = currentTime
-	return
 }
 
 // IsHeartbeatTimeout 心跳是否超时
@@ -146,5 +151,5 @@ func (c *Client) close() {
 		return
 	}
 	c.SendClose = true
-	close(c.Send)
+	c.closeSignal <- struct{}{}
 }

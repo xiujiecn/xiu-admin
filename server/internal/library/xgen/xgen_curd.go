@@ -463,6 +463,7 @@ func Dao(ctx context.Context) (err error) {
 	cmd := `gf gen dao`
 	r, err := gproc.ShellExec(gctx.New(), cmd)
 	if err != nil {
+		g.Log().Error(ctx, "生成数据库实体 Stderr", r)
 		return err
 	}
 	g.Log().Info(ctx, "生成数据库实体 Stdout", r)

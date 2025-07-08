@@ -73,3 +73,11 @@ export function getDictOptions(dictName: string, formatNumber = false) {
     formatNumber,
   );
 }
+
+// 获取字典的lable根据值
+export function getDictLabel(dictName: string, value: string) {
+  const { getDictOptions } = useDictStore();
+  const options = getDictOptions(dictName);
+  const option = options.find(opt => String(opt.value) === String(value));
+  return option ? option.label : '';
+}

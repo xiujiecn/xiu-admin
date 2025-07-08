@@ -27,7 +27,7 @@ import {
   WindowsIcon,
 } from '@vben/icons';
 
-import { Tag,Tooltip } from 'ant-design-vue';
+import { Tag, Tooltip } from 'ant-design-vue';
 
 import { DictTag } from '#/components/dict';
 
@@ -97,9 +97,7 @@ export function renderIcon(icon: string) {
 }
 
 export function renderTooltip(trigger: any, content: any) {
-  return <Tooltip title={content}>
-    {trigger}
-  </Tooltip>;
+  return <Tooltip title={content}>{trigger}</Tooltip>;
 }
 
 /**

@@ -59,7 +59,7 @@ func (l *sMonitorServer) GetGoInfo(ctx context.Context) (res *model.GoRunInfo) {
 		GoOs:      runtime.GOOS,
 		Arch:      runtime.GOARCH,
 		GoVersion: runtime.Version(),
-		StartTime: SysStartTime.Format("2006-01-02 15:04:05"),
+		StartTime: SysStartTime.Format("YmdHis"),
 		RunTime:   gtime.Now().Timestamp() - SysStartTime.Timestamp(),
 		RootPath:  runtime.GOROOT(),
 		Pwd:       SysRunDir,

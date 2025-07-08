@@ -335,6 +335,7 @@ func initStep(in *genmodel.CurdPreviewParam) {
 	if in.Options.PresetStep.FormGridCols < 1 {
 		in.Options.PresetStep.FormGridCols = 1
 	}
+	in.Options.Step.IsEditModal = gstr.InArray(in.Options.AutoOps, "genEditModal")
 }
 
 func initFuncDict(in *genmodel.CurdPreviewParam) (err error) {

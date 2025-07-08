@@ -425,7 +425,7 @@ const masterColumns = computed(() => {
                         value: record.formGridSpan,
                         options: getFormGridSpanOptions(formValue.value.options.presetStep.formGridCols),
                         onChange: function (e: any) {
-                            record.formGridSpan = e.target.value;
+                            record.formGridSpan = e;
                         },
                     });
                 },
@@ -501,7 +501,7 @@ const masterColumns = computed(() => {
                         disabled: record.name === 'id',
                         options: selectListObj.whereMode ?? [],
                         onChange: function (e: any) {
-                            record.queryWhere = e.target.value;
+                            record.queryWhere = e;
                         },
                     });
                 },
@@ -519,7 +519,7 @@ const masterColumns = computed(() => {
                         value: record.align,
                         options: selectListObj.tableAlign ?? [],
                         onChange: function (e: any) {
-                            record.align = e.target.value;
+                            record.align = e;
                         },
                     });
                 },

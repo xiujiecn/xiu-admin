@@ -15,14 +15,14 @@ import (
 )
 
 // cache 缓存驱动
-var cache *gcache.Cache
+var cacheVal *gcache.Cache
 
 // Instance 缓存实例
 func Instance() *gcache.Cache {
-	if cache == nil {
+	if cacheVal == nil {
 		panic("cache uninitialized.")
 	}
-	return cache
+	return cacheVal
 }
 
 // SetAdapter 设置缓存适配器
@@ -55,6 +55,6 @@ func SetAdapter(ctx context.Context) {
 	g.DB().GetCache().SetAdapter(cacheAdapter)
 
 	// 通用缓存
-	cache = gcache.New()
-	cache.SetAdapter(cacheAdapter)
+	cacheVal = gcache.New()
+	cacheVal.SetAdapter(cacheAdapter)
 }

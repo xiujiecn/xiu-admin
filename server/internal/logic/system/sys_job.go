@@ -22,7 +22,6 @@ import (
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/dao"
 	"xiuadmin/internal/library/contexts"
-	"xiuadmin/internal/library/worker"
 	"xiuadmin/internal/library/xgorm/handler"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/entity"
@@ -90,7 +89,7 @@ func (c *sSysJob) Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastIn
 	}
 
 	//获取task目录下是否绑定对应的方法
-	_, exist := tasks.TasksInstance().CheckFuncName(jobAdd.InvokeTarget)
+	_, exist := tasks.TasksInstance(ctx).CheckFuncName(jobAdd.InvokeTarget)
 	if !exist {
 		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", jobAdd.InvokeTarget)
 		return 0, gerror.New(errInfo)
@@ -128,7 +127,7 @@ func (c *sSysJob) Update(ctx context.Context, jobUpdate *model.SysJobUpdateModel
 		return 0, gerror.NewCode(gcode.CodeMissingParameter, "用户信息不存在")
 	}
 	//获取task目录下是否绑定对应的方法
-	_, exist := tasks.TasksInstance().CheckFuncName(jobUpdate.InvokeTarget)
+	_, exist := tasks.TasksInstance(ctx).CheckFuncName(jobUpdate.InvokeTarget)
 	if !exist {
 		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", jobUpdate.InvokeTarget)
 		return 0, gerror.New(errInfo)
@@ -210,14 +209,14 @@ func (c *sSysJob) taskRestart(ctx context.Context, job *entity.SysJob) (err erro
 // 任务启动
 func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
 	//获取task目录下是否绑定对应的方法
-	actualName, exist := tasks.TasksInstance().CheckFuncName(job.InvokeTarget)
+	actualName, exist := tasks.TasksInstance(ctx).CheckFuncName(job.InvokeTarget)
 	if !exist {
 		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", job.InvokeTarget)
 		return gerror.New(errInfo)
 	}
 
 	//传参解析
-	paramArr, err := tasks.TasksInstance().ParseParameters(job.JobParams)
+	paramArr, err := tasks.TasksInstance(ctx).ParseParameters(job.JobParams)
 	if err != nil {
 		return err
 	}
@@ -231,31 +230,37 @@ func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
 	}
 	runPayload, _ := json.Marshal(taskData)
 	if job.MisfirePolicy == consts.SysJobMisfirePolicyMulty {
-		entryID, err := tasks.TasksInstance().Cron(
-			job.Concurrent,
-			worker.WithTaskCtx(context.Background()),
-			worker.WithTaskUid(taskData.ID),           // 任务ID
-			worker.WithTaskGroup(taskData.MethodName), // 任务组
-			worker.WithTaskExpr(job.CronExpression),
-			worker.WithTaskTimeout(10),
-			worker.WithTaskReplace(true),
-			worker.WithTaskPayload(runPayload),
-		)
+		// entryID, err := tasks.TasksInstance().Cron(
+		// 	job.Concurrent,
+		// 	worker.WithTaskCtx(context.Background()),
+		// 	worker.WithTaskUid(taskData.ID),           // 任务ID
+		// 	worker.WithTaskGroup(taskData.MethodName), // 任务组
+		// 	worker.WithTaskExpr(job.CronExpression),
+		// 	worker.WithTaskTimeout(10),
+		// 	worker.WithTaskReplace(true),
+		// 	worker.WithTaskPayload(runPayload),
+		// )
+		entryID, err := tasks.TasksInstance(ctx).Cron(ctx, tasks.TaskOptions{
+			Uid:        taskData.ID,
+			Payload:    runPayload,
+			Expr:       &job.CronExpression,
+			Concurrent: job.Concurrent,
+		})
 		if err != nil {
 			g.Log().Debug(ctx, taskData.MethodName, taskData.Explain, "启动任务失败")
 			return err
 		}
-		g.Log().Debug(ctx, taskData.MethodName, taskData.Explain, "启动任务成功", "entryID", entryID)
+		g.Log().Debug(ctx, taskData.MethodName, taskData.Explain, "启动任务成功",
+			"entryID", entryID, "CronExpression", job.CronExpression,
+			"JobId", job.JobId,
+			"JobName", job.JobName)
 	} else {
-		err := tasks.TasksInstance().Once(
-			worker.WithTaskCtx(context.Background()),
-			worker.WithTaskUid(taskData.ID),           // 任务ID
-			worker.WithTaskGroup(taskData.MethodName), // 任务组
-			worker.WithTaskTimeout(10),
-			worker.WithTaskNow(true),
-			worker.WithTaskReplace(true),
-			worker.WithTaskPayload(runPayload),
-		)
+		now := true
+		err := tasks.TasksInstance(ctx).Once(ctx, tasks.TaskOptions{
+			Uid:     taskData.ID,
+			Now:     &now,
+			Payload: runPayload,
+		})
 		if err != nil {
 			g.Log().Debug(ctx, taskData.MethodName, taskData.Explain, "启动任务失败")
 			return err
@@ -267,7 +272,7 @@ func (c *sSysJob) taskRun(ctx context.Context, job *entity.SysJob) error {
 
 func (c *sSysJob) taskStop(ctx context.Context, job *entity.SysJob) error {
 	//获取task目录下是否绑定对应的方法
-	_, exist := tasks.TasksInstance().CheckFuncName(job.InvokeTarget)
+	_, exist := tasks.TasksInstance(ctx).CheckFuncName(job.InvokeTarget)
 	if !exist {
 		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", job.InvokeTarget)
 		return gerror.New(errInfo)
@@ -275,7 +280,7 @@ func (c *sSysJob) taskStop(ctx context.Context, job *entity.SysJob) error {
 
 	taskJobId := fmt.Sprintf("%s-job-%d", job.InvokeTarget, job.JobId)
 
-	err := tasks.TasksInstance().Remove(taskJobId)
+	err := tasks.TasksInstance(ctx).Remove(taskJobId)
 	if err != nil {
 		g.Log().Debug(ctx, job.JobName, "启动停止失败")
 		return err
@@ -314,14 +319,14 @@ func (c *sSysJob) Exec(ctx context.Context, jobId int64) error {
 		return err
 	}
 
-	actualName, exist := tasks.TasksInstance().CheckFuncName(exists.InvokeTarget)
+	actualName, exist := tasks.TasksInstance(ctx).CheckFuncName(exists.InvokeTarget)
 	if !exist {
 		errInfo := fmt.Sprintf("没有绑定对应的方法:%s", exists.InvokeTarget)
 		return gerror.New(errInfo)
 	}
 
 	//传参解析
-	paramArr, err := tasks.TasksInstance().ParseParameters(exists.JobParams)
+	paramArr, err := tasks.TasksInstance(ctx).ParseParameters(exists.JobParams)
 	if err != nil {
 		g.Log().Error(ctx, "sSysJob.JobRun worker.ParseParameters", err)
 		return err
@@ -335,16 +340,20 @@ func (c *sSysJob) Exec(ctx context.Context, jobId int64) error {
 		Explain:    exists.JobName,
 	}
 	runPayload, _ := json.Marshal(taskData)
-
-	err = tasks.TasksInstance().Once(
-		worker.WithTaskCtx(context.Background()),
-		worker.WithTaskUid(taskData.ID),           // 任务ID
-		worker.WithTaskGroup(taskData.MethodName), // 任务组
-		worker.WithTaskTimeout(10),
-		worker.WithTaskNow(true),
-		worker.WithTaskReplace(true),
-		worker.WithTaskPayload(runPayload),
-	)
+	now := true
+	err = tasks.TasksInstance(ctx).Once(ctx, tasks.TaskOptions{
+		Uid:     taskData.ID,
+		Payload: runPayload,
+		Now:     &now,
+	})
+	// 	worker.WithTaskCtx(context.Background()),
+	// 	worker.WithTaskUid(taskData.ID),           // 任务ID
+	// 	worker.WithTaskGroup(taskData.MethodName), // 任务组
+	// 	worker.WithTaskTimeout(10),
+	// 	worker.WithTaskNow(true),
+	// 	worker.WithTaskReplace(true),
+	// 	worker.WithTaskPayload(runPayload),
+	// )
 
 	if err != nil {
 		errInfo := fmt.Sprintf(exists.InvokeTarget, taskData.Explain, "启动任务失败")

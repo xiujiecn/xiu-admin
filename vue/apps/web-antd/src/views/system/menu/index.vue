@@ -21,7 +21,7 @@ import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysMenuListApi,deleteSysMenuApi } from '#/api/system'; 
-import { Icon } from '@iconify/vue';
+import { IconifyIcon } from '@vben/icons';
 import {
   MdiPlus,
   MdiEdit,
@@ -184,7 +184,7 @@ async function handleDelete(row: SysMenuListData) {
         <Button class="mr-2 flex items-center"  @click="collapseAll">折叠</Button>
       </template>
       <template #icon="{ row }">
-        <Icon :icon="row.icon" />
+        <IconifyIcon :icon="row.icon" />
       </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '停用' }}</Tag>

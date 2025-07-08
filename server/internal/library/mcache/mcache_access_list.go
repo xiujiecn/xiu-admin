@@ -12,6 +12,8 @@ import (
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/library/event"
 	"xiuadmin/internal/service"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 func init() {
@@ -21,6 +23,7 @@ func init() {
 		}
 		userId := args[0].(int64)
 		RemoveUserAccessCodeList(ctx, userId)
+		g.Log().Infof(ctx, "mcache_access_list.go EventKeyUserLogout userId: %d", userId)
 	})
 
 }

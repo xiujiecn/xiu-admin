@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"xiuadmin/utility/uuid32"
+
 	"github.com/dromara/carbon/v2"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/xiujiecn/asynq"
@@ -22,6 +24,7 @@ type Worker struct {
 	client    *asynq.Client
 	inspector *asynq.Inspector
 	scheduler *asynq.Scheduler
+	svr       *asynq.Server
 	Error     error
 }
 
@@ -50,6 +53,16 @@ func (p *periodTask) FromString(str string) {
 	return
 }
 
+func aggregate(group string, tasks []*asynq.Task) *asynq.Task {
+	// g.Log().Infof(context.Background(), "server/internal/library/worker/worker.go aggregate group %s, tasks %d", group, len(tasks))
+	list := make([][]byte, 0)
+	for _, t := range tasks {
+		list = append(list, t.Payload())
+	}
+	payload, _ := json.Marshal(list)
+	return asynq.NewTask(group+".aggregate", payload, asynq.TaskID(uuid32.S()))
+}
+
 func New(options ...func(*WorkerOptions)) *Worker {
 	ops := GetDefaultWorkerOptions(nil)
 	for _, op := range options {
@@ -76,24 +89,41 @@ func New(options ...func(*WorkerOptions)) *Worker {
 			LogLevel: asynq.LogLevel(g.Cfg().MustGet(context.Background(), "queue.asynq.logLevel").Int()), // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
 		})
 		go func() {
-			if err := w.scheduler.Run(); err != nil {
+			if err := w.scheduler.Start(); err != nil {
 				g.Log().Error(context.Background(), "server/internal/library/worker/worker.go New 启动调度器失败", err)
 				panic(err)
 			}
 			g.Log().Info(context.Background(), "server/internal/library/worker/worker.go New 启动调度器成功", "group", w.ops.group)
 		}()
 	}
-	svr := asynq.NewServer(rs, asynq.Config{
+	conf := asynq.Config{
 		Concurrency: g.Cfg().MustGet(context.Background(), "queue.asynq.concurrency").Int(),              // 最大同时执行的任务数量
 		Queues:      map[string]int{ops.group: 10},                                                       // 队列名称和优先级
 		LogLevel:    asynq.LogLevel(g.Cfg().MustGet(context.Background(), "queue.asynq.logLevel").Int()), // 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5
-	})
-	go func() {
-		h := &taskHandlerBase{w: w}
-		if err := svr.Run(h); err != nil {
-			panic(err)
-		}
-	}()
+	}
+	if w.ops.aggregator != nil {
+		conf.GroupAggregator = asynq.GroupAggregatorFunc(aggregate)
+		conf.GroupGracePeriod = time.Duration(w.ops.aggregator.GroupGracePeriod) * time.Second
+		conf.GroupMaxDelay = time.Duration(w.ops.aggregator.GroupMaxDelay) * time.Second
+		conf.GroupMaxSize = w.ops.aggregator.GroupMaxSize
+		g.Log().Infof(context.Background(), "server/internal/library/worker/worker.go New 聚合器配置 group %s, gracePeriod %d, maxDelay %d, maxSize %d",
+			w.ops.group, w.ops.aggregator.GroupGracePeriod, w.ops.aggregator.GroupMaxDelay, w.ops.aggregator.GroupMaxSize)
+	}
+	svr := asynq.NewServer(rs, conf)
+	h := &taskHandlerBase{w: w}
+
+	mux := asynq.NewServeMux()
+	if w.ops.aggregator != nil {
+		mux.HandleFunc(w.ops.group+".aggregate", h.ProcessTask)
+	} else {
+		mux.HandleFunc(w.ops.group+".once", h.ProcessTask)
+		mux.HandleFunc(w.ops.group+".cron", h.ProcessTask)
+	}
+
+	if err := svr.Start(mux); err != nil {
+		panic(err)
+	}
+	w.svr = svr
 	if w.ops.clearArchived > 0 {
 		go func() {
 			time.Sleep(time.Duration(w.ops.clearArchived) * time.Second)
@@ -113,7 +143,7 @@ func (w *Worker) Once(options ...func(*TaskOptions)) (err error) {
 		err = errors.New("uid is nil")
 		return
 	}
-	t := asynq.NewTask(ops.group+".once", ops.payload, asynq.TaskID(ops.uid))
+	t := asynq.NewTask(ops.group+".once", ops.payload, asynq.TaskID(ops.uid), asynq.Group(ops.group))
 	taskOpts := []asynq.Option{
 		asynq.Queue(w.ops.group),
 		asynq.MaxRetry(w.ops.maxRetry),
@@ -166,7 +196,7 @@ func (w *Worker) Cron(concurrent int, options ...func(*TaskOptions)) (entryID st
 	if err != nil {
 		return
 	}
-	g.Log().Debug(context.Background(), "server/internal/library/worker/worker.go Cron", "group", w.ops.group, "entryID", entryID)
+	g.Log().Debug(context.Background(), "server/internal/library/worker/worker.go Cron", "group", w.ops.group, "entryID", entryID, "expr", ops.expr, "concurrent", concurrent)
 	return
 }
 
@@ -242,15 +272,36 @@ type taskHandlerBase struct {
 }
 
 func (h *taskHandlerBase) ProcessTask(ctx context.Context, task *asynq.Task) (err error) {
-	group := strings.TrimSuffix(strings.TrimSuffix(task.Type(), ".once"), ".cron")
+	var isAggregate bool
+	if strings.Contains(task.Type(), ".aggregate") {
+		isAggregate = true
+	}
+	group := strings.TrimSuffix(strings.TrimSuffix(strings.TrimSuffix(task.Type(), ".aggregate"), ".once"), ".cron")
 	if h.w.ops.handler == nil {
+		g.Log().Errorf(ctx, "server/internal/library/worker/worker.go ProcessTask handler is nil, group: %s, uid: %s, payload: %s", group, task.ResultWriter().TaskID(), string(task.Payload()))
 		return errors.New("handler is nil")
 	}
 	err = h.w.ops.handler(ctx, Payload{
-		Group:   group,
-		Uid:     task.ResultWriter().TaskID(),
-		Payload: task.Payload(),
+		IsAggregate: isAggregate,
+		Group:       group,
+		Uid:         task.ResultWriter().TaskID(),
+		Payload:     task.Payload(),
 	})
 
 	return
+}
+
+func (w *Worker) Stop() {
+	if w.scheduler != nil {
+		w.scheduler.Shutdown()
+	}
+	if w.client != nil {
+		w.client.Close()
+	}
+	if w.inspector != nil {
+		w.inspector.Close()
+	}
+	if w.svr != nil {
+		w.svr.Shutdown()
+	}
 }

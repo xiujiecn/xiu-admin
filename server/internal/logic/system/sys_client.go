@@ -13,10 +13,10 @@ import (
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/do"
 	"xiuadmin/internal/service"
+	"xiuadmin/utility/uuid32"
 
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/gogf/gf/v2/util/guid"
 )
 
 type sSysClient struct {
@@ -76,7 +76,7 @@ func (s *sSysClient) View(ctx context.Context, param *model.SysClientViewParam) 
 func (s *sSysClient) Add(ctx context.Context, param *model.SysClientAddParam) (output *model.SysClientAddModel, err error) {
 	data := &do.SysClient{}
 	gconv.Struct(param, data)
-	data.ClientId = guid.S()
+	data.ClientId = uuid32.S()
 	data.CreatedAt = gtime.Now()
 	data.CreatedBy = contexts.GetUserId(ctx)
 	data.CreatedDept = contexts.GetDeptId(ctx)

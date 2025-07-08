@@ -44,6 +44,7 @@ import './style.css';
 
 interface Props extends VxeGridProps {
   api: ExtendedVxeGridApi;
+  hideSeparator?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {});
@@ -66,6 +67,7 @@ const {
   tableTitle,
   tableTitleHelp,
   showSearchForm,
+  hideSeparator,
 } = usePriorityValues(props, state);
 
 const { isMobile } = usePreferences();
@@ -378,7 +380,7 @@ onUnmounted(() => {
               </template>
             </Form>
           </slot>
-          <div
+          <div v-if="!hideSeparator"
             class="bg-background-deep z-100 absolute -left-2 bottom-1 h-2 w-[calc(100%+1rem)] overflow-hidden md:bottom-2 md:h-3"
           ></div>
         </div>

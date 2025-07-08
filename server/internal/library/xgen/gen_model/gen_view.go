@@ -48,6 +48,7 @@ type CurdStep struct {
 	ImportModel           ImportModel // 公用导包 - model.ts
 	ActionColumnWidth     int64       // 列表操作栏宽度
 	IsAddon               bool        // 是否是插件
+	IsEditModal           bool        // 新增修改模态框模式
 }
 
 type FuncDict struct {

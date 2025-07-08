@@ -97,7 +97,7 @@ export async function refreshTokenApi() {
  * 退出登录
  */
 export async function logoutApi() {
-  return baseRequestClient.post('/system/auth/logout', {
+  return requestClient.post('/system/auth/logout', {
     withCredentials: true,
   });
 }

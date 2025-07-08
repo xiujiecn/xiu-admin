@@ -9,10 +9,18 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"xiuadmin/internal/cmd/inithttp"
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/library/websocket"
 	"xiuadmin/internal/service"
 )
+
+func init() {
+	inithttp.RegisterHttpInitFunc("InitMonitor", func(ctx context.Context) error {
+		InitMonitor()
+		return nil
+	})
+}
 
 func InitMonitor() {
 	go func() {

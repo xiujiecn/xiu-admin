@@ -8,30 +8,33 @@ package worker
 import (
 	"context"
 
+	"xiuadmin/utility/uuid32"
+
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/util/guid"
 )
 
 type Queue struct {
 	topic string
 	w     *Worker
 }
+
 type Process interface {
 	GetTopic() string                                  // 获取消费主题
 	Handle(ctx context.Context, p Payload) (err error) // 处理过程的方法
+	GetAggregator() *AggregatorOptions                 // 获取聚合器配置，返回nil不使用聚合
 }
 
 func RegisterQueueProcess(p Process) (q *Queue) {
 	q = &Queue{
 		topic: p.GetTopic(),
-		w:     New(WithWorkerGroup(p.GetTopic()), WithWorkerHandler(p.Handle)),
+		w:     New(WithWorkerGroup(p.GetTopic()), WithWorkerHandler(p.Handle), WithWorkerAggregator(p.GetAggregator())),
 	}
 	return
 }
 
 func (q *Queue) Push(ctx context.Context, topic string, data []byte, timeout int) (err error) {
 	err = q.w.Once(
-		WithTaskUid(guid.S()),
+		WithTaskUid(uuid32.New()),
 		WithTaskGroup(topic),
 		WithTaskPayload(data),
 		WithTaskTimeout(timeout),
@@ -42,6 +45,12 @@ func (q *Queue) Push(ctx context.Context, topic string, data []byte, timeout int
 	return nil
 }
 
+func (q *Queue) Stop() {
+	if q.w != nil {
+		q.w.Stop()
+	}
+}
+
 type Scheduled struct {
 	topic string
 	w     *Worker
@@ -50,7 +59,7 @@ type Scheduled struct {
 func RegisterScheduledProcess(p Process) (q *Queue) {
 	q = &Queue{
 		topic: p.GetTopic(),
-		w:     New(WithWorkerGroup(p.GetTopic()), WithWorkerHandler(p.Handle)),
+		w:     New(WithWorkerGroup(p.GetTopic()), WithWorkerHandler(p.Handle), WithWorkerAggregator(p.GetAggregator())),
 	}
 	return
 }
@@ -58,7 +67,7 @@ func (s *Scheduled) Cron(ctx context.Context, topic, cronExpr string, data []byt
 	s.topic = topic
 	entryID, err = s.w.Cron(
 		1,
-		WithTaskUid(guid.S()),
+		WithTaskUid(uuid32.S()),
 		WithTaskGroup(topic),
 		WithTaskExpr(cronExpr),
 		WithTaskPayload(data),
