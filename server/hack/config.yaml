@@ -4,11 +4,8 @@
 gfcli:
   gen:
     dao:
-      - link: "mysql:xj_admin:xj_admin123456@tcp(192.168.158.200:3306)/xiujie_admin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
-        tables: "sys_client,sys_config,sys_dept,sys_dict_data,sys_dict_type,
-          sys_logininfor,sys_menu,sys_notice,sys_oper_log,sys_oss,sys_oss_config,
-          sys_post,sys_role,sys_role_dept,sys_role_menu,sys_social,sys_tenant,
-          sys_tenant_package,sys_user,sys_user_post,sys_user_role,sys_user_online,sys_gen_table,test_demo"
+      - link: "mysql:userxiuadmin:xiuadmin123456@tcp(192.168.37.60:3306)/dbxiuadmin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+        tables: "books"
         descriptionTag:  true # 数据表字段注释
         noModelComment:  true
         jsonCase: "CamelLower" # 生成json字段时，字段名使用驼峰命名

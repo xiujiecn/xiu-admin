@@ -69,7 +69,7 @@ database:
     level:   "all"
     stdout:  true
   default:  # 分组名称，可自定义，默认为default
-    link: "mysql:xj_admin:xj_admin123456@tcp(192.168.158.200:3306)/xiujie_admin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+    link: "mysql:userxiuadmin:xiuadmin123456@tcp(192.168.37.60:3306)/dbxiuadmin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
     debug: true #开启调试模式
     charset: "utf8mb4" # (可选)数据库编码(如: utf8mb4/utf8/gbk/gb2312)，一般设置为utf8mb4。默认为utf8。
     dryRun: false #ORM空跑(只读不写)
