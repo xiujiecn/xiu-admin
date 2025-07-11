@@ -28,6 +28,11 @@ var (
 func main() {
 	version.ShowLogo(BuildVersion, BuildTime, CommitID)
 	ctx := gctx.GetInitCtx()
+
 	cmd.SystemInit(ctx)
+	err := cmd.InitSystemDeferFunc(ctx)
+	if err != nil {
+		panic(err)
+	}
 	cmd.Main.Run(ctx)
 }
