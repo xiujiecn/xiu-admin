@@ -1,17 +1,3 @@
-/*
- Source Server         : 192.168.158.200-dev
- Source Server Type    : MariaDB
- Source Server Version : 110404 (11.4.4-MariaDB-ubu2404)
- Source Host           : 192.168.158.200:3306
- Source Schema         : xiu_admin
-
- Target Server Type    : MariaDB
- Target Server Version : 110404 (11.4.4-MariaDB-ubu2404)
- File Encoding         : 65001
-
- Date: 28/03/2025 09:02:21
-*/
-
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -383,7 +369,7 @@ CREATE TABLE `sys_job` (
   `deleted_by` bigint(20) DEFAULT NULL COMMENT '删除人',
   `deleted_at` datetime DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`job_id`,`job_name`,`job_group`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci ROW_FORMAT=DYNAMIC COMMENT='定时任务调度表';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='定时任务调度表';
 
 -- ----------------------------
 -- Records of sys_job
@@ -1095,7 +1081,7 @@ CREATE TABLE `sys_user_online` (
   `login_location` varchar(255) DEFAULT '' COMMENT '登录地点',
   `browser` varchar(50) DEFAULT '' COMMENT '浏览器类型',
   `os` varchar(50) DEFAULT '' COMMENT '操作系统',
-  `token` text DEFAULT '' COMMENT 'Token',
+  `token` text  COMMENT 'Token',
   `login_time` datetime DEFAULT NULL COMMENT '访问时间',
   `expire_time` datetime DEFAULT NULL COMMENT '过期时间',
   `deleted_at` datetime DEFAULT NULL COMMENT '删除时间',
