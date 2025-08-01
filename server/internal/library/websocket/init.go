@@ -44,8 +44,9 @@ func WsPage(r *ghttp.Request) {
 	g.Log().Infof(r.GetCtx(), "websocket.WsPage Begin. UserID:%v ", contexts.GetUserId(r.GetCtx()))
 	// r.Response.Header().Set("Content-Type", "text/event-stream")
 	contexts.SetIsWebSocket(r.GetCtx(), true)
-	conn, err := upGrader.Upgrade(r.Response.ResponseWriter, r.Request, nil)
+	conn, err := upGrader.Upgrade(r.Response.Writer, r.Request, nil)
 	if err != nil {
+		r.Response.Write(err.Error())
 		return
 	}
 	currentTime := uint64(gtime.Now().Unix())
