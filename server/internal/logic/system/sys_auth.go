@@ -24,6 +24,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
@@ -102,26 +103,29 @@ func (s *sSysAuth) Login(ctx context.Context, param *model.LoginParams) (res *mo
 	}
 
 	// 保存登录日志
-	id, err := service.SysLogininfor().AddLogininfor(ctx, logininfor)
-	if err != nil {
-		return nil, "", err
-	}
-	// 保存在线列表
-	service.SysUserOnline().Add(ctx, &model.SysUserOnlineAddModel{
-		OnlineId:      id,
-		TenantId:      user.TenantId,
-		Uuid:          claims.UUID,
-		UserName:      user.UserName,
-		ClientKey:     "web",
-		DeviceType:    "web",
-		Ipaddr:        ip,
-		LoginLocation: utility.GetCityByIp(ip),
-		Browser:       utility.GetBrowser(ctx),
-		Os:            utility.GetOs(ctx),
-		Token:         token,
-		LoginTime:     gtime.Now(),
-		ExpireTime:    gtime.NewFromTime(claims.ExpiresAt.Time),
-	})
+	go func() {
+		id, err := service.SysLogininfor().AddLogininfor(ctx, logininfor)
+		if err != nil {
+			return
+		}
+
+		// 保存在线列表
+		service.SysUserOnline().Add(ctx, &model.SysUserOnlineAddModel{
+			OnlineId:      id,
+			TenantId:      user.TenantId,
+			Uuid:          claims.UUID,
+			UserName:      user.UserName,
+			ClientKey:     "web",
+			DeviceType:    "web",
+			Ipaddr:        ip,
+			LoginLocation: utility.GetCityByIp(ip),
+			Browser:       utility.GetBrowser(ctx),
+			Os:            utility.GetOs(ctx),
+			Token:         token,
+			LoginTime:     gtime.Now(),
+			ExpireTime:    gtime.NewFromTime(claims.ExpiresAt.Time),
+		})
+	}()
 	event.EventsInstance().Emit(ctx, consts.EventKeyUserLogin, user.UserId)
 	return userOut, token, nil
 }
@@ -134,7 +138,7 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 	sk := g.Cfg().MustGet(ctx, "jwt.signingKey", "39c54195e73304e74a8429b178965865").String()
 	et, _ := utility.ParseDuration(ets)
 	bt, _ := utility.ParseDuration(bts)
-	g.Log().Infof(ctx, "生成Token: user:%+v, et:%s, bt:%s, iss:%s, sk:%s", user, et, bt, iss, sk)
+	g.Log().Infof(ctx, "sSysAuth.GenerateToken 生成Token: user:%+v, et:%s, bt:%s, iss:%s, sk:%s", user, et, bt, iss, sk)
 	authorityIds, err := service.SysUser().GetUserRoleIds(ctx, user.ID)
 	if err != nil {
 		return nil, "", err
@@ -181,6 +185,7 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 	if err != nil {
 		return nil, "", err
 	}
+	g.Log().Infof(ctx, "sSysAuth.GenerateToken token: %s, claims: %+v", token, claims)
 	bcache.SetSysAuthToken(ctx, claims.BaseClaims.ID, claims.BaseClaims.UUID, token, et)
 	return claims, token, nil
 }
@@ -256,13 +261,15 @@ func (s *sSysAuth) GetCurrentUser(ctx context.Context) (claims *model.CustomClai
 }
 
 // 获取用户权限码
-func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (accessCodeList []string, err error) {
+func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (accessCodeList []string, menuRoleAccessCodeList []string, err error) {
 	accessCodeList = make([]string, 0)
+	menuRoleAccessCodeList = make([]string, 0)
+	roleDataScopeMap := make(map[int64]string)
 
 	// 角色权限码
 	roleIds, err := service.SysUser().GetUserRoleIds(ctx, userId)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(roleIds) > 0 {
 		rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
@@ -273,10 +280,11 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 			RoleIds: roleIds,
 		})
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		for _, r := range rl {
 			accessCodeList = append(accessCodeList, consts.SysCheckPermissionRolePrefix+r.RoleKey)
+			roleDataScopeMap[r.RoleId] = r.DataScope
 		}
 	}
 	g.Log().Infof(ctx, "sSysAuth.GetUserAccessCodeList roleIds: %v", roleIds)
@@ -284,7 +292,7 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 	// 获取角色菜单列表
 	rmList, err := service.SysRole().GetRoleListMenu(ctx, roleIds)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	menuIds := make([]int64, 0)
 	for _, menu := range rmList {
@@ -297,18 +305,27 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 			MenuIds: menuIds,
 		})
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		g.Log().Infof(ctx, "sSysAuth.GetUserAccessCodeList menuList: %v", menuList)
 		for _, m := range menuList {
 			accessCodeList = append(accessCodeList, consts.SysCheckPermissionMenuPrefix+m.Perms)
+			for _, r := range rmList {
+				if r.MenuId == m.MenuId {
+					roleDS := roleDataScopeMap[r.RoleId]
+					if len(roleDS) < 1 {
+						roleDS = consts.SysRoleDataScopeAll
+					}
+					menuRoleAccessCodeList = append(menuRoleAccessCodeList, consts.SysCheckPermissionMenuPrefix+m.Perms+"|"+gconv.String(r.RoleId)+"|"+roleDS)
+				}
+			}
 		}
 	}
 	g.Log().Infof(ctx, "sSysAuth.GetUserAccessCodeList accessCodeList: %v", accessCodeList)
 	// 获取用户岗位信息
 	postIds, err := service.SysUser().GetUserPostIds(ctx, userId)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(postIds) > 0 {
 		pl, _, err := service.SysPost().List(ctx, &model.SysPostListParam{
@@ -319,7 +336,7 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 			PostIds: postIds,
 		})
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		for _, p := range pl {
 			accessCodeList = append(accessCodeList, consts.SysCheckPermissionPostPrefix+p.PostCode)
@@ -328,10 +345,91 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 	// 获取用户信息
 	user, err := service.SysUser().GetUserById(ctx, userId)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	accessCodeList = append(accessCodeList, consts.SysCheckPermissionUserPrefix+user.UserName)
 	accessCodeList = append(accessCodeList, consts.SysCheckPermissionCurrentUser)
 	accessCodeList = slices.Compact(accessCodeList)
-	return accessCodeList, nil
+	return accessCodeList, menuRoleAccessCodeList, nil
+}
+
+// 根据openId登录
+func (s *sSysAuth) LoginByOpenId(ctx context.Context, social *model.SysSocialListModel) (res *model.LoginUserOut, token string, err error) {
+	ip := g.RequestFromCtx(ctx).GetClientIp()
+	logininfor := &model.SysLogininforAddModel{
+		TenantId:      social.User.TenantId,
+		UserName:      social.User.UserName,
+		ClientKey:     "web",
+		DeviceType:    "web",
+		Ipaddr:        ip,
+		LoginLocation: utility.GetCityByIp(ip),
+		Browser:       utility.GetBrowser(ctx),
+		Os:            utility.GetOs(ctx),
+		Status:        "0",
+		Msg:           "登录成功",
+		LoginTime:     gtime.Now(),
+	}
+	user, err := service.SysUser().GetUserByUsername(ctx, social.User.UserName, social.User.TenantId)
+	if err != nil {
+		return nil, "用户不存在", err
+	}
+	userOut := &model.LoginUserOut{
+		ID:       user.UserId,
+		Username: user.UserName,
+		NickName: user.NickName,
+		Avatar:   user.Avatar,
+		TenantId: user.TenantId,
+		DeptId:   user.DeptId,
+	}
+	// 构建临时的上下文
+	identity := &model.Identity{
+		BaseClaims: model.BaseClaims{
+			ID:       user.UserId,
+			Username: user.UserName,
+			NickName: user.NickName,
+			TenantId: user.TenantId,
+			DeptId:   user.DeptId,
+			Roles:    []model.Role{},
+			LoginAt:  time.Now().Unix(),
+		},
+	}
+	contextModel := new(model.Context)
+	contextModel.User = identity
+
+	ctx = contexts.Set(ctx, contextModel)
+
+	// 生成token
+	claims, token, err := s.GenerateToken(ctx, userOut)
+	if err != nil {
+		logininfor.Status = "1"
+		logininfor.Msg = err.Error()
+		return nil, "", err
+	}
+
+	// 保存登录日志
+	go func() {
+		id, err := service.SysLogininfor().AddLogininfor(ctx, logininfor)
+		if err != nil {
+			return
+		}
+
+		// 保存在线列表
+		service.SysUserOnline().Add(ctx, &model.SysUserOnlineAddModel{
+			OnlineId:      id,
+			TenantId:      user.TenantId,
+			Uuid:          claims.UUID,
+			UserName:      user.UserName,
+			ClientKey:     "web",
+			DeviceType:    "web",
+			Ipaddr:        ip,
+			LoginLocation: utility.GetCityByIp(ip),
+			Browser:       utility.GetBrowser(ctx),
+			Os:            utility.GetOs(ctx),
+			Token:         token,
+			LoginTime:     gtime.Now(),
+			ExpireTime:    gtime.NewFromTime(claims.ExpiresAt.Time),
+		})
+	}()
+	event.EventsInstance().Emit(ctx, consts.EventKeyUserLogin, user.UserId)
+	return userOut, token, nil
 }

@@ -6,6 +6,8 @@
 package consts
 
 const (
-	KeySysAuthToken       = "login:%d:%s"         // 系统认证token缓存    login:{userId}:{uuid}
-	KeySysAuthTokenReject = "login_reject:%d:%s:" // 系统认证token拒绝缓存 login_reject:{userId}:{uuid}
+	KeySysAuthToken       = "login:%d:%s"          // 系统认证token缓存    login:{userId}:{uuid}
+	KeySysAuthTokenReject = "login_reject:%d:%s:"  // 系统认证token拒绝缓存 login_reject:{userId}:{uuid}
+	KeyLoginScanWechat    = "login:scan:wechat:%d" // 系统二维码登录缓存 hash  Key:SceneId  field:tempUserId value:QrcodeCacheModel
+	KeyUserBindWechat     = "user:bind:wechat:%d"  // 系统二维码绑定缓存 hash  Key:SceneId field:userId value:QrcodeCacheModel
 )

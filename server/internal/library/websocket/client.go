@@ -36,19 +36,19 @@ func (l *login) GetKey() (key string) {
 
 // Client 客户端连接
 type Client struct {
-	Addr          string          // 客户端地址
-	ID            string          // 连接唯一标识
-	Socket        *websocket.Conn // 用户连接
-	Send          chan *WResponse // 待发送的数据
-	SendClose     bool            // 发送是否关闭
-	UserId        uint64          // 用户ID，用户登录以后才有
-	FirstTime     uint64          // 首次连接事件
-	HeartbeatTime uint64          // 用户上次心跳时间
-	LoginTime     uint64          // 登录时间 登录以后才有
-	isApp         bool            // 是否是app
-	tags          garray.StrArray // 标签
-	Ctx           context.Context // 上下文
-	closeSignal   chan struct{}   // 关闭信号
+	Addr          string           // 客户端地址
+	ID            string           // 连接唯一标识
+	Socket        *websocket.Conn  // 用户连接
+	Send          chan *WResponse  // 待发送的数据
+	SendClose     bool             // 发送是否关闭
+	UserId        uint64           // 用户ID，用户登录以后才有
+	FirstTime     uint64           // 首次连接事件
+	HeartbeatTime uint64           // 用户上次心跳时间
+	LoginTime     uint64           // 登录时间 登录以后才有
+	isApp         bool             // 是否是app
+	tags          *garray.StrArray // 标签
+	Ctx           context.Context  // 上下文
+	closeSignal   chan struct{}    // 关闭信号
 }
 
 // NewClient 初始化
@@ -63,6 +63,7 @@ func NewClient(addr string, socket *websocket.Conn, firstTime uint64, ctx contex
 		HeartbeatTime: firstTime,
 		Ctx:           ctx,
 		closeSignal:   make(chan struct{}, 1),
+		tags:          garray.NewStrArray(true),
 	}
 	return
 }

@@ -33,6 +33,7 @@ type UserListParam struct {
 	TenantId    string   `json:"tenantId"    description:"租户编号"`
 	UserId      int64    `json:"userId"      description:"用户ID"`
 	DeptId      int64    `json:"deptId"      description:"部门ID"`
+	DeptIdList  []int64  `json:"deptIdList"  description:"部门ID列表"`
 	UserName    string   `json:"userName"    description:"用户账号"`
 	NickName    string   `json:"nickName"    description:"用户昵称"`
 	Email       string   `json:"email"       description:"用户邮箱"`
@@ -143,4 +144,16 @@ type SysUserUpdateModel struct {
 	Remark      *string     `json:"remark"      orm:"remark"       description:"备注"`
 	PostIds     []int64     `json:"postIds"     orm:"post_ids"     description:"岗位ID列表"`
 	RoleIds     []int64     `json:"roleIds"     orm:"role_ids"     description:"角色ID列表"`
+}
+type SysUserRegisterModel struct {
+	UserName     string `json:"userName"  v:"required#用户账号不能为空"  dc:"用户账号"`
+	Password     string `json:"password"  v:"required#密码不能为空"  dc:"密码"`
+	TenantId     string `json:"tenantId"  v:"required#租户编号不能为空"  dc:"租户编号"`
+	CaptchaID    string `json:"captchaId"  v:"required#验证码不能为空"  dc:"验证码ID"`
+	CaptchaValue string `json:"captchaValue"  v:"required#验证码不能为空"  dc:"验证码值"`
+}
+
+type SysUserStatusParam struct {
+	UserId int64  `json:"userId" v:"required#用户ID不能为空" dc:"用户ID"`
+	Status string `json:"status" v:"required#状态不能为空" dc:"状态"`
 }

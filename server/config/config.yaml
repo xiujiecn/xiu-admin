@@ -69,7 +69,7 @@ database:
     level:   "all"
     stdout:  true
   default:  # 分组名称，可自定义，默认为default
-    link: "mysql:userxiuadmin:xiuadmin123456@tcp(192.168.37.60:3306)/dbxiuadmin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+    link: "mysql:root:123456@tcp(localhost:3306)/xiuadmin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
     debug: true #开启调试模式
     charset: "utf8mb4" # (可选)数据库编码(如: utf8mb4/utf8/gbk/gb2312)，一般设置为utf8mb4。默认为utf8。
     dryRun: false #ORM空跑(只读不写)
@@ -88,9 +88,9 @@ redis:
   default:
     mode: "single" #redis模式，支持：single|cluster|sentinel
     sentinelMasterName: "xiujie-master" #哨兵模式主节点名称
-    address: 192.168.158.200:6379
+    address: localhost:6379
     db: 0
-    pass: redis123456@@
+    pass: 
     minIdle: 5 #最小空闲连接数
     maxIdle: 30 #允许闲置的最大连接数
     maxActive: 5000 #最大活跃连接数
@@ -102,9 +102,9 @@ queue:
   type: "asynq" # 队列类型
   asynq:
     redis:
-      address: 192.168.158.200:6379
+      address: localhost:6379
       db: 0
-      pass: redis123456@@
+      pass: 
       user:
     concurrency: 10 # 最大同时执行的任务数量
     logLevel: 4 # 日志级别 DebugLevel 1, InfoLevel 2, WarnLevel 3, ErrorLevel 4, FatalLevel 5

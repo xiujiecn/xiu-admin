@@ -41,6 +41,7 @@ type SysTenantListParam struct {
 	ContactPhone    string `json:"contactPhone"    orm:"contact_phone"     description:"联系电话"`
 	CompanyName     string `json:"companyName"     orm:"company_name"      description:"企业名称"`
 	LicenseNumber   string `json:"licenseNumber"   orm:"license_number"    description:"统一社会信用代码"`
+	Status          string `json:"status"          orm:"status"            description:"租户状态（0正常 1停用）"`
 }
 
 type SysTenantStatusParam struct {

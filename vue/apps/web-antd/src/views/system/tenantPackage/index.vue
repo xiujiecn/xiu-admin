@@ -46,7 +46,9 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'packageId',
+  },
+  rowConfig: {
+    keyField: 'packageId',
   },
   columns: columns,
   exportConfig: {},

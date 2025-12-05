@@ -16,7 +16,6 @@ import { $t } from '@vben/locales';
 import { addFullName, cloneDeep } from '@vben/utils';
 
 import { useVbenForm } from '#/adapter/form';
-import MenuSelect from '../menu/menu-select.vue';
 
 import { addSysDictDataApi, editSysDictDataApi, getSysDictDataViewApi } from '#/api/system/dict';
 import { drawerSchema } from './model';
@@ -106,7 +105,8 @@ async function handleConfirm() {
     // 这个用于提交
     // formApi.getValues拿到的是一个readonly对象，不能直接修改，需要cloneDeep
     const data = cloneDeep(await formApi.getValues());
-    await (isUpdate.value ? editSysDictDataApi (data) : addSysDictDataApi(data));
+    const res = await (isUpdate.value ? editSysDictDataApi (data) : addSysDictDataApi(data));
+    // console.log('handleConfirm',res);
     emit('reload');
     await handleCancel();
   } catch (error) {

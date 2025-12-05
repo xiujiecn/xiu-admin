@@ -16,6 +16,7 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 // FilterAuth 过滤数据权限
@@ -42,29 +43,69 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 
 	deptIds := make([]int64, 0)
 	userIds := make([]int64, 0)
-	for _, role := range user.Roles {
-		if role.DataScope == consts.SysRoleDataScopeAll { // 角色数据范围: 1全部数据权限
+	currentRoleId := ""
+	currentRoleDataScope := ""
+	currentRoleIdIf := contexts.GetDataValue(ctx, "currentRoleId")
+	if currentRoleIdIf != nil {
+		currentRoleId = currentRoleIdIf.(string)
+	}
+	currentRoleDataScopeIf := contexts.GetDataValue(ctx, "currentRoleDataScope")
+	if currentRoleDataScopeIf != nil {
+		currentRoleDataScope = currentRoleDataScopeIf.(string)
+	}
+	if len(currentRoleDataScope) > 0 && len(currentRoleId) > 0 {
+		dataScope := currentRoleDataScope
+		roleId := gconv.Int64(currentRoleId)
+		g.Log().Infof(ctx, "uid:%d, currentRoleId: %d, currentRoleDataScope: %s", user.ID, roleId, dataScope)
+		if dataScope == consts.SysRoleDataScopeAll { // 角色数据范围: 1全部数据权限
 			return m
-		} else if role.DataScope == consts.SysRoleDataScopeCustom { // 角色数据范围: 2自定数据权限
+		} else if dataScope == consts.SysRoleDataScopeCustom { // 角色数据范围: 2自定数据权限
 			var roleDepts []*entity.SysRoleDept
-			err := g.Model("sys_role_dept").Where("role_id", role.RoleId).Scan(&roleDepts)
+			err := g.Model("sys_role_dept").Where("role_id", roleId).Scan(&roleDepts)
 			if err != nil {
 				g.Log().Panicf(ctx, "failed to get role dept data err:%+v", err)
 			}
 			for _, roleDept := range roleDepts {
 				deptIds = append(deptIds, roleDept.DeptId)
 			}
-		} else if role.DataScope == consts.SysRoleDataScopeDept { // 角色数据范围: 3本部门数据权限
+		} else if dataScope == consts.SysRoleDataScopeDept { // 角色数据范围: 3本部门数据权限
 			deptIds = append(deptIds, user.DeptId)
-		} else if role.DataScope == consts.SysRoleDataScopeDeptAndBelow { // 角色数据范围: 4本部门及以下数据权限
+		} else if dataScope == consts.SysRoleDataScopeDeptAndBelow { // 角色数据范围: 4本部门及以下数据权限
 			deptIds = append(deptIds, GetDeptAndSub(ctx, user.DeptId)...)
-		} else if role.DataScope == consts.SysRoleDataScopePersonal { // 角色数据范围: 5仅本人数据权限
+		} else if dataScope == consts.SysRoleDataScopePersonal { // 角色数据范围: 5仅本人数据权限
 			userIds = append(userIds, user.ID)
-		} else if role.DataScope == consts.SysRoleDataScopeDeptAndBelowOrPersonal { // 角色数据范围: 6本部门及以下或本人数据权限
+		} else if dataScope == consts.SysRoleDataScopeDeptAndBelowOrPersonal { // 角色数据范围: 6本部门及以下或本人数据权限
 			deptIds = append(deptIds, GetDeptAndSub(ctx, user.DeptId)...)
 			userIds = append(userIds, user.ID)
 		}
+	} else {
+		for _, role := range user.Roles {
+			dataScope := role.DataScope
+			roleId := role.RoleId
+			if dataScope == consts.SysRoleDataScopeAll { // 角色数据范围: 1全部数据权限
+				return m
+			} else if dataScope == consts.SysRoleDataScopeCustom { // 角色数据范围: 2自定数据权限
+				var roleDepts []*entity.SysRoleDept
+				err := g.Model("sys_role_dept").Where("role_id", roleId).Scan(&roleDepts)
+				if err != nil {
+					g.Log().Panicf(ctx, "failed to get role dept data err:%+v", err)
+				}
+				for _, roleDept := range roleDepts {
+					deptIds = append(deptIds, roleDept.DeptId)
+				}
+			} else if dataScope == consts.SysRoleDataScopeDept { // 角色数据范围: 3本部门数据权限
+				deptIds = append(deptIds, user.DeptId)
+			} else if dataScope == consts.SysRoleDataScopeDeptAndBelow { // 角色数据范围: 4本部门及以下数据权限
+				deptIds = append(deptIds, GetDeptAndSub(ctx, user.DeptId)...)
+			} else if dataScope == consts.SysRoleDataScopePersonal { // 角色数据范围: 5仅本人数据权限
+				userIds = append(userIds, user.ID)
+			} else if dataScope == consts.SysRoleDataScopeDeptAndBelowOrPersonal { // 角色数据范围: 6本部门及以下或本人数据权限
+				deptIds = append(deptIds, GetDeptAndSub(ctx, user.DeptId)...)
+				userIds = append(userIds, user.ID)
+			}
+		}
 	}
+
 	deptFilterField := ""
 	if gstr.InArray(fields, "dept_id") {
 		deptFilterField = "dept_id"
@@ -80,7 +121,7 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 
 	if len(deptIds) > 0 && len(userIds) > 0 {
 		if deptFilterField != "" && userFilterField != "" {
-			m = m.Where(deptFilterField+" IN ? OR "+userFilterField+" IN ?", deptIds, userIds)
+			m = m.Where(deptFilterField+" IN (?) OR "+userFilterField+" IN (?)", deptIds, userIds)
 		} else if deptFilterField != "" {
 			m = m.WhereIn(deptFilterField, deptIds)
 		} else if userFilterField != "" {

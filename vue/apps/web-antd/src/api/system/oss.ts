@@ -18,16 +18,16 @@ export interface SysOssListParam {
 }
 
 export interface SysOssListData {
-    ossId: number;
-    tenantId: string;
-    fileName: string;
-    originalName: string;
-    fileSuffix: string;
-    url: string;
-    createdDept: number;
-    createdAt: string;
-    createdBy: number;
-    service: string;
+  ossId: number;
+  tenantId: string;
+  fileName: string;
+  originalName: string;
+  fileSuffix: string;
+  url: string;
+  createdDept: number;
+  createdAt: string;
+  createdBy: number;
+  service: string;
 }
 
 export interface SysOssListModel {
@@ -89,11 +89,9 @@ export function ossDownload(
   ossId: ID,
   onDownloadProgress?: AxiosRequestConfig['onDownloadProgress'],
 ) {
-  return requestClient.get<Blob>(`/common/oss/download?ossId=${ossId}`, {
-    responseType: 'blob',
+  return requestClient.download(`/common/oss/download?ossId=${ossId}`, {
     timeout: 30 * 1000,
-    isTransformResponse: false,
-    onDownloadProgress,
+    onDownloadProgress
   });
 }
 
@@ -101,6 +99,19 @@ export function ossUpload(file: Blob | File) {
   const formData = new FormData();
   formData.append('file', file);
   return requestClient.post('/common/oss/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data;charset=UTF-8' },
+    timeout: 30 * 1000,
+  });
+}
+
+export function ossUploadImg(file: Blob | File) {
+  console.log(file);
+  const files = new FormData();
+  files.append('file', file);
+  files.append('isDevice', "false");
+  files.append('fileType', "img");
+  console.log(files.getAll('file'));
+  return requestClient.post('/common/oss/upload',  files, {
     headers: { 'Content-Type': 'multipart/form-data;charset=UTF-8' },
     timeout: 30 * 1000,
   });

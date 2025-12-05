@@ -14,15 +14,15 @@ import type {
   import { getDictOptions } from '#/utils/dict';
   import { DictEnum } from '@vben/constants';
   import { getPopupContainer } from '@vben/utils';
-  
-  
+
+
 export const authScopeOptions = [
     { color: 'green', label: '全部数据权限', value: '1' },
     { color: 'default', label: '自定数据权限', value: '2' },
-    { color: 'orange', label: '本部门数据权限', value: '3' },
-    { color: 'cyan', label: '本部门及以下数据权限', value: '4' },
+    { color: 'orange', label: '本机构数据权限', value: '3' },
+    { color: 'cyan', label: '本机构及以下数据权限', value: '4' },
     { color: 'error', label: '仅本人数据权限', value: '5' },
-    { color: 'default', label: '部门及以下或本人数据权限', value: '6' },
+    { color: 'blue', label: '机构及以下或本人数据权限', value: '6' },
 ];
 
 export const drawerSchema: VbenFormSchema[] =  [
@@ -38,8 +38,9 @@ export const drawerSchema: VbenFormSchema[] =  [
     {
       component: 'Input',
       fieldName: 'roleName',
-      label: '角色名称',
-      rules: 'required',
+      label: '角色名称',rules: z.string()
+      .min(1, '角色名称不能为空')
+      .max(32, '角色名称最大长度32位'),
     },
     {
       component: 'Input',
@@ -122,7 +123,7 @@ export const drawerSchema: VbenFormSchema[] =  [
       component: 'CheckboxGroup',
       defaultValue: [],
       fieldName: 'deptIds',
-      label: '部门权限',
+      label: '机构权限',
       // formItemClass: 'col-span-2',
       dependencies: {
         show: (values) => values?.dataScope === '2',
@@ -135,8 +136,8 @@ export const drawerSchema: VbenFormSchema[] =  [
         show: () => false,
         triggerFields: [''],
       },
-      
+
       fieldName: 'deptCheckStrictly',
-      label: '部门树父子关联',
+      label: '机构树父子关联',
     },
   ];

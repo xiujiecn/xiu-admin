@@ -8,6 +8,8 @@
  */
 
 import { requestClient } from '#/api/request';
+import { useCacheStore } from "#/store/cache";
+const KEY = "menmenuuList";
 export interface SysMenuListReq {
   menuName: string;
   status: string;
@@ -85,7 +87,7 @@ export interface SysMenuDeleteReq {
 }
 
 export async function getSysMenuListApi(params?: SysMenuListReq) {
-  return requestClient.get<SysMenuListRes>('/system/menu/list', { params });
+  return useCacheStore().getCache(params?params:{}, KEY, () => requestClient.get<SysMenuListRes>('/system/menu/list', { params }));
 }
 
 export async function getSysMenuViewApi(params: SysMenuViewReq) {
@@ -93,13 +95,16 @@ export async function getSysMenuViewApi(params: SysMenuViewReq) {
 }
 
 export async function updateSysMenuApi(params: SysMenuUpdateReq|any) {
+  useCacheStore().clearCache(KEY);
   return requestClient.post('/system/menu/update', { ...params });
 }
 
 export async function deleteSysMenuApi(params: SysMenuDeleteReq|any) {
+  useCacheStore().clearCache(KEY);
   return requestClient.post('/system/menu/delete', { ...params });
 }
 
 export async function addSysMenuApi(params: SysMenuAddReq|any) {
+  useCacheStore().clearCache(KEY);
   return requestClient.post('/system/menu/add', { ...params });
 }

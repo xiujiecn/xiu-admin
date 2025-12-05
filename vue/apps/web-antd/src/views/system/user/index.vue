@@ -8,11 +8,11 @@
 -->
 <script lang="ts" setup>
 import { h, ref } from 'vue';
-import type {  DeepPartial } from '@vben/types';
+import type { DeepPartial } from '@vben/types';
 import type { VbenFormProps } from '#/adapter/form';
-import type { VxeTableGridOptions,VxeGridListeners } from '#/adapter/vxe-table';
+import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
 import type { SysUserListData } from '#/api/system/user';
-import { deleteSysUser } from '#/api/system/user';
+import { deleteSysUser, updateSysUserStatus } from '#/api/system/user';
 import { AccessControl, useAccess } from '@vben/access';
 const { hasAccessByCodes } = useAccess();
 import { Page, useVbenDrawer, useVbenModal } from '@vben/common-ui';
@@ -21,7 +21,7 @@ import { Button, message, Switch, Modal, Popconfirm } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysUserListApi, updateSysUser } from '#/api/system'; 
+import { getSysUserListApi, updateSysUser } from '#/api/system';
 import DeptTree from '#/components/dept/dept-tree.vue';
 
 import {
@@ -96,7 +96,7 @@ const formOptions: VbenFormProps = {
       label: '创建时间',
       componentProps: {
         format: 'YYYY-MM-DD',
-        valueFormat:"YYYY-MM-DD",
+        valueFormat: "YYYY-MM-DD",
       },
     },
   ],
@@ -116,13 +116,13 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'userId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'userId', title: 'ID' },
     { field: 'userName', title: '用户名称' },
     { field: 'nickName', title: '用户昵称' },
-    { field: 'deptInfo.deptName', title: '部门' },
+    { field: 'deptInfo.deptName', title: '机构' },
     { field: 'email', title: '邮箱' },
     {
       field: 'status',
@@ -140,8 +140,8 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        let deptId:number = 0;
-        if(selectDeptId.value.length > 0) {
+        let deptId: number = 0;
+        if (selectDeptId.value.length > 0) {
           deptId = Number(selectDeptId.value[0]);
         }
 
@@ -165,7 +165,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
 
 };
 
-const [Grid, tableApi ] = useVbenVxeGrid({
+const [Grid, tableApi] = useVbenVxeGrid({
   formOptions,
   gridOptions,
   gridEvents,
@@ -176,17 +176,17 @@ const [UserDrawer, userDrawerApi] = useVbenDrawer({
 
 function handleView(row: SysUserListData) {
   const { userId } = row;
-  userDrawerApi.setData({id: userId, update:false,view:true});
+  userDrawerApi.setData({ id: userId, update: false, view: true });
   userDrawerApi.open();
 }
 
 function handleAdd() {
-  userDrawerApi.setData({update:false, view:false});
+  userDrawerApi.setData({ update: false, view: false });
   userDrawerApi.open();
 }
 
 function handleEdit(row: SysUserListData) {
-  userDrawerApi.setData({ id: row.userId, update:true, view:false });
+  userDrawerApi.setData({ id: row.userId, update: true, view: false });
   userDrawerApi.open();
 }
 
@@ -227,7 +227,7 @@ function handleResetPassword(row: SysUserListData) {
 }
 
 async function handleStatusChange(row: SysUserListData) {
-  await updateSysUser({ userId: row.userId, status: row.status });
+  await updateSysUserStatus({ userId: row.userId, status: row.status });
   message.success('状态更新成功');
   await tableApi.query();
 }
@@ -237,35 +237,40 @@ async function handleStatusChange(row: SysUserListData) {
 <template>
   <Page auto-content-height>
     <div class="flex h-full gap-[8px]">
-    <DeptTree class="w-[240px]" 
-      @select="()=> tableApi.reload()" 
-      @reload="()=> tableApi.reload()"
-      v-model:select-dept-id="selectDeptId" />
+      <DeptTree class="w-[240px]" @select="() => tableApi.reload()" @reload="() => tableApi.reload()"
+        v-model:select-dept-id="selectDeptId" />
 
-    <Grid class="flex-1" table-title="用户列表"    >
-      <template #toolbar-tools>
-        
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:user:add'">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:user:remove'">删除</Button>
-      </template>
-      <template #open="{ row }">
-        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" :disabled="!hasAccessByCodes(['cpm:system:user:edit'])" />
-      </template>
-      <template #action="{ row }">
-        <div class="flex items-center">
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:user:query'">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:user:edit'">修改</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleResetPassword(row)" v-access:code="'cpm:system:user:resetPwd'">重置密码</Button>
-          <AccessControl :codes="['cpm:system:user:remove']" type="code">
-            <Popconfirm placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
-              <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1" danger >删除</Button>
-            </Popconfirm>
-          </AccessControl>
-        </div>
-      </template>
-    </Grid>
-  </div>
-  <UserDrawer @reload="tableApi.query()" />
-  <UserResetPwdModal />
+      <Grid class="flex-1" table-title="用户列表">
+        <template #toolbar-tools>
+
+          <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd"
+            v-access:code="'cpm:system:user:add'">新增</Button>
+          <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)"
+            @click="handleMultiDelete" v-access:code="'cpm:system:user:remove'">删除</Button>
+        </template>
+        <template #open="{ row }">
+          <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'"
+            @change="handleStatusChange(row)" :disabled="!hasAccessByCodes(['cpm:system:user:edit'])" />
+        </template>
+        <template #action="{ row }">
+          <div class="flex items-center">
+            <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)"
+              v-access:code="'cpm:system:user:query'">查看</Button>
+            <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)"
+              v-access:code="'cpm:system:user:edit'">修改</Button>
+            <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleResetPassword(row)"
+              v-access:code="'cpm:system:user:resetPwd'">重置密码</Button>
+            <AccessControl :codes="['cpm:system:user:remove']" type="code">
+              <Popconfirm placement="left" title="确定删除吗？" @confirm="handleDelete(row)">
+                <Button class="mr-2 border-none p-0" :block="false" type="link" v-if="row.userId != 1"
+                  danger>删除</Button>
+              </Popconfirm>
+            </AccessControl>
+          </div>
+        </template>
+      </Grid>
+    </div>
+    <UserDrawer @reload="tableApi.query()" />
+    <UserResetPwdModal />
   </Page>
 </template>

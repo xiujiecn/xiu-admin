@@ -15,6 +15,7 @@ import (
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/dao"
 	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/event"
 	"xiuadmin/internal/library/xgorm/handler"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/entity"
@@ -48,8 +49,18 @@ func (s *sSysMenu) Model(ctx context.Context, option ...*handler.Option) *gdb.Mo
 	return handler.Model(dao.SysMenu.Ctx(ctx), option...)
 }
 
+func (s *sSysMenu) ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) == 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: false,
+			FilterAuth:   false,
+		})
+	}
+	return handler.Model(service.MemoryDB().DB(ctx).Ctx(ctx).Model(dao.SysMenu.Table()), option...)
+}
+
 func (l *sSysMenu) List(ctx context.Context, param *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error) {
-	m := l.Model(ctx)
+	m := l.ModelQuery(ctx)
 	if param.MenuIds != nil {
 		m = m.WhereIn(dao.SysMenu.Columns().MenuId, param.MenuIds)
 	}
@@ -71,7 +82,8 @@ func (l *sSysMenu) List(ctx context.Context, param *model.SysMenuListParam) (dat
 func (l *sSysMenu) GetTenantMenu(ctx context.Context, query *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error) {
 	// 获取当前用户信息
 	tenantId := contexts.GetTenantId(ctx)
-	m := dao.SysMenu.Ctx(ctx)
+	m := l.ModelQuery(ctx)
+
 	if tenantId != consts.DefaultSystemTenantCode {
 		// 获取租户信息
 		tenantInfo, err := service.SysTenant().View(ctx, &model.SysTenantViewParam{
@@ -148,10 +160,12 @@ func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err
 	for _, role := range roles {
 		roleIds = append(roleIds, role.RoleId)
 	}
+	g.Log().Infof(ctx, "sSysMenu.GetUserMenu roleIds: %v", roleIds)
 	// 判断是否存在超级管理员角色
 	if slices.Contains(roleIds, consts.SuperAdminRoleId) {
 		// 获取所有菜单
-		err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().Status, consts.SysMenuStatusNormal).Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
+		err = l.ModelQuery(ctx).Where(dao.SysMenu.Columns().Status, consts.SysMenuStatusNormal).
+			Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
 		return
 	}
 	// 获取角色菜单列表
@@ -159,13 +173,17 @@ func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err
 	if err != nil {
 		return nil, err
 	}
-	// g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuList: %v", menuList)
+	g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuList: %v", menuList)
 	menuIds := make([]int64, 0)
 	for _, menu := range menuList {
 		menuIds = append(menuIds, menu.MenuId)
 	}
+	g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuIds: %v", menuIds)
 	// 获取用户角色菜单
-	err = dao.SysMenu.Ctx(ctx).WhereIn(dao.SysMenu.Columns().MenuId, menuIds).Where(dao.SysMenu.Columns().Status, consts.SysMenuStatusNormal).Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
+	err = l.ModelQuery(ctx).WhereIn(dao.SysMenu.Columns().MenuId, menuIds).
+		Where(dao.SysMenu.Columns().Status, consts.SysMenuStatusNormal).
+		Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
+	g.Log().Infof(ctx, "sSysMenu.GetUserMenu data: %v", data)
 	return
 }
 
@@ -206,6 +224,7 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 			if menu.Visible == consts.SysMenuVisibleHide {
 				hideInMenu = true
 			}
+			keepAlive := true
 			item := &v1.RouteMenu{
 				Id:        menu.MenuId,
 				ParentId:  menu.ParentId,
@@ -222,6 +241,7 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 					HideInMenu:      &hideInMenu,
 					Authority:       strings.Split(menu.Perms, ","),
 					Link:            link,
+					KeepAlive:       &keepAlive,
 				},
 			}
 			if hideInMenu {
@@ -266,7 +286,7 @@ func (l *sSysMenu) GetUserMenuTree(ctx context.Context) (data v1.MenuAllRes, err
 
 func (l *sSysMenu) GetSysMenuView(ctx context.Context, menuId int64) (data *model.SysMenuViewModel, err error) {
 	menu := &entity.SysMenu{}
-	err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().MenuId, menuId).Scan(menu)
+	err = l.ModelQuery(ctx).Where(dao.SysMenu.Columns().MenuId, menuId).Scan(menu)
 	if err != nil {
 		return nil, err
 	}
@@ -279,10 +299,11 @@ func (l *sSysMenu) GetSysMenuView(ctx context.Context, menuId int64) (data *mode
 func (l *sSysMenu) UpdateSysMenu(ctx context.Context, menu *model.SysMenuUpdateModel) (data *model.SysMenuViewModel, err error) {
 	menu.UpdatedAt = gtime.Now()
 	menu.UpdatedBy = contexts.GetUserId(ctx)
-	_, err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().MenuId, menu.MenuId).Data(menu).OmitNil().Update(menu)
+	_, err = l.Model(ctx).Where(dao.SysMenu.Columns().MenuId, menu.MenuId).Data(menu).OmitNil().Update(menu)
 	if err != nil {
 		return nil, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysMenuUpdate, menu.MenuId)
 	data, err = l.GetSysMenuView(ctx, menu.MenuId)
 	if err != nil {
 		return nil, err
@@ -296,7 +317,7 @@ func (l *sSysMenu) AddSysMenu(ctx context.Context, menu *model.SysMenuAddModel) 
 	menu.CreatedBy = contexts.GetUserId(ctx)
 	menu.UpdatedAt = gtime.Now()
 	menu.UpdatedBy = contexts.GetUserId(ctx)
-	re, err := dao.SysMenu.Ctx(ctx).Data(menu).Insert()
+	re, err := l.Model(ctx).Data(menu).Insert()
 	if err != nil {
 		return nil, err
 	}
@@ -304,6 +325,7 @@ func (l *sSysMenu) AddSysMenu(ctx context.Context, menu *model.SysMenuAddModel) 
 	if err != nil {
 		return nil, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysMenuCreate, menuId)
 	data, err = l.GetSysMenuView(ctx, menuId)
 	if err != nil {
 		return nil, err
@@ -312,13 +334,14 @@ func (l *sSysMenu) AddSysMenu(ctx context.Context, menu *model.SysMenuAddModel) 
 }
 
 func (l *sSysMenu) DeleteSysMenu(ctx context.Context, menuId int64) (err error) {
-	_, err = dao.SysMenu.Ctx(ctx).Where(dao.SysMenu.Columns().MenuId, menuId).Delete()
+	_, err = l.Model(ctx).Where(dao.SysMenu.Columns().MenuId, menuId).Delete()
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysMenuDelete, menuId)
 	return
 }
 
 func (s *sSysMenu) GetFastList(ctx context.Context) (res map[int64]*entity.SysMenu, err error) {
 	var models []*entity.SysMenu
-	if err = dao.SysMenu.Ctx(ctx).Scan(&models); err != nil {
+	if err = s.ModelQuery(ctx).Scan(&models); err != nil {
 		return
 	}
 

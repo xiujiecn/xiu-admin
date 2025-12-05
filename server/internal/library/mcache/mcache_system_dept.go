@@ -15,7 +15,9 @@ import (
 )
 
 func init() {
-	event.EventsInstance().Register(consts.EventKeySysDeptUpdate, func(ctx context.Context, eventKey string, args ...interface{}) {
+	event.EventsInstance().Register([]string{consts.EventKeyDBSysDeptUpdate,
+		consts.EventKeyDBSysDeptCreate,
+		consts.EventKeyDBSysDeptDelete}, func(ctx context.Context, eventKey string, args ...interface{}) {
 		if len(args) == 0 {
 			return
 		}

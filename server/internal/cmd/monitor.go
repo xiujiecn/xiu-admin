@@ -29,7 +29,7 @@ func InitMonitor() {
 			time.Sleep(time.Second * 5)
 		}
 	}()
-	websocket.RegisterTagCallback(consts.WSTagMonitorServer, func(client *websocket.Client) {
+	websocket.RegisterTagCallback(consts.WSTagMonitorServer, func(client *websocket.Client, tag string) {
 		RunMonitor()
 	})
 }

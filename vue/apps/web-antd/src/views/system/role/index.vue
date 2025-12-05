@@ -15,7 +15,7 @@ import { Page } from '@vben/common-ui';
 
 import { Button, message, Switch,Tag, Modal, Popconfirm } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysRoleListApi, deleteSysRoleApi } from '#/api/system/role'; 
+import { getSysRoleListApi, deleteSysRoleApi } from '#/api/system/role';
 import { getVxePopupContainer } from '@vben/utils';
 import { useVbenDrawer,useVbenModal } from '@vben/common-ui';
 
@@ -114,10 +114,10 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'roleId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'roleId', title: 'ID' },
     { field: 'roleName', title: '角色名称' },
     { field: 'roleKey', title: '角色权限字符串' },
     { field: 'dataScope', title: '数据范围', slots: { default: 'dataScope' }, minWidth: 90 },
@@ -229,7 +229,7 @@ function handleDataScope(row: SysRoleListData) {
   <Page auto-content-height>
     <Grid table-title="角色管理">
       <template #toolbar-tools>
-        
+
           <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:role:add'">新增</Button>
         <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:role:remove'">删除</Button>
       </template>

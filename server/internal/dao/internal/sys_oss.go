@@ -34,6 +34,10 @@ type SysOssColumns struct {
 	UpdatedAt    string // 更新时间
 	UpdatedBy    string // 更新者
 	Service      string // 服务商
+	Md5          string // 文件MD5
+	FileSize     string // 文件大小
+	FileCrc16    string // 文件Crc16
+	FileSum      string // 文件校验和
 }
 
 // sysOssColumns holds the columns for the table sys_oss.
@@ -51,6 +55,10 @@ var sysOssColumns = SysOssColumns{
 	UpdatedAt:    "updated_at",
 	UpdatedBy:    "updated_by",
 	Service:      "service",
+	Md5:          "md5",
+	FileSize:     "file_size",
+	FileCrc16:    "file_crc16",
+	FileSum:      "file_sum",
 }
 
 // NewSysOssDao creates and returns a new DAO object for table data access.

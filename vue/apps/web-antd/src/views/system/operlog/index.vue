@@ -11,7 +11,7 @@ const { hasAccessByCodes } = useAccess();
 import { Button, message,Tag  } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysOperLogList } from '#/api/system/oper-log'; 
+import { getSysOperLogList } from '#/api/system/oper-log';
 
 import viewDrawer from './view-drawer.vue';
 
@@ -44,7 +44,7 @@ const formOptions: VbenFormProps = {
       fieldName: 'createdBy',
       label: '创建者',
     },
-    
+
 
     {
       component: 'RangePicker',
@@ -68,10 +68,10 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'operId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'operId', title: 'ID' },
     { field: 'businessType', title: '业务类型', slots: { default: 'businessType' } },
     { field: 'method', title: '操作' },
     { field: 'operName', title: '操作人员' },

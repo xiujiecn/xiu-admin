@@ -95,10 +95,10 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'infoId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'infoId', title: 'ID' },
     { field: 'userName', title: '用户名称' },
     { field: 'clientKey', title: '客户端' },
     { field: 'deviceType', title: '设备类型' },

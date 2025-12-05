@@ -16,7 +16,6 @@ import { $t } from '@vben/locales';
 import { addFullName, cloneDeep } from '@vben/utils';
 
 import { useVbenForm } from '#/adapter/form';
-import MenuSelect from '../menu/menu-select.vue';
 
 import { addSysPostApi, editSysPostApi, getSysPostViewApi } from '#/api/system/post';
 import { getSysDeptTreeApi } from '#/api/system/dept';

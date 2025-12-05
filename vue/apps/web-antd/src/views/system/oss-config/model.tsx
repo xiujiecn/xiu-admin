@@ -172,7 +172,7 @@ import type {
     },
     {
       field: 'createdDept',
-      label: '创建部门',
+      label: '创建机构',
     },
     {
       field: 'createdBy',

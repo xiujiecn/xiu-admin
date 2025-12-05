@@ -80,10 +80,10 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'configId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'configId', title: 'ID' },
     { field: 'configName', title: '参数名称' },
     { field: 'configKey', title: '参数键名' },
     { field: 'configValue', title: '参数键值' },

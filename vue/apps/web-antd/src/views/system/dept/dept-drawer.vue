@@ -1,5 +1,5 @@
 <!--
- * @description 部门管理编辑抽屉组件
+ * @description 机构管理编辑抽屉组件
  * @Link  https://github.com/xiujiecn/xiu-admin
  * @Copyright  Copyright (c) 2025 LiXiujie
  * @Author  Lxj <li@xiujie.cn>
@@ -67,7 +67,7 @@ async function initDeptUsers(deptId: number | string) {
       componentProps: {
         disabled: data.length === 0,
         options,
-        placeholder: data.length === 0 ? '该部门暂无用户' : '请选择部门负责人',
+        placeholder: data.length === 0 ? '该机构暂无用户' : '请选择机构负责人',
       },
       fieldName: 'leader',
     },
@@ -80,7 +80,7 @@ async function setLeaderOptions() {
       componentProps: {
         disabled: true,
         options: [],
-        placeholder: '仅在更新时可选部门负责人',
+        placeholder: '仅在更新时可选机构负责人',
       },
       fieldName: 'leader',
     },

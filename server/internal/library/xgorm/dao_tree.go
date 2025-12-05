@@ -72,8 +72,12 @@ func AutoUpdateTree(ctx context.Context, dao daoInstance, id, pid int64, option 
 		newTree = ""
 	} else {
 		var pdMap map[string]interface{}
-		if err = dao.Ctx(ctx).Fields(option.IdField, option.PidField, option.LevelField, option.TreeField).WherePri(pid).Scan(&pdMap); err != nil {
+		row, err := dao.Ctx(ctx).Fields(option.IdField, option.PidField, option.LevelField, option.TreeField).WherePri(pid).One()
+		if err != nil {
 			return 0, 0, "", err
+		}
+		if row != nil {
+			pdMap = row.Map()
 		}
 
 		if len(pdMap) == 0 {

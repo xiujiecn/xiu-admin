@@ -17,7 +17,7 @@ import { getVxePopupContainer } from '@vben/utils';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Button, message,Tag, Modal, Popconfirm,Switch } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysClientListApi, postSysClientDeleteApi, postSysClientStatusApi } from '#/api/system/client'; 
+import { getSysClientListApi, postSysClientDeleteApi, postSysClientStatusApi } from '#/api/system/client';
 import { MdiPlus, MdiDelete,} from '@vben/icons';
 import { AccessControl, useAccess } from '@vben/access';
 
@@ -51,7 +51,6 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'id',
   },
   rowConfig: {
     keyField: 'id',
@@ -171,7 +170,7 @@ async function handleStatusChange(row: SysClient) {
     message.error("PC客户端不允许禁用");
     return;
   }
-  await postSysClientStatusApi({ id: row.id, status: row.status }); 
+  await postSysClientStatusApi({ id: row.id, status: row.status });
   await message.success("操作成功")
   await handleRefresh();
 }
@@ -198,7 +197,7 @@ async function handleStatusChange(row: SysClient) {
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:client:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:client:edit'">修改</Button>
           <AccessControl :codes="['cpm:system:client:remove']" type="code">
-            <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" >  
+            <Popconfirm title="确定删除吗？" v-if="row.id != 1" :get-popup-container="getVxePopupContainer" placement="left"  @confirm="handleDelete(row)" >
               <Button class="mr-2 border-none p-0" :block="false" type="link"  danger  >删除</Button>
             </Popconfirm>
           </AccessControl>

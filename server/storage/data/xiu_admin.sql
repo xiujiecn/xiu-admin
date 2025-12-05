@@ -117,7 +117,7 @@ CREATE TABLE `sys_config` (
   `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
   `config_name` varchar(100) DEFAULT '' COMMENT '参数名称',
   `config_key` varchar(100) DEFAULT '' COMMENT '参数键名',
-  `config_value` varchar(500) DEFAULT '' COMMENT '参数键值',
+  `config_value` varchar(1024) DEFAULT '' COMMENT '参数键值',
   `config_type` char(1) DEFAULT 'N' COMMENT '系统内置（Y是 N否）',
   `created_dept` bigint(20) DEFAULT NULL COMMENT '创建部门',
   `created_by` bigint(20) DEFAULT NULL COMMENT '创建者',
@@ -578,6 +578,9 @@ CREATE TABLE `sys_notice` (
   `notice_type` char(1) NOT NULL COMMENT '公告类型（1通知 2公告）',
   `notice_content` longblob DEFAULT NULL COMMENT '公告内容',
   `status` char(1) DEFAULT '0' COMMENT '公告状态（0正常 1关闭）',
+  `notice_range` tinyint(1) NOT NULL DEFAULT 1 COMMENT '通知范围（1全员 2指定机构 3指定用户）',
+  `dept_ids` text   COMMENT '通知机构ID列表JSON',
+  `user_ids` text   COMMENT '通知用户ID列表JSON',
   `created_dept` bigint(20) DEFAULT NULL COMMENT '创建部门',
   `created_by` bigint(20) DEFAULT NULL COMMENT '创建者',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
@@ -594,6 +597,26 @@ BEGIN;
 INSERT INTO `sys_notice` (`notice_id`, `tenant_id`, `notice_title`, `notice_type`, `notice_content`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (1, '000000', '温馨提醒：2018-07-01 新版本发布啦', '2', 0xE696B0E78988E69CACE58685E5AEB9, '0', 103, 1, '2025-02-13 11:56:36', NULL, NULL, '管理员');
 INSERT INTO `sys_notice` (`notice_id`, `tenant_id`, `notice_title`, `notice_type`, `notice_content`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (2, '000000', '维护通知：2018-07-01 系统凌晨维护', '1', 0xE7BBB4E68AA4E58685E5AEB9, '0', 103, 1, '2025-02-13 11:56:36', NULL, NULL, '管理员');
 COMMIT;
+
+
+CREATE TABLE `sys_notice` (
+  `notice_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '公告ID',
+  `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
+  `notice_title` varchar(50) NOT NULL COMMENT '公告标题',
+  `notice_type` char(1) NOT NULL COMMENT '公告类型（1通知 2公告）',
+  `notice_content` longblob DEFAULT NULL COMMENT '公告内容',
+  `status` char(1) DEFAULT '0' COMMENT '公告状态（0正常 1关闭）',
+  `notice_range` tinyint(1) NOT NULL DEFAULT 1 COMMENT '通知范围（1全员 2指定机构 3指定用户）',
+  `dept_ids` text DEFAULT NULL COMMENT '通知机构ID列表JSON',
+  `user_ids` text DEFAULT NULL COMMENT '通知用户ID列表JSON',
+  `created_dept` bigint(20) DEFAULT NULL COMMENT '创建部门',
+  `created_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(255) DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`notice_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='通知公告表';
 
 -- ----------------------------
 -- Table structure for sys_oper_log
@@ -648,6 +671,10 @@ CREATE TABLE `sys_oss` (
   `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
   `updated_by` bigint(20) DEFAULT NULL COMMENT '更新者',
   `service` varchar(20) NOT NULL DEFAULT 'minio' COMMENT '服务商',
+  `md5` varchar(64)  NULL DEFAULT NULL COMMENT '文件MD5',
+  `file_size` int NULL DEFAULT NULL COMMENT '文件大小',
+  `file_crc16` int NOT NULL COMMENT '文件Crc16',
+  `file_sum` int NOT NULL COMMENT '文件校验和',
   PRIMARY KEY (`oss_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='OSS对象存储表';
 
@@ -918,7 +945,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_social`;
 CREATE TABLE `sys_social` (
-  `id` bigint(20) NOT NULL COMMENT '主键',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户id',
   `auth_id` varchar(255) NOT NULL COMMENT '平台+平台唯一id',

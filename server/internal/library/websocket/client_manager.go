@@ -18,21 +18,21 @@ import (
 
 // ClientManager 客户端管理
 type ClientManager struct {
-	Clients         map[*Client]bool                // 全部的连接
-	ClientsLock     sync.RWMutex                    // 读写锁
-	Users           map[string]*Client              // 登录的用户 // uuid
-	UserLock        sync.RWMutex                    // 读写锁
-	Register        chan *Client                    // 连接连接处理
-	Login           chan *login                     // 用户登录处理
-	Unregister      chan *Client                    // 断开连接处理程序
-	Broadcast       chan *WResponse                 // 广播 向全部成员发送数据
-	ClientBroadcast chan *ClientWResponse           // 广播 向某个客户端发送数据
-	TagBroadcast    chan *TagWResponse              // 广播 向某个标签成员发送数据
-	UserBroadcast   chan *UserWResponse             // 广播 向某个用户的所有链接发送数据
-	TagCallbackMap  map[string]func(client *Client) // 注册标签回调
-	closeSignal     chan struct{}                   // 关闭信号
-	TagCountMap     map[string]int                  // 标签map
-	TagLock         sync.RWMutex                    // 标签读写锁
+	Clients         map[*Client]bool                            // 全部的连接
+	ClientsLock     sync.RWMutex                                // 读写锁
+	Users           map[string]*Client                          // 登录的用户 // uuid
+	UserLock        sync.RWMutex                                // 读写锁
+	Register        chan *Client                                // 连接连接处理
+	Login           chan *login                                 // 用户登录处理
+	Unregister      chan *Client                                // 断开连接处理程序
+	Broadcast       chan *WResponse                             // 广播 向全部成员发送数据
+	ClientBroadcast chan *ClientWResponse                       // 广播 向某个客户端发送数据
+	TagBroadcast    chan *TagWResponse                          // 广播 向某个标签成员发送数据
+	UserBroadcast   chan *UserWResponse                         // 广播 向某个用户的所有链接发送数据
+	TagCallbackMap  map[string]func(client *Client, tag string) // 注册标签回调
+	closeSignal     chan struct{}                               // 关闭信号
+	TagCountMap     map[string]int                              // 标签map
+	TagLock         sync.RWMutex                                // 标签读写锁
 }
 
 func NewClientManager() (clientManager *ClientManager) {
@@ -44,7 +44,7 @@ func NewClientManager() (clientManager *ClientManager) {
 		Broadcast:      make(chan *WResponse, 1000),
 		TagBroadcast:   make(chan *TagWResponse, 1000),
 		UserBroadcast:  make(chan *UserWResponse, 1000),
-		TagCallbackMap: make(map[string]func(client *Client)),
+		TagCallbackMap: make(map[string]func(client *Client, tag string)),
 		closeSignal:    make(chan struct{}, 1),
 		TagCountMap:    make(map[string]int),
 		TagLock:        sync.RWMutex{},
@@ -325,7 +325,7 @@ func SendToTag(tag string, response *WResponse) {
 }
 
 // RegisterTagCallback 注册标签回调
-func RegisterTagCallback(tag string, callback func(client *Client)) {
+func RegisterTagCallback(tag string, callback func(client *Client, tag string)) {
 	clientManager.TagLock.Lock()
 	defer clientManager.TagLock.Unlock()
 	clientManager.TagCallbackMap[tag] = callback
@@ -372,4 +372,13 @@ func GetTagCount(tag string) (count int) {
 		return count
 	}
 	return 0
+}
+
+// 变量Tag Count
+func RangeTagCount(callback func(tag string, count int)) {
+	clientManager.TagLock.RLock()
+	defer clientManager.TagLock.RUnlock()
+	for tag, count := range clientManager.TagCountMap {
+		callback(tag, count)
+	}
 }

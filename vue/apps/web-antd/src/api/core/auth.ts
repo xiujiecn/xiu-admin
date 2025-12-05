@@ -30,11 +30,23 @@ export namespace AuthApi {
   export interface LoginResult {
     accessToken: string;
   }
+  /** 注册接口参数 */
+  export interface RegisterParams {
+    tenantId?: string;
+    username?: string;
+    password?: string;
+    captchaID?: string;
+    captchaValue?: string;
+  }
+    export interface RegisterResult {
+  }
 
   export interface RefreshTokenResult {
     data: string;
     status: number;
   }
+
+
   export interface BaseLoginParams {
     clientId?: string;
     grantType: GrantType;
@@ -82,6 +94,16 @@ export interface GetAccessCodesResult {
  */
 export async function loginApi(data: AuthApi.LoginParams) {
   return requestClient.post<AuthApi.LoginResult>('/system/auth/login', data);
+}
+/**
+ * 注册register
+ */
+
+export async function registerApi(data: AuthApi.RegisterParams) {
+  return requestClient.post<AuthApi.RegisterResult>(
+    '/system/user/register',
+    data,
+  );
 }
 
 /**

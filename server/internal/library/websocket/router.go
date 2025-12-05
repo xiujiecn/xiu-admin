@@ -26,15 +26,16 @@ const (
 func ProcessData(client *Client, message []byte) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("处理数据 stop", r)
+			fmt.Println("websocket.ProcessData 处理数据 stop", r, "message=", message)
 		}
 	}()
 	request := &request{}
 	err := gconv.Struct(message, request)
 	if err != nil {
-		fmt.Println("数据解析失败：", err)
+		fmt.Println("websocket.ProcessData 数据解析失败：", err)
 		return
 	}
+	fmt.Println("websocket.ProcessData request", request)
 	switch request.Event {
 	case Login:
 		LoginController(client, request)

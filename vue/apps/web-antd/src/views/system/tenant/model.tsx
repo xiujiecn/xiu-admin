@@ -104,7 +104,7 @@ export const viewSchema: DescItem[] = [
       );
     },
   },
-  { field: 'createdDept', label: '创建部门' },
+  { field: 'createdDept', label: '创建机构' },
   { field: 'createdBy', label: '创建者' },
   { field: 'createdAt', label: '创建时间' },
   { field: 'updatedBy', label: '更新者' },
@@ -144,8 +144,9 @@ export const drawerSchema: VbenFormSchema[] = [
   {
     component: 'Input',
     fieldName: 'companyName',
-    label: '企业名称',
-    rules: 'required',
+    label: '企业名称',rules: z.string()
+      .min(1, '企业名称不能为空')
+      .max(32, '企业名称最大长度32位'),
   },
   {
     component: 'Input',
@@ -179,9 +180,9 @@ export const drawerSchema: VbenFormSchema[] = [
   {
     component: 'Input',
     fieldName: 'username',
-    label: '用户账号',
-    rules: 'required',
-    dependencies: {
+    label: '用户账号',rules: z.string()
+      .min(1, '用户账号不能为空')
+      .max(32, '用户账号最大长度32位'),    dependencies: {
       if: (values) => !values?.tenantId,
       triggerFields: ['tenantId'],
     },

@@ -19,7 +19,7 @@ import { AccessControl, useAccess } from '@vben/access';
 const { hasAccessByCodes } = useAccess();
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysDictDataListApi,deleteSysDictDataApi } from '#/api'; 
+import { getSysDictDataListApi,deleteSysDictDataApi } from '#/api';
 import { useRouter } from 'vue-router';
 import dictDataDrawer from './dict-data-drawer.vue';
 
@@ -29,9 +29,9 @@ const route = useRouter();
 const dictId = parseInt(route.currentRoute.value.path.split('/').pop() || '0');
 const dictName = ref('');
 const dictType = ref('');
+const dictIsSys = ref('1'); // 默认为非系统内置，避免在加载完成前误判权限
 
 onMounted(() => {
-  // console.log("vue/apps/web-antd/src/views/system/dict-data/index.vue", dictId);
 })
 import {
   MdiPlus,
@@ -95,16 +95,19 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
-        return await getSysDictDataListApi({
+         const res = await getSysDictDataListApi({
           page: page.currentPage,
           pageSize: page.pageSize,
           dictId: dictId,
           ...formValues,
-        });
+        })
+        // console.log('res',res);
+        return res;
       },
       querySuccess: ({ page, sort, sorts, filters, form, response }) => {
         dictName.value = response.type.dictName;
         dictType.value = response.type.dictType;
+        dictIsSys.value = response.type.isSys || '1'; // 获取字典类型的系统内置状态
       },
     },
   },
@@ -206,9 +209,41 @@ function handleMultiDelete() {
   <Page auto-content-height>
     <Grid :table-title="'['+dictName+']' +'['+dictType+']' + '字典数据'">
       <template #toolbar-tools>
-        
-        <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:dict:add'">新增</Button>
-        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:dict:remove'">删除</Button>
+        <!-- 新增按钮：系统内置时只有超级管理员可操作 -->
+        <AccessControl
+          :codes="dictIsSys === '0' ? ['cpr:superadmin'] : ['cpm:system:dict:add']"
+          type="code"
+        >
+          <template #default="{ hasPermission }">
+            <Button
+              class="mr-2 flex items-center"
+              type="primary"
+              :icon="h(MdiPlus)"
+              :disabled="!hasPermission"
+              @click="handleAdd"
+            >
+              新增
+            </Button>
+          </template>
+        </AccessControl>
+
+        <!-- 批量删除按钮：系统内置时只有超级管理员可操作 -->
+        <AccessControl
+          :codes="dictIsSys === '0' ? ['cpr:superadmin'] : ['cpm:system:dict:remove']"
+          type="code"
+        >
+          <template #default="{ hasPermission }">
+            <Button
+              class="mr-2 flex items-center"
+              type="primary"
+              :disabled="!CheckboxChecked || !hasPermission"
+              :icon="h(MdiDelete)"
+              @click="handleMultiDelete"
+            >
+              删除
+            </Button>
+          </template>
+        </AccessControl>
       </template>
       <template #label="{ row }">
         <Tag :color="labelColor(row)">{{ row.dictLabel }}</Tag>
@@ -219,11 +254,60 @@ function handleMultiDelete() {
       <template #action="{ row }">
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:dict:query'">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:dict:edit'">修改</Button>
-          <AccessControl :codes="['cpm:system:dict:remove']" type="code">
-            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
-              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
-            </Popconfirm>
+
+          <!-- 修改按钮：系统内置时只有超级管理员可操作 -->
+          <AccessControl
+            :codes="dictIsSys === '0' ? ['cpr:superadmin'] : ['cpm:system:dict:edit']"
+            type="code"
+          >
+            <template #default="{ hasPermission }">
+              <Button
+                class="mr-2 border-none p-0"
+                :block="false"
+                type="link"
+                :disabled="!hasPermission"
+                @click="handleEdit(row)"
+              >
+                修改
+              </Button>
+            </template>
+          </AccessControl>
+
+          <!-- 删除按钮：系统内置时只有超级管理员可操作 -->
+          <AccessControl
+            :codes="dictIsSys === '0' ? ['cpr:superadmin'] : ['cpm:system:dict:remove']"
+            type="code"
+          >
+            <template #default="{ hasPermission }">
+              <!-- 有权限时显示可点击的删除按钮 -->
+              <Popconfirm
+                v-if="hasPermission"
+                :get-popup-container="getVxePopupContainer"
+                placement="left"
+                title="确定删除吗？"
+                @confirm="handleDelete(row)"
+              >
+                <Button
+                  class="mr-2 border-none p-0"
+                  :block="false"
+                  type="link"
+                  danger
+                >
+                  删除
+                </Button>
+              </Popconfirm>
+              <!-- 无权限时显示禁用的删除按钮，不包含点击事件 -->
+              <Button
+                v-else
+                class="mr-2 border-none p-0"
+                :block="false"
+                type="link"
+                danger
+                disabled
+              >
+                删除
+              </Button>
+            </template>
           </AccessControl>
         </div>
       </template>

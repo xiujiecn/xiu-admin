@@ -13,7 +13,7 @@ import type {
   import { getDictOptions } from '#/utils/dict';
   import { DictEnum } from '@vben/constants';
   import { getPopupContainer } from '@vben/utils';
-  
+
   export const drawerSchema: VbenFormSchema[] =  [
     {
       component: 'Input',
@@ -27,8 +27,9 @@ import type {
     {
       component: 'Input',
       fieldName: 'dictName',
-      label: '字典名称',
-      rules: 'required',
+      label: '字典名称',rules: z.string()
+      .min(1, '字典名称不能为空')
+      .max(32, '字典名称最大长度32位'),
     },
     {
       component: 'Input',
@@ -39,6 +40,20 @@ import type {
         .string()
         .regex(/^[a-z_]+$/i, { message: '字典类型只能使用英文/下划线命名' }),
     },
+    //添加是否系统内置 字段
+     {
+      component: 'RadioGroup',
+      componentProps: {
+        buttonStyle: 'solid',
+        options: getDictOptions(DictEnum.SYS_YES_NO),
+        optionType: 'button',
+      },
+      defaultValue: 'N', // 默认为"否"，提交时会转换为 1
+      fieldName: 'isSys',
+      label: '是否系统内置',
+      rules: 'required',
+      //根据用户身份决定这个字段的值是否可以修改； cpr:superadmin
+    },
     {
       component: 'Textarea',
       fieldName: 'remark',
@@ -46,4 +61,3 @@ import type {
       label: '备注',
     },
   ];
-  

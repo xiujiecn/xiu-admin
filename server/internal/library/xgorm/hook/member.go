@@ -63,34 +63,54 @@ var MemberSummary = gdb.HookHandler{
 
 		var members []*MemberSumma
 		if err = g.Model("sys_user").Ctx(ctx).WhereIn("user_id", memberIds).Scan(&members); err != nil {
+			g.Log().Errorf(ctx, "[MemberSummary] 查询用户信息失败: %v", err)
 			return nil, err
 		}
 
 		if len(members) == 0 {
+			g.Log().Warningf(ctx, "[MemberSummary] 没有找到任何用户信息，用户IDs: %v", memberIds)
 			return
 		}
 
 		findMember := func(id *gvar.Var) *MemberSumma {
+			userId := id.Int64()
 			for _, v := range members {
-				if v.UserId == id.Int64() {
+				if v.UserId == userId {
 					return v
 				}
 			}
+			// 只在找不到用户时记录警告（避免日志过多）
+			g.Log().Warningf(ctx, "[MemberSummary] 未找到用户ID: %d", userId)
 			return nil
 		}
 
 		for _, record := range result {
 			if record["created_by"].Int64() > 0 {
-				record["createdBySumma"] = gvar.New(findMember(record["created_by"]))
+				member := findMember(record["created_by"])
+				if member != nil {
+					record["createdBySumma"] = gvar.New(member)
+				}
 			}
+
 			if record["updated_by"].Int64() > 0 {
-				record["updatedBySumma"] = gvar.New(findMember(record["updated_by"]))
+				member := findMember(record["updated_by"])
+				if member != nil {
+					record["updatedBySumma"] = gvar.New(member)
+				}
 			}
+
 			if record["deleted_by"].Int64() > 0 {
-				record["deletedBySumma"] = gvar.New(findMember(record["deleted_by"]))
+				member := findMember(record["deleted_by"])
+				if member != nil {
+					record["deletedBySumma"] = gvar.New(member)
+				}
 			}
+
 			if record["user_id"].Int64() > 0 {
-				record["memberBySumma"] = gvar.New(findMember(record["user_id"]))
+				member := findMember(record["user_id"])
+				if member != nil {
+					record["memberBySumma"] = gvar.New(member)
+				}
 			}
 		}
 		return

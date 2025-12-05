@@ -58,7 +58,7 @@ const [BasicTable, tableApi] = useVbenVxeGrid({ gridOptions });
 
 async function handleForceOffline(row: Recordable<any>) {
   await deleteSysUserOnlineApi({
-    id: row.onlineId,
+    ids: [row.onlineId],
   });
   await tableApi.query();
 }

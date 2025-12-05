@@ -37,6 +37,7 @@ import {
 
 } from 'ant-design-vue';
 import { Tinymce as RichTextarea } from '#/components/tinymce';
+import { FileUpload, ImageUpload } from '#/components/upload';
 
 const withDefaultPlaceholder = <T extends Component>(
   component: T,
@@ -58,7 +59,9 @@ export type ComponentType =
   | 'DatePicker'
   | 'DefaultButton'
   | 'Divider'
+  | 'FileUpload'
   | 'IconPicker'
+  | 'ImageUpload'
   | 'Input'
   | 'InputNumber'
   | 'InputPassword'
@@ -124,6 +127,8 @@ async function initComponentAdapter() {
       return h(Button, { ...props, attrs, type: 'default' }, slots);
     },
     Divider,
+    FileUpload,
+    ImageUpload,
     IconPicker: (props, { attrs, slots }) => {
       return h(
         IconPicker,

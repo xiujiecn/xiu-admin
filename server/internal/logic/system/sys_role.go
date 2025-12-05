@@ -11,6 +11,7 @@ import (
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/dao"
 	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/event"
 	"xiuadmin/internal/library/xgorm/handler"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/do"
@@ -39,15 +40,26 @@ func (l *sSysRole) Model(ctx context.Context, option ...*handler.Option) *gdb.Mo
 	if len(option) == 0 {
 		option = append(option, &handler.Option{
 			FilterTenant: true,
-			FilterAuth:   true,
+			FilterAuth:   false, // 角色表不验证数据权限
 		})
 	}
 	return handler.Model(dao.SysRole.Ctx(ctx), option...)
 }
 
+func (l *sSysRole) ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) == 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: true,
+			FilterAuth:   false, // 角色表不验证数据权限
+		})
+	}
+	return handler.Model(service.MemoryDB().DB(ctx).Ctx(ctx).Model(dao.SysRole.Table()), option...)
+}
+
 // 获取租户下角色列表
 func (s *sSysRole) List(ctx context.Context, param *model.SysRoleListParam) (res []*model.SysRoleListModel, total int, err error) {
-	db := s.Model(ctx)
+	db := s.ModelQuery(ctx)
+	// 注意：ModelQuery使用内存数据库，删除的记录会被物理删除，所以不需要过滤deleted_at
 	if param.RoleName != "" {
 		db = db.WhereLike(dao.SysRole.Columns().RoleName, "%"+param.RoleName+"%")
 	}
@@ -71,7 +83,7 @@ func (s *sSysRole) List(ctx context.Context, param *model.SysRoleListParam) (res
 
 // 获取角色详情
 func (s *sSysRole) View(ctx context.Context, param *model.SysRoleViewParam) (res *model.SysRoleViewModel, err error) {
-	err = s.Model(ctx).Where(dao.SysRole.Columns().RoleId, param.RoleId).Scan(&res)
+	err = s.ModelQuery(ctx).Where(dao.SysRole.Columns().RoleId, param.RoleId).Scan(&res)
 	if err != nil {
 		return nil, err
 	}
@@ -152,6 +164,7 @@ func (s *sSysRole) Add(ctx context.Context, param *model.SysRoleAddParam) (role 
 	if err != nil {
 		return nil, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysRoleCreate, roleId)
 
 	role = &model.SysRoleAddModel{
 		RoleId: roleId,
@@ -182,6 +195,7 @@ func (s *sSysRole) Edit(ctx context.Context, param *model.SysRoleEditParam) (rol
 	if err != nil {
 		return role, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysRoleUpdate, param.RoleId)
 	// 更新角色菜单
 	err = s.RoleMenu(ctx, param.RoleId, param.MenuIds)
 	if err != nil {
@@ -214,6 +228,7 @@ func (s *sSysRole) Delete(ctx context.Context, param *model.SysRoleDeleteParam) 
 	data.DeletedBy = user.ID
 	data.DeletedAt = gtime.Now()
 	_, err = s.Model(ctx).WhereIn(dao.SysRole.Columns().RoleId, roleIds).Data(data).OmitNil().Update()
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysRoleDelete, roleIds)
 	return
 }
 
@@ -298,6 +313,8 @@ func (s *sSysRole) EditRoleDataScope(ctx context.Context, model *model.SysRoleDa
 	if err != nil {
 		return err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysRoleUpdate, model.RoleId)
+
 	// 更新角色部门
 	err = s.RoleDept(ctx, model.RoleId, model.DeptIds)
 	if err != nil {

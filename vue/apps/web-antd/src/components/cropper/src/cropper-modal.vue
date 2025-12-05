@@ -3,12 +3,12 @@ import type { PropType } from 'vue';
 
 import type { CropendResult, Cropper } from './typing';
 
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 import { useVbenModal } from '@vben/common-ui';
 import { $t as t } from '@vben/locales';
 
-import { Avatar, message, Space, Tooltip, Upload,Button } from 'ant-design-vue';
+import { Avatar, message, Space, Tooltip, Upload, Button } from 'ant-design-vue';
 import { isFunction } from 'lodash-es';
 
 import { dataURLtoBlob } from '@vben/utils';
@@ -42,16 +42,24 @@ const prefixCls = 'cropper-am';
 const [BasicModal, modalApi] = useVbenModal({
   onConfirm: handleOk,
   onOpenChange(isOpen) {
-    // 打开的时候loading CropperImage组件加载完毕关闭loading
     if (isOpen) {
-      modalLoading(true);
+      if (!src.value) {
+        modalLoading(false);
+      } else {
+        modalLoading(true);
+      }
     } else {
-      // 关闭时候清空右侧预览
-      previewSource.value = '';
+      resetState();
       modalLoading(false);
     }
   },
 });
+watch(() => props.src, (newVal) => {
+  src.value = newVal || '';
+  if (!newVal) {
+    modalLoading(false);
+  }
+}, { immediate: true });
 
 function modalLoading(loading: boolean) {
   modalApi.setState({ confirmLoading: loading, loading });
@@ -67,10 +75,18 @@ function handleBeforeUpload(file: File) {
   reader.readAsDataURL(file);
   src.value = '';
   previewSource.value = '';
+
+  // 添加错误处理
+  reader.addEventListener('error', () => {
+    modalLoading(false);
+    message.error('图片加载失败');
+  });
+
   reader.addEventListener('load', (e) => {
     src.value = (e.target?.result as string) ?? '';
     filename = file.name;
   });
+  fileList.value = [file];
   return false;
 }
 
@@ -101,49 +117,54 @@ async function handleOk() {
       message.warn('未选择图片');
       return;
     }
-    const blob = dataURLtoBlob(previewSource.value);
     try {
       modalLoading(true);
-      const result = await uploadApi({ file: blob, filename, name: 'file' });
-      emit('uploadSuccess', { data: result.url, source: previewSource.value });
+      // 始终使用裁剪后的图片进行上传
+      if (previewSource.value) {
+        const blob = dataURLtoBlob(previewSource.value);
+        // 修复文件名后缀，使其基于实际的 MIME 类型
+        const extension = blob.type.split("/")[1] || "png";
+        const file = new File([blob], `${filename.substring(0, filename.lastIndexOf('.')) || filename}.${extension}`, { type: blob.type });
+        await uploadApi({ file, filename, name: 'file' });
+        // 触发上传成功事件
+        emit('uploadSuccess', { source: previewSource.value });
+      }
       modalApi.close();
+    } catch (error:any) {
+      emit('uploadError', { msg: error.message });
     } finally {
       modalLoading(false);
     }
   }
 }
+
+
+function resetState() {
+  src.value = props.src || '';
+  previewSource.value = '';
+  filename = '';
+  scaleX = 1;
+  scaleY = 1;
+}
+
+function handleCancel() {
+  resetState();
+  modalApi.close();
+}
+const fileList = ref<any[]>([])
 </script>
 <template>
-  <BasicModal
-    v-bind="$attrs"
-    :confirm-text="t('component.cropper.okText')"
-    :fullscreen-button="false"
-    :title="t('component.cropper.modalTitle')"
-    class="w-[800px]"
-  >
+  <BasicModal v-bind="$attrs" :confirm-text="t('component.cropper.okText')" :fullscreen-button="false"
+    :title="t('component.cropper.modalTitle')" class="w-[800px]" @cancel="handleCancel">
     <div :class="prefixCls">
       <div :class="`${prefixCls}-left`" class="w-full">
         <div :class="`${prefixCls}-cropper`">
-          <CropperImage
-            v-if="src"
-            :circled="circled"
-            :src="src"
-            height="300px"
-            @cropend="handleCropend"
-            @ready="handleReady"
-          />
+          <CropperImage :circled="circled" :src="src" height="300px" @cropend="handleCropend" @ready="handleReady" />
         </div>
 
         <div :class="`${prefixCls}-toolbar`">
-          <Upload
-            :before-upload="handleBeforeUpload"
-            :file-list="[]"
-            accept="image/*"
-          >
-            <Tooltip
-              :title="t('component.cropper.selectImage')"
-              placement="bottom"
-            >
+          <Upload :before-upload="handleBeforeUpload" :file-list="[]" accept="image/*">
+            <Tooltip :title="t('component.cropper.selectImage')" placement="bottom">
               <Button size="small" type="primary">
                 <template #icon>
                   <div class="flex items-center justify-center">
@@ -154,16 +175,8 @@ async function handleOk() {
             </Tooltip>
           </Upload>
           <Space>
-            <Tooltip
-              :title="t('component.cropper.btn_reset')"
-              placement="bottom"
-            >
-              <Button
-                :disabled="!src"
-                size="small"
-                type="primary"
-                @click="handlerToolbar('reset')"
-              >
+            <Tooltip :title="t('component.cropper.btn_reset')" placement="bottom">
+              <Button :disabled="!src" size="small" type="primary" @click="handlerToolbar('reset')">
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <span class="icon-[ant-design--reload-outlined]"></span>
@@ -171,55 +184,27 @@ async function handleOk() {
                 </template>
               </Button>
             </Tooltip>
-            <Tooltip
-              :title="t('component.cropper.btn_rotate_left')"
-              placement="bottom"
-            >
-              <Button
-                :disabled="!src"
-                size="small"
-                type="primary"
-                @click="handlerToolbar('rotate', -45)"
-              >
+            <Tooltip :title="t('component.cropper.btn_rotate_left')" placement="bottom">
+              <Button :disabled="!src" size="small" type="primary" @click="handlerToolbar('rotate', -45)">
                 <template #icon>
                   <div class="flex items-center justify-center">
-                    <span
-                      class="icon-[ant-design--rotate-left-outlined]"
-                    ></span>
+                    <span class="icon-[ant-design--rotate-left-outlined]"></span>
                   </div>
                 </template>
               </Button>
             </Tooltip>
-            <Tooltip
-              :title="t('component.cropper.btn_rotate_right')"
-              placement="bottom"
-            >
-              <Button
-                :disabled="!src"
-                pre-icon="ant-design:rotate-right-outlined"
-                size="small"
-                type="primary"
-                @click="handlerToolbar('rotate', 45)"
-              >
+            <Tooltip :title="t('component.cropper.btn_rotate_right')" placement="bottom">
+              <Button :disabled="!src" pre-icon="ant-design:rotate-right-outlined" size="small" type="primary"
+                @click="handlerToolbar('rotate', 45)">
                 <template #icon>
                   <div class="flex items-center justify-center">
-                    <span
-                      class="icon-[ant-design--rotate-right-outlined]"
-                    ></span>
+                    <span class="icon-[ant-design--rotate-right-outlined]"></span>
                   </div>
                 </template>
               </Button>
             </Tooltip>
-            <Tooltip
-              :title="t('component.cropper.btn_scale_x')"
-              placement="bottom"
-            >
-              <Button
-                :disabled="!src"
-                size="small"
-                type="primary"
-                @click="handlerToolbar('scaleX')"
-              >
+            <Tooltip :title="t('component.cropper.btn_scale_x')" placement="bottom">
+              <Button :disabled="!src" size="small" type="primary" @click="handlerToolbar('scaleX')">
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <span class="icon-[vaadin--arrows-long-h]"></span>
@@ -227,16 +212,8 @@ async function handleOk() {
                 </template>
               </Button>
             </Tooltip>
-            <Tooltip
-              :title="t('component.cropper.btn_scale_y')"
-              placement="bottom"
-            >
-              <Button
-                :disabled="!src"
-                size="small"
-                type="primary"
-                @click="handlerToolbar('scaleY')"
-              >
+            <Tooltip :title="t('component.cropper.btn_scale_y')" placement="bottom">
+              <Button :disabled="!src" size="small" type="primary" @click="handlerToolbar('scaleY')">
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <span class="icon-[vaadin--arrows-long-v]"></span>
@@ -244,16 +221,8 @@ async function handleOk() {
                 </template>
               </Button>
             </Tooltip>
-            <Tooltip
-              :title="t('component.cropper.btn_zoom_in')"
-              placement="bottom"
-            >
-              <Button
-                :disabled="!src"
-                size="small"
-                type="primary"
-                @click="handlerToolbar('zoom', 0.1)"
-              >
+            <Tooltip :title="t('component.cropper.btn_zoom_in')" placement="bottom">
+              <Button :disabled="!src" size="small" type="primary" @click="handlerToolbar('zoom', 0.1)">
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <span class="icon-[ant-design--zoom-in-outlined]"></span>
@@ -261,16 +230,8 @@ async function handleOk() {
                 </template>
               </Button>
             </Tooltip>
-            <Tooltip
-              :title="t('component.cropper.btn_zoom_out')"
-              placement="bottom"
-            >
-              <Button
-                :disabled="!src"
-                size="small"
-                type="primary"
-                @click="handlerToolbar('zoom', -0.1)"
-              >
+            <Tooltip :title="t('component.cropper.btn_zoom_out')" placement="bottom">
+              <Button :disabled="!src" size="small" type="primary" @click="handlerToolbar('zoom', -0.1)">
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <span class="icon-[ant-design--zoom-out-outlined]"></span>
@@ -283,11 +244,7 @@ async function handleOk() {
       </div>
       <div :class="`${prefixCls}-right`">
         <div :class="`${prefixCls}-preview`">
-          <img
-            v-if="previewSource"
-            :alt="t('component.cropper.preview')"
-            :src="previewSource"
-          />
+          <img v-if="previewSource" :alt="t('component.cropper.preview')" :src="previewSource" />
         </div>
         <template v-if="previewSource">
           <div :class="`${prefixCls}-group`">
@@ -322,20 +279,16 @@ async function handleOk() {
   &-cropper {
     height: 300px;
     background: #eee;
-    background-image: linear-gradient(
-        45deg,
+    background-image: linear-gradient(45deg,
         rgb(0 0 0 / 25%) 25%,
         transparent 0,
         transparent 75%,
-        rgb(0 0 0 / 25%) 0
-      ),
-      linear-gradient(
-        45deg,
+        rgb(0 0 0 / 25%) 0),
+      linear-gradient(45deg,
         rgb(0 0 0 / 25%) 25%,
         transparent 0,
         transparent 75%,
-        rgb(0 0 0 / 25%) 0
-      );
+        rgb(0 0 0 / 25%) 0);
     background-position:
       0 0,
       12px 12px;

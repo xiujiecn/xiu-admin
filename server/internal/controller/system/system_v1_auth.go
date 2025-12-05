@@ -48,7 +48,7 @@ func (c *ControllerV1) Logout(ctx context.Context, req *v1.LogoutReq) (res *v1.L
 }
 func (c *ControllerV1) GetAccessCodes(ctx context.Context, req *v1.GetAccessCodesReq) (res *v1.GetAccessCodesRes, err error) {
 	if req.IsCache {
-		accessCodes, err := mcache.GetUserAccessCodeList(ctx, contexts.GetUserId(ctx))
+		accessCodes, _, err := mcache.GetUserAccessCodeList(ctx, contexts.GetUserId(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -56,11 +56,12 @@ func (c *ControllerV1) GetAccessCodes(ctx context.Context, req *v1.GetAccessCode
 			Data: accessCodes,
 		}
 	} else {
-		accessCodes, err := service.SysAuth().GetUserAccessCodeList(ctx, contexts.GetUserId(ctx))
+		accessCodes, roleDataAccessCodes, err := service.SysAuth().GetUserAccessCodeList(ctx, contexts.GetUserId(ctx))
 		if err != nil {
 			return nil, err
 		}
 		mcache.SetUserAccessCodeList(ctx, contexts.GetUserId(ctx), accessCodes)
+		mcache.SetUserRoleDataAccessCodeList(ctx, contexts.GetUserId(ctx), roleDataAccessCodes)
 		res = &v1.GetAccessCodesRes{
 			Data: accessCodes,
 		}
@@ -68,7 +69,9 @@ func (c *ControllerV1) GetAccessCodes(ctx context.Context, req *v1.GetAccessCode
 	return res, nil
 }
 func (c *ControllerV1) TenantList(ctx context.Context, req *v1.TenantListReq) (res *v1.TenantListRes, err error) {
-	tenantList, _, err := service.SysTenant().List(ctx, &model.SysTenantListParam{})
+	tenantList, _, err := service.SysTenant().List(ctx, &model.SysTenantListParam{
+		Status: consts.SysDeptStatusNormal,
+	})
 	if err != nil {
 		return nil, err
 	}

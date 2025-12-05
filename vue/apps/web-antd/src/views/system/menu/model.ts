@@ -91,8 +91,9 @@ export const drawerSchema: VbenFormSchema[] = [
       component: 'Input',
       fieldName: 'menuName',
       label: '菜单名称',
-      help: '支持i18n写法, 如: menu.system.user',
-      rules: 'required',
+      help: '支持i18n写法, 如: menu.system.user',rules: z.string()
+      .min(1, '菜单名称不能为空')
+      .max(32, '菜单名称最大长度32位'),
     },
     {
       component: 'InputNumber',

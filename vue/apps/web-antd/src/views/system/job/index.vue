@@ -75,10 +75,10 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<SysJob> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'jobId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { align: 'left', type: 'checkbox', width: 40 },
+    { title: 'ID', field: 'jobId' },
     { field: 'jobName', title: '任务名称' },
     { field: 'remark', title: '任务描述' },
     { field: 'jobGroup', title: '任务分组',
@@ -217,9 +217,9 @@ async function handleExecOnce(row: SysJob) {
         <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:job:add'">新增</Button>
         <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked" :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:job:delete'">删除</Button>
       </template>
-      
+
       <template #open="{ row }">
-        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)" 
+        <Switch v-model:checked="row.status" :checkedValue="'0'" :unCheckedValue="'1'" @change="handleStatusChange(row)"
         :disabled="!hasAccessByCodes(['cpm:system:job:update'])" />
       </template>
       <template #action="{ row }">
@@ -240,7 +240,7 @@ async function handleExecOnce(row: SysJob) {
           </AccessControl>
         </div>
       </template>
-     
+
     </Grid>
     <ViewDrawer />
     <EditDrawer @reload="gridApi.query()" />

@@ -27,7 +27,8 @@ export const querySchema: VbenFormSchema[] = [
   },
 ];
 export const columns: VxeGridProps['columns'] = [
-  { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+  { align: 'left',type: 'checkbox', width: 80 },
+    { align: 'left', field: 'packageId', title: 'ID',  width: 80 },
   {
     title: '套餐名称',
     field: 'packageName',
@@ -62,7 +63,7 @@ export const viewSchema: DescItem[] = [
       );
     },
   },
-  { field: 'createdDept', label: '创建部门' },
+  { field: 'createdDept', label: '创建机构' },
   { field: 'createdBy', label: '创建者' },
   { field: 'createdAt', label: '创建时间' },
   { field: 'updatedBy', label: '更新者' },
@@ -89,8 +90,9 @@ export const drawerSchema: VbenFormSchema[] = [
   {
     component: 'Input',
     fieldName: 'packageName',
-    label: '套餐名称',
-    rules: 'required',
+    label: '套餐名称',rules: z.string()
+      .min(1, '套餐名称不能为空')
+      .max(32, '套餐名称最大长度32位'),
   },
   {
     component: 'menuIds',

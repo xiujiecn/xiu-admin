@@ -23,3 +23,12 @@ func (c *ControllerV1) SysSocialList(ctx context.Context, req *v1.SysSocialListR
 	}
 	return res, nil
 }
+
+// 删除绑定关系
+func (c *ControllerV1) SysSocialDelete(ctx context.Context, req *v1.SysSocialDeleteReq) (res *v1.SysSocialDeleteRes, err error) {
+	err = service.SysSocial().Delete(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.SysSocialDeleteRes{}, nil
+}

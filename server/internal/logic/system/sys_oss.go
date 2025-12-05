@@ -20,7 +20,9 @@ import (
 	"xiuadmin/internal/model/entity"
 	"xiuadmin/internal/model/request"
 	"xiuadmin/internal/service"
+	"xiuadmin/utility/hash"
 
+	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -177,7 +179,16 @@ func (s *sSysOss) Upload(ctx context.Context, param *model.SysOssUploadParam) (o
 	}
 
 	// TODO：待实现其他云存储
-	result, err := s.UploadLocal(ctx, file)
+	if param.NewFileType == 0 {
+		if param.IsDevice {
+			param.NewFileType = consts.SysUploadNewFileTypeDeviceFile
+		} else if param.FileType == consts.SysUploadFileTypeImg {
+			param.NewFileType = consts.SysUploadNewFileTypeUserImg
+		} else {
+			param.NewFileType = consts.SysUploadNewFileTypeUserFile
+		}
+	}
+	result, err := s.UploadLocal(ctx, file, param.NewFileType, param.SaveOriginalName, param.SubDirName, param.NotAddDate)
 	if err != nil {
 		return nil, err
 	}
@@ -194,6 +205,10 @@ func (s *sSysOss) Upload(ctx context.Context, param *model.SysOssUploadParam) (o
 		dao.SysOss.Columns().UpdatedAt:    gtime.Now(),
 		dao.SysOss.Columns().UpdatedBy:    contexts.GetUserId(ctx),
 		dao.SysOss.Columns().Service:      "local",
+		dao.SysOss.Columns().Md5:          result.Md5,
+		dao.SysOss.Columns().FileSize:     result.Size,
+		dao.SysOss.Columns().FileCrc16:    result.Crc16,
+		dao.SysOss.Columns().FileSum:      result.Sum16,
 	}).InsertAndGetId()
 	if err != nil {
 		return nil, err
@@ -206,33 +221,143 @@ func (s *sSysOss) Upload(ctx context.Context, param *model.SysOssUploadParam) (o
 	return
 }
 
-func (s *sSysOss) UploadLocal(ctx context.Context, file *ghttp.UploadFile) (result model.UploadResponse, err error) {
-	if file == nil {
-		err = errors.New("文件必须")
-		return
+func (s *sSysOss) MoveFile(ctx context.Context, param *model.SysOssMoveFileParam) (output *model.SysOssMoveFileModel, err error) {
+	result, err := s.MoveFileLocal(ctx, param.FilePath, param.NewFileType, param.SaveOriginalName, param.SubDirName, param.NotAddDate)
+	if err != nil {
+		return nil, err
 	}
+	id, err := s.Model(ctx).Data(g.Map{
+		dao.SysOss.Columns().TenantId:     contexts.GetTenantId(ctx),
+		dao.SysOss.Columns().FileName:     result.Name,
+		dao.SysOss.Columns().OriginalName: result.OriginalName,
+		dao.SysOss.Columns().FileSuffix:   result.Ext,
+		dao.SysOss.Columns().Path:         result.Path,
+		dao.SysOss.Columns().Url:          result.FullPath,
+		dao.SysOss.Columns().CreatedDept:  contexts.GetDeptId(ctx),
+		dao.SysOss.Columns().CreatedAt:    gtime.Now(),
+		dao.SysOss.Columns().CreatedBy:    contexts.GetUserId(ctx),
+		dao.SysOss.Columns().UpdatedAt:    gtime.Now(),
+		dao.SysOss.Columns().UpdatedBy:    contexts.GetUserId(ctx),
+		dao.SysOss.Columns().Service:      "local",
+		dao.SysOss.Columns().Md5:          result.Md5,
+		dao.SysOss.Columns().FileSize:     result.Size,
+		dao.SysOss.Columns().FileCrc16:    result.Crc16,
+		dao.SysOss.Columns().FileSum:      result.Sum16,
+	}).InsertAndGetId()
+	if err != nil {
+		return nil, err
+	}
+	oss := &entity.SysOss{}
+	err = s.Model(ctx).Where(dao.SysOss.Columns().OssId, id).Scan(&oss)
+	if err != nil {
+		return nil, err
+	}
+	output = &model.SysOssMoveFileModel{
+		SysOss: oss,
+	}
+	return output, nil
+}
+
+func (s *sSysOss) SaveContent(ctx context.Context, param *model.SysOssSaveContentParam) (output *model.SysOssSaveContentModel, err error) {
+	result, err := s.SaveContentLocal(ctx, param.Content, param.NewFileType, param.FileName, param.SubDirName, param.NotAddDate)
+	if err != nil {
+		return nil, err
+	}
+	id, err := s.Model(ctx).Data(g.Map{
+		dao.SysOss.Columns().TenantId:     contexts.GetTenantId(ctx),
+		dao.SysOss.Columns().FileName:     result.Name,
+		dao.SysOss.Columns().OriginalName: result.OriginalName,
+		dao.SysOss.Columns().FileSuffix:   result.Ext,
+		dao.SysOss.Columns().Path:         result.Path,
+		dao.SysOss.Columns().Url:          result.FullPath,
+		dao.SysOss.Columns().CreatedDept:  contexts.GetDeptId(ctx),
+		dao.SysOss.Columns().CreatedAt:    gtime.Now(),
+		dao.SysOss.Columns().CreatedBy:    contexts.GetUserId(ctx),
+		dao.SysOss.Columns().UpdatedAt:    gtime.Now(),
+		dao.SysOss.Columns().UpdatedBy:    contexts.GetUserId(ctx),
+		dao.SysOss.Columns().Service:      "local",
+		dao.SysOss.Columns().Md5:          result.Md5,
+		dao.SysOss.Columns().FileSize:     result.Size,
+		dao.SysOss.Columns().FileCrc16:    result.Crc16,
+		dao.SysOss.Columns().FileSum:      result.Sum16,
+	}).InsertAndGetId()
+	if err != nil {
+		return nil, err
+	}
+	oss := &entity.SysOss{}
+	err = s.Model(ctx).Where(dao.SysOss.Columns().OssId, id).Scan(&oss)
+	if err != nil {
+		return nil, err
+	}
+	output = &model.SysOssSaveContentModel{
+		SysOss: oss,
+	}
+	return output, nil
+}
+
+func (s *sSysOss) getNewFileTypePath(ctx context.Context, newFileType int) string {
+	switch newFileType {
+	case consts.SysUploadNewFileTypeUserFile:
+		return consts.SysUploadNewFileTypePathUserFile
+	case consts.SysUploadNewFileTypeUserImg:
+		return consts.SysUploadNewFileTypePathUserImg
+	case consts.SysUploadNewFileTypeDeviceFile:
+		return consts.SysUploadNewFileTypePathDeviceFile
+	default:
+		key := fmt.Sprintf(consts.ConfigOssNewFileTypePath, newFileType)
+		config, err := service.SysConfig().GetConfigByKey(ctx, key)
+		if err == nil && config != nil {
+			return config.ConfigValue
+		}
+	}
+	return "other"
+}
+
+func (s *sSysOss) GetSaveFilePathConfig(ctx context.Context, newFileType int, notAddDate int) (string, error) {
 	uploadPath := g.Cfg().MustGet(ctx, "system.upload.local.path").String()
 	if uploadPath == "" {
-		err = errors.New("上传路径未配置")
+		return "", errors.New("上传路径未配置")
+	}
+	tenantId := contexts.GetTenantId(ctx)
+	if tenantId == "" {
+		tenantId = "default"
+	}
+	fileTypePath := s.getNewFileTypePath(ctx, newFileType)
+	fullDirPath := uploadPath + "/" + tenantId + "/" + fileTypePath
+	if notAddDate == 0 {
+		nowData := time.Now().Format("20060102")
+		fullDirPath = fullDirPath + "/" + nowData
+	}
+	return fullDirPath, nil
+}
+
+func (s *sSysOss) MoveFileLocal(ctx context.Context, filePath string, newFileType int, useOriginalName int, subDirName string, isAddDate int) (result model.UploadResponse, err error) {
+	if filePath == "" {
+		err = errors.New("文件路径必须")
 		return
 	}
-	nowData := time.Now().Format("2006-01-02")
-	fullDirPath := uploadPath + "/" + nowData
+	fileName := gfile.Basename(filePath)
+	fullDirPath, err := s.GetSaveFilePathConfig(ctx, newFileType, isAddDate)
+	if err != nil {
+		return
+	}
+	if subDirName != "" {
+		fullDirPath = fullDirPath + "/" + subDirName
+	}
 	if !gfile.Exists(fullDirPath) {
 		err = gfile.Mkdir(fullDirPath)
 		if err != nil {
 			return
 		}
 	}
-	fileName := gfile.Basename(file.Filename)
-	ext := gfile.Ext(file.Filename)
-	fileNewName, err := file.Save(fullDirPath, true)
+	err = gfile.Move(filePath, fullDirPath)
 	if err != nil {
+		g.Log().Errorf(ctx, "sSysOss MoveFileLocal move file error: %+v, filePath: %s, fullDirPath: %s, newFileType: %d, useOriginalName: %d, subDirName: %s", err, filePath, fullDirPath, newFileType, useOriginalName, subDirName)
 		return
 	}
-	fullFilePath := fullDirPath + "/" + fileNewName
+	fullFilePath := fullDirPath + "/" + fileName
 	url := fullFilePath
-	configType, err := NewSysConfig().GetConfigByKey(ctx, consts.ConfigOssUrlPath)
+	configType, err := service.SysConfig().GetConfigByKey(ctx, consts.ConfigOssUrlPath)
 	if err == nil && configType.ConfigValue != "" {
 		if strings.Contains(configType.ConfigValue, "|") {
 			split := strings.Split(configType.ConfigValue, "|")
@@ -241,7 +366,111 @@ func (s *sSysOss) UploadLocal(ctx context.Context, file *ghttp.UploadFile) (resu
 			url = configType.ConfigValue + fullFilePath
 		}
 	}
+	md5, _ := gmd5.EncryptFile(fullFilePath)
+	crc16 := hash.Crc16ChecksumFile(fullFilePath)
+	sum16 := hash.Sum16ChecksumFile(fullFilePath)
+	result = model.UploadResponse{
+		Size:         gfile.Size(fullFilePath),
+		Path:         fullFilePath,
+		FullPath:     url,
+		OriginalName: fileName,
+		Name:         fileName,
+		Type:         gfile.ExtName(fileName),
+		Ext:          gfile.ExtName(fileName),
+		Md5:          md5,
+		Crc16:        crc16,
+		Sum16:        sum16,
+	}
+	return result, nil
+}
 
+// 保存内容
+func (s *sSysOss) SaveContentLocal(ctx context.Context, content []byte, newFileType int, fileName string, subDirName string, isAddDate int) (result model.UploadResponse, err error) {
+	fullDirPath, err := s.GetSaveFilePathConfig(ctx, newFileType, isAddDate)
+	if err != nil {
+		return
+	}
+	if subDirName != "" {
+		fullDirPath = fullDirPath + "/" + subDirName
+	}
+	if !gfile.Exists(fullDirPath) {
+		err = gfile.Mkdir(fullDirPath)
+		if err != nil {
+			return
+		}
+	}
+	fullFilePath := fullDirPath + "/" + fileName
+	err = gfile.PutBytes(fullFilePath, content)
+	if err != nil {
+		return
+	}
+	url := fullFilePath
+	configType, err := service.SysConfig().GetConfigByKey(ctx, consts.ConfigOssUrlPath)
+	if err == nil && configType.ConfigValue != "" {
+		if strings.Contains(configType.ConfigValue, "|") {
+			split := strings.Split(configType.ConfigValue, "|")
+			url = strings.Replace(url, split[0], split[1], 1)
+		} else {
+			url = configType.ConfigValue + fullFilePath
+		}
+	}
+	md5, _ := gmd5.EncryptFile(fullFilePath)
+	crc16 := hash.Crc16ChecksumFile(fullFilePath)
+	sum16 := hash.Sum16ChecksumFile(fullFilePath)
+	result = model.UploadResponse{
+		Size:         gfile.Size(fullFilePath),
+		Path:         fullFilePath,
+		FullPath:     url,
+		OriginalName: fileName,
+		Name:         fileName,
+		Type:         "application/json",
+		Ext:          gfile.ExtName(fileName),
+		Md5:          md5,
+		Crc16:        crc16,
+		Sum16:        sum16,
+	}
+	return result, nil
+}
+
+func (s *sSysOss) UploadLocal(ctx context.Context, file *ghttp.UploadFile, newFileType int, useOriginalName int, subDirName string, notAddDate int) (result model.UploadResponse, err error) {
+	if file == nil {
+		err = errors.New("文件必须")
+		return
+	}
+
+	fullDirPath, err := s.GetSaveFilePathConfig(ctx, newFileType, notAddDate)
+	if err != nil {
+		return
+	}
+	if subDirName != "" {
+		fullDirPath = fullDirPath + "/" + subDirName
+	}
+	if !gfile.Exists(fullDirPath) {
+		err = gfile.Mkdir(fullDirPath)
+		if err != nil {
+			return
+		}
+	}
+	fileName := gfile.Basename(file.Filename)
+	ext := gfile.Ext(file.Filename)
+	fileNewName, err := file.Save(fullDirPath, useOriginalName == 0)
+	if err != nil {
+		return
+	}
+	fullFilePath := fullDirPath + "/" + fileNewName
+	url := fullFilePath
+	configType, err := service.SysConfig().GetConfigByKey(ctx, consts.ConfigOssUrlPath)
+	if err == nil && configType.ConfigValue != "" {
+		if strings.Contains(configType.ConfigValue, "|") {
+			split := strings.Split(configType.ConfigValue, "|")
+			url = strings.Replace(url, split[0], split[1], 1)
+		} else {
+			url = configType.ConfigValue + fullFilePath
+		}
+	}
+	md5, _ := gmd5.EncryptFile(fullFilePath)
+	crc16 := hash.Crc16ChecksumFile(fullFilePath)
+	sum16 := hash.Sum16ChecksumFile(fullFilePath)
 	result = model.UploadResponse{
 		Size:         file.Size,
 		Path:         fullFilePath,
@@ -250,6 +479,9 @@ func (s *sSysOss) UploadLocal(ctx context.Context, file *ghttp.UploadFile) (resu
 		Name:         fileNewName,
 		Type:         file.Header.Get("Content-type"),
 		Ext:          ext,
+		Md5:          md5,
+		Crc16:        crc16,
+		Sum16:        sum16,
 	}
 	return
 }
@@ -259,7 +491,7 @@ func (s *sSysOss) DownloadLocal(ctx context.Context, file *entity.SysOss) (err e
 		err = errors.New("文件必须")
 		return
 	}
-	finalPath := file.Url
+	finalPath := file.Path
 	r := ghttp.RequestFromCtx(ctx)
 	if r == nil {
 		err = gerror.New("ctx not http request")
@@ -295,19 +527,19 @@ func (s *sSysOss) CheckType(ctx context.Context, checkFileType string, file *ght
 
 	if checkFileType == consts.SysUploadFileTypeFile {
 		//获取上传类型配置
-		configType, err = NewSysConfig().GetConfigByKey(ctx, consts.ConfigOssFileTypeKey)
+		configType, err = service.SysConfig().GetConfigByKey(ctx, consts.ConfigOssFileTypeKey)
 		if err != nil {
 			return
 		}
 
 	} else if checkFileType == consts.SysUploadFileTypeImg {
 		//获取上传类型配置
-		configType, err = NewSysConfig().GetConfigByKey(ctx, consts.ConfigOssImgTypeKey)
+		configType, err = service.SysConfig().GetConfigByKey(ctx, consts.ConfigOssImgTypeKey)
 		if err != nil {
 			return
 		}
 	} else {
-		return errors.New(fmt.Sprintf("文件检查类型错误:%s|%s, 	文件类型:%s", consts.SysUploadFileTypeFile, consts.SysUploadFileTypeImg, checkFileType))
+		return fmt.Errorf("文件检查类型错误:%s|%s, 	文件类型:%s", consts.SysUploadFileTypeFile, consts.SysUploadFileTypeImg, checkFileType)
 	}
 	ext := gfile.ExtName(file.Filename)
 	ext = strings.ToLower(ext)
@@ -334,19 +566,19 @@ func (s *sSysOss) CheckSize(ctx context.Context, checkFileType string, file *ght
 
 	if checkFileType == consts.SysUploadFileTypeFile {
 		//获取上传类型配置
-		configType, err = NewSysConfig().GetConfigByKey(ctx, consts.ConfigOssFileSizeKey)
+		configType, err = service.SysConfig().GetConfigByKey(ctx, consts.ConfigOssFileSizeKey)
 		if err != nil {
 			return
 		}
 
 	} else if checkFileType == consts.SysUploadFileTypeImg {
 		//获取上传类型配置
-		configType, err = NewSysConfig().GetConfigByKey(ctx, consts.ConfigOssImgSizeKey)
+		configType, err = service.SysConfig().GetConfigByKey(ctx, consts.ConfigOssImgSizeKey)
 		if err != nil {
 			return
 		}
 	} else {
-		return errors.New(fmt.Sprintf("文件检查类型错误:%s|%s", consts.SysUploadFileTypeFile, consts.SysUploadFileTypeImg))
+		return fmt.Errorf("文件检查类型错误:%s|%s", consts.SysUploadFileTypeFile, consts.SysUploadFileTypeImg)
 	}
 	match, err := gregex.MatchString(`^([0-9]+)(?i:([a-z]*))$`, configType.ConfigValue)
 	if err != nil {
@@ -373,5 +605,31 @@ func (s *sSysOss) CheckSize(ctx context.Context, checkFileType string, file *ght
 		err = gerror.New("上传文件大小超过限制，最大为" + configType.ConfigValue)
 		return
 	}
+	return
+}
+
+func (s *sSysOss) GetAllUrl(ctx context.Context, url string) (allUrl string, ossId int64, fileSize int64, OriginalName string, md5 string, hmac string, err error) {
+	entity := &entity.SysOss{}
+	s.Model(ctx).Where(dao.SysOss.Columns().Path, url).Scan(&entity)
+	if entity.OssId <= 0 {
+		return
+	}
+	ossId = entity.OssId
+	ossConfig, err := service.SysOssConfig().View(ctx, &model.SysOssConfigViewParam{
+		ConfigKey: entity.Service,
+	})
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysOss GetAllUrl error: %+v, url: %s", err, url)
+		return "", 0, 0, "", "", "", err
+	}
+	if ossConfig.IsHttps == "Y" {
+		allUrl = "https://" + ossConfig.Domain + entity.Path
+	} else {
+		allUrl = "http://" + ossConfig.Domain + entity.Path
+	}
+	fileSize = gfile.Size(entity.Path)
+	OriginalName = entity.OriginalName
+	md5, _ = gmd5.Encrypt(entity.Path)
+	hmac = ""
 	return
 }

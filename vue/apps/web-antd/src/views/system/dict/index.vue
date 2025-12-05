@@ -20,8 +20,8 @@ const { hasAccessByCodes } = useAccess();
 import { Button, message, Popconfirm,Tag, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysDictTypeListApi, deleteSysDictTypeApi } from '#/api/system/dict'; 
-import { useRouter } from 'vue-router';
+import { getSysDictTypeListApi, deleteSysDictTypeApi } from '#/api/system/dict';
+import { useRoute, useRouter } from 'vue-router';
 import {
   MdiPlus,
   MdiDelete,
@@ -53,7 +53,23 @@ const formOptions: VbenFormProps = {
       fieldName: 'dictType',
       label: '字典类型',
     },
-    
+    {
+      component: 'Select',
+      fieldName: 'isSys',
+      label: '系统内置',
+      componentProps: {
+        options: [
+          {
+            label: '否',
+            value: '1',
+          },
+          {
+            label: '是',
+            value: '0',
+          },
+        ],
+      },
+    },
     {
       component: 'RangePicker',
       // defaultValue: [dayjs().subtract(7, 'days'), dayjs()],
@@ -76,12 +92,13 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'dictId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'dictId', title: 'ID' },
     { field: 'dictName', title: '字典名称' },
     { field: 'dictType', title: '字典类型' ,slots: { default: 'type' }, },
+    { field: 'isSys', title: '系统内置', slots: { default: 'isSys' } },
     { field: 'remark', title: '备注' },
     { field: 'createdAt', formatter: 'formatDateTime', title: '创建时间' },
     { title: '操作', width: 120, slots: { default: 'action' } }
@@ -189,17 +206,69 @@ function handleMultiDelete() {
       <template #type="{ row }">
         <Button type="link" :block="false" @click="handleClickDictType(row.dictId)" >{{ row.dictType }}</Button>
       </template>
+       <template #isSys="{ row }">
+        <Tag :color="row.isSys == '0' ? 'green' : 'red'">{{ row.isSys == '0' ? '是' : '否' }}</Tag>
+      </template>
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '停用' }}</Tag>
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:dict:query'">查看</Button>
-          <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:dict:edit'">修改</Button>
-          <AccessControl :codes="['cpm:system:dict:remove']" type="code">
-            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
-              <Button class="mr-2 border-none p-0" :block="false" type="link"  danger >删除</Button>
-            </Popconfirm>
+
+          <!-- 修改按钮：系统内置时只有超级管理员可操作 -->
+          <AccessControl
+            :codes="row.isSys === '0' ? ['cpr:superadmin'] : ['cpm:system:dict:edit']"
+            type="code"
+          >
+            <template #default="{ hasPermission }">
+              <Button
+                class="mr-2 border-none p-0"
+                :block="false"
+                type="link"
+                :disabled="!hasPermission"
+                @click="handleEdit(row)"
+              >
+                修改
+              </Button>
+            </template>
+          </AccessControl>
+
+          <!-- 删除按钮：系统内置时只有超级管理员可操作 -->
+          <AccessControl
+            :codes="row.isSys === '0' ? ['cpr:superadmin'] : ['cpm:system:dict:remove']"
+            type="code"
+          >
+            <template #default="{ hasPermission }">
+              <!-- 有权限时显示可点击的删除按钮 -->
+              <Popconfirm
+                v-if="hasPermission"
+                :get-popup-container="getVxePopupContainer"
+                placement="left"
+                title="确定删除吗？"
+                @confirm="handleDelete(row)"
+              >
+                <Button
+                  class="mr-2 border-none p-0"
+                  :block="false"
+                  type="link"
+                  danger
+                >
+                  删除
+                </Button>
+              </Popconfirm>
+              <!-- 无权限时显示禁用的删除按钮，不包含点击事件 -->
+              <Button
+                v-else
+                class="mr-2 border-none p-0"
+                :block="false"
+                type="link"
+                danger
+                disabled
+              >
+                删除
+              </Button>
+            </template>
           </AccessControl>
         </div>
       </template>

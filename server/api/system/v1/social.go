@@ -14,7 +14,7 @@ import (
 )
 
 type SysSocialListReq struct {
-	g.Meta `path:"/social/list" method:"get" tags:"系统-第三方授权管理" summary:"社交列表" x-check-permission:"cpm:system:social:list"`
+	g.Meta `path:"/social/list" method:"get" tags:"系统-第三方授权管理" summary:"社交列表" x-check-permission:"cpc:current:user"`
 	model.SysSocialListParam
 	request.PageInfo
 }
@@ -22,4 +22,13 @@ type SysSocialListReq struct {
 type SysSocialListRes struct {
 	Items []*model.SysSocialListModel `json:"items"`
 	response.PageResult
+}
+
+// 删除绑定关系
+type SysSocialDeleteReq struct {
+	g.Meta `path:"/social/delete" method:"post" tags:"系统-第三方授权管理" summary:"删除社交" x-check-permission:"cpc:current:user"`
+	Id     int64 `json:"id" dc:"主键"`
+}
+
+type SysSocialDeleteRes struct {
 }

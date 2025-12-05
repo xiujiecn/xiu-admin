@@ -25,4 +25,8 @@ type SysOss struct {
 	UpdatedAt    *gtime.Time // 更新时间
 	UpdatedBy    interface{} // 更新者
 	Service      interface{} // 服务商
+	Md5          interface{} // 文件MD5
+	FileSize     interface{} // 文件大小
+	FileCrc16    interface{} // 文件Crc16
+	FileSum      interface{} // 文件校验和
 }

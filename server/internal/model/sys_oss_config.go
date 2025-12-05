@@ -13,7 +13,8 @@ import (
 )
 
 type SysOssConfigViewParam struct {
-	OssConfigId int64 `json:"ossConfigId" description:"主键"`
+	OssConfigId int64  `json:"ossConfigId" description:"主键"`
+	ConfigKey   string `json:"configKey"    orm:"config_key"    description:"配置key"`
 }
 
 type SysOssConfigViewModel struct {

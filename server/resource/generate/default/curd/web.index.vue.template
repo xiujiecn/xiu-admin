@@ -79,10 +79,15 @@ function handlePreview(record: RowType) {
 }
 
 
-
+@{ if eq .isEditModal true }
+const [EditDrawer, editDrawerApi] = useVbenModal({
+  connectedComponent: editDrawer,
+});
+@{else}
 const [EditDrawer, editDrawerApi] = useVbenDrawer({
   connectedComponent: editDrawer,
 });
+@{end}
 
 function handleAdd() {
   editDrawerApi.setData({ update: false, view: false });

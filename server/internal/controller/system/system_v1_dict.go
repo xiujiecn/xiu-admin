@@ -9,6 +9,7 @@ import (
 	"xiuadmin/internal/service"
 )
 
+
 func (c *ControllerV1) SysDictTypeList(ctx context.Context, req *v1.SysDictTypeListReq) (res *v1.SysDictTypeListRes, err error) {
 	items, total, err := service.SysDictType().List(ctx, &req.SysDictTypeListParam)
 	if err != nil {

@@ -211,8 +211,7 @@ func (s *s@{.servFunName}) Switch(ctx context.Context, in *@{.templateGroup}in.@
 	var fields = []string{
 @{.switchFields}		// ...
 	}
-
-	if !validate.InSlice(fields, in.Key) {
+	if (!slices.Contains(fields, in.Status)) {
 		err = gerror.New("开关键名不在白名单")
 		return
 	}

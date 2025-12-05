@@ -1,0 +1,169 @@
+<script lang="ts" setup>
+import { h, ref } from 'vue';
+import { Button, message, Modal, Popconfirm } from 'ant-design-vue';
+import type { VbenFormProps } from '#/adapter/form';
+import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
+import type { DeepPartial } from '@vben/types';
+import { getVxePopupContainer } from '@vben/utils';
+import { Page } from '@vben/common-ui';
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
+import { AccessControl } from '@vben/access';
+import { commonDownloadExcel } from '#/utils/file/download';
+import { List, Export, Delete, View, Read } from '#/api/system/sysNoticeUser';
+import { MdiPlus, MdiExport, MdiDelete } from '@vben/icons';
+import { columns, querySchema, type RowType } from './model';
+const formOptions: VbenFormProps = {
+  // 默认展开
+  collapsed: false,
+  fieldMappingTime: [['date', ['start', 'end']]],
+  schema: querySchema,
+  // 控制表单是否显示折叠按钮
+  showCollapseButton: true,
+  // 是否在字段值改变时提交表单
+  submitOnChange: true,
+  // 按下回车时是否提交表单
+  submitOnEnter: false,
+};
+const gridOptions: VxeTableGridOptions<RowType> = {
+  checkboxConfig: {
+    highlight: true,
+  },
+  rowConfig: {
+    keyField: 'id',
+  },
+  columns: columns,
+  exportConfig: {},
+  height: 'auto',
+  keepSource: true,
+  showOverflow: false,
+  pagerConfig: {},
+  proxyConfig: {
+    ajax: {
+      query: async ({ page }, formValues) => {
+        return await List({
+          page: page.currentPage,
+          pageSize: page.pageSize,
+          ...formValues,
+        });
+      },
+    },
+  },
+  toolbarConfig: {
+    custom: true,
+    export: false,
+    refresh: true,
+    resizable: true,
+    search: true,
+    zoom: true,
+  },
+};
+const gridEvents: DeepPartial<VxeGridListeners> = {
+  checkboxChange: handleCheckboxChange,
+  checkboxAll: handleCheckboxChange,
+};
+const CheckboxChecked = ref(false);
+function handleCheckboxChange() {
+  CheckboxChecked.value = gridApi.grid.getCheckboxRecords().length > 0;
+}
+const [Grid, gridApi] = useVbenVxeGrid({
+  formOptions,
+  gridOptions,
+  gridEvents,
+});
+async function noticeDelete(row?: any) {
+  if (row) {
+    await Delete({ id: [row.id] });
+    message.success("删除成功");
+    await handleRefresh();
+  }
+}
+async function noticeView(row?: any) {
+  if (row) {
+    await Read({ ids: [row.id] });
+    message.success("已读成功");
+    await handleRefresh();
+  }
+}
+async function noticeDeleteList() {
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids: string[] = [];
+  for (const row of rows) {
+    ids.push(row.id);
+  }
+  if (ids.length === 0) {
+    message.error('请至少选择一项要删除的数据');
+    return;
+  }
+  Modal.confirm({
+    title: '提示',
+    okType: 'danger',
+    content: `确认删除选中的${ids.length}条记录吗？`,
+    onOk: async () => {
+      await Delete({ id: ids });
+      message.success("删除成功");
+      await handleRefresh();
+    },
+  });
+} async function noticeViewList() {
+  const rows = gridApi.grid.getCheckboxRecords();
+  const ids: string[] = [];
+  for (const row of rows) {
+    ids.push(row.id);
+  }
+  if (ids.length === 0) {
+    message.error('请至少选择一项要已读的数据');
+    return;
+  }
+  await Read({ ids: ids });
+  message.success("已读成功");
+  await handleRefresh();
+}
+async function handleRefresh() {
+  await gridApi.query();
+}
+async function handleExport() {
+  const formValues = gridApi.formApi.form.values;
+  await commonDownloadExcel(Export, '用户通知公告表', {
+    ...formValues,
+    page: 1,
+    pageSize: 2000,
+  });
+  message.success("导出成功");
+}
+</script>
+<template>
+  <Page auto-content-height>
+    <Grid table-title="用户通知公告表">
+      <template #toolbar-tools>
+        <Button class="mr-2 flex items-center " type="primary" @click="noticeViewList"
+          v-access:code="'cpm:system:sysNoticeUser:view'">
+          标记已读
+        </Button>
+        <Button class="mr-2 flex items-center" type="primary" :disabled="!CheckboxChecked"
+          @click="noticeDeleteList" v-access:code="'cpm:system:sysNoticeUser:delete'">
+          删除
+        </Button>
+        <Button class="mr-2 flex items-center" type="primary" @click="handleExport"
+          v-access:code="'cpm:system:sysNoticeUser:export'">
+          导出
+        </Button>
+      </template>
+      <template #action="{ row }">
+        <div class="flex items-center">
+          <Button v-if="row.isRead==0" class="mr-2 border-none p-0" :block="false" type="link" @click="noticeView(row)"
+            v-access:code="'cpm:system:sysNoticeUser:view'">
+            已读
+          </Button>
+          <AccessControl :codes="['cpm:system:sysNoticeUser:delete']" type="code">
+            <Popconfirm title="确定删除吗？" :get-popup-container="getVxePopupContainer" placement="left"
+              @confirm="noticeDelete(row)">
+              <Button class="mr-2 border-none p-0" :block="false" type="link" danger>
+                删除
+              </Button>
+            </Popconfirm>
+          </AccessControl>
+        </div>
+      </template>
+    </Grid>
+  </Page>
+</template>
