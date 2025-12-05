@@ -12,6 +12,12 @@ var (
 )
 
 var (
+	// 状态: 0正常 1停用
+	SysStatusNormal  = "0"
+	SysStatusDisable = "1"
+)
+
+var (
 	// 菜单状态: 0正常 1停用
 	SysMenuStatusNormal  = "0"
 	SysMenuStatusDisable = "1"
@@ -62,6 +68,18 @@ var (
 )
 
 var (
+	// 新文件类型
+	SysUploadNewFileTypeUserFile   = 1 // 用户文件
+	SysUploadNewFileTypeUserImg    = 2 // 用户图片
+	SysUploadNewFileTypeDeviceFile = 3 // 设备文件 ${device_key}
+)
+var (
+	// 新文件类型路径
+	SysUploadNewFileTypePathUserFile   = "user/file" // 用户文件
+	SysUploadNewFileTypePathUserImg    = "user/img"  // 用户图片
+	SysUploadNewFileTypePathDeviceFile = "device"    // 设备文件 ${device_key}
+)
+var (
 	// 用户性别: 0男 1女 2未知
 	SysUserSexMale    = "0"
 	SysUserSexFemale  = "1"
@@ -100,4 +118,23 @@ var (
 	SysCheckPermissionPostPrefix  = "cpp:"             // 岗位权限码前缀+岗位编码
 	SysCheckPermissionUserPrefix  = "cpu:"             // 用户权限码前缀+用户名
 	SysCheckPermissionCurrentUser = "cpc:current:user" // 当前登录用户默认权限
+)
+var StatusSlice = []int{0, 1}
+
+var (
+	// 公告范围: 1全部 2指定机构 3指定用户
+	NoticeRangeAll  = 1
+	NoticeRangeDept = 2
+	NoticeRangeUser = 3
+)
+
+var (
+	// 租户配置
+	ConfigKeyTenantDefaultRegisterDeptId = "iot.register.dept"
+	ConfigKeyTenantDefaultRegisterRoleId = "iot.register.role"
+)
+
+var (
+	// 微信平台
+	SourceWechatMp = "wechat_mp"
 )

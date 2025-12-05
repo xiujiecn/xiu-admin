@@ -19,7 +19,7 @@ import { Button, message, Switch,Tag, Modal, Popconfirm } from 'ant-design-vue';
 import dayjs from 'dayjs';
 import { commonDownloadExcel } from '#/utils/file/download';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysPostListApi, deleteSysPostApi, getSysPostExportApi } from '#/api'; 
+import { getSysPostListApi, deleteSysPostApi, getSysPostExportApi } from '#/api';
 import DeptTree from '#/components/dept/dept-tree.vue';
 import postDrawer from './post-drawer.vue';
 import { AccessControl, useAccess } from '@vben/access';
@@ -104,13 +104,13 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'postId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'postId', title: 'ID' },
     { field: 'postCode', title: '岗位编码' },
     { field: 'postName', title: '岗位名称' },
-    { field: 'deptInfo.deptName', title: '部门' },
+    { field: 'deptInfo.deptName', title: '机构' },
     { field: 'postCategory', title: '岗位类别' },
     {
       field: 'status',
@@ -229,13 +229,13 @@ function handleStatusChange(row: SysPostListData) {
 <template>
   <Page auto-content-height>
     <div class="flex h-full gap-[8px]">
-    <DeptTree class="w-[240px]" 
-      @select="()=> tableApi.reload()" 
+    <DeptTree class="w-[240px]"
+      @select="()=> tableApi.reload()"
       @reload="()=> tableApi.reload()"
       v-model:select-dept-id="selectDeptId" />
     <Grid table-title="岗位列表">
       <template #toolbar-tools>
-        
+
         <Button class="mr-2 flex items-center " type="primary" :icon="h(MdiPlus)" @click="handleAdd" v-access:code="'cpm:system:post:add'">新增</Button>
         <Button class="mr-2 flex items-center" type="primary" disabled :icon="h(MdiDelete)" @click="handleMultiDelete" v-access:code="'cpm:system:post:remove'">删除</Button>
         <Button class="mr-2 flex items-center "  :icon="h(MdiExport)" @click="handleExport" v-access:code="'cpm:system:post:export'">导出</Button>

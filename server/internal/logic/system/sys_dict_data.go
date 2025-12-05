@@ -7,8 +7,10 @@ package system
 
 import (
 	"context"
+	"xiuadmin/internal/consts"
 	"xiuadmin/internal/dao"
 	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/event"
 	"xiuadmin/internal/library/xgorm/handler"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/do"
@@ -33,11 +35,21 @@ func init() {
 func (l *sSysDictData) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
 	if len(option) == 0 {
 		option = append(option, &handler.Option{
-			FilterTenant: true,
-			FilterAuth:   true,
+			FilterTenant: false,
+			FilterAuth:   false,
 		})
 	}
 	return handler.Model(dao.SysDictData.Ctx(ctx), option...)
+}
+
+func (l *sSysDictData) ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) == 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: false,
+			FilterAuth:   false,
+		})
+	}
+	return handler.Model(service.MemoryDB().DB(ctx).Ctx(ctx).Model(dao.SysDictData.Table()), option...)
 }
 
 func (s *sSysDictData) List(ctx context.Context, param *model.SysDictDataListParam) (items []model.SysDictDataListModel, total int, err error) {
@@ -60,7 +72,10 @@ func (s *sSysDictData) List(ctx context.Context, param *model.SysDictDataListPar
 	}
 	// 获取字典数据
 	items = make([]model.SysDictDataListModel, 0)
-	m := s.Model(ctx).Where(dao.SysDictData.Columns().DictType, param.DictType)
+	m := s.ModelQuery(ctx).Where(dao.SysDictData.Columns().DictType, param.DictType)
+	if param.DictValue != "" {
+		m = m.Where(dao.SysDictData.Columns().DictValue, param.DictValue)
+	}
 	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
@@ -77,7 +92,7 @@ func (s *sSysDictData) View(ctx context.Context, param *model.SysDictDataViewPar
 		return nil, gerror.New("字典编码不能为空")
 	}
 
-	m := s.Model(ctx)
+	m := s.ModelQuery(ctx)
 	if param.DictCode != 0 {
 		m = m.Where(dao.SysDictData.Columns().DictCode, param.DictCode)
 	}
@@ -92,6 +107,21 @@ func (s *sSysDictData) Add(ctx context.Context, param *model.SysDictDataAddParam
 	m := s.Model(ctx)
 	data := do.SysDictData{}
 	gconv.Struct(param, &data)
+	// 通过 DictType 查询字典类型列表
+	listParam := &model.SysDictTypeListParam{
+		DictType: param.DictType,
+	}
+	typeList, _, err := service.SysDictType().List(ctx, listParam)
+	if err != nil {
+		return nil, err
+	}
+	if len(typeList) == 0 {
+		return nil, gerror.New("字典类型不存在")
+	}
+	isSys := typeList[0].IsSys
+	if isSys == "0" && !contexts.IsSuperAdmin(ctx) {
+		return nil, gerror.New("非超级管理员不能添加系统内置字典数据")
+	}
 	data.TenantId = contexts.GetTenantId(ctx)
 	data.CreatedAt = gtime.Now()
 	data.CreatedBy = contexts.GetUserId(ctx)
@@ -102,6 +132,7 @@ func (s *sSysDictData) Add(ctx context.Context, param *model.SysDictDataAddParam
 	if err != nil {
 		return nil, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysDictDataCreate, output.DictCode)
 	return
 }
 
@@ -122,6 +153,7 @@ func (s *sSysDictData) Edit(ctx context.Context, param *model.SysDictDataEditPar
 	if err != nil {
 		return nil, err
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysDictDataUpdate, param.DictCode)
 	return
 }
 
@@ -129,6 +161,35 @@ func (s *sSysDictData) Delete(ctx context.Context, param *model.SysDictDataDelet
 	if len(param.DictCodes) == 0 {
 		return nil, gerror.New("字典编码不能为空")
 	}
+
+	// 检查要删除的字典数据所属的字典类型是否为系统内置类型
+	if !contexts.IsSuperAdmin(ctx) {
+		// 查询字典数据所属的字典类型
+		var dictTypes []string
+		err = dao.SysDictData.Ctx(ctx).
+			Fields(dao.SysDictData.Columns().DictType).
+			WhereIn(dao.SysDictData.Columns().DictCode, param.DictCodes).
+			Distinct().
+			Scan(&dictTypes)
+		if err != nil {
+			return nil, err
+		}
+
+		// 检查这些字典类型是否有系统内置类型
+		var systemTypeCount int
+		systemTypeCount, err = dao.SysDictType.Ctx(ctx).
+			WhereIn(dao.SysDictType.Columns().DictType, dictTypes).
+			Where(dao.SysDictType.Columns().IsSys, "0").
+			Count()
+		if err != nil {
+			return nil, err
+		}
+
+		if systemTypeCount > 0 {
+			return nil, gerror.New("系统内置字典数据不能删除，请联系管理员")
+		}
+	}
+
 	m := s.Model(ctx)
 	m = m.WhereIn(dao.SysDictData.Columns().DictCode, param.DictCodes)
 	_, err = m.Delete()
@@ -138,5 +199,27 @@ func (s *sSysDictData) Delete(ctx context.Context, param *model.SysDictDataDelet
 	output = &model.SysDictDataDeleteModel{
 		DictCodes: param.DictCodes,
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysDictDataDelete, param.DictCodes)
+	return
+}
+
+func (s *sSysDictData) GetDictLabel(ctx context.Context, dictType string, dictCode string) string {
+	dictData, _, err := s.List(ctx, &model.SysDictDataListParam{
+		DictType:  dictType,
+		DictValue: dictCode,
+	})
+	if err != nil {
+		return ""
+	}
+	if len(dictData) > 0 {
+		return dictData[0].DictLabel
+	}
+	return ""
+}
+
+func (s *sSysDictData) GetDictListByTypes(ctx context.Context, dictTypes []string) (dictDataList []model.SysDictDataListModel, err error) {
+	dictDataList = make([]model.SysDictDataListModel, 0)
+	m := s.ModelQuery(ctx).WhereIn(dao.SysDictData.Columns().DictType, dictTypes)
+	err = m.Scan(&dictDataList)
 	return
 }

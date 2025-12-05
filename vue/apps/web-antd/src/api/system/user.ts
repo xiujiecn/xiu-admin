@@ -53,7 +53,7 @@ export interface SysUserListParam {
     deptInfo: SysDeptMini;
   }
   export interface SysUserListRes {
-    data: SysUserListData[];
+    items: SysUserListData[];
     total: number;
   }
   
@@ -211,6 +211,10 @@ export interface SysUserListParam {
   export async function resetSysUserPassword(params: SysUserResetPasswordParam) {
     params.password = md5(params.password);
     return requestClient.post('/system/user/resetPassword', { ...params });
+  }
+
+  export async function updateSysUserStatus(params: any) {
+    return requestClient.post('/system/user/status', { ...params });
   }
   
   export interface SysUserListByDeptIdParam {

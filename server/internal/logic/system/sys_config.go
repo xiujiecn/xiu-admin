@@ -38,14 +38,24 @@ func (l *sSysConfig) Model(ctx context.Context, option ...*handler.Option) *gdb.
 	if len(option) == 0 {
 		option = append(option, &handler.Option{
 			FilterTenant: true,
-			FilterAuth:   true,
+			FilterAuth:   false,
 		})
 	}
 	return handler.Model(dao.SysConfig.Ctx(ctx), option...)
 }
 
+func (l *sSysConfig) ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) == 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: true,
+			FilterAuth:   false,
+		})
+	}
+	return handler.Model(service.MemoryDB().DB(ctx).Ctx(ctx).Model(dao.SysConfig.Table()), option...)
+}
+
 func (s *sSysConfig) List(ctx context.Context, param *model.SysConfigListParam) (items []*model.SysConfigListModel, total int, err error) {
-	m := s.Model(ctx)
+	m := s.ModelQuery(ctx)
 
 	if param.ConfigName != "" {
 		m = m.WhereLike(dao.SysConfig.Columns().ConfigName, "%"+param.ConfigName+"%")
@@ -104,7 +114,7 @@ func (s *sSysConfig) Add(ctx context.Context, param *model.SysConfigAddParam) (o
 	output = &model.SysConfigAddModel{
 		ConfigId: lastInsertId,
 	}
-	event.EventsInstance().Emit(ctx, consts.EventKeySysConfigUpdate, data.TenantId, data.ConfigKey)
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysConfigCreate, lastInsertId, data.TenantId, data.ConfigKey)
 	return
 }
 
@@ -128,7 +138,7 @@ func (s *sSysConfig) Edit(ctx context.Context, param *model.SysConfigEditParam) 
 	output = &model.SysConfigEditModel{
 		ConfigId: param.ConfigId,
 	}
-	event.EventsInstance().Emit(ctx, consts.EventKeySysConfigUpdate, contexts.GetTenantId(ctx), data.ConfigKey)
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysConfigUpdate, param.ConfigId, contexts.GetTenantId(ctx), data.ConfigKey)
 	return
 }
 
@@ -154,14 +164,14 @@ func (s *sSysConfig) Delete(ctx context.Context, param *model.SysConfigDeletePar
 	if err != nil {
 		return nil, err
 	}
-	event.EventsInstance().Emit(ctx, consts.EventKeySysConfigUpdate, contexts.GetTenantId(ctx))
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysConfigDelete, param.ConfigIds, contexts.GetTenantId(ctx))
 	return &model.SysConfigDeleteModel{
 		ConfigIds: param.ConfigIds,
 	}, nil
 }
 
 func (s *sSysConfig) View(ctx context.Context, param *model.SysConfigViewParam) (output *model.SysConfigViewModel, err error) {
-	m := s.Model(ctx)
+	m := s.ModelQuery(ctx)
 
 	err = m.Where(dao.SysConfig.Columns().ConfigId, param.ConfigId).Scan(&output)
 	if err != nil {
@@ -172,7 +182,7 @@ func (s *sSysConfig) View(ctx context.Context, param *model.SysConfigViewParam) 
 }
 
 func (s *sSysConfig) GetConfigByKey(ctx context.Context, configKey string) (config *entity.SysConfig, err error) {
-	m := s.Model(ctx)
+	m := s.ModelQuery(ctx)
 	err = m.Where(dao.SysConfig.Columns().ConfigKey, configKey).Scan(&config)
 	if err != nil {
 		return nil, err

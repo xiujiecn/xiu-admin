@@ -40,7 +40,7 @@ export interface SysNoticeAddReq {
   noticeContent: string;
   status: string;
   remark: string;
-} 
+}
 
 export interface SysNoticeEditReq {
   noticeId: number;
@@ -53,13 +53,15 @@ export interface SysNoticeEditReq {
 
 export interface SysNoticeDeleteReq {
   noticeIds: number[];
-}   
+}
 
 export interface SysNoticeViewReq {
   noticeId : number;
 }
 
 export interface SysNoticeViewRes extends SysNotice {
+  userIdList: any;
+  deptIdList: any;
 }
 
 export interface SysNoticeAddRes {
@@ -68,11 +70,11 @@ export interface SysNoticeAddRes {
 
 export interface SysNoticeEditRes  {
   noticeId: number;
-} 
+}
 
 export interface SysNoticeDeleteRes  {
   noticeIds: number[];
-} 
+}
 
 
 
@@ -95,8 +97,8 @@ export async function editSysNoticeApi(params: SysNoticeEditReq| {
 
 export async function deleteSysNoticeApi(params: SysNoticeDeleteReq) {
   return requestClient.post<SysNoticeDeleteRes>('/system/notice/delete', { ...params });
-} 
+}
 
 export async function getSysNoticeApi(params: SysNoticeViewReq) {
   return requestClient.get<SysNoticeViewRes>('/system/notice/view', { params });
-} 
+}

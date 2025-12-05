@@ -89,10 +89,10 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'infoId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'infoId', title: 'ID' },
     { field: 'fileName', title: '文件名称' },
     { field: 'originalName', title: '原名', showOverflow: true,},
     { field: 'fileSuffix', title: '文件后缀' },

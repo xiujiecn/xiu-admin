@@ -11,6 +11,7 @@ import (
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/dao"
 	"xiuadmin/internal/library/contexts"
+	"xiuadmin/internal/library/event"
 	"xiuadmin/internal/library/xgorm/handler"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/do"
@@ -47,8 +48,18 @@ func (l *sSysPost) Model(ctx context.Context, option ...*handler.Option) *gdb.Mo
 	return handler.Model(dao.SysPost.Ctx(ctx), option...)
 }
 
+func (l *sSysPost) ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model {
+	if len(option) == 0 {
+		option = append(option, &handler.Option{
+			FilterTenant: true,
+			FilterAuth:   true,
+		})
+	}
+	return handler.Model(service.MemoryDB().DB(ctx).Ctx(ctx).Model(dao.SysPost.Table()), option...)
+}
+
 func (l *sSysPost) List(ctx context.Context, query *model.SysPostListParam) (items []*model.SysPostListModel, total int, err error) {
-	m := l.Model(ctx)
+	m := l.ModelQuery(ctx)
 	deptIds := make([]int64, 0)
 	if query.DeptId != 0 {
 		deptIds = append(deptIds, query.DeptId)
@@ -89,7 +100,7 @@ func (l *sSysPost) List(ctx context.Context, query *model.SysPostListParam) (ite
 }
 
 func (l *sSysPost) View(ctx context.Context, param *model.SysPostViewParam) (post *model.SysPostViewModel, err error) {
-	err = l.Model(ctx).WithAll().Where(dao.SysPost.Columns().PostId, param.PostId).Scan(&post)
+	err = l.ModelQuery(ctx).WithAll().Where(dao.SysPost.Columns().PostId, param.PostId).Scan(&post)
 	if err != nil {
 		return nil, err
 	}
@@ -116,6 +127,7 @@ func (l *sSysPost) Add(ctx context.Context, param *model.SysPostAddParam) (post 
 	post = &model.SysPostAddModel{
 		PostId: postId,
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysPostCreate, postId)
 	return
 }
 
@@ -135,6 +147,7 @@ func (l *sSysPost) Edit(ctx context.Context, param *model.SysPostEditParam) (pos
 	post = &model.SysPostEditModel{
 		PostId: param.PostId,
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysPostUpdate, param.PostId)
 	return
 }
 
@@ -163,6 +176,7 @@ func (l *sSysPost) Delete(ctx context.Context, param *model.SysPostDeleteParam) 
 	post = &model.SysPostDeleteModel{
 		PostId: param.PostId,
 	}
+	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysPostDelete, ids)
 	return
 }
 

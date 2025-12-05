@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { UploadFile, UploadProps } from 'ant-design-vue';
 import type { UploadRequestOption } from 'ant-design-vue/lib/vc-upload/interface';
-import type { SysOssListData } from '#/api/system/oss';
 import type { AxiosResponse } from '@vben/request';
 
 import type { AxiosProgressEvent } from '#/api';
@@ -129,7 +128,7 @@ watch(
               uid: uniqueId(),
               name: item.slice(Math.max(0, item.lastIndexOf('/') + 1)),
               status: 'done',
-              url: item,
+              url: item, // 使用处理后的URL
             });
           } else if (item && isObject(item)) {
             withUrlList.push(item);
@@ -273,41 +272,22 @@ function getValue() {
 
 <template>
   <div>
-    <Upload
-      v-bind="$attrs"
-      v-model:file-list="fileList"
-      :accept="getStringAccept"
-      :before-upload="beforeUpload"
-      :custom-request="customRequest"
-      :disabled="disabled"
-      :list-type="listType"
-      :max-count="maxNumber"
-      :multiple="multiple"
-      :progress="{ showInfo: true }"
-      @preview="handlePreview"
-      @remove="handleRemove"
-    >
+    <Upload v-bind="$attrs" v-model:file-list="fileList" :accept="getStringAccept" :before-upload="beforeUpload"
+      :custom-request="customRequest" :disabled="disabled" :list-type="listType" :max-count="maxNumber"
+      :multiple="multiple" :progress="{ showInfo: true }" @preview="handlePreview" @remove="handleRemove">
       <div v-if="fileList && fileList.length < maxNumber">
         <PlusOutlined />
         <div style="margin-top: 8px">{{ $t('component.upload.upload') }}</div>
       </div>
     </Upload>
-    <div
-      v-if="showDescription"
-      class="mt-2 flex flex-wrap items-center text-[14px]"
-    >
+    <div v-if="showDescription" class="mt-2 flex flex-wrap items-center text-[14px]">
       请上传不超过
       <div class="text-primary mx-1 font-bold">{{ maxSize }}MB</div>
       的
       <div class="text-primary mx-1 font-bold">{{ accept.join('/') }}</div>
       格式文件
     </div>
-    <Modal
-      :footer="null"
-      :open="previewOpen"
-      :title="previewTitle"
-      @cancel="handleCancel"
-    >
+    <Modal :footer="null" :open="previewOpen" :title="previewTitle" @cancel="handleCancel">
       <img :src="previewImage" alt="" style="width: 100%" />
     </Modal>
   </div>

@@ -77,9 +77,9 @@ const postName = computed(() => {
           <DescriptionsItem label="邮箱">
             {{ profile.user.email || '未绑定邮箱' }}
           </DescriptionsItem>
-          <DescriptionsItem label="部门">
+          <DescriptionsItem label="机构">
             <Tag color="processing">
-              {{ profile.user.deptInfo?.deptName ?? '未分配部门' }}
+              {{ profile.user.deptInfo?.deptName ?? '未分配机构' }}
             </Tag>
             <Tag v-if="postName" color="processing">
               {{ postName }}

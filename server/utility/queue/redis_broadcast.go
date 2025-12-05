@@ -2,15 +2,18 @@ package queue
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"sync"
 	"time"
 
-	"github.com/gogf/gf/v2/database/gredis"
+	"xiuadmin/utility/gfredis"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/gtrace"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/grpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type tRedisBroadcast struct {
@@ -19,7 +22,7 @@ type tRedisBroadcast struct {
 	isRunning bool
 	grpool    *grpool.Pool
 	clientId  string
-	conn      gredis.Conn
+	pubSub    *redis.PubSub
 }
 
 var (
@@ -53,7 +56,7 @@ func RegisterRedisBroadcast(ctx context.Context, topic string, p Process, config
 		q.p = p
 		q.grpool = grpool.New(workers)
 
-		q.conn, _ = q.getConn(ctx)
+		q.pubSub, _ = q.getConn(ctx)
 		go q.Handle(ctx)
 	}
 	return q
@@ -94,7 +97,7 @@ func (q *tRedisBroadcast) Push(ctx context.Context, topic string, data interface
 	if err != nil {
 		return err
 	}
-	num, err := g.Redis(q.RedisName).Publish(ctx, topic, payloadJson)
+	num, err := gfredis.Instance(q.RedisName).Publish(ctx, topic, payloadJson)
 	if err != nil {
 		return err
 	}
@@ -102,21 +105,14 @@ func (q *tRedisBroadcast) Push(ctx context.Context, topic string, data interface
 	return
 }
 
-func (q *tRedisBroadcast) getConn(ctx context.Context) (conn gredis.Conn, err error) {
-	conn, err = g.Redis(q.RedisName).Conn(ctx)
+func (q *tRedisBroadcast) getConn(ctx context.Context) (conn *redis.PubSub, err error) {
+
+	conn, err = gfredis.Instance(q.RedisName).Subscribe(ctx, q.p.GetTopic())
 	if err != nil || conn == nil {
 		g.Log().Errorf(ctx, "tRedisBroadcast.Handle Conn %s error: %v", q.p.GetTopic(), err)
 		return
 	}
-	g.Log().Debugf(ctx, "tRedisBroadcast.Handle 获取连接 %s", q.p.GetTopic())
-	subs, err := conn.Subscribe(ctx, q.p.GetTopic())
-	if err != nil {
-		g.Log().Errorf(ctx, "tRedisBroadcast.Handle Subscribe %s error: %v", q.p.GetTopic(), err)
-		conn.Close(ctx)
-		conn = nil
-		return
-	}
-	g.Log().Debugf(ctx, "tRedisBroadcast.Handle Subscribe %s 成功, sub:%+v", q.p.GetTopic(), subs)
+	g.Log().Debugf(ctx, "tRedisBroadcast.Handle Subscribe %s 成功, sub:%+v", q.p.GetTopic(), conn)
 	return
 }
 
@@ -128,19 +124,19 @@ func (q *tRedisBroadcast) Handle(ctx context.Context) (err error) {
 		if !q.isRunning {
 			break
 		}
-		if q.conn == nil {
-			q.conn, err = q.getConn(ctx)
+		if q.pubSub == nil {
+			q.pubSub, err = q.getConn(ctx)
 			if err != nil {
 				g.Log().Errorf(ctx, "tRedisBroadcast.Handle getConn %s error: %v", topic, err)
-				time.Sleep(time.Second)
+				time.Sleep(2 * time.Second)
 				continue
 			}
 		}
-		data, err := q.conn.ReceiveMessage(ctx)
+		data, err := q.pubSub.ReceiveMessage(ctx)
 		if err != nil {
 			g.Log().Errorf(ctx, "tRedisBroadcast.Handle ReceiveMessage %s error: %v", topic, err)
-			q.conn.Close(ctx)
-			q.conn = nil
+			q.pubSub.Close()
+			q.pubSub = nil
 			continue
 		}
 		var payload Payload
@@ -153,10 +149,16 @@ func (q *tRedisBroadcast) Handle(ctx context.Context) (err error) {
 		subCtx := gctx.New()
 		gtrace.WithTraceID(subCtx, payload.TraceId)
 		err = q.grpool.Add(subCtx, func(ctx context.Context) {
+			defer func() {
+				if r := recover(); r != nil {
+					g.Log().Errorf(ctx, "tRedisBroadcast.Handle process panic: %v, topic: %s, trace_id: %s, len(data): %d, hex(data): %v",
+						r, q.p.GetTopic(), payload.TraceId, len(payload.Data), hex.EncodeToString(payload.Data))
+				}
+			}()
 			err = q.p.Handle(subCtx, payload)
 			if err != nil {
-				g.Log().Errorf(ctx, "tRedisBroadcast.Handle process error: %v, topic: %s, trace_id: %s, data: %v",
-					err, q.p.GetTopic(), payload.TraceId, payload.Data)
+				g.Log().Errorf(ctx, "tRedisBroadcast.Handle process error: %v, topic: %s, trace_id: %s, len(data): %d, hex(data): %v",
+					err, q.p.GetTopic(), payload.TraceId, len(payload.Data), hex.EncodeToString(payload.Data))
 				return
 			}
 		})
@@ -164,8 +166,8 @@ func (q *tRedisBroadcast) Handle(ctx context.Context) (err error) {
 	redisBroadcastRwLock.Lock()
 	delete(redisBroadcastQueues, topic)
 	redisBroadcastRwLock.Unlock()
-	if q.conn != nil {
-		q.conn.Close(ctx)
+	if q.pubSub != nil {
+		q.pubSub.Close()
 	}
 	return
 }

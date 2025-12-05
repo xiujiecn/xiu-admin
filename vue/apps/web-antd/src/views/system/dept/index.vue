@@ -1,5 +1,5 @@
 <!--
- * @description 部门管理页面
+ * @description 机构管理页面
  * @Link  https://github.com/xiujiecn/xiu-admin
  * @Copyright  Copyright (c) 2025 LiXiujie
  * @Author  Lxj <li@xiujie.cn>
@@ -44,7 +44,7 @@ const formOptions: VbenFormProps = {
     {
       component: 'Input',
       fieldName: 'deptName',
-      label: '部门名称',
+      label: '机构名称',
     },
     {
       component: 'Select',
@@ -77,8 +77,8 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   align: 'center',
   columns: [
-    { field: 'deptName', title: '部门名称' , treeNode: true, minWidth: 240,  align: 'left', },
-    { field: 'deptCategory', title: '部门编码', minWidth: 100 },
+    { field: 'deptName', title: '机构名称' , treeNode: true, minWidth: 240,  align: 'left', },
+    { field: 'deptCategory', title: '机构编码', minWidth: 100 },
     {
       field: 'status',
       slots: { default: 'status' },
@@ -172,7 +172,7 @@ async function handleRefresh() {
 
 <template>
   <Page auto-content-height>
-    <Grid :table-title="'部门管理'">
+    <Grid :table-title="'机构管理'">
       <template #toolbar-tools>
         
         <Button class="mr-2 flex items-center"  @click="expandAll">展开</Button>

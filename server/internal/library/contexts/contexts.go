@@ -11,6 +11,7 @@ import (
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/model"
 
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
@@ -155,6 +156,7 @@ func SetIsWebSocket(ctx context.Context, isWebSocket bool) {
 		return
 	}
 	customCtx.IsWebSocket = isWebSocket
+	g.Log().Debugf(ctx, "SetIsWebSocket: %v", isWebSocket)
 }
 
 // GetAccessCodeList 获取上下文变量中的访问码列表
@@ -167,4 +169,30 @@ func GetAccessCodeList(ctx context.Context) []string {
 		return nil
 	}
 	return user.AccessCodeList
+}
+
+func GetDataValue(ctx context.Context, key string) interface{} {
+	customCtx := Get(ctx)
+	if customCtx == nil {
+		return nil
+	}
+	if customCtx.Data == nil {
+		return nil
+	}
+	value, ok := customCtx.Data[key]
+	if !ok {
+		return nil
+	}
+	return value
+}
+
+func SetDataValue(ctx context.Context, key string, value interface{}) {
+	customCtx := Get(ctx)
+	if customCtx == nil {
+		return
+	}
+	if customCtx.Data == nil {
+		customCtx.Data = make(g.Map)
+	}
+	customCtx.Data[key] = value
 }

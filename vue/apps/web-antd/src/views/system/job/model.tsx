@@ -6,8 +6,9 @@
  * @License  https://github.com/xiujiecn/xiu-admin/blob/master/LICENSE
  * @date 2024-03-21
  */
-import type {
-    VbenFormSchema,
+import {
+  z,
+    type VbenFormSchema,
   } from '@vben/common-ui';
 import type { DescItem } from '#/components/description';
 import { getDictOptions } from '#/utils/dict';
@@ -19,6 +20,10 @@ import {
 } from '#/utils/render';
 
 export const viewSchema: DescItem[] = [
+  {
+    field: 'jobId',
+    label: 'ID',
+  },
   {
     field: 'jobName',
     label: '任务名称',
@@ -82,8 +87,9 @@ export const drawerSchema: VbenFormSchema[] =  [
   {
     component: 'Input',
     fieldName: 'jobName',
-    label: '任务名称',
-    rules: 'required'
+    label: '任务名称',rules: z.string()
+          .min(1, '任务名称不能为空')
+          .max(32, '任务名称最大长度32位'),
   },
   {
     component: 'Input',
@@ -152,4 +158,3 @@ export const drawerSchema: VbenFormSchema[] =  [
     label: '状态'
   }
 ];
-  

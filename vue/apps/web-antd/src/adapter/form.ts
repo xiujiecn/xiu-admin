@@ -20,6 +20,7 @@ setupVbenForm<ComponentType>({
       RichTextarea: 'modelValue',
       Switch: 'checked',
       Upload: 'fileList',
+      ImageUpload: 'value',
     },
   },
   defineRules: {

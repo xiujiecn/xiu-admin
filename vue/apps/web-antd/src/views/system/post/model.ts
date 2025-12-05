@@ -14,7 +14,7 @@ import type {
   import { getDictOptions } from '#/utils/dict';
   import { DictEnum } from '@vben/constants';
   import { getPopupContainer } from '@vben/utils';
-  
+
 
 export const drawerSchema: VbenFormSchema[] =  [
     {
@@ -32,14 +32,15 @@ export const drawerSchema: VbenFormSchema[] =  [
         getPopupContainer,
       },
       fieldName: 'deptId',
-      label: '所属部门',
+      label: '所属机构',
       rules: 'selectRequired',
     },
     {
       component: 'Input',
       fieldName: 'postName',
-      label: '岗位名称',
-      rules: 'required',
+      label: '岗位名称',rules: z.string()
+      .min(1, '岗位名称不能为空')
+      .max(32, '岗位名称最大长度32位'),
     },
     {
       component: 'Input',
@@ -77,4 +78,3 @@ export const drawerSchema: VbenFormSchema[] =  [
       label: '备注',
     },
   ];
-  

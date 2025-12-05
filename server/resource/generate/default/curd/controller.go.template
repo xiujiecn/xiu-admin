@@ -9,7 +9,7 @@ package @{.templateGroup}
 
 import (
 	"context"
-	"@{.importApi}"
+	v1 "@{.importApi}"
 	"xiuadmin/internal/model/input/form"
 	"@{.importInput}"
 	"@{.importService}"

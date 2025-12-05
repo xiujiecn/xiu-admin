@@ -121,3 +121,21 @@ type GetUserListByDeptIdRes struct {
 	response.PageResult
 	Items []*model.SysUserMiniModel `json:"items" dc:"用户列表"`
 }
+
+// 用户注册
+type UserRegisterReq struct {
+	g.Meta `path:"/user/register" method:"post" tags:"系统-用户管理" summary:"用户注册" x-check-permission:"cpm:system:user:register"`
+	model.SysUserRegisterModel
+}
+
+type UserRegisterRes struct {
+}
+
+// StatusReq 更新用户状态
+type UserStatusReq struct {
+	g.Meta `path:"/user/status" method:"post" tags:"系统-用户管理" summary:"更新用户状态" x-check-permission:"cpm:system:user:edit"`
+	model.SysUserStatusParam
+}
+
+type UserStatusRes struct {
+}

@@ -5,10 +5,10 @@ import (
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 
 	v1 "xiuadmin/api/system/v1"
-	"xiuadmin/internal/consts"
 	"xiuadmin/internal/library/contexts"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/request"
@@ -27,39 +27,51 @@ func (c *ControllerV1) UserInfo(ctx context.Context, req *v1.UserInfoReq) (res *
 	if err != nil {
 		return nil, err
 	}
-	menus, err := service.SysMenu().GetUserMenu(ctx)
+	menus, err := service.SysMenu().GetUserMenuTree(ctx)
 	if err != nil {
 		return nil, err
 	}
 	homePath := ""
-	firstMenu := ""
+	firstMenu := "404"
 	if len(menus) > 0 {
 		for _, menu := range menus {
-			if menu.ParentId == 0 && menu.Path == "analytics" {
-				homePath = "/analytics"
+			firstMenu = menu.Path
+			if len(menu.Children) == 0 {
 				break
 			}
-			if firstMenu == "" && menu.MenuType == consts.SysMenuTypeMenu {
-				firstMenu = menu.Path
-				if menu.ParentId != 0 {
-					for _, menu2 := range menus {
-						if menu2.MenuId == menu.ParentId {
-							firstMenu = menu2.Path + "/" + firstMenu
-							if menu2.ParentId != 0 {
-								for _, menu3 := range menus {
-									if menu3.MenuId == menu2.ParentId {
-										firstMenu = menu3.Path + "/" + firstMenu
-										break
-									}
+			for _, menu2 := range menu.Children {
+				firstMenu = firstMenu + "/" + menu2.Path
+				if len(menu2.Children) == 0 {
+					break
+				}
+				for _, menu3 := range menu2.Children {
+					firstMenu = firstMenu + "/" + menu3.Path
+					if len(menu3.Children) == 0 {
+						break
+					}
+					for _, menu4 := range menu3.Children {
+						firstMenu = firstMenu + "/" + menu4.Path
+						if len(menu4.Children) == 0 {
+							break
+						}
+						for _, menu5 := range menu4.Children {
+							firstMenu = firstMenu + "/" + menu5.Path
+							if len(menu5.Children) == 0 {
+								break
+							}
+							for _, menu6 := range menu5.Children {
+								firstMenu = firstMenu + "/" + menu6.Path
+								if len(menu6.Children) == 0 {
+									break
 								}
 							}
-							break
 						}
 					}
 				}
 			}
 		}
 	}
+	g.Log().Debugf(ctx, "firstMenu: %s", firstMenu)
 	if homePath == "" {
 		homePath = "/" + firstMenu
 	}
@@ -161,6 +173,13 @@ func (c *ControllerV1) DeleteUser(ctx context.Context, req *v1.DeleteUserReq) (r
 	return &v1.DeleteUserRes{}, nil
 }
 func (c *ControllerV1) GetUser(ctx context.Context, req *v1.GetUserReq) (res *v1.GetUserRes, err error) {
+	// 如果调用方传入 userId == 0，则不返回错误，直接返回空的用户视图结构
+	if req.UserId == 0 {
+		return &v1.GetUserRes{
+			SysUserViewModel: model.SysUserViewModel{},
+		}, nil
+	}
+
 	user, err := service.SysUser().GetUserById(ctx, req.UserId)
 	if err != nil {
 		return nil, err
@@ -196,4 +215,22 @@ func (c *ControllerV1) GetUserListByDeptId(ctx context.Context, req *v1.GetUserL
 			Total:    total,
 		},
 	}, nil
+}
+
+// UserRegister 用户注册
+func (c *ControllerV1) UserRegister(ctx context.Context, req *v1.UserRegisterReq) (res *v1.UserRegisterRes, err error) {
+	err = service.SysUser().Register(ctx, &req.SysUserRegisterModel)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UserRegisterRes{}, nil
+}
+
+// UserStatus 更新用户状态
+func (c *ControllerV1) UserStatus(ctx context.Context, req *v1.UserStatusReq) (res *v1.UserStatusRes, err error) {
+	err = service.SysUser().Status(ctx, &req.SysUserStatusParam)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UserStatusRes{}, nil
 }

@@ -7,12 +7,12 @@
  * @date 2024-03-21
 -->
 <script lang="ts" setup>
-import { h, ref } from 'vue';
+import { h, onMounted, ref } from 'vue';
 import type { DeepPartial } from '@vben/types';
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions, VxeGridListeners } from '#/adapter/vxe-table';
 import type { SysNotice } from '#/api/system/notice';
-import { getVxePopupContainer } from '@vben/utils';
+import { addFullName, getVxePopupContainer } from '@vben/utils';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { DictEnum } from '@vben/constants';
 import { getPopupContainer } from '@vben/utils';
@@ -23,12 +23,15 @@ const { hasAccessByCodes } = useAccess();
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysNoticeListApi, deleteSysNoticeApi } from '#/api/system/notice';
 import { renderDict } from '#/utils/render';
+import viewDrawer from './view.vue';
 
 import {
   MdiPlus,
   MdiDelete,
 } from '@vben/icons';
 import noticeDrawer from './notice-drawer.vue';
+import { getSysDeptTreeApi } from '#/api/system/dept';
+import { getSysUserListApi } from '#/api/system';
 interface RowType {
   category: string;
   color: string;
@@ -86,10 +89,10 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'noticeId',
   },
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    { type: 'checkbox', width: 40 },
+    { field: 'noticeId', title: 'ID' },
     { field: 'noticeTitle', title: '标题' },
     {
     title: '公告类型',
@@ -156,11 +159,7 @@ const [NoticeDrawer, noticeDrawerApi] = useVbenDrawer({
 });
 
 
-function handleView(row: SysNotice) {
-  const { noticeId } = row;
-  noticeDrawerApi.setData({ id: noticeId, update: false, view: true });
-  noticeDrawerApi.open();
-}
+
 
 function handleAdd() {
   noticeDrawerApi.setData({ update: false, view: false });
@@ -196,6 +195,31 @@ function handleMultiDelete() {
     },
   });
 }
+
+
+const [ViewDrawer, drawerApi] = useVbenDrawer({
+  connectedComponent: viewDrawer,
+});
+const userList=ref([])
+const deptList=ref([])
+function handleView(row: SysNotice) {
+  const { noticeId } = row;
+  drawerApi.setData({ id: noticeId,userList:userList.value.items,deptList:deptList.value, update: false, view: true });
+  drawerApi.open();
+}
+/** 获取机构树内容,并格式化 */
+async function getDeptTree() {
+  const treeRes = await getSysDeptTreeApi();
+  const treeData = treeRes.items;
+  addFullName(treeData, 'deptName', ' / ');
+  return treeData;
+}
+onMounted(async() => {
+  userList.value = await getSysUserListApi();
+  deptList.value = await getDeptTree();
+  // console.log(userList.value);
+  // console.log(deptList.value);
+});
 </script>
 
 <template>
@@ -226,5 +250,6 @@ function handleMultiDelete() {
 
     </Grid>
     <NoticeDrawer @reload="handleRefresh" />
+    <ViewDrawer></ViewDrawer>
   </Page>
 </template>

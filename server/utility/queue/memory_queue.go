@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"sync"
@@ -109,10 +110,16 @@ func (q *tMemoryQueue) Handle(ctx context.Context) (err error) {
 		subCtx := gctx.New()
 		gtrace.WithTraceID(subCtx, payload.TraceId)
 		q.grpool.Add(ctx, func(ctx context.Context) {
+			defer func() {
+				if r := recover(); r != nil {
+					g.Log().Errorf(ctx, "memqueue process panic: %v, topic: %s, trace_id: %s, hex(data): %v",
+						r, q.p.GetTopic(), payload.TraceId, hex.EncodeToString(payload.Data))
+				}
+			}()
 			err := p.Handle(subCtx, payload)
 			if err != nil {
-				g.Log().Errorf(ctx, "memqueue process error: %v, topic: %s, trace_id: %s, data: %v",
-					err, q.p.GetTopic(), payload.TraceId, payload.Data)
+				g.Log().Errorf(ctx, "memqueue process error: %v, topic: %s, trace_id: %s, hex(data): %v",
+					err, q.p.GetTopic(), payload.TraceId, hex.EncodeToString(payload.Data))
 			}
 		})
 	}

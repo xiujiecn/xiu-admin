@@ -236,6 +236,9 @@ func (l *sSysUser) List(ctx context.Context, page *request.PageInfo, query *mode
 		begin, end := gtime.NewFromStr(query.CreatedAt[0]), gtime.NewFromStr(query.CreatedAt[1])
 		m = m.WhereBetween(dao.SysUser.Columns().CreatedAt, begin, end.EndOfDay())
 	}
+	if len(query.DeptIdList) > 0 {
+		m = m.WhereIn(dao.SysUser.Columns().DeptId, query.DeptIdList)
+	}
 	total, err = m.Count()
 	if err != nil {
 		return nil, 0, err
@@ -263,9 +266,9 @@ func (l *sSysUser) AddUser(ctx context.Context, req *model.SysUserAddModel) (dat
 		return nil, gerror.NewCode(consts.CodeDeptNotFound, "部门不存在")
 	}
 
-	// 判断用户名是否存在
+	// 判断用户名是否存在（在当前租户下）
 	var user *entity.SysUser
-	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserName, req.UserName).Unscoped().Scan(&user)
+	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserName, req.UserName).Where(dao.SysUser.Columns().TenantId, req.TenantId).Scan(&user)
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
 			return nil, err
@@ -525,6 +528,13 @@ func (l *sSysUser) DeleteUser(ctx context.Context, userIds []int64) (err error) 
 	if err != nil {
 		return err
 	}
+
+	// 删除用户绑定关系
+	_, err = dao.SysSocial.Ctx(ctx).WhereIn(dao.SysSocial.Columns().UserId, userIds).Delete()
+	if err != nil {
+		return err
+	}
+
 	event.EventsInstance().Emit(ctx, consts.EventKeyUserDelete, userIds)
 	return nil
 }
@@ -570,4 +580,122 @@ func (l *sSysUser) GetUserPostIds(ctx context.Context, userId int64) (postIds []
 		postIds = append(postIds, up.PostId)
 	}
 	return postIds, nil
+}
+
+func (l *sSysUser) Register(ctx context.Context, param *model.SysUserRegisterModel) (err error) {
+	// 验证验证码
+	err = service.SysCaptcha().VerifyCaptcha(ctx, param.CaptchaID, param.CaptchaValue)
+	if err != nil {
+		return err
+	}
+
+	// 检查是否开启用户注册功能
+	registerConfig := &model.SysConfigViewModel{}
+	mod := g.DB().Model(dao.SysConfig.Table())
+	mod = mod.Where(dao.SysConfig.Columns().ConfigKey, "sys.account.registerUser")
+	mod = mod.Where(dao.SysConfig.Columns().TenantId, param.TenantId)
+	err = mod.Scan(&registerConfig)
+	if err != nil {
+		return gerror.New("请联系管理员开启用户注册功能")
+	}
+	if registerConfig == nil || registerConfig.ConfigValue != "true" {
+		return gerror.New("请联系管理员开启用户注册功能")
+	}
+
+	// 获取租户信息
+	tenant, err := service.SysTenant().View(ctx, &model.SysTenantViewParam{
+		TenantId: param.TenantId,
+	})
+	if err != nil {
+		return err
+	}
+	if tenant == nil {
+		return gerror.New("租户无效")
+	}
+
+	// 获取租户的默认注册机构ID
+	config := &model.SysConfigViewModel{}
+	mod = g.DB().Model(dao.SysConfig.Table())
+	mod = mod.Where(dao.SysConfig.Columns().ConfigKey, consts.ConfigKeyTenantDefaultRegisterDeptId)
+	mod = mod.Where(dao.SysConfig.Columns().TenantId, param.TenantId)
+	err = mod.Scan(&config)
+	if err != nil {
+		return gerror.New("该租户不允许自主注册")
+	}
+	if config == nil || config.ConfigValue == "" {
+		return gerror.New("该租户不允许自主注册")
+	}
+
+	// 验证用户名是否存在
+	mod1 := g.DB().Model(dao.SysUser.Table())
+	mod1 = mod1.Where(dao.SysUser.Columns().UserName, param.UserName)
+	mod1 = mod1.Where(dao.SysUser.Columns().TenantId, param.TenantId)
+	total, err := mod1.Count()
+	if err != nil {
+		return err
+	}
+	if total > 0 {
+		return gerror.New("用户名已存在")
+	}
+	// 随机生成5位字符
+	salt := utility.RandomString(5)
+	password := utility.PasswordEncrypt(param.Password, salt)
+
+	newUser := &entity.SysUser{
+		UserName:  param.UserName,
+		NickName:  "",
+		Password:  password,
+		Salt:      salt,
+		TenantId:  param.TenantId,
+		DeptId:    gconv.Int64(config.ConfigValue),
+		Status:    consts.SysDeptStatusNormal,
+		CreatedBy: 0,
+		CreatedAt: gtime.Now(),
+		UpdatedBy: 0,
+		UpdatedAt: gtime.Now(),
+	}
+
+	userId, err := l.Model(ctx).Data(newUser).InsertAndGetId()
+	if err != nil {
+		return err
+	}
+
+	//配置角色
+	// 新增用户角色
+	mod = g.DB().Model(dao.SysConfig.Table())
+	mod = mod.Where(dao.SysConfig.Columns().ConfigKey, consts.ConfigKeyTenantDefaultRegisterRoleId)
+	mod = mod.Where(dao.SysConfig.Columns().TenantId, param.TenantId)
+	err = mod.Scan(&config)
+	if err != nil {
+		g.Log().Error(ctx, "获取租户的默认角色失败", err)
+	}
+	if config != nil && config.ConfigValue != "" {
+		roleId := gconv.Int64(config.ConfigValue)
+		d := map[string]any{dao.SysUserRole.Columns().UserId: userId, dao.SysUserRole.Columns().RoleId: roleId}
+		_, err = dao.SysUserRole.Ctx(ctx).Data(d).Insert()
+		if err != nil {
+			g.Log().Error(ctx, "获取租户的默认角色失败", err)
+		}
+	}
+	return nil
+}
+
+// Status 更新用户状态
+func (l *sSysUser) Status(ctx context.Context, param *model.SysUserStatusParam) (err error) {
+	_, err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, param.UserId).Data(map[string]any{
+		dao.SysUser.Columns().Status: param.Status,
+	}).OmitEmpty().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// 批量查询用户迷你信息
+func (l *sSysUser) BatchGetUserMiniInfo(ctx context.Context, userIds []int64) (users []*model.SysUserMiniModel, err error) {
+	err = dao.SysUser.Ctx(ctx).WhereIn(dao.SysUser.Columns().UserId, userIds).Scan(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }

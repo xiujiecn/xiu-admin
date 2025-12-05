@@ -23,4 +23,8 @@ type SysOss struct {
 	UpdatedAt    *gtime.Time `json:"updatedAt"    orm:"updated_at"    description:"更新时间"`
 	UpdatedBy    int64       `json:"updatedBy"    orm:"updated_by"    description:"更新者"`
 	Service      string      `json:"service"      orm:"service"       description:"服务商"`
+	Md5          string      `json:"md5"          orm:"md5"           description:"文件MD5"`
+	FileSize     int         `json:"fileSize"     orm:"file_size"     description:"文件大小"`
+	FileCrc16    int         `json:"fileCrc16"    orm:"file_crc16"    description:"文件Crc16"`
+	FileSum      int         `json:"fileSum"      orm:"file_sum"      description:"文件校验和"`
 }

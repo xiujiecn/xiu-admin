@@ -18,7 +18,7 @@ import (
 )
 
 func init() {
-	event.EventsInstance().Register(consts.EventKeySysConfigUpdate, func(ctx context.Context, eventKey string, args ...interface{}) {
+	event.EventsInstance().Register([]string{consts.EventKeyDBSysConfigUpdate, consts.EventKeyDBSysConfigCreate, consts.EventKeyDBSysConfigDelete}, func(ctx context.Context, eventKey string, args ...interface{}) {
 		if len(args) < 1 {
 			return
 		}

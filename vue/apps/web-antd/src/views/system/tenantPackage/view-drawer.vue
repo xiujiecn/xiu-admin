@@ -27,7 +27,8 @@ async function handleOpenChange(open: boolean) {
     return null;
   }
   const { record } = drawerApi.getData() as { record: SysTenantListData };
-  const record2 = await getSysTenantPackageViewApi ({ packageId: Number(record.id) });
+  const record2 = await getSysTenantPackageViewApi ({ packageId: Number(record.packageId) });
+  console.log("这是请求接口调用时的record.packageId", record.packageId);
   setDescProps({ data: record2 }, true);
 }
 

@@ -31,7 +31,9 @@ type (
 		// 根据Token获取当前登录用户信息
 		GetCurrentUser(ctx context.Context) (claims *model.CustomClaims, err error)
 		// 获取用户权限码
-		GetUserAccessCodeList(ctx context.Context, userId int64) (accessCodeList []string, err error)
+		GetUserAccessCodeList(ctx context.Context, userId int64) (accessCodeList []string, menuRoleAccessCodeList []string, err error)
+		// 根据openId登录
+		LoginByOpenId(ctx context.Context, social *model.SysSocialListModel) (res *model.LoginUserOut, token string, err error)
 	}
 	ISysCaptcha interface {
 		// 生成验证码
@@ -49,6 +51,7 @@ type (
 	}
 	ISysConfig interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model
 		List(ctx context.Context, param *model.SysConfigListParam) (items []*model.SysConfigListModel, total int, err error)
 		Add(ctx context.Context, param *model.SysConfigAddParam) (output *model.SysConfigAddModel, err error)
 		Edit(ctx context.Context, param *model.SysConfigEditParam) (output *model.SysConfigEditModel, err error)
@@ -58,6 +61,7 @@ type (
 	}
 	ISysDept interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model
 		GetDeptList(ctx context.Context, query model.SysDeptListParam) (items []*model.SysDeptListModel, total int, err error)
 		GetDeptById(ctx context.Context, id int64) (dept *model.SysDeptViewModel, err error)
 		// 构建树结构
@@ -73,17 +77,22 @@ type (
 		// 刷新部门 ancestors
 		RefreshDeptAncestors(ctx context.Context) (err error)
 		GetParentIDAncestors(ctx context.Context, depts []*model.SysDeptViewModel, printId int64, ancestors *string) (err error)
+		GetDeptListByIds(ctx context.Context, ids []int64) (depts []*model.SysDeptListModel, err error)
 	}
 	ISysDictData interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model
 		List(ctx context.Context, param *model.SysDictDataListParam) (items []model.SysDictDataListModel, total int, err error)
 		View(ctx context.Context, param *model.SysDictDataViewParam) (data *model.SysDictDataViewModel, err error)
 		Add(ctx context.Context, param *model.SysDictDataAddParam) (output *model.SysDictDataAddModel, err error)
 		Edit(ctx context.Context, param *model.SysDictDataEditParam) (output *model.SysDictDataEditModel, err error)
 		Delete(ctx context.Context, param *model.SysDictDataDeleteParam) (output *model.SysDictDataDeleteModel, err error)
+		GetDictLabel(ctx context.Context, dictType string, dictCode string) string
+		GetDictListByTypes(ctx context.Context, dictTypes []string) (dictDataList []model.SysDictDataListModel, err error)
 	}
 	ISysDictType interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model
 		List(ctx context.Context, param *model.SysDictTypeListParam) (items []model.SysDictTypeListModel, total int, err error)
 		View(ctx context.Context, param *model.SysDictTypeViewParam) (data *model.SysDictTypeViewModel, err error)
 		Add(ctx context.Context, param *model.SysDictTypeAddParam) (output *model.SysDictTypeAddModel, err error)
@@ -110,6 +119,7 @@ type (
 	}
 	ISysMenu interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model
 		List(ctx context.Context, param *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error)
 		// 获取租户菜单列表， 系统租户返回所有菜单，其他租户返回当前租户菜单
 		GetTenantMenu(ctx context.Context, query *model.SysMenuListParam) (data []*model.SysMenuListModel, total int, err error)
@@ -135,6 +145,24 @@ type (
 		Delete(ctx context.Context, param *model.SysNoticeDeleteParam) (err error)
 		View(ctx context.Context, param *model.SysNoticeViewParam) (data *model.SysNoticeViewModel, err error)
 	}
+	ISysNoticeUser interface {
+		// Model 用户通知公告表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取用户通知公告表列表
+		List(ctx context.Context, in *model.SysNoticeUserListParam) (list []*model.SysNoticeUserListModel, totalCount int, err error)
+		// Export 导出用户通知公告表
+		Export(ctx context.Context, in *model.SysNoticeUserListParam) (err error)
+		// Edit 修改/新增用户通知公告表
+		Edit(ctx context.Context, in *model.SysNoticeUserEditParam) (err error)
+		// Delete 删除用户通知公告表
+		Delete(ctx context.Context, in *model.SysNoticeUserDeleteParam) (err error)
+		// View 获取用户通知公告表指定信息
+		View(ctx context.Context, in *model.SysNoticeUserViewParam) (res *model.SysNoticeUserViewModel, err error)
+		// Status 更新用户通知公告表状态
+		Status(ctx context.Context, in *model.SysNoticeUserStatusParam) (err error)
+		// Read 已读
+		Read(ctx context.Context, in *model.SysNoticeUserReadParam) (err error)
+	}
 	ISysOperLog interface {
 		GetOperLogList(ctx context.Context, query *model.SysOperLogListParam, page *request.PageInfo) (items []*model.SysOperLogListModel, total int, err error)
 		AnalysisLog(ctx context.Context) (data *model.SysOperLogAddParam, err error)
@@ -148,11 +176,18 @@ type (
 		Download(ctx context.Context, param *model.SysOssDownloadParam) (output *model.SysOssDownloadModel, err error)
 		Delete(ctx context.Context, param *model.SysOssDeleteParam) (output *model.SysOssDeleteModel, err error)
 		Upload(ctx context.Context, param *model.SysOssUploadParam) (output *model.SysOssUploadModel, err error)
-		UploadLocal(ctx context.Context, file *ghttp.UploadFile) (result model.UploadResponse, err error)
+		MoveFile(ctx context.Context, param *model.SysOssMoveFileParam) (output *model.SysOssMoveFileModel, err error)
+		SaveContent(ctx context.Context, param *model.SysOssSaveContentParam) (output *model.SysOssSaveContentModel, err error)
+		GetSaveFilePathConfig(ctx context.Context, newFileType int, notAddDate int) (string, error)
+		MoveFileLocal(ctx context.Context, filePath string, newFileType int, useOriginalName int, subDirName string, isAddDate int) (result model.UploadResponse, err error)
+		// 保存内容
+		SaveContentLocal(ctx context.Context, content []byte, newFileType int, fileName string, subDirName string, isAddDate int) (result model.UploadResponse, err error)
+		UploadLocal(ctx context.Context, file *ghttp.UploadFile, newFileType int, useOriginalName int, subDirName string, notAddDate int) (result model.UploadResponse, err error)
 		DownloadLocal(ctx context.Context, file *entity.SysOss) (err error)
 		DeleteLocal(ctx context.Context, file *entity.SysOss) (err error)
 		CheckType(ctx context.Context, checkFileType string, file *ghttp.UploadFile) (err error)
 		CheckSize(ctx context.Context, checkFileType string, file *ghttp.UploadFile) (err error)
+		GetAllUrl(ctx context.Context, url string) (allUrl string, ossId int64, fileSize int64, OriginalName string, md5 string, hmac string, err error)
 	}
 	ISysOssConfig interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -161,9 +196,11 @@ type (
 		Add(ctx context.Context, param *model.SysOssConfigAddParam) (item *model.SysOssConfigAddModel, err error)
 		Edit(ctx context.Context, param *model.SysOssConfigEditParam) (item *model.SysOssConfigEditModel, err error)
 		Delete(ctx context.Context, param *model.SysOssConfigDeleteParam) (item *model.SysOssConfigDeleteModel, err error)
+		GetAllUrlByService(ctx context.Context, path string, tenantId string, ossService string) (allUrl string, err error)
 	}
 	ISysPost interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model
 		List(ctx context.Context, query *model.SysPostListParam) (items []*model.SysPostListModel, total int, err error)
 		View(ctx context.Context, param *model.SysPostViewParam) (post *model.SysPostViewModel, err error)
 		Add(ctx context.Context, param *model.SysPostAddParam) (post *model.SysPostAddModel, err error)
@@ -171,8 +208,27 @@ type (
 		Delete(ctx context.Context, param *model.SysPostDeleteParam) (post *model.SysPostDeleteModel, err error)
 		Export(ctx context.Context, param *model.SysPostExportParam) (post *model.SysPostExportModel, err error)
 	}
+	ISysQrcode interface {
+		// 获取登录二维码
+		GetQrcodeLogin(ctx context.Context) (res *model.QrcodeLoginModel, err error)
+		// 获取登录二维码扫码结果
+		GetQrcodeLoginStatus(ctx context.Context, tempUserId string) (res *model.QrcodeLoginModel, err error)
+		// 获取绑定二维码
+		GetQrcodeBind(ctx context.Context) (res *model.QrcodeCacheModel, err error)
+		// 获取绑定二维码扫码结果
+		GetQrcodeBindStatus(ctx context.Context) (res *model.QrcodeBindStatusModel, err error)
+		// 扫码回调
+		QrcodeScanCallback(ctx context.Context, param *model.QrcodeScanCallbackParam) (err error)
+		// 扫码后选择用户登录
+		QrcodeLoginSelectUserId(ctx context.Context, param *model.QrcodeLoginSelectUserIdParam) (res *model.QrcodeLoginAndBindOpenIdModel, err error)
+		// 登录并绑定
+		QrcodeLoginAndBindOpenId(ctx context.Context, param *model.QrcodeLoginAndBindOpenIdParam) (res *model.QrcodeLoginAndBindOpenIdModel, err error)
+		// 注册并绑定
+		QrcodeRegisterAndBindOpenId(ctx context.Context, param *model.QrcodeRegisterAndBindOpenIdParam) (res *model.QrcodeLoginAndBindOpenIdModel, err error)
+	}
 	ISysRole interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model
 		// 获取租户下角色列表
 		List(ctx context.Context, param *model.SysRoleListParam) (res []*model.SysRoleListModel, total int, err error)
 		// 获取角色详情
@@ -196,9 +252,14 @@ type (
 		EditRoleDataScope(ctx context.Context, model *model.SysRoleDataScopeEditParam) (err error)
 	}
 	ISysSocial interface {
+		// 查询社会化关系表
 		List(ctx context.Context, query *model.SysSocialListParam, page *request.PageInfo) (items []*model.SysSocialListModel, total int, err error)
+		// 删除社会化关系表
+		Delete(ctx context.Context, id int64) (err error)
+		Create(ctx context.Context, social *model.SysSocialSaveParam) (err error)
 	}
 	ISysTenant interface {
+		ModelQuery(ctx context.Context, option ...*handler.Option) *gdb.Model
 		// 获取租户信息
 		View(ctx context.Context, param *model.SysTenantViewParam) (data *model.SysTenantViewModel, err error)
 		// 获取租户列表
@@ -243,6 +304,11 @@ type (
 		GetUserRoleIds(ctx context.Context, userId int64) (roleIds []int64, err error)
 		// 获取用户岗位ID列表
 		GetUserPostIds(ctx context.Context, userId int64) (postIds []int64, err error)
+		Register(ctx context.Context, param *model.SysUserRegisterModel) (err error)
+		// Status 更新用户状态
+		Status(ctx context.Context, param *model.SysUserStatusParam) (err error)
+		// 批量查询用户迷你信息
+		BatchGetUserMiniInfo(ctx context.Context, userIds []int64) (users []*model.SysUserMiniModel, err error)
 	}
 	ISysUserOnline interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -265,10 +331,12 @@ var (
 	localSysLogininfor    ISysLogininfor
 	localSysMenu          ISysMenu
 	localSysNotice        ISysNotice
+	localSysNoticeUser    ISysNoticeUser
 	localSysOperLog       ISysOperLog
 	localSysOss           ISysOss
 	localSysOssConfig     ISysOssConfig
 	localSysPost          ISysPost
+	localSysQrcode        ISysQrcode
 	localSysRole          ISysRole
 	localSysSocial        ISysSocial
 	localSysTenant        ISysTenant
@@ -398,6 +466,17 @@ func RegisterSysNotice(i ISysNotice) {
 	localSysNotice = i
 }
 
+func SysNoticeUser() ISysNoticeUser {
+	if localSysNoticeUser == nil {
+		panic("implement not found for interface ISysNoticeUser, forgot register?")
+	}
+	return localSysNoticeUser
+}
+
+func RegisterSysNoticeUser(i ISysNoticeUser) {
+	localSysNoticeUser = i
+}
+
 func SysOperLog() ISysOperLog {
 	if localSysOperLog == nil {
 		panic("implement not found for interface ISysOperLog, forgot register?")
@@ -440,6 +519,17 @@ func SysPost() ISysPost {
 
 func RegisterSysPost(i ISysPost) {
 	localSysPost = i
+}
+
+func SysQrcode() ISysQrcode {
+	if localSysQrcode == nil {
+		panic("implement not found for interface ISysQrcode, forgot register?")
+	}
+	return localSysQrcode
+}
+
+func RegisterSysQrcode(i ISysQrcode) {
+	localSysQrcode = i
 }
 
 func SysRole() ISysRole {

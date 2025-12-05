@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CSSProperties, PropType } from 'vue';
 
-import { computed, onMounted, onUnmounted, ref, unref, useAttrs } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, unref, useAttrs, watch } from 'vue';
 
 import { useDebounceFn } from '@vueuse/core';
 import Cropper from 'cropperjs';
@@ -83,7 +83,21 @@ const getWrapperStyle = computed((): CSSProperties => {
   return { height: `${`${props.height}`.replace(/px/, '')}px` };
 });
 
-onMounted(init);
+onMounted(() => {
+  if (props.src) {
+    init();
+  } else {
+    emit('ready', null);
+  }
+});
+watch(() => props.src, (newSrc) => {
+  if (!newSrc) return;
+  if (cropper.value) {
+    cropper.value.destroy();
+    cropper.value = null;
+  }
+  nextTick(init);
+});
 
 onUnmounted(() => {
   cropper.value?.destroy();
@@ -115,8 +129,11 @@ async function init() {
 }
 
 // Real-time display preview
-function realTimeCroppered() {
+function realTimeCroppered(){
+  try {
   props.realTimePreview && croppered();
+  } catch (error) {
+  }
 }
 
 // event: return base64 and width and height information after cropping
@@ -171,22 +188,25 @@ function getRoundedCanvas() {
   context.fill();
   return canvas;
 }
+function reset() {
+  if (cropper.value) {
+    cropper.value.reset();
+  }
+}
+defineExpose({
+  reset
+});
+
 </script>
 <template>
   <div :class="getClass" :style="getWrapperStyle">
-    <img
-      v-show="isReady"
-      ref="imgElRef"
-      :alt="alt"
-      :crossorigin="crossorigin"
-      :src="src"
-      :style="getImageStyle"
-    />
+    <img v-show="isReady" ref="imgElRef" :alt="alt" :crossorigin="crossorigin" :src="src" :style="getImageStyle" />
   </div>
 </template>
 <style lang="scss">
 .cropper-image {
   &--circled {
+
     .cropper-view-box,
     .cropper-face {
       border-radius: 50%;

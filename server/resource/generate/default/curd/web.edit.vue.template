@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
 
-import { useVbenDrawer } from '@vben/common-ui';
+import { useVbenDrawer, useVbenModal, VbenButton } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 import { addFullName, cloneDeep } from '@vben/utils';
 
@@ -39,15 +39,20 @@ const [BasicForm, formApi] = useVbenForm({
     componentProps: {
       class: 'w-full',
     },
-    formItemClass: 'col-span-3',
+    formItemClass: 'col-span-@{.script.formGridSpan}',
   },
   layout: 'vertical',
   schema: editSchema,
   showDefaultActions: false,
-  wrapperClass: 'grid-cols-3 gap-x-4',
+  wrapperClass: 'grid-cols-@{.script.formGridSpan} gap-x-4',
 });
 
-const [BasicDrawer, drawerApi] = useVbenDrawer({
+@{ if eq .isEditModal true }
+const [BasicDrawer, drawerApi] = useVbenModal
+@{else}
+const [BasicDrawer, drawerApi] = useVbenDrawer
+@{end}
+({
   onCancel: handleCancel,
   onConfirm: handleConfirm,
   async onOpenChange(isOpen) {

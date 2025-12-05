@@ -18,6 +18,7 @@ type SysDictTypeListModel struct {
 	TenantId    string      `json:"tenantId"    orm:"tenant_id"    description:"租户编号"`
 	DictName    string      `json:"dictName"    orm:"dict_name"    description:"字典名称"`
 	DictType    string      `json:"dictType"    orm:"dict_type"    description:"字典类型"`
+	IsSys       string      `json:"isSys"       orm:"is_sys"       description:"是否系统（0是 1否）"`
 	CreatedDept int64       `json:"createdDept" orm:"created_dept" description:"创建部门"`
 	CreatedBy   int64       `json:"createdBy"   orm:"created_by"   description:"创建者"`
 	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   description:"创建时间"`
@@ -28,11 +29,13 @@ type SysDictTypeListParam struct {
 	request.PageInfo
 	DictName  string   `json:"dictName"    description:"字典名称"`
 	DictType  string   `json:"dictType"    description:"字典类型"`
+	IsSys     string   `json:"isSys"    description:"是否系统（0是 1否）"`
 	CreatedAt []string `json:"createdAt"   description:"创建时间"`
 }
 
 type SysDictTypeViewParam struct {
 	DictId   int64  `json:"dictId"    description:"字典主键"`
+	IsSys    string `json:"isSys"    description:"是否系统（0是 1否）"`
 	DictType string `json:"dictType"    orm:"dict_type"    description:"字典类型"`
 }
 
@@ -42,6 +45,7 @@ type SysDictTypeViewModel struct {
 	TenantId    string      `json:"tenantId"    orm:"tenant_id"    description:"租户编号"`
 	DictName    string      `json:"dictName"    orm:"dict_name"    description:"字典名称"`
 	DictType    string      `json:"dictType"    orm:"dict_type"    description:"字典类型"`
+	IsSys       string      `json:"isSys"       orm:"is_sys"       description:"是否系统（0是 1否）"`
 	CreatedDept int64       `json:"createdDept" orm:"created_dept" description:"创建部门"`
 	CreatedBy   int64       `json:"createdBy"   orm:"created_by"   description:"创建者"`
 	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   description:"创建时间"`
@@ -53,6 +57,7 @@ type SysDictTypeViewModel struct {
 type SysDictTypeAddParam struct {
 	DictName string `json:"dictName"    description:"字典名称"`
 	DictType string `json:"dictType"    description:"字典类型"`
+	IsSys    string `json:"isSys"       description:"是否系统（0是 1否）"`
 	Remark   string `json:"remark"      description:"备注"`
 }
 
@@ -64,6 +69,7 @@ type SysDictTypeEditParam struct {
 	DictId   int64  `json:"dictId"       description:"字典主键"`
 	DictName string `json:"dictName"     description:"字典名称"`
 	DictType string `json:"dictType"     description:"字典类型"`
+	IsSys    string `json:"isSys"        description:"是否系统（0是 1否）"`
 	Remark   string `json:"remark"       description:"备注"`
 }
 
@@ -104,8 +110,9 @@ type SysDictDataList struct {
 
 type SysDictDataListParam struct {
 	request.PageInfo
-	DictId   int64  `json:"dictId"`
-	DictType string `json:"dictType"`
+	DictId    int64  `json:"dictId"`
+	DictType  string `json:"dictType"`
+	DictValue string `json:"dictValue"`
 }
 
 type SysDictDataViewParam struct {

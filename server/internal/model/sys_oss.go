@@ -60,11 +60,42 @@ type SysOssDeleteModel struct {
 }
 
 type SysOssUploadParam struct {
-	File     *ghttp.UploadFile `json:"file" description:"文件"`
-	FileType string            `json:"fileType" description:"文件类型"`
+	File             *ghttp.UploadFile `json:"file" description:"文件"`
+	FileType         string            `json:"fileType" description:"文件类型"`
+	IsDevice         bool              `json:"isDevice" description:"是否是设备文件"`
+	NewFileType      int               `json:"newFileType" description:"新文件类型 1:用户文件 2:用户图片 3:设备文件 4:iot配置图片 5:iot固件文件 6:项目图片 7:项目文件"`
+	SubDirName       string            `json:"subDirName" description:"子目录名称或路径"`
+	SaveOriginalName int               `json:"saveOriginalName" description:"是否保存原始文件名 0:否 1:是 默认否"`
+	NotAddDate       int               `json:"notAddDate" description:"存储路径不添加日期 0:添加 1:不添加 默认添加"`
 }
+
 type SysOssUploadModel struct {
 	entity.SysOss
+}
+
+type SysOssMoveFileParam struct {
+	FilePath         string `json:"filePath" description:"文件路径"`
+	NewFileType      int    `json:"newFileType" description:"新文件类型 1:用户文件 2:用户图片 3:设备文件 4:iot配置图片 5:iot固件文件 6:项目图片 7:项目文件"`
+	SubDirName       string `json:"subDirName" description:"子目录名称或路径"`
+	SaveOriginalName int    `json:"saveOriginalName" description:"是否保存原始文件名 0:否 1:是 默认否"`
+	NotAddDate       int    `json:"notAddDate" description:"存储路径不添加日期 0:添加 1:不添加 默认添加"`
+}
+
+type SysOssMoveFileModel struct {
+	*entity.SysOss
+}
+
+type SysOssSaveContentParam struct {
+	Content          []byte `json:"content" description:"内容"`
+	FileName         string `json:"fileName" description:"文件名"`
+	NewFileType      int    `json:"newFileType" description:"新文件类型 1:用户文件 2:用户图片 3:设备文件 4:iot配置图片 5:iot固件文件 6:项目图片 7:项目文件"`
+	SubDirName       string `json:"subDirName" description:"子目录名称或路径"`
+	SaveOriginalName int    `json:"saveOriginalName" description:"是否保存原始文件名 0:否 1:是 默认否"`
+	NotAddDate       int    `json:"notAddDate" description:"存储路径不添加日期 0:添加 1:不添加 默认添加"`
+}
+
+type SysOssSaveContentModel struct {
+	*entity.SysOss
 }
 
 type UploadResponse struct {
@@ -75,4 +106,7 @@ type UploadResponse struct {
 	OriginalName string `json:"original_name"` // 文件原名
 	Type         string `json:"type"`          // 文件类型 http Content-type
 	Ext          string `json:"ext"`           // 文件扩展名 不包含.
+	Md5          string `json:"md5"`           // 文件MD5
+	Crc16        uint16 `json:"crc16"`         // 文件CRC-16/MODBUS
+	Sum16        uint16 `json:"sum16"`         // 文件SUM16
 }

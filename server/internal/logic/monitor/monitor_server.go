@@ -105,7 +105,10 @@ func (l *sMonitorServer) GetCpuInfo(ctx context.Context) (data []byte) {
 	CpuInfoData.Number = len(cpus)
 	percent, _ := cpu.Percent(time.Second, false) //获取CPU使用率
 	CpuInfoData.UsedPercent = percent
-	CpuInfoData.ModelName = cpus[0].ModelName //CPU型号
+	if len(cpus) > 0 {
+		CpuInfoData.ModelName = cpus[0].ModelName //CPU型号
+	}
+
 	data, _ = json.Marshal(CpuInfoData)
 	return
 }

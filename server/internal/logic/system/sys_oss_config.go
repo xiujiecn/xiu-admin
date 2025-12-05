@@ -12,9 +12,12 @@ import (
 	"xiuadmin/internal/library/xgorm/handler"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/do"
+	"xiuadmin/internal/model/entity"
 	"xiuadmin/internal/service"
 
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 )
@@ -69,7 +72,14 @@ func (s *sSysOssConfig) List(ctx context.Context, param *model.SysOssConfigListP
 
 func (s *sSysOssConfig) View(ctx context.Context, param *model.SysOssConfigViewParam) (item *model.SysOssConfigViewModel, err error) {
 	db := s.Model(ctx)
-	db = db.Where(dao.SysOssConfig.Columns().OssConfigId, param.OssConfigId)
+	if param.OssConfigId > 0 {
+		db = db.Where(dao.SysOssConfig.Columns().OssConfigId, param.OssConfigId)
+	} else if param.ConfigKey != "" {
+		db = db.Where(dao.SysOssConfig.Columns().ConfigKey, param.ConfigKey)
+	} else {
+		g.Log().Errorf(ctx, "sSysOssConfig View 参数错误: %+v", param)
+		return nil, gerror.New("参数错误")
+	}
 	err = db.Scan(&item)
 	return
 }
@@ -126,5 +136,33 @@ func (s *sSysOssConfig) Delete(ctx context.Context, param *model.SysOssConfigDel
 	if err != nil {
 		return item, err
 	}
+	return
+}
+
+func (s *sSysOssConfig) GetAllUrlByService(ctx context.Context, path string, tenantId string, ossService string) (allUrl string, err error) {
+	ossConfig := &entity.SysOssConfig{}
+	db := s.Model(ctx)
+	db = db.Where(dao.SysOssConfig.Columns().ConfigKey, ossService)
+	db = db.Where(dao.SysOssConfig.Columns().TenantId, tenantId)
+	err = db.Scan(&ossConfig)
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysOss GetAllUrlByService error: %+v, url: %s ,service: %s", err, path, ossService)
+		return "", err
+	}
+	if ossConfig == nil {
+		g.Log().Errorf(ctx, "sSysOss GetAllUrlByService error: ossConfig is empty, url: %s ,service: %s", path, ossService)
+		err = gerror.New("ossConfig is empty")
+		return
+	}
+	domain := ossConfig.Endpoint
+	if ossConfig.Domain != "" {
+		domain = ossConfig.Domain
+	}
+	if ossConfig.IsHttps == "Y" {
+		allUrl = "https://" + domain + path
+	} else {
+		allUrl = "http://" + domain + path
+	}
+	g.Log().Infof(ctx, "sSysOss GetAllUrlByService success: %s, url: %s, ossConfig: %+v", ossService, allUrl, ossConfig)
 	return
 }

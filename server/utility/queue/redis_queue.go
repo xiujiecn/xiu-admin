@@ -2,9 +2,12 @@ package queue
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"sync"
 	"time"
+
+	"xiuadmin/utility/gfredis"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/gtrace"
@@ -29,7 +32,9 @@ func RegisterRedisQueue(ctx context.Context, topic string, p Process, config *Co
 	defer redisRwLock.Unlock()
 	q, ok := redisQueues[topic]
 	if ok {
-		q.p = p
+		if p != nil {
+			q.p = p
+		}
 		q.RedisName = config.RedisName
 		q.isRunning = true
 	} else {
@@ -86,7 +91,7 @@ func (q *tRedisQueue) Push(ctx context.Context, topic string, data interface{}, 
 	if err != nil {
 		return err
 	}
-	_, err = g.Redis(q.RedisName).RPush(ctx, topic, payloadJson)
+	_, err = gfredis.Instance(q.RedisName).RPush(ctx, topic, payloadJson)
 	if err != nil {
 		return err
 	}
@@ -101,9 +106,10 @@ func (q *tRedisQueue) Handle(ctx context.Context) (err error) {
 		if !q.isRunning {
 			break
 		}
-		data, err := g.Redis(redisName).BLPop(ctx, 1, topic)
+		data, err := gfredis.Instance(redisName).BLPop(ctx, 1*time.Second, topic)
 		if err != nil {
 			g.Log().Errorf(ctx, "redisqueue Pop %s error: %v", topic, err)
+			time.Sleep(2 * time.Second)
 			continue
 		}
 		arr := data.Strings()
@@ -114,16 +120,28 @@ func (q *tRedisQueue) Handle(ctx context.Context) (err error) {
 		var payload Payload
 		err = json.Unmarshal([]byte(arr[1]), &payload)
 		if err != nil {
-			g.Log().Errorf(ctx, "redisqueue process unmarshal error: %v", data)
+			g.Log().Errorf(ctx, "redisqueue process unmarshal error: %v, data: %v, topic: %s",
+				err, data, topic)
+			continue
+		}
+		if q.p == nil {
+			g.Log().Errorf(ctx, "redisqueue process is nil, topic: %s, trace_id: %s, data: %v",
+				topic, payload.TraceId, payload.Data)
 			continue
 		}
 		subCtx := gctx.New()
 		gtrace.WithTraceID(subCtx, payload.TraceId)
 		err = q.grpool.Add(subCtx, func(ctx context.Context) {
+			defer func() {
+				if r := recover(); r != nil {
+					g.Log().Errorf(ctx, "redisqueue process panic: %v, topic: %s, trace_id: %s, len(data): %d, hex(data): %v",
+						r, q.p.GetTopic(), payload.TraceId, len(payload.Data), hex.EncodeToString(payload.Data))
+				}
+			}()
 			err = q.p.Handle(subCtx, payload)
 			if err != nil {
-				g.Log().Errorf(ctx, "redisqueue process error: %v, topic: %s, trace_id: %s, data: %v",
-					err, q.p.GetTopic(), payload.TraceId, payload.Data)
+				g.Log().Errorf(ctx, "redisqueue process error: %v, topic: %s, trace_id: %s, len(data): %d, hex(data): %v",
+					err, q.p.GetTopic(), payload.TraceId, len(payload.Data), hex.EncodeToString(payload.Data))
 				return
 			}
 		})

@@ -19,13 +19,13 @@ import type {
   import { h } from 'vue';
 
   import {
-    renderBrowserIcon, renderOsIcon, 
+    renderBrowserIcon, renderOsIcon,
     renderDict,
     renderHttpMethodTag,
     renderJsonPreview,
   } from '#/utils/render';
 
-  
+
   export const viewSchema: DescItem[] = [
     {
       field: 'status',
@@ -92,8 +92,9 @@ import type {
     {
       component: 'Input',
       fieldName: 'configName',
-      label: '参数名称',
-      rules: 'required',
+      label: '参数名称',rules: z.string()
+      .min(1, '参数名称不能为空')
+      .max(32, '参数名称最大长度32位'),
     },
     {
       component: 'Input',
@@ -130,4 +131,3 @@ import type {
       label: '备注',
     },
   ];
-  

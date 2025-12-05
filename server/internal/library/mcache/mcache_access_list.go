@@ -28,24 +28,35 @@ func init() {
 
 }
 
-func GetUserAccessCodeList(ctx context.Context, userId int64) ([]string, error) {
+func GetUserAccessCodeList(ctx context.Context, userId int64) ([]string, []string, error) {
 	accessCodeList, err := Instance().Get(ctx, fmt.Sprintf(consts.MemCacheUserAccessCodeList, userId))
+	menuRoleDataAccessCodeList, err := Instance().Get(ctx, fmt.Sprintf(consts.MemCacheUserRoleDataAccessCodeList, userId))
 	if err != nil || accessCodeList == nil {
-		accessCodeCurrList, err := service.SysAuth().GetUserAccessCodeList(ctx, userId)
+		accessCodeCurrList, menuRoleDataAccessCodeList, err := service.SysAuth().GetUserAccessCodeList(ctx, userId)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if len(accessCodeCurrList) == 0 {
 			accessCodeCurrList = []string{"null"}
 		}
 		Instance().Set(ctx, fmt.Sprintf(consts.MemCacheUserAccessCodeList, userId), accessCodeCurrList, time.Hour*24)
-		return accessCodeCurrList, nil
+		Instance().Set(ctx, fmt.Sprintf(consts.MemCacheUserRoleDataAccessCodeList, userId), menuRoleDataAccessCodeList, time.Hour*24)
+		return accessCodeCurrList, menuRoleDataAccessCodeList, nil
 	}
-	return accessCodeList.Strings(), nil
+	return accessCodeList.Strings(), menuRoleDataAccessCodeList.Strings(), nil
 }
 
 func SetUserAccessCodeList(ctx context.Context, userId int64, accessCodeList []string) error {
 	return Instance().Set(ctx, fmt.Sprintf(consts.MemCacheUserAccessCodeList, userId), accessCodeList, time.Hour*24)
+}
+
+func SetUserRoleDataAccessCodeList(ctx context.Context, userId int64, roleDataAccessCodeList []string) error {
+	return Instance().Set(ctx, fmt.Sprintf(consts.MemCacheUserRoleDataAccessCodeList, userId), roleDataAccessCodeList, time.Hour*24)
+}
+
+func RemoveUserRoleDataAccessCodeList(ctx context.Context, userId int64) error {
+	_, err := Instance().Remove(ctx, fmt.Sprintf(consts.MemCacheUserRoleDataAccessCodeList, userId))
+	return err
 }
 
 func RemoveUserAccessCodeList(ctx context.Context, userId int64) error {

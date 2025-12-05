@@ -27,8 +27,9 @@ export const drawerSchema: VbenFormSchema[] =  [
   {
     component: 'Input',
     fieldName: 'userName',
-    label: '用户账号',
-    rules: 'required',
+    label: '用户账号',rules: z.string()
+      .min(1, '用户账号不能为空')
+      .max(32, '用户账号最大长度32位'),
   },
   // {
   //   component: 'InputPassword',
@@ -39,15 +40,16 @@ export const drawerSchema: VbenFormSchema[] =  [
   {
     component: 'Input',
     fieldName: 'nickName',
-    label: '用户昵称',
-    rules: 'required',
+    label: '用户昵称',rules: z.string()
+      .min(1, '用户账号不能为空')
+      .max(32, '用户账号最大长度32位'),
   },
   {
     component: 'TreeSelect',
     // 在drawer里更新 这里不需要默认的componentProps
     defaultValue: undefined,
     fieldName: 'deptId',
-    label: '所属部门',
+    label: '所属机构',
     rules: 'selectRequired',
   },
   {
@@ -105,10 +107,10 @@ export const drawerSchema: VbenFormSchema[] =  [
       mode: 'multiple',
       optionFilterProp: 'label',
       optionLabelProp: 'label',
-      placeholder: '请先选择部门',
+      placeholder: '请先选择机构',
     },
     fieldName: 'postIds',
-    help: '选择部门后, 将自动加载该部门下所有的岗位',
+    help: '选择机构后, 将自动加载该机构下所有的岗位',
     label: '岗位',
   },
   {

@@ -6,6 +6,9 @@
 package websocket
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 )
@@ -39,9 +42,11 @@ func JoinController(client *Client, req *request) {
 
 	if !client.tags.Contains(name) {
 		client.tags.Append(name)
-		if callback, ok := clientManager.TagCallbackMap[name]; ok {
-			if callback != nil {
-				callback(client)
+		for k, v := range clientManager.TagCallbackMap {
+			if strings.HasPrefix(name, k) {
+				if v != nil {
+					v(client, name)
+				}
 			}
 		}
 		AddTagCount(name)
@@ -72,12 +77,28 @@ func PingController(client *Client) {
 
 // JoinsController 加入
 func JoinsController(client *Client, req *request) {
-	for _, name := range gconv.Strings(req.Data["names"]) {
+	if req == nil || req.Data == nil {
+		fmt.Println("websocket.JoinsController req is nil or req.Data is nil")
+		return
+	}
+	// fmt.Println("websocket.JoinsController req.Data", req.Data)
+	names, ok := req.Data["names"]
+	if !ok || names == nil {
+		fmt.Println("websocket.JoinsController names is nil or names is empty")
+		return
+	}
+	// fmt.Println("websocket.JoinsController names", names)
+	for _, name := range gconv.Strings(names) {
+		if name == "" {
+			continue
+		}
 		if !client.tags.Contains(name) {
 			client.tags.Append(name)
-			if callback, ok := clientManager.TagCallbackMap[name]; ok {
-				if callback != nil {
-					callback(client)
+			for k, v := range clientManager.TagCallbackMap {
+				if strings.HasPrefix(name, k) {
+					if v != nil {
+						v(client, name)
+					}
 				}
 			}
 			AddTagCount(name)

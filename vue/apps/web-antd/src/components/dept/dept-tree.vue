@@ -31,7 +31,7 @@ const searchValue = defineModel('searchValue', {
   default: '',
 });
 
-/** 部门数据源 */
+/** 机构数据源 */
 type DeptTreeArray = SysDeptTreeData[];
 const deptTreeArray = ref<DeptTreeArray>([]);
 /** 骨架屏加载 */
@@ -114,7 +114,7 @@ onMounted(loadTree);
           <div v-else class="mt-5">
             <Empty
               :image="Empty.PRESENTED_IMAGE_SIMPLE"
-              description="无部门数据"
+              description="无机构数据"
             />
           </div>
         </div>

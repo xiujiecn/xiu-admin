@@ -93,7 +93,7 @@ async function setupPostOptions(deptId: number | string) {
       value: item.postId,
     })) ;
   }
-  const placeholder = options.length > 0 ? '请选择' : '该部门下暂无岗位';
+  const placeholder = options.length > 0 ? '请选择' : '该机构下暂无岗位';
   formApi.updateSchema([
     {
       componentProps: { options, placeholder },
@@ -103,7 +103,7 @@ async function setupPostOptions(deptId: number | string) {
 }
 
 /**
- * 初始化部门选择
+ * 初始化机构选择
  */
 async function setupDeptSelect() {
   // updateSchema
@@ -123,7 +123,7 @@ async function setupDeptSelect() {
         },
         getPopupContainer,
         async onSelect(deptId: number | string) {
-          /** 根据部门ID加载岗位 */
+          /** 根据机构ID加载岗位 */
           await setupPostOptions(deptId);
           /** 变化后需要重新选择岗位 */
           formModel.postIds = [];
@@ -155,7 +155,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
       // 需要重置岗位选择
       formApi.updateSchema([
         {
-          componentProps: { options: [], placeholder: '请先选择部门' },
+          componentProps: { options: [], placeholder: '请先选择机构' },
           fieldName: 'postIds',
         },
       ]);
@@ -221,7 +221,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
         fieldName: 'postIds',
       },
     ]);
-    // 部门选择 && 初始密码
+    // 机构选择 && 初始密码
     await Promise.all([setupDeptSelect()]);//, loadDefaultPassword(isUpdate.value)]);
     if (user.userId > 0) {
       await Promise.all([
