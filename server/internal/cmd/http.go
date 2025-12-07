@@ -37,7 +37,7 @@ var Http = &gcmd.Command{
 			g.Log().Errorf(ctx, "http init error: %v", err)
 			return err
 		}
-		s.SetDumpRouterMap(false)
+		s.SetDumpRouterMap(true)
 		router.InitRouter(ctx, s)
 		websocket.StartWebSocket(ctx)
 		s.Run()

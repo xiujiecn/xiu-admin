@@ -25,6 +25,8 @@ server:
   serverRoot:          "resource/public"                   # 静态文件服务的目录根路径，配置时自动开启静态文件服务。默认关闭
   searchPaths:         ["/resource/public"] # 提供静态文件服务时额外的文件搜索路径，当根路径找不到时则按照顺序在搜索目录查找。默认关闭
   fileServerEnabled:   true
+  initLoadMemoryDB:    false  # 是否初始化内存数据库，默认关闭
+  
   # 文件上传配置
   maxHeaderBytes:    "20KB"
   clientMaxBodySize: "200MB"
@@ -76,7 +78,15 @@ database:
     maxIdle: 30 #连接池最大闲置的连接数
     maxOpen: 100 #连接池最大打开的连接数
     maxLifetime: 120 #(单位秒)连接对象可重复使用的时间长度
-
+  memorydb:
+    # link: "sqlite::@file(jieiotmem.db)?journal_mode=WAL"
+    link: "sqlite::@file(:memory:)"
+    # link: ""
+    debug: true
+    maxIdle: 1
+    maxOpen: 1
+    maxLifetime: 30
+    
 # 缓存配置
 cache:
   adapter: "redis" # 缓存适配器，支持：file|redis

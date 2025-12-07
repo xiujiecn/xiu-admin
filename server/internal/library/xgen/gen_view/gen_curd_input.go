@@ -18,6 +18,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 )
 
 const (
@@ -65,14 +66,30 @@ func (l *gCurd) genInputViewColumns(ctx context.Context, in *genmodel.CurdPrevie
 			index++
 		}
 	}
+	table := tablewriter.NewTable(buffer)
 
-	tw := tablewriter.NewWriter(buffer)
-	tw.SetBorder(false)
-	tw.SetRowLine(false)
-	tw.SetAutoWrapText(false)
-	tw.SetColumnSeparator("")
-	tw.AppendBulk(array)
-	tw.Render()
+	table.Options(tablewriter.WithRendition(tw.Rendition{
+		Borders: tw.Border{
+			Top:    tw.Fail,
+			Bottom: tw.Fail,
+			Left:   tw.Fail,
+			Right:  tw.Fail,
+		},
+		Settings: tw.Settings{
+			Lines: tw.Lines{
+				ShowTop:        tw.Fail,
+				ShowBottom:     tw.Fail,
+				ShowHeaderLine: tw.Fail,
+				ShowFooterLine: tw.Fail,
+			},
+		},
+	}))
+	// tw.SetBorder(false)
+	// tw.SetRowLine(false)
+	// tw.SetAutoWrapText(false)
+	// tw.SetColumnSeparator("")
+	table.Bulk(array)
+	table.Render()
 	stContent := buffer.String()
 	// Let's do this hack of table writer for indent!
 	stContent = gstr.Replace(stContent, "  #", "")
@@ -134,13 +151,29 @@ func (l *gCurd) genInputListColumns(ctx context.Context, in *genmodel.CurdPrevie
 	}
 	g.Log().Infof(ctx, "genInputListColumns in.Options.Join: %+v", in.Options.Join)
 
-	tw := tablewriter.NewWriter(buffer)
-	tw.SetBorder(false)
-	tw.SetRowLine(false)
-	tw.SetAutoWrapText(false)
-	tw.SetColumnSeparator("")
-	tw.AppendBulk(array)
-	tw.Render()
+	table := tablewriter.NewWriter(buffer)
+	table.Options(tablewriter.WithRendition(tw.Rendition{
+		Borders: tw.Border{
+			Top:    tw.Fail,
+			Bottom: tw.Fail,
+			Left:   tw.Fail,
+			Right:  tw.Fail,
+		},
+		Settings: tw.Settings{
+			Lines: tw.Lines{
+				ShowTop:        tw.Fail,
+				ShowBottom:     tw.Fail,
+				ShowHeaderLine: tw.Fail,
+				ShowFooterLine: tw.Fail,
+			},
+		},
+	}))
+	// tw.SetBorder(false)
+	// tw.SetRowLine(false)
+	// tw.SetAutoWrapText(false)
+	// tw.SetColumnSeparator("")
+	table.Bulk(array)
+	table.Render()
 	stContent := buffer.String()
 	// Let's do this hack of table writer for indent!
 	stContent = gstr.Replace(stContent, "  #", "")
