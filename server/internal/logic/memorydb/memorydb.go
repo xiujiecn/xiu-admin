@@ -40,8 +40,7 @@ func NewMemoryDB() *sMemoryDB {
 func init() {
 	service.RegisterMemoryDB(NewMemoryDB())
 	inithttp.RegisterHttpInitFunc("memorydb", func(ctx context.Context) error {
-		service.MemoryDB().Init(ctx)
-		return nil
+		return service.MemoryDB().Init(ctx)
 	})
 }
 
@@ -96,7 +95,7 @@ func (s *sMemoryDB) EventHandler(ctx context.Context, chg *model.BroadcastDbChgC
 }
 
 func (s *sMemoryDB) DB(ctx context.Context) gdb.DB {
-	link := g.Cfg().MustGet(ctx, "database.memorydb.link", "").String()
+	link := g.Cfg().MustGet(ctx, "database.memorydb.link", "sqlite::@file(:memory:)").String()
 	if link == "" {
 		return g.DB()
 	}
