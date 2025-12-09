@@ -37,6 +37,14 @@ type daoInstance interface {
 }
 
 func CustomTreeFiledToDefault(old map[string]interface{}, option *TreeFiledOption) *gormmodel.DefaultTree {
+	if option == nil {
+		option = &TreeFiledOption{
+			IdField:    idDefaulField,
+			PidField:   pidDefaulField,
+			LevelField: levelDefaulField,
+			TreeField:  treeDefaulField,
+		}
+	}
 	pd := &gormmodel.DefaultTree{}
 	if id, ok := old[option.IdField]; ok {
 		pd.Id = gconv.Int64(id)
@@ -107,7 +115,7 @@ func AutoUpdateTree(ctx context.Context, dao daoInstance, id, pid int64, option 
 		if models == nil {
 			return 0, 0, "", gerror.New("树表信息不存在，请检查！")
 		}
-
+		// g.Log().Infof(ctx, "models: %+v, pid: %v, newPid: %v, newLevel: %v, newTree: %v", models, pid, newPid, newLevel, newTree)
 		// 上级发生变化时，遍历修改其所有的下级关系树
 		if models.Pid != pid {
 			if err = updateChildrenTree(ctx, dao, models.Id, newLevel, newTree, option); err != nil {
@@ -142,14 +150,23 @@ func CheckTreeTable(ctx context.Context, dao daoInstance, option *TreeFiledOptio
 // updateChildrenTree 更新下级关系树
 func updateChildrenTree(ctx context.Context, dao daoInstance, pid int64, pLevel int, pTree string, option *TreeFiledOption) (err error) {
 	var list []*gormmodel.DefaultTree
-	var pdMaps []map[string]interface{}
-
-	if err = dao.Ctx(ctx).Fields(option.IdField, option.PidField, option.LevelField, option.TreeField).Where(option.PidField, pid).Scan(&pdMaps); err != nil {
-		return
+	// var pdMaps []map[string]interface{}
+	pdMaps, err := dao.Ctx(ctx).Fields(option.IdField, option.PidField, option.LevelField, option.TreeField).Where(option.PidField, pid).All()
+	if err != nil {
+		return err
 	}
 
 	for _, v := range pdMaps {
-		list = append(list, CustomTreeFiledToDefault(v, option))
+		if v == nil {
+			continue
+		}
+		pb := CustomTreeFiledToDefault(v.Map(), option)
+		if pb.Id == 0 {
+			g.Log().Warningf(ctx, "updateChildrenTree pb.Id is 0, pb: %+v, option: %+v, v: %+v, pdMaps: %+v", pb, option, v, pdMaps)
+			continue
+		}
+		// g.Log().Debugf(ctx, "updateChildrenTree pb: %+v", pb)
+		list = append(list, pb)
 	}
 
 	if len(list) == 0 {
