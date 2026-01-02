@@ -81,3 +81,4 @@ server/temp
 server/temp.yaml
 server/bin  
 
+dump.rdb

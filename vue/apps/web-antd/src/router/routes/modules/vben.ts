@@ -6,7 +6,9 @@ import {
   VBEN_GITHUB_URL,
   VBEN_LOGO_URL,
   VBEN_NAIVE_PREVIEW_URL,
+  VBEN_TD_PREVIEW_URL,
 } from '@vben/constants';
+// import { SvgTDesignIcon } from '@vben/icons';
 
 import { IFrameView } from '#/layouts';
 import { $t } from '#/locales';
@@ -41,29 +43,7 @@ const routes: RouteRecordRaw[] = [
           link: VBEN_GITHUB_URL,
           title: 'Github',
         },
-      },
-      {
-        name: 'VbenNaive',
-        path: '/vben-admin/naive',
-        component: IFrameView,
-        meta: {
-          badgeType: 'dot',
-          icon: 'logos:naiveui',
-          link: VBEN_NAIVE_PREVIEW_URL,
-          title: $t('demos.vben.naive-ui'),
-        },
-      },
-      {
-        name: 'VbenElementPlus',
-        path: '/vben-admin/ele',
-        component: IFrameView,
-        meta: {
-          badgeType: 'dot',
-          icon: 'logos:element',
-          link: VBEN_ELE_PREVIEW_URL,
-          title: $t('demos.vben.element-plus'),
-        },
-      },
+      }
     ],
   },
   {
@@ -74,6 +54,16 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:copyright',
       title: $t('demos.vben.about'),
       order: 9999,
+    },
+  },
+  {
+    name: 'Profile',
+    path: '/profile',
+    component: () => import('#/views/_core/profile/index.vue'),
+    meta: {
+      icon: 'lucide:user',
+      hideInMenu: true,
+      title: $t('page.auth.profile'),
     },
   },
 ];

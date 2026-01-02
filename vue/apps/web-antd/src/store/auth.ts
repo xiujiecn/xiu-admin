@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@vben/constants';
+import { preferences } from '@vben/preferences';
 import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 
 import { notification } from 'ant-design-vue';
@@ -64,8 +65,8 @@ export const useAuthStore = defineStore('auth', () => {
         userInfo = fetchUserInfoResult;
 
         userStore.setUserInfo(userInfo);
-        // console.log('vue/apps/web-antd/src/store/auth.ts','accessCodes',accessCodes);
-        if (accessCodes.data) {
+        console.log('vue/apps/web-antd/src/store/auth.ts','accessCodes',accessCodes);
+        if (accessCodes && accessCodes.data) {
           accessStore.setAccessCodes(accessCodes.data);
         }
 

@@ -35,7 +35,8 @@ type @{.varName}InsertFields struct {
 
 // @{.varName}EditParam 修改/新增@{.tableComment}
 type @{.varName}EditParam struct {
-	entity.@{.daoName}
+	//entity.@{.daoName}
+	@{.editParamFieldsColumns}
 }
 
 func (in *@{.varName}EditParam) Filter(ctx context.Context) (err error) {

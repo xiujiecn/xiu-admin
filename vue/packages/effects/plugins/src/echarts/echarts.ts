@@ -12,7 +12,7 @@ import type {
 } from 'echarts/components';
 import type { ComposeOption } from 'echarts/core';
 
-import { BarChart, LineChart, MapChart,PieChart, RadarChart,GaugeChart } from 'echarts/charts';
+import { BarChart, LineChart, PieChart, RadarChart, MapChart, GaugeChart } from 'echarts/charts';
 import {
   // 数据集组件
   DatasetComponent,

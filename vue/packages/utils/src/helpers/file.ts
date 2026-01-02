@@ -14,27 +14,27 @@ export function dataURLtoBlob(base64Buf: string): Blob {
     }
     return new Blob([u8arr], { type: mime });
 }
-// 将url转换为base64
-export function urlToBase64(url: string, mineType?: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        let canvas = document.createElement('CANVAS') as HTMLCanvasElement | null;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const ctx = canvas!.getContext('2d');
+// // 将url转换为base64
+// export function urlToBase64(url: string, mineType?: string): Promise<string> {
+//     return new Promise((resolve, reject) => {
+//         let canvas = document.createElement('CANVAS') as HTMLCanvasElement | null;
+//         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+//         const ctx = canvas!.getContext('2d');
 
-        const img = new Image();
-        img.crossOrigin = '';
-        img.addEventListener('load', () => {
-        if (!canvas || !ctx) {
-            // eslint-disable-next-line prefer-promise-reject-errors
-            return reject();
-        }
-        canvas.height = img.height;
-        canvas.width = img.width;
-        ctx.drawImage(img, 0, 0);
-        const dataURL = canvas.toDataURL(mineType || 'image/png');
-        canvas = null;
-        resolve(dataURL);
-        });
-        img.src = url;
-    });
-}
+//         const img = new Image();
+//         img.crossOrigin = '';
+//         img.addEventListener('load', () => {
+//         if (!canvas || !ctx) {
+//             // eslint-disable-next-line prefer-promise-reject-errors
+//             return reject();
+//         }
+//         canvas.height = img.height;
+//         canvas.width = img.width;
+//         ctx.drawImage(img, 0, 0);
+//         const dataURL = canvas.toDataURL(mineType || 'image/png');
+//         canvas = null;
+//         resolve(dataURL);
+//         });
+//         img.src = url;
+//     });
+// }

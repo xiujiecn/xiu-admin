@@ -12,8 +12,16 @@ export interface VbenAdminProAppConfigRaw {
   VITE_GLOB_CLIENT_ID: string; // 客户端ID
 }
 
+interface AuthConfig {
+  dingding?: {
+    clientId: string;
+    corpId: string;
+  };
+}
+
 export interface ApplicationConfig {
   apiURL: string;
+  auth: AuthConfig;
   clientId: string; // 客户端ID
 }
 

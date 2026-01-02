@@ -8,6 +8,7 @@ export const LOGIN_PATH = '/auth/login';
  */
 export const DEFAULT_HOME_PATH = '/analytics';
 
+
 export interface LanguageOption {
   label: string;
   value: 'en-US' | 'zh-CN';

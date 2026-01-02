@@ -44,6 +44,7 @@ export class ModalApi {
       confirmDisabled: false,
       confirmLoading: false,
       contentClass: '',
+      destroyOnClose: true,
       draggable: false,
       footer: true,
       footerClass: '',
@@ -58,6 +59,7 @@ export class ModalApi {
       showCancelButton: true,
       showConfirmButton: true,
       title: '',
+      animationType: 'slide',
     };
 
     this.store = new Store<ModalState>(
@@ -105,7 +107,6 @@ export class ModalApi {
       this.store.setState((prev) => ({
         ...prev,
         isOpen: false,
-        submitting: false,
       }));
     }
   }
@@ -160,7 +161,11 @@ export class ModalApi {
   }
 
   open() {
-    this.store.setState((prev) => ({ ...prev, isOpen: true }));
+    this.store.setState((prev) => ({
+      ...prev,
+      isOpen: true,
+      submitting: false,
+    }));
   }
 
   setData<T>(payload: T) {
@@ -179,5 +184,13 @@ export class ModalApi {
       this.store.setState((prev) => ({ ...prev, ...stateOrFn }));
     }
     return this;
+  }
+
+  /**
+   * 解除弹窗的锁定状态
+   * @description 解除由lock方法设置的锁定状态，是lock(false)的别名
+   */
+  unlock() {
+    return this.lock(false);
   }
 }

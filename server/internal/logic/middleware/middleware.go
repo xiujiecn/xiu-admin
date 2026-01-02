@@ -144,7 +144,7 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 	tenantId := contexts.GetTenantId(ctx)
 	g.Log().Debugf(ctx, "sMiddleware.Auth userId: %d tenantId: %s method: %s path: %s, ================>>", userId, tenantId, method, path)
 	if userId == 0 {
-		g.Log().Error(ctx, "sMiddleware.Auth userId is 0", "path", path, "clientIp", r.GetClientIp(), utility.GetUserAgent(ctx))
+		g.Log().Error(ctx, "sMiddleware.Auth userId is 0", "path", path, "clientIp", r.GetClientIp(), "User-Agent", utility.GetUserAgent(ctx), "Authorization", r.Header.Get("Authorization"))
 		response.JsonExit(r, gcode.CodeNotAuthorized.Code(), consts.CodeLoginExpired.Message())
 		// r.Response.WriteStatus(http.StatusUnauthorized)
 		return
