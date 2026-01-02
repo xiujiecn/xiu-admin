@@ -255,6 +255,7 @@ func (s *sSysAuth) GetCurrentUser(ctx context.Context) (claims *model.CustomClai
 	// 解析token
 	claims, err = s.ParseToken(ctx, token)
 	if err != nil {
+		g.Log().Warningf(ctx, "sSysAuth.GetCurrentUser ParseToken failed, token: %s, error: %v", token, err)
 		return nil, err
 	}
 	return claims, nil

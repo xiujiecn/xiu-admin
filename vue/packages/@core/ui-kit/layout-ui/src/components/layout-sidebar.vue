@@ -65,9 +65,14 @@ interface Props {
   show?: boolean;
   /**
    * 显示折叠按钮
-   * @default false
+   * @default true
    */
   showCollapseButton?: boolean;
+  /**
+   * 显示固定按钮
+   * @default true
+   */
+  showFixedButton?: boolean;
   /**
    * 主题
    */
@@ -95,6 +100,7 @@ const props = withDefaults(defineProps<Props>(), {
   paddingTop: 0,
   show: true,
   showCollapseButton: true,
+  showFixedButton: true,
   zIndex: 0,
 });
 
@@ -258,7 +264,7 @@ function handleMouseleave() {
       theme,
       {
         'bg-sidebar-deep': isSidebarMixed,
-        'bg-sidebar border-border border-r': !isSidebarMixed,
+        'border-r border-border bg-sidebar': !isSidebarMixed,
       },
     ]"
     :style="style"
@@ -267,7 +273,7 @@ function handleMouseleave() {
     @mouseleave="handleMouseleave"
   >
     <SidebarFixedButton
-      v-if="!collapse && !isSidebarMixed"
+      v-if="!collapse && !isSidebarMixed && showFixedButton"
       v-model:expand-on-hover="expandOnHover"
     />
     <div v-if="slots.logo" :style="headerStyle">
@@ -289,7 +295,7 @@ function handleMouseleave() {
         'border-l': extraVisible,
       }"
       :style="extraStyle"
-      class="border-border bg-sidebar fixed top-0 h-full overflow-hidden border-r transition-all duration-200"
+      class="fixed top-0 h-full overflow-hidden border-r border-border bg-sidebar transition-all duration-200"
     >
       <SidebarCollapseButton
         v-if="isSidebarMixed && expandOnHover"

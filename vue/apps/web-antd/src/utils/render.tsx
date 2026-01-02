@@ -4,7 +4,7 @@ import type { DictOption } from '#/store/dict';
 
 import { h } from 'vue';
 
-import { JsonPreview } from '@vben/common-ui';
+import { JsonViewer } from '@vben/common-ui';
 import {
   AndroidIcon,
   BaiduIcon,
@@ -73,7 +73,7 @@ export function renderJsonPreview(json: any) {
     return <span>{json}</span>;
   }
   if (typeof json === 'object') {
-    return <JsonPreview class="break-normal" data={json} />;
+    return <JsonViewer class="break-normal" value={json} />;
   }
   try {
     const obj = JSON.parse(json);
@@ -81,7 +81,7 @@ export function renderJsonPreview(json: any) {
     if (typeof obj !== 'object') {
       return <span>{obj}</span>;
     }
-    return <JsonPreview class="break-normal" data={obj} />;
+    return <JsonViewer class="break-normal" value={obj} />;
   } catch {
     return <span>{json}</span>;
   }

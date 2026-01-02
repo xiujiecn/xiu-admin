@@ -33,7 +33,7 @@ const emit = defineEmits(['uploadSuccess', 'uploadError', 'register']);
 
 let filename = '';
 const src = ref(props.src || '');
-const previewSource = ref('');
+const previewSource = ref<String>('');
 const cropper = ref<Cropper>();
 let scaleX = 1;
 let scaleY = 1;
@@ -121,7 +121,7 @@ async function handleOk() {
       modalLoading(true);
       // 始终使用裁剪后的图片进行上传
       if (previewSource.value) {
-        const blob = dataURLtoBlob(previewSource.value);
+        const blob = dataURLtoBlob(previewSource.value as string);
         // 修复文件名后缀，使其基于实际的 MIME 类型
         const extension = blob.type.split("/")[1] || "png";
         const file = new File([blob], `${filename.substring(0, filename.lastIndexOf('.')) || filename}.${extension}`, { type: blob.type });
@@ -244,14 +244,14 @@ const fileList = ref<any[]>([])
       </div>
       <div :class="`${prefixCls}-right`">
         <div :class="`${prefixCls}-preview`">
-          <img v-if="previewSource" :alt="t('component.cropper.preview')" :src="previewSource" />
+          <img v-if="previewSource" :alt="t('component.cropper.preview')" :src="previewSource as string" />
         </div>
         <template v-if="previewSource">
           <div :class="`${prefixCls}-group`">
-            <Avatar :src="previewSource" size="large" />
-            <Avatar :size="48" :src="previewSource" />
-            <Avatar :size="64" :src="previewSource" />
-            <Avatar :size="80" :src="previewSource" />
+            <Avatar :src="previewSource as string" size="large" />
+            <Avatar :size="48" :src="previewSource as string" />
+            <Avatar :size="64" :src="previewSource as string" />
+            <Avatar :size="80" :src="previewSource as string" />
           </div>
         </template>
       </div>

@@ -28,6 +28,14 @@ interface AccessState {
    */
   isAccessChecked: boolean;
   /**
+   * 是否锁屏状态
+   */
+  isLockScreen: boolean;
+  /**
+   * 锁屏密码
+   */
+  lockScreenPassword?: string;
+  /**
    * 登录是否过期
    */
   loginExpired: boolean;
@@ -61,8 +69,11 @@ export const useAccessStore = defineStore('core-access', {
       }
       return findMenu(this.accessMenus, path);
     },
+    lockScreen(password: string) {
+      this.isLockScreen = true;
+      this.lockScreenPassword = password;
+    },
     setAccessCodes(codes: string[]) {
-      // console.log('vue/packages/stores/src/modules/access.ts setAccessCodes', codes);
       this.accessCodes = codes;
     },
     setAccessMenus(menus: MenuRecordRaw[]) {
@@ -83,10 +94,20 @@ export const useAccessStore = defineStore('core-access', {
     setRefreshToken(token: AccessToken) {
       this.refreshToken = token;
     },
+    unlockScreen() {
+      this.isLockScreen = false;
+      this.lockScreenPassword = undefined;
+    },
   },
   persist: {
     // 持久化
-    pick: ['accessToken', 'refreshToken', 'accessCodes'],
+    pick: [
+      'accessToken',
+      'refreshToken',
+      'accessCodes',
+      'isLockScreen',
+      'lockScreenPassword',
+    ],
   },
   state: (): AccessState => ({
     accessCodes: [],
@@ -94,6 +115,8 @@ export const useAccessStore = defineStore('core-access', {
     accessRoutes: [],
     accessToken: null,
     isAccessChecked: false,
+    isLockScreen: false,
+    lockScreenPassword: undefined,
     loginExpired: false,
     refreshToken: null,
   }),

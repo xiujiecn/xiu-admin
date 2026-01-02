@@ -67,6 +67,4 @@ interface AuthenticationProps {
   submitButtonText?: string;
 }
 
-
-
 export type { AuthenticationProps };

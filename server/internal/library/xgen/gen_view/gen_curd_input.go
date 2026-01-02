@@ -29,6 +29,7 @@ const (
 	InputTypeUpdateFields     = 5 // 编辑修改过滤字段
 	InputTypeInsertFields     = 6 // 编辑新增过滤字段
 	InputTypeTreeOptionFields = 7 // 关系树查询字段
+	InputTypeEditParamFields  = 8 // 编辑参数过滤字段
 	EditInpValidatorGenerally = "if err := g.Validator().Rules(\"%s\").Data(in.%s).Messages(\"%s\").Run(ctx); err != nil {\n\t\treturn err.Current()\n\t}\n"
 )
 
@@ -40,6 +41,7 @@ func (l *gCurd) inputTplData(ctx context.Context, in *genmodel.CurdPreviewParam)
 	data["editInpValidator"] = l.genInputListColumns(ctx, in, InputTypeEditInpValidator)
 	data["updateFieldsColumns"] = l.genInputListColumns(ctx, in, InputTypeUpdateFields)
 	data["insertFieldsColumns"] = l.genInputListColumns(ctx, in, InputTypeInsertFields)
+	data["editParamFieldsColumns"] = l.genInputListColumns(ctx, in, InputTypeEditParamFields)
 	data["viewModelColumns"] = l.genInputViewColumns(ctx, in)
 	if in.Options.Step.IsTreeTable {
 		data["treeOptionFields"] = l.genInputListColumns(ctx, in, InputTypeTreeOptionFields)
@@ -72,8 +74,8 @@ func (l *gCurd) genInputViewColumns(ctx context.Context, in *genmodel.CurdPrevie
 		Borders: tw.Border{
 			Top:    tw.Fail,
 			Bottom: tw.Fail,
-			Left:   tw.Fail,
-			Right:  tw.Fail,
+			Left:   tw.Success,
+			Right:  tw.Success,
 		},
 		Settings: tw.Settings{
 			Lines: tw.Lines{
@@ -83,7 +85,12 @@ func (l *gCurd) genInputViewColumns(ctx context.Context, in *genmodel.CurdPrevie
 				ShowFooterLine: tw.Fail,
 			},
 		},
-	}))
+	}), tablewriter.WithRowConfig(tw.CellConfig{
+		Formatting: tw.CellFormatting{
+			AutoWrap: tw.WrapNone,
+		},
+	}), tablewriter.WithSymbols(tw.NewSymbols(tw.StyleDefault)))
+
 	// tw.SetBorder(false)
 	// tw.SetRowLine(false)
 	// tw.SetAutoWrapText(false)
@@ -92,7 +99,9 @@ func (l *gCurd) genInputViewColumns(ctx context.Context, in *genmodel.CurdPrevie
 	table.Render()
 	stContent := buffer.String()
 	// Let's do this hack of table writer for indent!
-	stContent = gstr.Replace(stContent, "  #", "")
+	stContent = gstr.Replace(stContent, "│#", " ")
+	stContent = gstr.Replace(stContent, "│", " ")
+	stContent = gstr.Replace(stContent, "  #", " ")
 	stContent = gstr.Replace(stContent, "` ", "`")
 	stContent = gstr.Replace(stContent, "``", "")
 	stContent = removeEndWrap(stContent)
@@ -156,8 +165,8 @@ func (l *gCurd) genInputListColumns(ctx context.Context, in *genmodel.CurdPrevie
 		Borders: tw.Border{
 			Top:    tw.Fail,
 			Bottom: tw.Fail,
-			Left:   tw.Fail,
-			Right:  tw.Fail,
+			Left:   tw.Success,
+			Right:  tw.Success,
 		},
 		Settings: tw.Settings{
 			Lines: tw.Lines{
@@ -167,7 +176,11 @@ func (l *gCurd) genInputListColumns(ctx context.Context, in *genmodel.CurdPrevie
 				ShowFooterLine: tw.Fail,
 			},
 		},
-	}))
+	}), tablewriter.WithRowConfig(tw.CellConfig{
+		Formatting: tw.CellFormatting{
+			AutoWrap: tw.WrapNone,
+		},
+	}), tablewriter.WithSymbols(tw.NewSymbols(tw.StyleDefault)))
 	// tw.SetBorder(false)
 	// tw.SetRowLine(false)
 	// tw.SetAutoWrapText(false)
@@ -176,7 +189,9 @@ func (l *gCurd) genInputListColumns(ctx context.Context, in *genmodel.CurdPrevie
 	table.Render()
 	stContent := buffer.String()
 	// Let's do this hack of table writer for indent!
-	stContent = gstr.Replace(stContent, "  #", "")
+	stContent = gstr.Replace(stContent, "│#", " ")
+	stContent = gstr.Replace(stContent, "│", " ")
+	stContent = gstr.Replace(stContent, "  #", " ")
 	stContent = gstr.Replace(stContent, "` ", "`")
 	stContent = gstr.Replace(stContent, "``", "")
 	stContent = removeEndWrap(stContent)
@@ -195,7 +210,11 @@ func (l *gCurd) genStructFieldDefinition(in *genmodel.CurdPreviewParam, field *g
 	)
 
 	addResult := func() []string {
-		result = append(result, " #"+field.GoType)
+		if inputType == InputTypeEditParamFields && !IsIndexPK(field.Index) && !strings.HasPrefix(field.GoType, "*") {
+			result = append(result, " #*"+field.GoType)
+		} else {
+			result = append(result, " #"+field.GoType)
+		}
 		result = append(result, " #"+fmt.Sprintf(tagKey+`json:"%s"`, field.TsName))
 		result = append(result, " #"+fmt.Sprintf(`dc:"%s"`+tagKey, descriptionTag))
 		return result
@@ -318,6 +337,8 @@ func (l *gCurd) genStructFieldDefinition(in *genmodel.CurdPreviewParam, field *g
 			return addResult()
 		}
 		return nil
+	case InputTypeEditParamFields:
+		return addResult()
 	default:
 		panic("inputType is invalid")
 	}
