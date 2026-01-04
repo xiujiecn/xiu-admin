@@ -110,7 +110,7 @@ func (l *gCurd) genLogicEdit(ctx context.Context, in *genmodel.CurdPreviewParam)
 
 	for _, field := range in.MasterFields {
 		if field.GoName == "TenantId" {
-			insertBuffer.WriteString("\t\tin.TenantId = contexts.GetTenantId(ctx)\n")
+			insertBuffer.WriteString("\t\ttenantId := contexts.GetTenantId(ctx)\n\t\tin.TenantId = &tenantId\n")
 		}
 		if field.GoName == "CreatedDept" {
 			insertBuffer.WriteString("\t\tin.CreatedDept = contexts.GetDeptId(ctx)\n")
