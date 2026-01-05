@@ -599,24 +599,6 @@ INSERT INTO `sys_notice` (`notice_id`, `tenant_id`, `notice_title`, `notice_type
 COMMIT;
 
 
-CREATE TABLE `sys_notice` (
-  `notice_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '公告ID',
-  `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
-  `notice_title` varchar(50) NOT NULL COMMENT '公告标题',
-  `notice_type` char(1) NOT NULL COMMENT '公告类型（1通知 2公告）',
-  `notice_content` longblob DEFAULT NULL COMMENT '公告内容',
-  `status` char(1) DEFAULT '0' COMMENT '公告状态（0正常 1关闭）',
-  `notice_range` tinyint(1) NOT NULL DEFAULT 1 COMMENT '通知范围（1全员 2指定机构 3指定用户）',
-  `dept_ids` text DEFAULT NULL COMMENT '通知机构ID列表JSON',
-  `user_ids` text DEFAULT NULL COMMENT '通知用户ID列表JSON',
-  `created_dept` bigint(20) DEFAULT NULL COMMENT '创建部门',
-  `created_by` bigint(20) DEFAULT NULL COMMENT '创建者',
-  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
-  `updated_by` bigint(20) DEFAULT NULL COMMENT '更新者',
-  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(255) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`notice_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='通知公告表';
 
 -- ----------------------------
 -- Table structure for sys_oper_log
@@ -673,8 +655,8 @@ CREATE TABLE `sys_oss` (
   `service` varchar(20) NOT NULL DEFAULT 'minio' COMMENT '服务商',
   `md5` varchar(64)  NULL DEFAULT NULL COMMENT '文件MD5',
   `file_size` int NULL DEFAULT NULL COMMENT '文件大小',
-  `file_crc16` int NOT NULL COMMENT '文件Crc16',
-  `file_sum` int NOT NULL COMMENT '文件校验和',
+  `file_crc16` int COMMENT '文件Crc16',
+  `file_sum` int COMMENT '文件校验和',
   PRIMARY KEY (`oss_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='OSS对象存储表';
 
