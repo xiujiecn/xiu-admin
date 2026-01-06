@@ -71,7 +71,7 @@ database:
     level:   "all"
     stdout:  true
   default:  # 分组名称，可自定义，默认为default
-    link: "mysql:root:your_db_password@tcp(localhost:3306)/xiuadmin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+    link: "mysql:root:Xjzl2025__@tcp(192.168.37.60:3309)/db_cloud?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
     debug: true #开启调试模式
     charset: "utf8mb4" # (可选)数据库编码(如: utf8mb4/utf8/gbk/gb2312)，一般设置为utf8mb4。默认为utf8。
     dryRun: false #ORM空跑(只读不写)
@@ -98,9 +98,9 @@ redis:
   default:
     mode: "single" #redis模式，支持：single|cluster|sentinel
     sentinelMasterName: "xiujie-master" #哨兵模式主节点名称
-    address: localhost:6379
+    address: 192.168.37.60:6381
     db: 0
-    pass: 
+    pass: Xjzl2025__
     minIdle: 5 #最小空闲连接数
     maxIdle: 30 #允许闲置的最大连接数
     maxActive: 5000 #最大活跃连接数

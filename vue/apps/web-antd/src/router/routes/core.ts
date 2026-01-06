@@ -40,8 +40,8 @@ const coreRoutes: RouteRecordRaw[] = [
   {
     component: AuthPageLayout,
     props: {
-      pageTitle: "开箱即用的大型中后台管理系统",
-      pageDescription: "",
+      pageTitle: '开箱即用的大型中后台管理系统',
+      pageDescription: '',
       toolbar: true,
       toolbarList: ['color', 'language', 'layout', 'theme'],
     },

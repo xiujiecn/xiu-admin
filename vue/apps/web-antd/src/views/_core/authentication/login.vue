@@ -11,7 +11,7 @@ import type { VbenFormSchema } from '@vben/common-ui';
 import type { BasicOption, Recordable } from '@vben/types';
 import type { TenantResp } from '#/api';
 
-import { computed, markRaw, useTemplateRef, ref, onMounted } from 'vue';
+import { computed, onMounted, ref, markRaw, useTemplateRef } from 'vue';
 
 import { AuthenticationLogin, SliderCaptcha, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
@@ -21,7 +21,6 @@ import { useAuthStore } from '#/store';
 import ImgCaptcha from './components/img-captcha.vue';
 import { tenantList } from '#/api/core/auth';
 
-
 defineOptions({ name: 'Login' });
 
 const authStore = useAuthStore();
@@ -29,26 +28,10 @@ const authStore = useAuthStore();
 const loginFormRef = useTemplateRef('loginFormRef');
 const captchaCount = ref(0);
 
-const MOCK_USER_OPTIONS: BasicOption[] = [
-  {
-    label: 'Super',
-    value: 'super',
-  },
-  {
-    label: 'Admin',
-    value: 'admin',
-  },
-  {
-    label: 'User',
-    value: 'jack',
-  },
-];
-
 const tenantInfo = ref<TenantResp>({
   tenantEnabled: true,
   voList: [],
 });
-
 
 async function getTenantList() {
   const resp = await tenantList();
@@ -66,20 +49,21 @@ onMounted(async () => {
   await getTenantList();
 });
 
-async function handleLogin(params: Recordable<any>,
+async function handleLogin(
+  params: Recordable<any>,
   onSuccess?: () => Promise<void> | void,
-  ) {
-    try {
-      await authStore.authLogin(params, onSuccess);
-    } catch (error) {
-      if (error instanceof Error) {
-        // 刷新验证码
-        // captchaCount.value = captchaCount.value+1;
-      }
-      loginFormRef.value?.getFormApi().setFieldValue('captcha', ['','']);
-      captchaCount.value = captchaCount.value+1;
-      console.error('登录失败', error);
+) {
+  try {
+    await authStore.authLogin(params, onSuccess);
+  } catch (error) {
+    if (error instanceof Error) {
+      // 刷新验证码
+      // captchaCount.value = captchaCount.value+1;
     }
+    loginFormRef.value?.getFormApi().setFieldValue('captcha', ['', '']);
+    captchaCount.value = captchaCount.value + 1;
+    console.error('登录失败', error);
+  }
 }
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -118,22 +102,6 @@ const formSchema = computed((): VbenFormSchema[] => {
       componentProps: {
         placeholder: $t('authentication.usernameTip'),
       },
-      dependencies: {
-        trigger(values, form) {
-          if (values.selectAccount) {
-            const findUser = MOCK_USER_OPTIONS.find(
-              (item) => item.value === values.selectAccount,
-            );
-            if (findUser) {
-              form.setValues({
-                password: '123456',
-                username: findUser.value,
-              });
-            }
-          }
-        },
-        triggerFields: ['selectAccount'],
-      },
       fieldName: 'username',
       label: $t('authentication.username'),
       rules: z.string().min(1, { message: $t('authentication.usernameTip') }),
@@ -155,8 +123,7 @@ const formSchema = computed((): VbenFormSchema[] => {
         captchaCount: captchaCount.value,
       },
 
-      rules: z
-      .array(z.string().optional()).refine((v) => !!v[0], {
+      rules: z.array(z.string().optional()).refine((v) => !!v[0], {
         message: $t('authentication.verifyRequiredTip'),
       }),
     },

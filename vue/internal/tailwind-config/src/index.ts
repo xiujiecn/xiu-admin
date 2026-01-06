@@ -1,6 +1,8 @@
 import type { Config } from 'tailwindcss';
 
+import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { addDynamicIconSelectors } from '@iconify/tailwind';
 import { getPackagesSync } from '@manypkg/get-packages';
@@ -11,7 +13,47 @@ import { enterAnimationPlugin } from './plugins/entry';
 
 // import defaultTheme from 'tailwindcss/defaultTheme';
 
-const { packages } = getPackagesSync(process.cwd());
+// 获取当前文件的目录，然后向上查找项目根目录
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 从当前文件向上查找项目根目录（包含 pnpm-workspace.yaml 的目录）
+let currentDir = __dirname;
+let projectRoot = currentDir;
+const maxIterations = 10;
+let iterations = 0;
+
+while (iterations < maxIterations) {
+  const workspaceFile = path.join(currentDir, 'pnpm-workspace.yaml');
+  const packageJsonFile = path.join(currentDir, 'package.json');
+
+  if (fs.existsSync(workspaceFile)) {
+    projectRoot = currentDir;
+    break;
+  }
+
+  if (fs.existsSync(packageJsonFile)) {
+    try {
+      const pkgJson = JSON.parse(fs.readFileSync(packageJsonFile, 'utf-8'));
+      if (pkgJson.workspaces) {
+        projectRoot = currentDir;
+        break;
+      }
+    } catch {
+      // 忽略解析错误继续向上查找
+    }
+  }
+
+  const parentDir = path.dirname(currentDir);
+  if (parentDir === currentDir) {
+    // 已到达根目录
+    break;
+  }
+  currentDir = parentDir;
+  iterations++;
+}
+
+const { packages } = getPackagesSync(projectRoot);
 
 const tailwindPackages: string[] = [];
 
