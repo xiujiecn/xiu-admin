@@ -1,5 +1,8 @@
 {
     "apps/web-antd/src/views/_core/selectproject": {
         "description": "中间页"
+    },
+    "apps/web-antd/src/views/globalProject": {
+        "description": "默认页-项目"
     }
 }

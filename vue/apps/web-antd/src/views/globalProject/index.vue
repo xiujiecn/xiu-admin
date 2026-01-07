@@ -2,7 +2,9 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { Button, Result, Card } from 'ant-design-vue';
+import { Button, Card, Result } from 'ant-design-vue';
+
+import RouterPath from '#/constants/routerPath';
 
 const router = useRouter();
 
@@ -15,24 +17,12 @@ const projectList = ref<any>([]);
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-4 bg-background p-8 overflow-scroll">
+  <div class="flex h-full flex-col gap-4 overflow-scroll bg-background p-8">
     <div>
       <div class="flex items-end justify-between pb-4">
         <p class="text-2xl">我创建的项目</p>
         <div>
-          <Button
-            type="primary"
-            @click="
-              projectList.push({
-                projectName: '项目1',
-                projectId: '1',
-                projectDescription: '项目描述1',
-                projectStatus: '正常',
-                projectDevice: 10,
-                projectMember: 10,
-              })
-            "
-          >
+          <Button type="primary" @click="router.push(RouterPath.CreateProject)">
             创建项目
           </Button>
           <Button type="primary" @click="goToHome">测试</Button>
@@ -40,7 +30,7 @@ const projectList = ref<any>([]);
       </div>
       <div
         v-if="projectList.length > 0"
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+        class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
       >
         <Card hoverable v-for="(item, index) in projectList" :key="index">
           <p class="text-xl font-bold">

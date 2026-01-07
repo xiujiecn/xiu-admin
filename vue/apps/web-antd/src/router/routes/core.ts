@@ -40,7 +40,18 @@ const coreRoutes: RouteRecordRaw[] = [
       {
         name: 'SelectProject',
         path: 'select-project',
-        component: () => import('#/views/_core/selectproject/index.vue'),
+        component: () => import('#/views/globalProject/index.vue'),
+        meta: {
+          hideInMenu: true,
+          hideSidebar: true,
+          hideTabbar: true,
+          title: '选择项目',
+        },
+      },
+      {
+        name: 'CreateProject',
+        path: 'create-project',
+        component: () => import('#/views/globalProject/create.vue'),
         meta: {
           hideInMenu: true,
           hideSidebar: true,
