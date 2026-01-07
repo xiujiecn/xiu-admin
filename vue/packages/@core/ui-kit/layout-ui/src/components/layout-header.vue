@@ -53,11 +53,11 @@ const style = computed((): CSSProperties => {
   };
 });
 
-const logoStyle = computed((): CSSProperties => {
-  return {
-    minWidth: `${props.isMobile ? 40 : props.sidebarWidth}px`,
-  };
-});
+// const logoStyle = computed((): CSSProperties => {
+//   return {
+//     minWidth: `${props.isMobile ? 40 : props.sidebarWidth}px`,
+//   };
+// });
 </script>
 
 <template>
@@ -66,7 +66,8 @@ const logoStyle = computed((): CSSProperties => {
     :style="style"
     class="top-0 flex w-full flex-[0_0_auto] items-center border-b border-border bg-header pl-2 transition-[margin-top] duration-200"
   >
-    <div v-if="slots.logo" :style="logoStyle">
+    <!-- <div v-if="slots.logo" :style="logoStyle"> -->
+    <div v-if="slots.logo">
       <slot name="logo"></slot>
     </div>
 

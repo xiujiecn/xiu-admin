@@ -156,7 +156,7 @@ const logoSrc = computed(() => {
     <!-- 右侧认证面板 -->
     <AuthenticationFormView
       v-if="authPanelRight"
-      class="min-h-full w-2/5 flex-1"
+      class="min-h-full w-[28%] flex-1"
       data-side="right"
     >
       <template v-if="copyright" #copyright>

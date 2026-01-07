@@ -8,18 +8,20 @@
 -->
 <script lang="ts" setup>
 import type { VbenFormSchema } from '@vben/common-ui';
-import type { BasicOption, Recordable } from '@vben/types';
+import type { Recordable } from '@vben/types';
+
 import type { TenantResp } from '#/api';
 
-import { computed, onMounted, ref, markRaw, useTemplateRef } from 'vue';
+import { computed, markRaw, onMounted, ref, useTemplateRef } from 'vue';
 
-import { AuthenticationLogin, SliderCaptcha, z } from '@vben/common-ui';
+import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+import { tenantList } from '#/api/core/auth';
 import { useAuthStore } from '#/store';
 
 import ImgCaptcha from './components/img-captcha.vue';
-import { tenantList } from '#/api/core/auth';
+import CustomLogin from './custom-login.vue';
 
 defineOptions({ name: 'Login' });
 
@@ -90,7 +92,7 @@ const formSchema = computed((): VbenFormSchema[] => {
         },
         triggerFields: ['', 'tenantId'],
       },
-      label: $t('authentication.selectAccount'),
+      // label: $t('authentication.selectAccount'),
       rules: z
         .string()
         .min(1, { message: $t('authentication.selectAccount') })
@@ -118,6 +120,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: markRaw(ImgCaptcha),
       fieldName: 'captcha',
+      label: '验证码',
       defaultValue: [undefined, ''],
       componentProps: {
         captchaCount: captchaCount.value,
@@ -132,7 +135,13 @@ const formSchema = computed((): VbenFormSchema[] => {
 </script>
 
 <template>
-  <AuthenticationLogin
+  <!-- <AuthenticationLogin
+    ref="loginFormRef"
+    :form-schema="formSchema"
+    :loading="authStore.loginLoading"
+    @submit="handleLogin"
+  /> -->
+  <CustomLogin
     ref="loginFormRef"
     :form-schema="formSchema"
     :loading="authStore.loginLoading"

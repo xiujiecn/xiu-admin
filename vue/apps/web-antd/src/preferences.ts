@@ -11,7 +11,7 @@ export const overridesPreferences = defineOverridesPreferences({
     name: import.meta.env.VITE_APP_TITLE,
     accessMode: 'backend',
 
-    authPageLayout: 'panel-left',
+    authPageLayout: 'panel-right',
     layout: 'header-sidebar-nav',
   },
   breadcrumb: {

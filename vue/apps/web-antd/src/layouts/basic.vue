@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router';
 import { AuthenticationLoginExpiredModal } from '@vben/common-ui';
 import { VBEN_DOC_URL, VBEN_GITHUB_URL } from '@vben/constants';
 import { useWatermark } from '@vben/hooks';
-import { BookOpenText, CircleHelp, MdiGithub,UserOutlined } from '@vben/icons';
+import { BookOpenText, CircleHelp, MdiGithub, UserOutlined } from '@vben/icons';
 import {
   BasicLayout,
   LockScreen,
@@ -17,6 +17,8 @@ import {
 import { preferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
+
+import { Button, Select } from 'ant-design-vue';
 
 import { $t } from '#/locales';
 import { useAuthStore } from '#/store';
@@ -167,6 +169,18 @@ watch(
     immediate: true,
   },
 );
+
+const options = [
+  {
+    label: 'Option 1',
+    value: '1',
+  },
+  {
+    label: 'Option 2',
+    value: '2',
+  },
+];
+const select = ref('1');
 </script>
 
 <template>
@@ -202,6 +216,13 @@ watch(
     <template #lock-screen>
       <LockScreen :avatar @to-login="handleLogout" />
     </template>
-    <template #header-left-0>apps\web-antd\src\layouts\basic.vue</template>
+    <template #header-left-0>
+      <div class="flex items-center gap-2">
+        <Select v-model:value="select" :options="options" :bordered="false" />
+        <Button type="text">我的项目</Button>
+        <Select v-model:value="select" :options="options" :bordered="false" />
+        apps\web-antd\src\layouts\basic.vue
+      </div>
+    </template>
   </BasicLayout>
 </template>
