@@ -170,6 +170,26 @@ function autoCollapseMenuByRouteMeta(route: RouteLocationNormalizedLoaded) {
 
 const route = useRoute();
 
+// 根据路由 meta 动态隐藏侧边栏
+const sidebarHiddenByRoute = computed(() => {
+  return !!route.meta?.hideSidebar;
+});
+
+// 合并全局配置和路由配置
+const currentSidebarHidden = computed(() => {
+  return preferences.sidebar.hidden || sidebarHiddenByRoute.value;
+});
+
+// 根据路由 meta 动态隐藏 tab 栏
+const tabbarHiddenByRoute = computed(() => {
+  return !!route.meta?.hideTabbar;
+});
+
+// 合并全局配置和路由配置
+const currentTabbarEnable = computed(() => {
+  return preferences.tabbar.enable && !tabbarHiddenByRoute.value;
+});
+
 onMounted(() => {
   autoCollapseMenuByRouteMeta(route);
 });
@@ -226,12 +246,12 @@ const headerSlots = computed(() => {
     :sidebar-expand-on-hover="preferences.sidebar.expandOnHover"
     :sidebar-extra-collapse="preferences.sidebar.extraCollapse"
     :sidebar-extra-collapsed-width="preferences.sidebar.extraCollapsedWidth"
-    :sidebar-hidden="preferences.sidebar.hidden"
+    :sidebar-hidden="currentSidebarHidden"
     :sidebar-mixed-width="preferences.sidebar.mixedWidth"
     :sidebar-theme="sidebarTheme"
     :sidebar-width="preferences.sidebar.width"
     :side-collapse-width="preferences.sidebar.collapseWidth"
-    :tabbar-enable="preferences.tabbar.enable"
+    :tabbar-enable="currentTabbarEnable"
     :tabbar-height="preferences.tabbar.height"
     :z-index="preferences.app.zIndex"
     @side-mouse-leave="handleSideMouseLeave"

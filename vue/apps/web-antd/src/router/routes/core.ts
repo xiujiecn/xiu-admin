@@ -35,7 +35,20 @@ const coreRoutes: RouteRecordRaw[] = [
     name: 'Root',
     path: '/',
     redirect: DEFAULT_HOME_PATH,
-    children: [],
+    // 项目选择页
+    children: [
+      {
+        name: 'SelectProject',
+        path: 'select-project',
+        component: () => import('#/views/_core/selectproject/index.vue'),
+        meta: {
+          hideInMenu: true,
+          hideSidebar: true,
+          hideTabbar: true,
+          title: '选择项目',
+        },
+      },
+    ],
   },
   {
     component: AuthPageLayout,

@@ -10,20 +10,52 @@ export const overridesPreferences = defineOverridesPreferences({
   app: {
     name: import.meta.env.VITE_APP_TITLE,
     accessMode: 'backend',
+
+    authPageLayout: 'panel-left',
+    layout: 'header-sidebar-nav',
+  },
+  breadcrumb: {
+    enable: false,
+  },
+  shortcutKeys: {
+    enable: false,
+  },
+  tabbar: {
+    styleType: 'plain',
   },
   theme: {
-    mode: "light"
+    mode: 'light',
+    radius: '0.25',
   },
   logo: {
     enable: true,
-    source: "https://iot.xiujie.cn/wp-content/uploads/2025/02/96x96.webp",
+    source: 'https://iot.xiujie.cn/wp-content/uploads/2025/02/96x96.webp',
   },
   copyright: {
     enable: true,
-    companyName: "李秀杰",
-    companySiteLink: "https://www.xiujiezhilian.cn",
-    date: "2024-2025",
-    icp: "鲁ICP备2024117944号-1",
-    icpLink: "https://beian.miit.gov.cn/",
+    companyName: '李秀杰',
+    companySiteLink: 'https://www.xiujiezhilian.cn',
+    date: '2024-2025',
+    icp: '鲁ICP备2024117944号-1',
+    icpLink: 'https://beian.miit.gov.cn/',
   },
 });
+
+// {
+//   "app": {
+//     "authPageLayout": "panel-left",
+//     "layout": "header-sidebar-nav"
+//   },
+//   "breadcrumb": {
+//     "enable": false
+//   },
+//   "shortcutKeys": {
+//     "enable": false
+//   },
+//   "tabbar": {
+//     "styleType": "plain"
+//   },
+//   "theme": {
+//     "radius": "0.25"
+//   }
+// }
