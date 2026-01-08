@@ -132,7 +132,7 @@ const defaultPreferences: Preferences = {
     languageToggle: true,
     lockScreen: true,
     notification: true,
-    refresh: false,
+    refresh: true,
     sidebarToggle: true,
     themeToggle: true,
     timezone: true,

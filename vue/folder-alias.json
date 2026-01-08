@@ -7,5 +7,11 @@
     },
     "apps/web-antd/src/views/_core/authentication/custom-login.vue": {
         "description": "自定义登录页"
+    },
+    "apps/web-antd/src/views/devices": {
+        "description": "设备"
+    },
+    "apps/web-antd/src/views/devices/devices": {
+        "description": "所有设备"
     }
 }

@@ -39,6 +39,9 @@ export const overridesPreferences = defineOverridesPreferences({
     icp: '鲁ICP备2024117944号-1',
     icpLink: 'https://beian.miit.gov.cn/',
   },
+  widget: {
+    refresh: false,
+  },
 });
 
 // {
