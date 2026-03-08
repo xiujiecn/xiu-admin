@@ -73,6 +73,12 @@ func RandomString(n int) string {
 
 // 获取客户端IP
 func GetClientIp(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	if ghttp.RequestFromCtx(ctx) == nil {
+		return ""
+	}
 	return ghttp.RequestFromCtx(ctx).GetClientIp()
 }
 

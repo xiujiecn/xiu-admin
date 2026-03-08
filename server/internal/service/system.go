@@ -268,6 +268,12 @@ type (
 		Edit(ctx context.Context, param *model.SysTenantEditParam) (output *model.SysTenantEditModel, err error)
 		Delete(ctx context.Context, param *model.SysTenantDeleteParam) (output *model.SysTenantDeleteModel, err error)
 		Status(ctx context.Context, param *model.SysTenantStatusParam) (output *model.SysTenantStatusModel, err error)
+		// 新建租户插入系统参数表数据
+		BatchInsertSysParam(ctx context.Context, tx gdb.TX, tenantId string, createdBy int64, createdDept int64) (ids []int64, err error)
+		// 同步租户菜单
+		SyncTenantMenu(ctx context.Context, tenantId string) (err error)
+		// 查询用户ID是否是租户管理员
+		IsTenantAdmin(ctx context.Context, userIds []int64) (isAdminUserIds []int64, err error)
 	}
 	ISysTenantPackage interface {
 		// 获取租户套餐

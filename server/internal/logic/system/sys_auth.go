@@ -139,31 +139,44 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 	et, _ := utility.ParseDuration(ets)
 	bt, _ := utility.ParseDuration(bts)
 	g.Log().Infof(ctx, "sSysAuth.GenerateToken 生成Token: user:%+v, et:%s, bt:%s, iss:%s, sk:%s", user, et, bt, iss, sk)
-	authorityIds, err := service.SysUser().GetUserRoleIds(ctx, user.ID)
-	if err != nil {
-		return nil, "", err
-	}
-	rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
-		PageInfo: request.PageInfo{
-			Page:     1,
-			PageSize: 5000,
-		},
-		RoleIds: authorityIds,
-	})
-	if err != nil {
-		return nil, "", err
-	}
 	roles := make([]model.Role, 0)
-	for _, r := range rl {
-		roles = append(roles, model.Role{
-			RoleId:    r.RoleId,
-			DataScope: r.DataScope,
+	if len(user.RoleIds) > 0 {
+		for _, roleId := range user.RoleIds {
+			roles = append(roles, model.Role{
+				RoleId:    roleId,
+				DataScope: consts.SysRoleDataScopeAll,
+			})
+		}
+	} else {
+		authorityIds, err := service.SysUser().GetUserRoleIds(ctx, user.ID)
+		if err != nil {
+			return nil, "", err
+		}
+		rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
+			PageInfo: request.PageInfo{
+				Page:     1,
+				PageSize: 5000,
+			},
+			RoleIds: authorityIds,
 		})
+		if err != nil {
+			return nil, "", err
+		}
+		for _, r := range rl {
+			roles = append(roles, model.Role{
+				RoleId:    r.RoleId,
+				DataScope: r.DataScope,
+			})
+		}
 	}
-	g.Log().Infof(ctx, "sSysAuth.GenerateToken roles: %v", roles)
+	g.Log().Debugf(ctx, "sSysAuth.GenerateToken roles: %v", roles)
+	uuidStr := user.UUID
+	if uuidStr == "" {
+		uuidStr = strings.ReplaceAll(uuid.New().String(), "-", "")
+	}
 	claims = &model.CustomClaims{
 		BaseClaims: model.BaseClaims{
-			UUID:     strings.ReplaceAll(uuid.New().String(), "-", ""),
+			UUID:     uuidStr,
 			ID:       user.ID,
 			Username: user.Username,
 			NickName: user.NickName,
@@ -203,8 +216,10 @@ func (s *sSysAuth) ParseToken(ctx context.Context, token string) (claims *model.
 	if t.Claims.(*model.CustomClaims).ExpiresAt.Unix() < time.Now().Unix() {
 		return nil, errors.New("token已过期")
 	}
-	_, err = bcache.GetSysAuthToken(ctx, t.Claims.(*model.CustomClaims).BaseClaims.ID, t.Claims.(*model.CustomClaims).BaseClaims.UUID)
+	baseClaims := t.Claims.(*model.CustomClaims).BaseClaims
+	_, err = bcache.GetSysAuthToken(ctx, baseClaims.ID, baseClaims.UUID)
 	if err != nil {
+		g.Log().Errorf(ctx, "sSysAuth.ParseToken GetSysAuthToken failed, userId: %d, uuid: %s, error: %v", baseClaims.ID, baseClaims.UUID, err)
 		return nil, err
 	}
 	return t.Claims.(*model.CustomClaims), nil

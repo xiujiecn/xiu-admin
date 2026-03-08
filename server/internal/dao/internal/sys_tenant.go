@@ -32,6 +32,9 @@ type SysTenantColumns struct {
 	Domain          string // 域名
 	Remark          string // 备注
 	PackageId       string // 租户套餐编号
+	AdminRoleId     string // 管理员角色ID
+	AdminDeptId     string // 管理员部门ID
+	AdminUserId     string // 管理员用户ID
 	ExpireTime      string // 过期时间
 	AccountCount    string // 用户数量（-1不限制）
 	Status          string // 租户状态（0正常 1停用）
@@ -57,6 +60,9 @@ var sysTenantColumns = SysTenantColumns{
 	Domain:          "domain",
 	Remark:          "remark",
 	PackageId:       "package_id",
+	AdminRoleId:     "admin_role_id",
+	AdminDeptId:     "admin_dept_id",
+	AdminUserId:     "admin_user_id",
 	ExpireTime:      "expire_time",
 	AccountCount:    "account_count",
 	Status:          "status",

@@ -21,12 +21,14 @@ type SysUserMiniModel struct {
 }
 
 type LoginUserOut struct {
-	ID       int64  `json:"id"`
-	Username string `json:"username"`
-	NickName string `json:"nickName"`
-	Avatar   string `json:"avatar"`
-	TenantId string `json:"tenantId"    orm:"tenant_id"    description:"租户编号"`
-	DeptId   int64  `json:"deptId"      orm:"dept_id"      description:"部门ID"`
+	ID       int64   `json:"id"`
+	Username string  `json:"username"`
+	NickName string  `json:"nickName"`
+	Avatar   string  `json:"avatar"`
+	TenantId string  `json:"tenantId"    orm:"tenant_id"    description:"租户编号"`
+	DeptId   int64   `json:"deptId"      orm:"dept_id"      description:"部门ID"`
+	UUID     string  `json:"uuid"`
+	RoleIds  []int64 `json:"roleIds"`
 }
 
 type UserListParam struct {

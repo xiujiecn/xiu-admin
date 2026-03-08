@@ -11,6 +11,8 @@ import (
 	"time"
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/library/cache"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 // 设置系统认证token缓存
@@ -28,6 +30,7 @@ func GetSysAuthToken(ctx context.Context, userId int64, uuid string) (token stri
 	key := fmt.Sprintf(consts.KeySysAuthToken, userId, uuid)
 	t, err := cache.Instance().Get(ctx, key)
 	if err != nil {
+		g.Log().Errorf(ctx, "bcache.GetSysAuthToken Get failed,error: %v, userId: %d, uuid: %s, key: %s", err, userId, uuid, key)
 		return "", err
 	}
 	return t.String(), nil

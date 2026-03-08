@@ -110,3 +110,10 @@ type SysTenantEditParam struct {
 type SysTenantEditModel struct {
 	Id int64 `json:"id"              orm:"id"                description:"id"`
 }
+
+type SysTenantSyncMenuParam struct {
+	TenantId string `json:"tenantId"         description:"租户编号"`
+}
+
+type SysTenantSyncMenuModel struct {
+}

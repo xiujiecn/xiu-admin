@@ -69,6 +69,15 @@ type SysTenantViewRes struct {
 	*model.SysTenantViewModel
 }
 
+type SysTenantSyncMenuReq struct {
+	g.Meta `path:"/tenant/syncmenu" method:"post" tags:"系统-租户管理" summary:"同步租户菜单" x-check-permission:"cpm:system:tenant:syncmenu"`
+	*model.SysTenantSyncMenuParam
+}
+
+type SysTenantSyncMenuRes struct {
+	*model.SysTenantSyncMenuModel
+}
+
 type SysTenantPackageListReq struct {
 	g.Meta `path:"/tenant/package/list" method:"get" tags:"系统-租户管理" summary:"租户套餐列表" x-check-permission:"cpm:system:tenant:package:list"`
 	request.PageInfo
