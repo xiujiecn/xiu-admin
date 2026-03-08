@@ -111,6 +111,7 @@ type ISystemV1 interface {
 	SysTenantDelete(ctx context.Context, req *v1.SysTenantDeleteReq) (res *v1.SysTenantDeleteRes, err error)
 	SysTenantStatus(ctx context.Context, req *v1.SysTenantStatusReq) (res *v1.SysTenantStatusRes, err error)
 	SysTenantView(ctx context.Context, req *v1.SysTenantViewReq) (res *v1.SysTenantViewRes, err error)
+	SysTenantSyncMenu(ctx context.Context, req *v1.SysTenantSyncMenuReq) (res *v1.SysTenantSyncMenuRes, err error)
 	SysTenantPackageList(ctx context.Context, req *v1.SysTenantPackageListReq) (res *v1.SysTenantPackageListRes, err error)
 	SysTenantPackageView(ctx context.Context, req *v1.SysTenantPackageViewReq) (res *v1.SysTenantPackageViewRes, err error)
 	SysTenantPackageStatus(ctx context.Context, req *v1.SysTenantPackageStatusReq) (res *v1.SysTenantPackageStatusRes, err error)

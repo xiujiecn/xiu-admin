@@ -129,5 +129,8 @@ export async function statusSysTenantApi(params: SysTenantStatusParam) {
   return requestClient.post<SysTenantStatusModel>('/system/tenant/status', { ...params });
 }
 
-
-
+export async function syncmenuTenantApi(params: any) {
+  return requestClient.post<SysTenantStatusModel>('/system/tenant/syncmenu', {
+    ...params,
+  });
+}

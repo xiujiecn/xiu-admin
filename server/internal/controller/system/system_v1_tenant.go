@@ -4,6 +4,7 @@ import (
 	"context"
 
 	v1 "xiuadmin/api/system/v1"
+	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/response"
 	"xiuadmin/internal/service"
 )
@@ -127,5 +128,14 @@ func (c *ControllerV1) SysTenantPackageDelete(ctx context.Context, req *v1.SysTe
 	}
 	return &v1.SysTenantPackageDeleteRes{
 		SysTenantPackageDeleteModel: data,
+	}, nil
+}
+func (c *ControllerV1) SysTenantSyncMenu(ctx context.Context, req *v1.SysTenantSyncMenuReq) (res *v1.SysTenantSyncMenuRes, err error) {
+	err = service.SysTenant().SyncTenantMenu(ctx, req.TenantId)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.SysTenantSyncMenuRes{
+		SysTenantSyncMenuModel: &model.SysTenantSyncMenuModel{},
 	}, nil
 }

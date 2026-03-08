@@ -82,3 +82,4 @@ server/temp.yaml
 server/bin  
 
 dump.rdb
+*.exe

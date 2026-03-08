@@ -42,6 +42,6 @@ const hasAuth = computed(() => {
 </script>
 
 <template>
-  <slot v-if="!codes"></slot>
-  <slot v-else-if="hasAuth"></slot>
+  <slot v-if="!codes" :hasPermission="true"></slot>
+  <slot v-else-if="hasAuth" :hasPermission="hasAuth"></slot>
 </template>

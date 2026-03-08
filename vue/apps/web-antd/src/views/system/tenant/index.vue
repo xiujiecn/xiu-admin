@@ -10,7 +10,7 @@ import { Button, message,Tag, Modal, Popconfirm,Switch } from 'ant-design-vue';
 import dayjs from 'dayjs';
 import { AccessControl, useAccess } from '@vben/access';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSysTenantListApi, deleteSysTenantApi, statusSysTenantApi } from '#/api/system/tenant';
+import { getSysTenantListApi, deleteSysTenantApi, statusSysTenantApi, syncmenuTenantApi } from '#/api/system/tenant';
 import {
   MdiPlus,
   MdiEdit,
@@ -118,6 +118,17 @@ function handleEdit(row: SysTenantListData) {
   editDrawerApi.open();
 }
 
+async function handleSync(row: SysTenantListData) {
+  console.log('syncmenuTenantApi', row);
+  try {
+    await syncmenuTenantApi({ tenantId: row.tenantId });
+    message.success('同步成功');
+  } catch (error) {
+    console.error(error);
+    message.error('同步失败');
+  }
+}
+
 async function handleDelete(row: SysTenantListData) {
   if(row.id === 1) {
     message.error("PC客户端不允许删除");
@@ -184,6 +195,14 @@ async function handleStatusChange(row: SysTenantListData) {
       </template>
       <template #action="{ row }">
         <div class="flex items-center">
+	   <Button
+            class="mr-2 border-none p-0"
+            :block="false"
+            type="link"
+            @click="handleSync(row)"
+            v-access:code="'cpm:system:tenant:syncmenu'"
+            v-if="row.id != 1"
+            >同步菜单</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handlePreview(row)" v-access:code="'cpm:system:tenant:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:tenant:edit'"    >修改</Button>
           <AccessControl :codes="['cpm:system:tenant:remove']" type="code" >

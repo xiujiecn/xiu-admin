@@ -7,6 +7,7 @@ package system
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"slices"
@@ -19,6 +20,7 @@ import (
 	"xiuadmin/internal/library/xgorm/handler"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/do"
+	"xiuadmin/internal/model/entity"
 	"xiuadmin/internal/service"
 	"xiuadmin/utility"
 
@@ -133,13 +135,7 @@ func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (o
 			return err
 		}
 		tenantId = fmt.Sprintf("%06d", 100000+id)
-		_, err = tx.Ctx(ctx).Model(dao.SysTenant.Table()).Data(g.Map{
-			dao.SysTenant.Columns().TenantId: tenantId,
-		}).Where(dao.SysTenant.Columns().Id, id).Update()
-		if err != nil {
-			g.Log().Errorf(ctx, "sSysTenant.Add SysTenant.Table().Update err: %v, data: %+v", err, data)
-			return err
-		}
+
 		// 创建部门
 		dataDeptInsert := do.SysDept{}
 		dataDeptInsert.TenantId = tenantId
@@ -176,6 +172,7 @@ func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (o
 			g.Log().Errorf(ctx, "sSysTenant.Add SysRole.Table().InsertAndGetId err: %v, data: %+v", err, dataRoleInsert)
 			return err
 		}
+
 		// 角色关联菜单
 		dataRoleMenuInserts := []*do.SysRoleMenu{}
 		for _, menuId := range menuIds {
@@ -217,6 +214,17 @@ func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (o
 			g.Log().Errorf(ctx, "sSysTenant.Add SysUser.Table().InsertAndGetId err: %v, data: %+v", err, dataUserInsert)
 			return err
 		}
+		// 修改租户信息
+		_, err = tx.Ctx(ctx).Model(dao.SysTenant.Table()).Data(g.Map{
+			dao.SysTenant.Columns().TenantId:    tenantId,
+			dao.SysTenant.Columns().AdminRoleId: roleId,
+			dao.SysTenant.Columns().AdminDeptId: deptId,
+			dao.SysTenant.Columns().AdminUserId: userId,
+		}).Where(dao.SysTenant.Columns().Id, id).Update()
+		if err != nil {
+			g.Log().Errorf(ctx, "sSysTenant.Add SysTenant.Table().Update err: %v, data: %+v", err, data)
+			return err
+		}
 		// 修改部门负责人
 		dataDeptUpdate := do.SysDept{}
 		dataDeptUpdate.DeptId = deptId
@@ -243,7 +251,7 @@ func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (o
 			return err
 		}
 		// 插入系统参数
-		sysConfigIds, err = l.batchInsertSysParam(ctx, tx, tenantId, userId, deptId)
+		sysConfigIds, err = l.BatchInsertSysParam(ctx, tx, tenantId, userId, deptId)
 		if err != nil {
 			g.Log().Errorf(ctx, "sSysTenant.Add batchInsertSysParam err: %v, tenantId: %s, createdBy: %d, createdDept: %d", err, tenantId, contexts.GetUserId(ctx), contexts.GetDeptId(ctx))
 			return err
@@ -333,7 +341,7 @@ func (l *sSysTenant) Status(ctx context.Context, param *model.SysTenantStatusPar
 }
 
 // 新建租户插入系统参数表数据
-func (l *sSysTenant) batchInsertSysParam(ctx context.Context, tx gdb.TX, tenantId string, createdBy int64, createdDept int64) (ids []int64, err error) {
+func (l *sSysTenant) BatchInsertSysParam(ctx context.Context, tx gdb.TX, tenantId string, createdBy int64, createdDept int64) (ids []int64, err error) {
 	sql := `
 INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '主框架页-默认皮肤样式名称', 'sys.index.skinName', 'skin-blue', 'Y', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), '蓝色 skin-blue、绿色 skin-green、紫色 skin-purple、红色 skin-red、黄色 skin-yellow');
 INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '用户管理-账号初始密码', 'sys.user.initPassword', '123456', 'Y', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), '初始化密码 123456');
@@ -400,4 +408,85 @@ INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config
 
 	g.Log().Infof(ctx, "sSysTenant.batchInsertSysParam ids: %v", ids)
 	return ids, nil
+}
+
+// 同步租户菜单
+func (l *sSysTenant) SyncTenantMenu(ctx context.Context, tenantId string) (err error) {
+	tenantInfo, err := l.View(ctx, &model.SysTenantViewParam{
+		TenantId: tenantId,
+	})
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysTenant.SyncTenantMenu SysTenant().View err: %v, tenantId: %s", err, tenantId)
+		return err
+	}
+	tenantPackage, err := service.SysTenantPackage().View(ctx, &model.SysTenantPackageViewParam{
+		PackageId: tenantInfo.PackageId,
+	})
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysTenant.SyncTenantMenu SysTenantPackage().View err: %v, tenantId: %s, packageId: %d", err, tenantId, tenantInfo.PackageId)
+		return err
+	}
+	if tenantPackage == nil {
+		return errors.New("租户套餐不存在")
+	}
+	menuIds := strings.Split(tenantPackage.MenuIds, ",")
+	// 获取角色对应菜单
+	roleMenuList, err := service.SysRole().GetRoleMenu(ctx, tenantInfo.AdminRoleId)
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysTenant.SyncTenantMenu SysRole().GetRoleMenu err: %v, tenantId: %s, roleId: %d", err, tenantId, tenantInfo.AdminRoleId)
+		return err
+	}
+	insertMenuIds := make([]do.SysRoleMenu, 0)
+	for _, menuId := range menuIds {
+		found := false
+		for _, roleMenu := range roleMenuList {
+			if roleMenu.MenuId == gconv.Int64(menuId) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			insertMenuIds = append(insertMenuIds, do.SysRoleMenu{
+				RoleId: tenantInfo.AdminRoleId,
+				MenuId: gconv.Int64(menuId),
+			})
+		}
+	}
+	delMenuIds := make([]int64, 0)
+	for _, roleMenu := range roleMenuList {
+		if !slices.Contains(menuIds, gconv.String(roleMenu.MenuId)) {
+			delMenuIds = append(delMenuIds, roleMenu.MenuId)
+			continue
+		}
+	}
+	if len(delMenuIds) > 0 {
+		_, err = dao.SysRoleMenu.Ctx(ctx).WhereIn(dao.SysRoleMenu.Columns().RoleId, tenantInfo.AdminRoleId).
+			WhereIn(dao.SysRoleMenu.Columns().MenuId, delMenuIds).Delete()
+		if err != nil {
+			g.Log().Errorf(ctx, "sSysTenant.SyncTenantMenu SysRoleMenu.Ctx(ctx).Delete err: %v, tenantId: %s, roleId: %d, delMenuIds: %v", err, tenantId, tenantInfo.AdminRoleId, delMenuIds)
+			return err
+		}
+	}
+	if len(insertMenuIds) > 0 {
+		_, err = dao.SysRoleMenu.Ctx(ctx).Data(insertMenuIds).Insert()
+		if err != nil {
+			g.Log().Errorf(ctx, "sSysTenant.SyncTenantMenu SysRoleMenu.Ctx(ctx).Insert err: %v, tenantId: %s, roleId: %d, insertMenuIds: %v", err, tenantId, tenantInfo.AdminRoleId, insertMenuIds)
+			return err
+		}
+	}
+	return nil
+}
+
+// 查询用户ID是否是租户管理员
+func (l *sSysTenant) IsTenantAdmin(ctx context.Context, userIds []int64) (isAdminUserIds []int64, err error) {
+	entityList := make([]*entity.SysTenant, 0)
+	err = dao.SysTenant.Ctx(ctx).WhereIn(dao.SysTenant.Columns().AdminUserId, userIds).Scan(&entityList)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+	isAdminUserIds = make([]int64, 0)
+	for _, entity := range entityList {
+		isAdminUserIds = append(isAdminUserIds, entity.AdminUserId)
+	}
+	return isAdminUserIds, nil
 }

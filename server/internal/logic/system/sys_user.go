@@ -8,6 +8,8 @@ package system
 import (
 	"context"
 	"errors"
+	"fmt"
+	"slices"
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/dao"
 	"xiuadmin/internal/library/contexts"
@@ -518,20 +520,41 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 
 func (l *sSysUser) DeleteUser(ctx context.Context, userIds []int64) (err error) {
 	if len(userIds) == 0 {
+		g.Log().Warningf(ctx, "sSysUser.DeleteUser 用户ID列表不能为空. userIds: %v", userIds)
 		return errors.New("用户ID列表不能为空")
 	}
 	currUserId := contexts.GetUserId(ctx)
+	if slices.Contains(userIds, 1) {
+		g.Log().Warningf(ctx, "sSysUser.DeleteUser 不能删除超级管理员. userIds: %v", userIds)
+		return errors.New("不能删除超级管理员")
+	}
+	if slices.Contains(userIds, currUserId) {
+		g.Log().Warningf(ctx, "sSysUser.DeleteUser 不能删除当前用户. userIds: %v, currUserId: %d", userIds, currUserId)
+		return errors.New("不能删除当前用户")
+	}
+	isAdminUserIds, err := service.SysTenant().IsTenantAdmin(ctx, userIds)
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysUser.DeleteUser IsTenantAdmin err: %v, userIds: %v", err, userIds)
+		return err
+	}
+	if len(isAdminUserIds) > 0 {
+		g.Log().Warningf(ctx, "sSysUser.DeleteUser 不能删除租户管理员. isAdminUserIds: %v, userIds: %v", isAdminUserIds, userIds)
+		return errors.New(fmt.Sprintf("不能删除租户管理员ID: %v", isAdminUserIds))
+	}
+
 	_, err = l.Model(ctx).WhereIn(dao.SysUser.Columns().UserId, userIds).Data(map[string]any{
 		dao.SysUser.Columns().DeletedAt: gtime.Now(),
 		dao.SysUser.Columns().DeletedBy: currUserId,
 	}).OmitEmpty().Update()
 	if err != nil {
+		g.Log().Errorf(ctx, "sSysUser.DeleteUser Update err: %v, userIds: %v", err, userIds)
 		return err
 	}
 
 	// 删除用户绑定关系
 	_, err = dao.SysSocial.Ctx(ctx).WhereIn(dao.SysSocial.Columns().UserId, userIds).Delete()
 	if err != nil {
+		g.Log().Errorf(ctx, "sSysUser.DeleteUser SysSocial.Ctx(ctx).Delete err: %v, userIds: %v", err, userIds)
 		return err
 	}
 

@@ -565,6 +565,7 @@ INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `o
 INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (1631, '编辑/新增测试单表', 1629, 3, 'tr_1628 tr_1629 ', 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:testDemo:edit', '', 103, 1, '2025-03-23 14:43:49', 1, '2025-03-25 17:30:11', '');
 INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (1632, '删除测试单表', 1629, 3, 'tr_1628 tr_1629 ', 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:testDemo:delete', '', 103, 1, '2025-03-23 14:43:49', 1, '2025-03-25 17:30:24', '');
 INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (1633, '导出测试单表', 1629, 3, 'tr_1628 tr_1629 ', 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:testDemo:export', '', 103, 1, '2025-03-23 14:43:49', 1, '2025-03-25 17:30:38', '');
+INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (1646, '同步菜单', 121, 1, NULL, 1, '', '', '', 1, 0, 'F', '0', '0', 'system:tenant:syncmenu', '', 103, 1, '2026-03-08 11:06:09', 1, '2026-03-08 11:09:00', '');
 COMMIT;
 
 -- ----------------------------
@@ -982,6 +983,9 @@ CREATE TABLE `sys_tenant` (
   `domain` varchar(200) DEFAULT NULL COMMENT '域名',
   `remark` varchar(200) DEFAULT NULL COMMENT '备注',
   `package_id` bigint(20) DEFAULT NULL COMMENT '租户套餐编号',
+  `admin_role_id` bigint(20) DEFAULT NULL COMMENT '管理员角色ID',
+  `admin_dept_id` bigint(20) DEFAULT NULL COMMENT '管理员部门ID',
+  `admin_user_id` bigint(20) DEFAULT NULL COMMENT '管理员用户ID',
   `expire_time` datetime DEFAULT NULL COMMENT '过期时间',
   `account_count` int(11) DEFAULT -1 COMMENT '用户数量（-1不限制）',
   `status` char(1) DEFAULT '0' COMMENT '租户状态（0正常 1停用）',
@@ -999,8 +1003,8 @@ CREATE TABLE `sys_tenant` (
 -- Records of sys_tenant
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `expire_time`, `account_count`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (1, '000000', '管理组', '15888888888', 'XXX有限公司', NULL, NULL, '多租户通用后台管理管理系统', NULL, NULL, NULL, NULL, -1, '0', 103, 1, '2025-02-13 11:56:36', NULL, NULL, NULL, NULL);
-INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `expire_time`, `account_count`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (6, '100006', '李先生', '18600000000', '秀杰智联', '3332233', '地址', '企业介绍', 'xiujiezhilian.com', '备注', 1, '2026-03-16 00:00:00', -1, '0', 103, 1, '2025-03-16 14:36:52', 1, '2025-03-16 14:37:11', NULL, NULL);
+INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `admin_role_id`, `admin_dept_id`, `admin_user_id`, `expire_time`, `account_count`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (1, '000000', '管理组', '15888888888', 'XXX有限公司', NULL, NULL, '多租户通用后台管理管理系统', NULL, NULL, NULL, 1, 103, 1, NULL, NULL, NULL, -1, '0', 103, 1, '2025-02-13 11:56:36', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `admin_role_id`, `admin_dept_id`, `admin_user_id`, `expire_time`, `account_count`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (6, '100006', '李先生', '18600000000', '秀杰智联', '3332233', '地址', '企业介绍', 'xiujiezhilian.com', '备注', 9, 117, 10, 1, '2026-03-16 00:00:00', -1, '0', 103, 1, '2025-03-16 14:36:52', 1, '2025-03-16 14:37:11', NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -1059,7 +1063,8 @@ CREATE TABLE `sys_user` (
   `deleted_by` bigint(20) DEFAULT NULL COMMENT '删除人',
   `deleted_at` datetime DEFAULT NULL COMMENT '删除时间',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`user_id`)
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_user_name` (`tenant_id`,`user_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户信息表';
 
 -- ----------------------------

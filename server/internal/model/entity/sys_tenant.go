@@ -21,6 +21,9 @@ type SysTenant struct {
 	Domain          string      `json:"domain"          orm:"domain"            description:"域名"`
 	Remark          string      `json:"remark"          orm:"remark"            description:"备注"`
 	PackageId       int64       `json:"packageId"       orm:"package_id"        description:"租户套餐编号"`
+	AdminRoleId     int64       `json:"adminRoleId"     orm:"admin_role_id"     description:"管理员角色ID"`
+	AdminDeptId     int64       `json:"adminDeptId"     orm:"admin_dept_id"     description:"管理员部门ID"`
+	AdminUserId     int64       `json:"adminUserId"     orm:"admin_user_id"     description:"管理员用户ID"`
 	ExpireTime      *gtime.Time `json:"expireTime"      orm:"expire_time"       description:"过期时间"`
 	AccountCount    int         `json:"accountCount"    orm:"account_count"     description:"用户数量（-1不限制）"`
 	Status          string      `json:"status"          orm:"status"            description:"租户状态（0正常 1停用）"`
