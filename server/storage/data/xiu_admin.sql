@@ -418,30 +418,30 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_menu`;
 CREATE TABLE `sys_menu` (
-  `menu_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
-  `menu_name` varchar(50) NOT NULL COMMENT '菜单名称',
-  `parent_id` bigint(20) DEFAULT 0 COMMENT '父菜单ID',
-  `level` int(11) DEFAULT 1 COMMENT '关系树等级',
-  `tree` varchar(255) DEFAULT NULL COMMENT '关系树',
-  `order_num` int(4) DEFAULT 0 COMMENT '显示顺序',
-  `path` varchar(200) DEFAULT '' COMMENT '路由地址',
-  `component` varchar(255) DEFAULT NULL COMMENT '组件路径',
-  `query_param` varchar(255) DEFAULT NULL COMMENT '路由参数',
-  `is_frame` int(1) DEFAULT 1 COMMENT '是否为外链（0是 1否）',
-  `is_cache` int(1) DEFAULT 0 COMMENT '是否缓存（0缓存 1不缓存）',
-  `menu_type` char(1) DEFAULT '' COMMENT '菜单类型（M目录 C菜单 F按钮）',
-  `visible` char(1) DEFAULT '0' COMMENT '显示状态（0显示 1隐藏）',
-  `status` char(1) DEFAULT '0' COMMENT '菜单状态（0正常 1停用）',
-  `perms` varchar(100) DEFAULT NULL COMMENT '权限标识',
-  `icon` varchar(100) DEFAULT '#' COMMENT '菜单图标',
-  `created_dept` bigint(20) DEFAULT NULL COMMENT '创建部门',
-  `created_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+  `menu_id` bigint NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
+  `menu_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '菜单名称',
+  `parent_id` bigint DEFAULT '0' COMMENT '父菜单ID',
+  `level` int DEFAULT '1' COMMENT '关系树等级',
+  `tree` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '关系树',
+  `order_num` int DEFAULT '0' COMMENT '显示顺序',
+  `path` varchar(200) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '路由地址',
+  `component` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '组件路径',
+  `query_param` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '路由参数',
+  `is_frame` int DEFAULT '1' COMMENT '是否为外链（0是 1否）',
+  `is_cache` int DEFAULT '0' COMMENT '是否缓存（0缓存 1不缓存）',
+  `menu_type` char(1) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '菜单类型（M目录 C菜单 F按钮）',
+  `visible` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '显示状态（0显示 1隐藏）',
+  `status` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '菜单状态（0正常 1停用）',
+  `perms` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '权限标识',
+  `icon` varchar(100) COLLATE utf8mb4_general_ci DEFAULT '#' COMMENT '菜单图标',
+  `created_dept` bigint DEFAULT NULL COMMENT '创建部门',
+  `created_by` bigint DEFAULT NULL COMMENT '创建者',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
-  `updated_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+  `updated_by` bigint DEFAULT NULL COMMENT '更新者',
   `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) DEFAULT '' COMMENT '备注',
+  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1646 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='菜单权限表';
+) ENGINE=InnoDB AUTO_INCREMENT=1647 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='菜单权限表';
 
 -- ----------------------------
 -- Records of sys_menu
@@ -1003,7 +1003,18 @@ CREATE TABLE `sys_tenant` (
 -- Records of sys_tenant
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `admin_role_id`, `admin_dept_id`, `admin_user_id`, `expire_time`, `account_count`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (1, '000000', '管理组', '15888888888', 'XXX有限公司', NULL, NULL, '多租户通用后台管理管理系统', NULL, NULL, NULL, 1, 103, 1, NULL, NULL, NULL, -1, '0', 103, 1, '2025-02-13 11:56:36', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_tenant` (
+  `id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, 
+  `license_number`, `address`, `intro`, `domain`, `remark`, 
+  `package_id`, `admin_role_id`, `admin_dept_id`, `admin_user_id`, `expire_time`, 
+  `account_count`, `status`, `created_dept`, `created_by`, `created_at`, 
+  `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (
+    1, '000000', '管理组', '15888888888', 'XXX有限公司', 
+    NULL, NULL, '多租户通用后台管理管理系统', NULL, '备注', 
+    NULL, 1, 103, 1, NULL, 
+    -1, '0', 103, 1, '2025-02-13 11:56:36', 
+    NULL, NULL, NULL, NULL);
+
 INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `admin_role_id`, `admin_dept_id`, `admin_user_id`, `expire_time`, `account_count`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (6, '100006', '李先生', '18600000000', '秀杰智联', '3332233', '地址', '企业介绍', 'xiujiezhilian.com', '备注', 9, 117, 10, 1, '2026-03-16 00:00:00', -1, '0', 103, 1, '2025-03-16 14:36:52', 1, '2025-03-16 14:37:11', NULL, NULL);
 COMMIT;
 
