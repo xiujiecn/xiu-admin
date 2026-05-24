@@ -26,6 +26,7 @@ type SysDeptColumns struct {
 	ParentId     string // 父部门id
 	Ancestors    string // 祖级列表
 	DeptName     string // 部门名称
+	DeptType     string // 部门类型(0:部门 1:公司)
 	DeptCategory string // 部门类别编码
 	OrderNum     string // 显示顺序
 	Leader       string // 负责人
@@ -48,6 +49,7 @@ var sysDeptColumns = SysDeptColumns{
 	ParentId:     "parent_id",
 	Ancestors:    "ancestors",
 	DeptName:     "dept_name",
+	DeptType:     "dept_type",
 	DeptCategory: "dept_category",
 	OrderNum:     "order_num",
 	Leader:       "leader",

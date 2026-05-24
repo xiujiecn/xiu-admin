@@ -2,7 +2,8 @@ export enum DictEnum {
   SYS_COMMON_STATUS = 'sys_common_status',
   SYS_DEVICE_TYPE = 'sys_device_type', // 设备类型
   SYS_GRANT_TYPE = 'sys_grant_type', // 授权类型
-  SYS_NORMAL_DISABLE = 'sys_normal_disable',
+  SYS_NORMAL_DISABLE = 'sys_normal_disable', // 字符状态0正常1停用
+  SYS_DEPT_TYPE = 'sys_dept_type', // 组织类型0部门1公司
   SYS_NOTICE_STATUS = 'sys_notice_status', // 通知状态
   SYS_NOTICE_TYPE = 'sys_notice_type', // 通知类型
   SYS_OPER_TYPE = 'sys_oper_type', // 操作类型

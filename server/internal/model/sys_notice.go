@@ -18,7 +18,7 @@ type SysNoticeListModel struct {
 	NoticeType    string           `json:"noticeType"    orm:"notice_type"    description:"公告类型（1通知 2公告）"`
 	NoticeContent []byte           `json:"noticeContent" orm:"notice_content" description:"公告内容"`
 	Status        string           `json:"status"        orm:"status"         description:"公告状态（0正常 1关闭）"`
-	NoticeRange   int              `json:"noticeRange"   orm:"notice_range"   description:"公告范围（1全部 2指定机构 3指定用户）"`
+	NoticeRange   int              `json:"noticeRange"   orm:"notice_range"   description:"公告范围（1全部 2指定组织 3指定用户）"`
 	CreatedDept   int64            `json:"createdDept"   orm:"created_dept"   description:"创建部门"`
 	CreatedBy     int64            `json:"createdBy"     orm:"created_by"     description:"创建者"`
 	CreatedAt     *gtime.Time      `json:"createdAt"     orm:"created_at"     description:"创建时间"`
@@ -41,8 +41,8 @@ type SysNoticeAddParam struct {
 	Status        string  `json:"status"         description:"公告状态（0正常 1关闭）"`
 	Remark        string  `json:"remark"         description:"备注"`
 	UserIdList    []int64 `json:"userIdList"  description:"通知用户ID列表"`
-	DeptIdList    []int64 `json:"deptIdList"  description:"通知机构ID列表"`
-	NoticeRange   int     `json:"noticeRange"    description:"公告范围（1全部 2指定机构 3指定用户）"`
+	DeptIdList    []int64 `json:"deptIdList"  description:"通知组织ID列表"`
+	NoticeRange   int     `json:"noticeRange"    description:"公告范围（1全部 2指定组织 3指定用户）"`
 }
 
 type SysNoticeAddModel struct {
@@ -57,8 +57,8 @@ type SysNoticeEditParam struct {
 	Status        *string `json:"status"         description:"公告状态（0正常 1关闭）"`
 	Remark        *string `json:"remark"         description:"备注"`
 	UserIdList    []int64 `json:"userIdList"  description:"通知用户ID列表"`
-	DeptIdList    []int64 `json:"deptIdList"  description:"通知机构ID列表"`
-	NoticeRange   int     `json:"noticeRange"    description:"公告范围（1全部 2指定机构 3指定用户）"`
+	DeptIdList    []int64 `json:"deptIdList"  description:"通知组织ID列表"`
+	NoticeRange   int     `json:"noticeRange"    description:"公告范围（1全部 2指定组织 3指定用户）"`
 }
 
 type SysNoticeEditModel struct {
@@ -83,10 +83,10 @@ type SysNoticeViewModel struct {
 	NoticeType    string      `json:"noticeType"    orm:"notice_type"    description:"公告类型（1通知 2公告）"`
 	NoticeContent string      `json:"noticeContent" orm:"notice_content" description:"公告内容"`
 	UserIds       string      `json:"userIds"       orm:"user_ids"       description:"通知用户ID列表"`
-	DeptIds       string      `json:"deptIds"       orm:"dept_ids"       description:"通知机构ID列表"`
+	DeptIds       string      `json:"deptIds"       orm:"dept_ids"       description:"通知组织ID列表"`
 	UserIdList    []int64     `json:"userIdList"  description:"通知用户ID列表"`
-	DeptIdList    []int64     `json:"deptIdList"  description:"通知机构ID列表"`
-	NoticeRange   int         `json:"noticeRange"    description:"公告范围（1全部 2指定机构 3指定用户）"`
+	DeptIdList    []int64     `json:"deptIdList"  description:"通知组织ID列表"`
+	NoticeRange   int         `json:"noticeRange"    description:"公告范围（1全部 2指定组织 3指定用户）"`
 	Status        string      `json:"status"        orm:"status"         description:"公告状态（0正常 1关闭）"`
 	CreatedDept   int64       `json:"createdDept"   orm:"created_dept"   description:"创建部门"`
 	CreatedBy     int64       `json:"createdBy"     orm:"created_by"     description:"创建者"`

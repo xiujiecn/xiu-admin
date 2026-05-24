@@ -26,6 +26,7 @@ type DeptListRes struct {
 
 type DeptTreeReq struct {
 	g.Meta `path:"/dept/tree" method:"get" tags:"系统-部门管理" summary:"获取部门树" x-check-permission:"cpm:system:dept:list"`
+	model.SysDeptTreeParam
 }
 
 type DeptTreeRes struct {

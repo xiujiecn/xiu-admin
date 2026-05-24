@@ -7,8 +7,9 @@ import { onMounted, ref } from 'vue';
 
 import { SyncOutlined } from  '@vben/icons';
 import { Empty, InputSearch, Skeleton, Tree, Button } from 'ant-design-vue';
-
+import { useRoute } from 'vue-router';
 import { getSysDeptTreeApi } from '#/api/system/dept';
+
 
 defineOptions({ inheritAttrs: false });
 
@@ -31,18 +32,25 @@ const searchValue = defineModel('searchValue', {
   default: '',
 });
 
-/** 机构数据源 */
+/** 组织数据源 */
 type DeptTreeArray = SysDeptTreeData[];
 const deptTreeArray = ref<DeptTreeArray>([]);
 /** 骨架屏加载 */
 const showTreeSkeleton = ref<boolean>(true);
 
 async function loadTree() {
+  // 获取路由参数deptId
+  const deptId = useRoute().query.deptId;
+  if (deptId) {
+    selectDeptId.value = [deptId as string];
+  }
+  console.log('vue/apps/web-antd/src/components/dept/dept-tree.vue loadTree', deptId);
+
   showTreeSkeleton.value = true;
   searchValue.value = '';
-  selectDeptId.value = [];
+  // selectDeptId.value = [];
 
-  const ret = await getSysDeptTreeApi();
+  const ret = await getSysDeptTreeApi({  });
 
   deptTreeArray.value = ret.items;
   showTreeSkeleton.value = false;
@@ -114,7 +122,7 @@ onMounted(loadTree);
           <div v-else class="mt-5">
             <Empty
               :image="Empty.PRESENTED_IMAGE_SIMPLE"
-              description="无机构数据"
+              description="无组织数据"
             />
           </div>
         </div>

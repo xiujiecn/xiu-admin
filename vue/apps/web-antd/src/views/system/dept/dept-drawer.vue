@@ -1,5 +1,5 @@
 <!--
- * @description 机构管理编辑抽屉组件
+ * @description 组织管理编辑抽屉组件
  * @Link  https://github.com/xiujiecn/xiu-admin
  * @Copyright  Copyright (c) 2025 LiXiujie
  * @Author  Lxj <li@xiujie.cn>
@@ -30,7 +30,7 @@ interface ModalProps {
 }
 
 async function getDeptTree() {
-  const treeRes = await getSysDeptTreeApi();
+  const treeRes = await getSysDeptTreeApi({ });
   const treeData = treeRes.items;
   addFullName(treeData, 'deptName', ' / ');
   return treeData;
@@ -67,7 +67,7 @@ async function initDeptUsers(deptId: number | string) {
       componentProps: {
         disabled: data.length === 0,
         options,
-        placeholder: data.length === 0 ? '该机构暂无用户' : '请选择机构负责人',
+        placeholder: data.length === 0 ? '该组织暂无用户' : '请选择组织负责人',
       },
       fieldName: 'leader',
     },
@@ -80,7 +80,7 @@ async function setLeaderOptions() {
       componentProps: {
         disabled: true,
         options: [],
-        placeholder: '仅在更新时可选机构负责人',
+        placeholder: '仅在更新时可选组织负责人',
       },
       fieldName: 'leader',
     },
@@ -125,9 +125,11 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
     if (isUpdate.value || isView.value) {
       const record = await viewSysDeptApi({ deptId: Number(id) });
       record.leader = record.leader ? Number(record.leader) : null;
+      record.deptType = record.deptType ? String(record.deptType) : '0';
       await formApi.setValues(record);
       await initDeptUsers(record.deptId);
     }else {
+      formApi.resetForm();
       await setLeaderOptions();
     }
 

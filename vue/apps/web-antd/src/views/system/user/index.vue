@@ -122,7 +122,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { field: 'userId', title: 'ID' },
     { field: 'userName', title: '用户名称' },
     { field: 'nickName', title: '用户昵称' },
-    { field: 'deptInfo.deptName', title: '机构' },
+    { field: 'deptInfo.deptName', title: '组织' },
     { field: 'email', title: '邮箱' },
     {
       field: 'status',

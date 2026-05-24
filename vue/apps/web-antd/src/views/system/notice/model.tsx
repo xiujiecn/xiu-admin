@@ -79,14 +79,14 @@ export const drawerSchema: VbenFormSchema[] = [
     },
     defaultValue: "1",
   },
-  /** 机构树 */
+  /** 组织树 */
   {
     fieldName: 'deptIdList',
-    label: '通知机构',
+    label: '通知组织',
     component: "TreeSelect",
     formItemClass: 'col-span-1',
     componentProps: {
-      placeholder: '请选择机构',
+      placeholder: '请选择组织',
       getPopupContainer,
       multiple: true, // 允许多选
       treeCheckable: true, // 显示复选框
@@ -149,13 +149,13 @@ export const viewSchema: DescItem[] = [
     }
   }, {
     field: 'deptIdList',
-    label: '提及机构',
+    label: '提及组织',
     render: (value) => {
       if(!value){return ""}
       return (<div>{value.map((v:any, idx:any) => <Tag key={idx}>{v}</Tag>)}</div>);
     }
   },
-  { field: 'createdDept', label: '创建机构' },
+  { field: 'createdDept', label: '创建组织' },
   { field: 'createdBy', label: '创建者' },
   { field: 'createdAt', label: '创建时间' },
   { field: 'updatedBy', label: '更新者' },

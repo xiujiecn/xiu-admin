@@ -50,7 +50,7 @@ export const columns: VxeGridProps['columns'] = [
     width: 150,
   },
   {
-    title: '机构',
+    title: '组织',
     field: 'deptInfo.deptName',
     align: 'center',
     width: 120,

@@ -64,6 +64,9 @@ func (l *sSysDept) GetDeptList(ctx context.Context, query model.SysDeptListParam
 	if query.Status != "" {
 		m = m.Where(dao.SysDept.Columns().Status, query.Status)
 	}
+	if query.DeptType != nil {
+		m = m.Where(dao.SysDept.Columns().DeptType, *query.DeptType)
+	}
 	// 排序：按照显示顺序OrderNum从小到大排序，如果相同则按照部门ID从小到大排序
 	err = m.Page(1, 5000).Order(dao.SysDept.Columns().OrderNum, "ASC").Order(dao.SysDept.Columns().DeptId, "ASC").Scan(&items)
 	if err != nil {
@@ -113,8 +116,10 @@ func (l *sSysDept) DeptTree(ctx context.Context, parentDept *model.SysDeptTreeMo
 	return
 }
 
-func (l *sSysDept) GetDeptTree(ctx context.Context) (items []*model.SysDeptTreeModel, err error) {
-	depts, _, err := l.GetDeptList(ctx, model.SysDeptListParam{})
+func (l *sSysDept) GetDeptTree(ctx context.Context, query model.SysDeptTreeParam) (items []*model.SysDeptTreeModel, err error) {
+	depts, _, err := l.GetDeptList(ctx, model.SysDeptListParam{
+		DeptType: query.DeptType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -186,6 +191,17 @@ func (l *sSysDept) AddDept(ctx context.Context, dept *model.SysDeptAddModel) (de
 	if user == nil {
 		return 0, gerror.NewCode(consts.CodeLoginExpired, "登录已过期")
 	}
+	if dept.DeptType == 1 {
+		isCompany, err := l.ValidateParentIsCompany(ctx, dept.ParentId)
+		if err != nil {
+			g.Log().Errorf(ctx, "sSysDept.AddDept ValidateParentIsCompany err: %v, parentId:%d, dept:%+v", err, dept.ParentId, dept)
+			return 0, err
+		}
+		if !isCompany {
+			return 0, gerror.New("上级部门必须是公司")
+		}
+	}
+
 	data := do.SysDept{}
 	gconv.Struct(dept, &data)
 	data.CreatedDept = user.DeptId
@@ -213,6 +229,36 @@ func (l *sSysDept) EditDept(ctx context.Context, dept *model.SysDeptEditModel) (
 	if user == nil {
 		return dept.DeptId, gerror.NewCode(consts.CodeLoginExpired, "登录已过期")
 	}
+	// 查询现有数据
+	existingDept, err := l.GetDeptById(ctx, dept.DeptId)
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysDept.EditDept GetDeptById err: %v, deptId:%d, dept:%+v", err, dept.DeptId, gconv.String(dept))
+		return 0, err
+	}
+	if existingDept == nil || existingDept.DeptId == 0 || existingDept.DeptId != dept.DeptId {
+		g.Log().Warningf(ctx, "sSysDept.EditDept GetDeptById err: %v, deptId:%d, dept:%+v", err, dept.DeptId, gconv.String(dept))
+		return 0, gerror.New("部门不存在")
+	}
+	newParentId := existingDept.ParentId
+	if dept.ParentId != nil {
+		newParentId = *dept.ParentId
+	}
+	if dept.DeptType != nil && *dept.DeptType == 1 {
+		isCompany, err := l.ValidateParentIsCompany(ctx, newParentId)
+		if err != nil {
+			return 0, err
+		}
+		if !isCompany {
+			return 0, gerror.New("上级组织必须是公司")
+		}
+	}
+
+	if dept.DeptType != nil && *dept.DeptType != existingDept.DeptType {
+		if existingDept.DeptType == 1 {
+			return 0, gerror.New("组织类型不能修改")
+		}
+	}
+
 	data := do.SysDept{}
 	gconv.Struct(dept, &data)
 	data.UpdatedBy = user.ID
@@ -307,4 +353,70 @@ func (l *sSysDept) GetDeptListByIds(ctx context.Context, ids []int64) (depts []*
 		return nil, err
 	}
 	return depts, nil
+}
+
+// 验证上级是否是公司
+func (l *sSysDept) ValidateParentIsCompany(ctx context.Context, parentId int64) (isCompany bool, err error) {
+	dept, err := l.GetDeptById(ctx, parentId)
+	if err != nil {
+		return false, err
+	}
+	return dept.DeptType == 1 || dept.ParentId == 0, nil
+}
+
+// 获取上级公司名称
+func (l *sSysDept) getParentCompanyInfo(ctx context.Context, depts []*model.SysDeptListModel, deptId int64) *model.SysDeptListModel {
+	var topDept *model.SysDeptListModel
+	for _, dept := range depts {
+		if dept.ParentId == 0 {
+			topDept = dept
+		}
+		if dept.DeptId == deptId {
+			if dept.ParentId == 0 {
+				return dept
+			}
+			if dept.DeptType == 1 {
+				return dept
+			}
+			return l.getParentCompanyInfo(ctx, depts, dept.ParentId)
+		}
+	}
+	return topDept
+}
+
+// 获取组织公司Map
+func (l *sSysDept) GetDeptCompanyMap(ctx context.Context) (map[int64]string, error) {
+	depts, _, err := l.GetDeptList(ctx, model.SysDeptListParam{})
+	if err != nil {
+		return nil, err
+	}
+	companyMap := make(map[int64]string)
+	for _, dept := range depts {
+		if dept.ParentId == 0 {
+			companyMap[0] = dept.DeptName
+		}
+		if dept.DeptType == 1 {
+			companyMap[dept.DeptId] = dept.DeptName
+		} else if dept.ParentId == 0 {
+			companyMap[dept.DeptId] = dept.DeptName
+		} else {
+			parentDept := l.getParentCompanyInfo(ctx, depts, dept.DeptId)
+			if parentDept != nil {
+				companyMap[dept.DeptId] = parentDept.DeptName
+			} else {
+				companyMap[dept.DeptId] = ""
+			}
+		}
+	}
+	return companyMap, nil
+}
+
+// 获取上级公司组织信息
+func (l *sSysDept) GetParentCompanyInfo(ctx context.Context, deptId int64) *model.SysDeptListModel {
+	depts, _, err := l.GetDeptList(ctx, model.SysDeptListParam{})
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysDept.GetParentCompanyInfo GetDeptList err: %v, deptId:%d", err, deptId)
+		return nil
+	}
+	return l.getParentCompanyInfo(ctx, depts, deptId)
 }

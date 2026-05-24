@@ -32,7 +32,7 @@ export const drawerSchema: VbenFormSchema[] =  [
         getPopupContainer,
       },
       fieldName: 'deptId',
-      label: '所属机构',
+      label: '所属组织',
       rules: 'selectRequired',
     },
     {

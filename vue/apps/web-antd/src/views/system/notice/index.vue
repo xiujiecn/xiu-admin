@@ -207,7 +207,7 @@ function handleView(row: SysNotice) {
   drawerApi.setData({ id: noticeId,userList:userList.value.items,deptList:deptList.value, update: false, view: true });
   drawerApi.open();
 }
-/** 获取机构树内容,并格式化 */
+/** 获取组织树内容,并格式化 */
 async function getDeptTree() {
   const treeRes = await getSysDeptTreeApi();
   const treeData = treeRes.items;

@@ -16,8 +16,8 @@ type SysNotice struct {
 	NoticeType    string      `json:"noticeType"    orm:"notice_type"    description:"公告类型（1通知 2公告）"`
 	NoticeContent []byte      `json:"noticeContent" orm:"notice_content" description:"公告内容"`
 	Status        string      `json:"status"        orm:"status"         description:"公告状态（0正常 1关闭）"`
-	NoticeRange   int         `json:"noticeRange"   orm:"notice_range"   description:"通知范围（1全员 2指定机构 3指定用户）"`
-	DeptIds       string      `json:"deptIds"       orm:"dept_ids"       description:"通知机构ID列表JSON"`
+	NoticeRange   int         `json:"noticeRange"   orm:"notice_range"   description:"通知范围（1全员 2指定组织 3指定用户）"`
+	DeptIds       string      `json:"deptIds"       orm:"dept_ids"       description:"通知组织ID列表JSON"`
 	UserIds       string      `json:"userIds"       orm:"user_ids"       description:"通知用户ID列表JSON"`
 	CreatedDept   int64       `json:"createdDept"   orm:"created_dept"   description:"创建部门"`
 	CreatedBy     int64       `json:"createdBy"     orm:"created_by"     description:"创建者"`

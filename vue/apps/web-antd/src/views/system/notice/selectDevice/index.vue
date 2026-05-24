@@ -23,9 +23,9 @@ const emit = defineEmits<{
 
 const currentDeptId = ref(0);
 
-// 机构选项数据
+// 组织选项数据
 const deptOptions = ref<Array<{ label: string; value: number }>>([]);
-// 全量机构选项数据（用于保存所有机构，不受搜索结果影响）
+// 全量组织选项数据（用于保存所有组织，不受搜索结果影响）
 const allDeptOptions = ref<Array<{ label: string; value: number }>>([]);
 
 // 表单配置 - 添加筛选条件
@@ -44,9 +44,9 @@ const formOptions: VbenFormProps = {
     {
       component: 'Select',
       fieldName: 'deptId',
-      label: '机构',
+      label: '组织',
       componentProps: {
-        placeholder: '请选择机构',
+        placeholder: '请选择组织',
         allowClear: true,
         options: allDeptOptions,
       },
@@ -84,7 +84,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
         });
 
         try {
-          // 处理机构ID参数
+          // 处理组织ID参数
           let deptIdParam = currentDeptId.value;
           if (formValues.deptId !== undefined && formValues.deptId !== null) {
             deptIdParam = Number(formValues.deptId) || 0;
@@ -99,7 +99,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
           };
 
           console.log('🚀 发送给API的参数:', apiParams);
-          console.log('📋 选择的机构ID:', deptIdParam);
+          console.log('📋 选择的组织ID:', deptIdParam);
 
           // 简化参数，只传必要的分页参数
           const result = await getSysUserListApi(apiParams as any);
@@ -115,7 +115,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
             firstItem: apiResult.items?.[0]
           });
 
-          // 提取机构信息并更新机构选项
+          // 提取组织信息并更新组织选项
           const items = apiResult.items || [];
           const deptMap = new Map<number, string>();
 
@@ -131,21 +131,21 @@ const gridOptions: VxeTableGridOptions<RowType> = {
             }
           });
 
-          // 更新机构选项（只在首次加载或选择"全部"时更新）
+          // 更新组织选项（只在首次加载或选择"全部"时更新）
           const newDeptOptions = Array.from(deptMap.entries()).map(([deptId, deptName]) => ({
             label: deptName,
             value: deptId
           }));
 
-          // 如果是首次加载（没有选择特定机构）或者当前机构选项为空，则更新全量机构选项
+          // 如果是首次加载（没有选择特定组织）或者当前组织选项为空，则更新全量组织选项
           if (deptIdParam === 0 || allDeptOptions.value.length === 0) {
             allDeptOptions.value = [
               { label: '全部', value: 0 },
               ...newDeptOptions.sort((a, b) => a.label.localeCompare(b.label))
             ];
-            console.log('🏢 更新全量机构选项:', allDeptOptions.value);
+            console.log('🏢 更新全量组织选项:', allDeptOptions.value);
           } else {
-            // 如果选择了特定机构，合并新发现的机构到全量选项中
+            // 如果选择了特定组织，合并新发现的组织到全量选项中
             const existingDeptIds = new Set(allDeptOptions.value.map(opt => opt.value));
             const newDepts = newDeptOptions.filter(opt => !existingDeptIds.has(opt.value));
             if (newDepts.length > 0) {
@@ -155,17 +155,17 @@ const gridOptions: VxeTableGridOptions<RowType> = {
                 allOption!, // 保留"全部"选项
                 ...otherOptions.concat(newDepts).sort((a, b) => a.label.localeCompare(b.label))
               ];
-              console.log('🏢 合并新机构到全量选项:', allDeptOptions.value);
+              console.log('🏢 合并新组织到全量选项:', allDeptOptions.value);
             }
           }
 
-          // 如果选择了特定机构，进行前端精确过滤
+          // 如果选择了特定组织，进行前端精确过滤
           let filteredItems = items;
           if (deptIdParam > 0) {
             filteredItems = items.filter((user: any) => {
               return user.deptInfo && user.deptInfo.deptId === deptIdParam;
             });
-            console.log('🔍 机构精确过滤后的用户:', filteredItems.length, '个用户');
+            console.log('🔍 组织精确过滤后的用户:', filteredItems.length, '个用户');
           }
 
           // 转换数据格式以适配表格
@@ -175,7 +175,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
           };
 
           console.log('🔄 转换后数据:', transformedData);
-          console.log('🏢 机构选项:', deptOptions.value);
+          console.log('🏢 组织选项:', deptOptions.value);
           return transformedData;
         } catch (error) {
           console.error('❌ API请求失败:', error);

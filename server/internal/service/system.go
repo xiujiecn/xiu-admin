@@ -66,7 +66,7 @@ type (
 		GetDeptById(ctx context.Context, id int64) (dept *model.SysDeptViewModel, err error)
 		// 构建树结构
 		DeptTree(ctx context.Context, parentDept *model.SysDeptTreeModel, deptList []*model.SysDeptListModel, ancestors string) (data []*model.SysDeptTreeModel, err error)
-		GetDeptTree(ctx context.Context) (items []*model.SysDeptTreeModel, err error)
+		GetDeptTree(ctx context.Context, query model.SysDeptTreeParam) (items []*model.SysDeptTreeModel, err error)
 		// 递归构建结构
 		RecursionDeptIds(ctx context.Context, parentId int64, deptList []*model.SysDeptListModel, data *[]int64) (err error)
 		// 根据父部门id获取部门列表
@@ -78,6 +78,12 @@ type (
 		RefreshDeptAncestors(ctx context.Context) (err error)
 		GetParentIDAncestors(ctx context.Context, depts []*model.SysDeptViewModel, printId int64, ancestors *string) (err error)
 		GetDeptListByIds(ctx context.Context, ids []int64) (depts []*model.SysDeptListModel, err error)
+		// 验证上级是否是公司
+		ValidateParentIsCompany(ctx context.Context, parentId int64) (isCompany bool, err error)
+		// 获取组织公司Map
+		GetDeptCompanyMap(ctx context.Context) (map[int64]string, error)
+		// 获取上级公司组织信息
+		GetParentCompanyInfo(ctx context.Context, deptId int64) *model.SysDeptListModel
 	}
 	ISysDictData interface {
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model

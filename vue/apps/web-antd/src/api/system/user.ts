@@ -87,6 +87,7 @@ export interface SysUserListParam {
     deptInfo: SysDeptMini;
     roles: SysRoleMini[];
     posts: SysPostMini[];
+    companyInfo: SysDeptMini;
   }
 
 

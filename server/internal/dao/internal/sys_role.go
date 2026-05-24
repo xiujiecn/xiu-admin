@@ -23,6 +23,7 @@ type SysRoleDao struct {
 type SysRoleColumns struct {
 	RoleId            string // 角色ID
 	TenantId          string // 租户编号
+	DeptId            string // 部门组织id
 	RoleName          string // 角色名称
 	RoleKey           string // 角色权限字符串
 	RoleSort          string // 显示顺序
@@ -44,6 +45,7 @@ type SysRoleColumns struct {
 var sysRoleColumns = SysRoleColumns{
 	RoleId:            "role_id",
 	TenantId:          "tenant_id",
+	DeptId:            "dept_id",
 	RoleName:          "role_name",
 	RoleKey:           "role_key",
 	RoleSort:          "role_sort",
