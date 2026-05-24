@@ -1,5 +1,5 @@
 /**
- * @description 机构管理模型定义
+ * @description 组织管理模型定义
  * @Link  https://github.com/xiujiecn/xiu-admin
  * @Copyright  Copyright (c) 2025 LiXiujie
  * @Author  Lxj <li@xiujie.cn>
@@ -15,6 +15,17 @@ import type {
   import { getPopupContainer } from '@vben/utils';
 
   export const drawerSchema: VbenFormSchema[] =  [
+    {
+      component: 'RadioGroup',
+      componentProps: {
+        buttonStyle: 'solid',
+        options: getDictOptions(DictEnum.SYS_DEPT_TYPE),
+        optionType: 'button',
+      },
+      defaultValue: '0',
+      fieldName: 'deptType',
+      label: '组织类型',
+    },
     {
       component: 'Input',
       dependencies: {
@@ -33,15 +44,15 @@ import type {
         triggerFields: ['parentId'],
       },
       fieldName: 'parentId',
-      label: '上级机构',
+      label: '上级组织',
       rules: 'selectRequired',
     },
     {
       component: 'Input',
       fieldName: 'deptName',
-      label: '机构名称',rules: z.string()
-      .min(1, '机构名称不能为空')
-      .max(32, '机构名称最大长度32位'),
+      label: '组织名称',rules: z.string()
+      .min(1, '组织名称不能为空')
+      .max(32, '组织名称最大长度32位'),
     },
     {
       component: 'InputNumber',
@@ -52,7 +63,7 @@ import type {
     {
       component: 'Input',
       fieldName: 'deptCategory',
-      label: '机构编码',
+      label: '组织编码',
     },
     {
       component: 'Select',
@@ -95,4 +106,5 @@ import type {
       fieldName: 'status',
       label: '状态',
     },
+
   ];

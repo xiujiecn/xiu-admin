@@ -1,5 +1,5 @@
 /**
- * @description 机构管理相关接口
+ * @description 组织管理相关接口
  * @Link  https://github.com/xiujiecn/xiu-admin
  * @Copyright  Copyright (c) 2025 LiXiujie
  * @Author  Lxj <li@xiujie.cn>
@@ -15,14 +15,19 @@ export interface SysDeptMini {
 }
 
 export interface SysDeptListParam {
-  deptName: string;
-  status: string;
+  deptName?: string;
+  status?: string;
+  deptType?: number;
   page?: number;
   pageSize?: number;
 }
 
+export interface SysDeptTreeParam {
+  deptType?: number;
+}
 export interface SysDeptListData {
   deptId: number;
+  deptType: number;
   tenantId: string;
   parentId: number;
   ancestors: string;
@@ -57,8 +62,8 @@ export interface SysDeptTreeRes {
   items: SysDeptTreeData[];
 }
 
-export async function getSysDeptTreeApi() {
-  return requestClient.get<SysDeptTreeRes>('/system/dept/tree');
+export async function getSysDeptTreeApi(params: SysDeptTreeParam) {
+  return requestClient.get<SysDeptTreeRes>('/system/dept/tree', { params });
 }
 
 export interface SysDeptAddParam {
@@ -139,6 +144,7 @@ export interface SysDeptViewRes {
   createdAt: string;
   updatedBy: number;
   updatedAt: string;
+  deptType: number|string;
 }
 
 export async function viewSysDeptApi(params: SysDeptViewParam) {
@@ -146,19 +152,19 @@ export async function viewSysDeptApi(params: SysDeptViewParam) {
 }
 
 /**
- * 批量获取机构名称
- * @param deptIds 机构ID数组
- * @returns 机构ID到名称的映射对象
+ * 批量获取组织名称
+ * @param deptIds 组织ID数组
+ * @returns 组织ID到名称的映射对象
  */
 export async function batchGetDeptNames(deptIds: number[]): Promise<Record<number, string>> {
-  console.log('📡 调用批量机构名称API:', deptIds);
+  console.log('📡 调用批量组织名称API:', deptIds);
 
   if (!deptIds || deptIds.length === 0) {
     return {};
   }
 
   try {
-    // 获取所有机构列表，使用合理的页面大小（不超过2000）
+    // 获取所有组织列表，使用合理的页面大小（不超过2000）
     const response = await getSysDeptListApi({
       deptName: '',
       status: '',
@@ -167,7 +173,7 @@ export async function batchGetDeptNames(deptIds: number[]): Promise<Record<numbe
     });
 
     if (!response || !response.items) {
-      console.error('机构列表API返回格式错误:', response);
+      console.error('组织列表API返回格式错误:', response);
       return {};
     }
 
@@ -177,13 +183,13 @@ export async function batchGetDeptNames(deptIds: number[]): Promise<Record<numbe
     const nameMap: Record<number, string> = {};
     deptIds.forEach(id => {
       const dept = deptList.find(d => d.deptId === id);
-      nameMap[id] = dept ? dept.deptName : `机构${id}`;
+      nameMap[id] = dept ? dept.deptName : `组织${id}`;
     });
 
-    console.log('🎯 批量机构名称查询结果:', nameMap);
+    console.log('🎯 批量组织名称查询结果:', nameMap);
     return nameMap;
   } catch (error) {
-    console.error('批量获取机构名称失败:', error);
+    console.error('批量获取组织名称失败:', error);
     // 失败时返回ID作为名称的映射
     const fallbackMap: Record<number, string> = {};
     deptIds.forEach(id => {

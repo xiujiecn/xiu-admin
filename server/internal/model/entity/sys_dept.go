@@ -15,6 +15,7 @@ type SysDept struct {
 	ParentId     int64       `json:"parentId"     orm:"parent_id"     description:"父部门id"`
 	Ancestors    string      `json:"ancestors"    orm:"ancestors"     description:"祖级列表"`
 	DeptName     string      `json:"deptName"     orm:"dept_name"     description:"部门名称"`
+	DeptType     int         `json:"deptType"     orm:"dept_type"     description:"部门类型(0:部门 1:公司)"`
 	DeptCategory string      `json:"deptCategory" orm:"dept_category" description:"部门类别编码"`
 	OrderNum     int         `json:"orderNum"     orm:"order_num"     description:"显示顺序"`
 	Leader       int64       `json:"leader"       orm:"leader"        description:"负责人"`

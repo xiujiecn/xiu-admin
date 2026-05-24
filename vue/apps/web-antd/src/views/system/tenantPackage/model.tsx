@@ -63,7 +63,7 @@ export const viewSchema: DescItem[] = [
       );
     },
   },
-  { field: 'createdDept', label: '创建机构' },
+  { field: 'createdDept', label: '创建组织' },
   { field: 'createdBy', label: '创建者' },
   { field: 'createdAt', label: '创建时间' },
   { field: 'updatedBy', label: '更新者' },

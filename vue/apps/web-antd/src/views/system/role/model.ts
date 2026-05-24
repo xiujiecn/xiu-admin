@@ -19,10 +19,10 @@ import type {
 export const authScopeOptions = [
     { color: 'green', label: '全部数据权限', value: '1' },
     { color: 'default', label: '自定数据权限', value: '2' },
-    { color: 'orange', label: '本机构数据权限', value: '3' },
-    { color: 'cyan', label: '本机构及以下数据权限', value: '4' },
+    { color: 'orange', label: '本组织数据权限', value: '3' },
+    { color: 'cyan', label: '本组织及以下数据权限', value: '4' },
     { color: 'error', label: '仅本人数据权限', value: '5' },
-    { color: 'blue', label: '机构及以下或本人数据权限', value: '6' },
+    { color: 'blue', label: '组织及以下或本人数据权限', value: '6' },
 ];
 
 export const drawerSchema: VbenFormSchema[] =  [
@@ -69,6 +69,11 @@ export const drawerSchema: VbenFormSchema[] =  [
       rules: 'required',
     },
     {
+      component: 'TreeSelect',
+      fieldName: 'deptId',
+      label: '所属组织',
+    },
+    {
       component: 'InputNumber',
       dependencies: {
         show: () => false,
@@ -86,9 +91,12 @@ export const drawerSchema: VbenFormSchema[] =  [
     },
     {
       component: 'Textarea',
+      componentProps: {
+        rows: 4,
+      },
       defaultValue: '',
       fieldName: 'remark',
-      formItemClass: 'items-baseline col-span-2',
+      formItemClass: ' col-span-2',
       label: '备注',
     },
   ];
@@ -123,7 +131,7 @@ export const drawerSchema: VbenFormSchema[] =  [
       component: 'CheckboxGroup',
       defaultValue: [],
       fieldName: 'deptIds',
-      label: '机构权限',
+      label: '组织权限',
       // formItemClass: 'col-span-2',
       dependencies: {
         show: (values) => values?.dataScope === '2',
@@ -138,6 +146,6 @@ export const drawerSchema: VbenFormSchema[] =  [
       },
 
       fieldName: 'deptCheckStrictly',
-      label: '机构树父子关联',
+      label: '组织树父子关联',
     },
   ];

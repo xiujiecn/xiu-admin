@@ -12,6 +12,7 @@ import (
 type SysRole struct {
 	RoleId            int64       `json:"roleId"            orm:"role_id"             description:"角色ID"`
 	TenantId          string      `json:"tenantId"          orm:"tenant_id"           description:"租户编号"`
+	DeptId            int64       `json:"deptId"            orm:"dept_id"             description:"部门组织id"`
 	RoleName          string      `json:"roleName"          orm:"role_name"           description:"角色名称"`
 	RoleKey           string      `json:"roleKey"           orm:"role_key"            description:"角色权限字符串"`
 	RoleSort          int         `json:"roleSort"          orm:"role_sort"           description:"显示顺序"`

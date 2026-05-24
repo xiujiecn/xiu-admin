@@ -49,7 +49,7 @@ export const drawerSchema: VbenFormSchema[] =  [
     // 在drawer里更新 这里不需要默认的componentProps
     defaultValue: undefined,
     fieldName: 'deptId',
-    label: '所属机构',
+    label: '所属组织',
     rules: 'selectRequired',
   },
   {
@@ -107,10 +107,10 @@ export const drawerSchema: VbenFormSchema[] =  [
       mode: 'multiple',
       optionFilterProp: 'label',
       optionLabelProp: 'label',
-      placeholder: '请先选择机构',
+      placeholder: '请先选择组织',
     },
     fieldName: 'postIds',
-    help: '选择机构后, 将自动加载该机构下所有的岗位',
+    help: '选择组织后, 将自动加载该组织下所有的岗位',
     label: '岗位',
   },
   {

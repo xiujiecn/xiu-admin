@@ -155,6 +155,7 @@ CREATE TABLE `sys_dept` (
   `parent_id` bigint(20) DEFAULT 0 COMMENT '父部门id',
   `ancestors` varchar(500) DEFAULT '' COMMENT '祖级列表',
   `dept_name` varchar(30) DEFAULT '' COMMENT '部门名称',
+  `dept_type` tinyint(1) DEFAULT 0 COMMENT '部门类型(0:部门 1:公司)',
   `dept_category` varchar(100) DEFAULT NULL COMMENT '部门类别编码',
   `order_num` int(4) DEFAULT 0 COMMENT '显示顺序',
   `leader` bigint(20) DEFAULT NULL COMMENT '负责人',
@@ -175,7 +176,7 @@ CREATE TABLE `sys_dept` (
 -- Records of sys_dept
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (100, '000000', 0, '0,', 'XXX科技', NULL, 0, NULL, '15888888888', 'xxx@qq.com', '0', 103, 1, '2025-02-13 11:56:36', NULL, '2025-02-27 22:21:39', NULL, NULL);
+INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`, `dept_type` ) VALUES (100, '000000', 0, '0,', 'XXX科技', NULL, 0, NULL, '15888888888', 'xxx@qq.com', '0', 103, 1, '2025-02-13 11:56:36', NULL, '2025-02-27 22:21:39', NULL, NULL, 1);
 INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (101, '000000', 100, '0,100,', '济南总公司', NULL, 1, NULL, '15888888888', 'xxx@qq.com', '0', 103, 1, '2025-02-13 11:56:36', NULL, '2025-02-27 22:21:39', NULL, NULL);
 INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (102, '000000', 100, '0,100,', '上海分公司', NULL, 2, NULL, '15888888888', 'xxx@qq.com', '0', 103, 1, '2025-02-13 11:56:36', NULL, '2025-02-27 22:21:40', NULL, NULL);
 INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (103, '000000', 101, '0,100,101,', '研发部门', NULL, 1, 1, '15888888888', 'xxx@qq.com', '0', 103, 1, '2025-02-13 11:56:36', NULL, '2025-02-27 22:21:40', NULL, NULL);
@@ -189,7 +190,7 @@ INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_
 INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (111, '000000', 110, '0,100,110,', '市场部门', '', 1, 0, '', '', '0', 103, 1, '2025-02-27 22:31:49', 1, '2025-02-27 22:31:50', NULL, '2025-02-27 22:31:52');
 INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (112, '000000', 110, '0,100,110,', '打点', '', 3, 0, '', '', '0', 103, 1, '2025-02-27 22:32:43', 1, '2025-02-27 22:32:43', NULL, '2025-02-27 22:32:49');
 INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (113, '000000', 110, '0,100,110,', '市场部门', '', 1, 0, '', '', '0', 103, 1, '2025-03-02 08:59:25', 1, '2025-03-02 08:59:26', NULL, NULL);
-INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (117, '100006', 0, '', '秀杰智联', NULL, 0, 10, NULL, NULL, '0', NULL, 0, '2025-03-16 14:36:52', 0, '2025-03-16 14:36:52', NULL, NULL);
+INSERT INTO `sys_dept` (`dept_id`, `tenant_id`, `parent_id`, `ancestors`, `dept_name`, `dept_category`, `order_num`, `leader`, `phone`, `email`, `status`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`, `dept_type`) VALUES (117, '100006', 0, '', '秀杰智联', NULL, 0, 10, NULL, NULL, '0', NULL, 0, '2025-03-16 14:36:52', 0, '2025-03-16 14:36:52', NULL, NULL, 1);
 COMMIT;
 
 -- ----------------------------
@@ -579,8 +580,8 @@ CREATE TABLE `sys_notice` (
   `notice_type` char(1) NOT NULL COMMENT '公告类型（1通知 2公告）',
   `notice_content` longblob DEFAULT NULL COMMENT '公告内容',
   `status` char(1) DEFAULT '0' COMMENT '公告状态（0正常 1关闭）',
-  `notice_range` tinyint(1) NOT NULL DEFAULT 1 COMMENT '通知范围（1全员 2指定机构 3指定用户）',
-  `dept_ids` text   COMMENT '通知机构ID列表JSON',
+  `notice_range` tinyint(1) NOT NULL DEFAULT 1 COMMENT '通知范围（1全员 2指定组织 3指定用户）',
+  `dept_ids` text   COMMENT '通知组织ID列表JSON',
   `user_ids` text   COMMENT '通知用户ID列表JSON',
   `created_dept` bigint(20) DEFAULT NULL COMMENT '创建部门',
   `created_by` bigint(20) DEFAULT NULL COMMENT '创建者',
@@ -750,6 +751,7 @@ DROP TABLE IF EXISTS `sys_role`;
 CREATE TABLE `sys_role` (
   `role_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '角色ID',
   `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
+  `dept_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '部门组织id(0:租户角色 其他:部门角色)',
   `role_name` varchar(30) NOT NULL COMMENT '角色名称',
   `role_key` varchar(100) NOT NULL COMMENT '角色权限字符串',
   `role_sort` int(4) NOT NULL COMMENT '显示顺序',

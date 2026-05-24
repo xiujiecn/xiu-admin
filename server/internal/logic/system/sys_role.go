@@ -21,6 +21,7 @@ import (
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 )
@@ -66,6 +67,9 @@ func (s *sSysRole) List(ctx context.Context, param *model.SysRoleListParam) (res
 	if param.Status != "" {
 		db = db.Where(dao.SysRole.Columns().Status, param.Status)
 	}
+	if param.DeptId != nil {
+		db = db.Where(dao.SysRole.Columns().DeptId, *param.DeptId)
+	}
 	if len(param.CreatedAt) == 2 {
 		start, end := gtime.NewFromStr(param.CreatedAt[0]), gtime.NewFromStr(param.CreatedAt[1])
 		db = db.WhereBetween(dao.SysRole.Columns().CreatedAt, start, end.EndOfDay())
@@ -77,7 +81,22 @@ func (s *sSysRole) List(ctx context.Context, param *model.SysRoleListParam) (res
 	if err != nil {
 		return nil, 0, err
 	}
+	if total == 0 {
+		return nil, 0, nil
+	}
+
+	companyMap, err := service.SysDept().GetDeptCompanyMap(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	g.Log().Debugf(ctx, "sSysRole.List companyMap: %v", companyMap)
 	err = db.Page(param.Page, param.PageSize).Scan(&res)
+	if err != nil {
+		return nil, 0, err
+	}
+	for _, role := range res {
+		role.DeptName = companyMap[role.DeptId]
+	}
 	return
 }
 

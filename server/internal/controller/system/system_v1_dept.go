@@ -24,7 +24,7 @@ func (c *ControllerV1) DeptList(ctx context.Context, req *v1.DeptListReq) (res *
 }
 
 func (c *ControllerV1) DeptTree(ctx context.Context, req *v1.DeptTreeReq) (res *v1.DeptTreeRes, err error) {
-	items, err := service.SysDept().GetDeptTree(ctx)
+	items, err := service.SysDept().GetDeptTree(ctx, req.SysDeptTreeParam)
 	if err != nil {
 		return nil, err
 	}

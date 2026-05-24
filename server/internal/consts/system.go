@@ -122,7 +122,7 @@ var (
 var StatusSlice = []int{0, 1}
 
 var (
-	// 公告范围: 1全部 2指定机构 3指定用户
+	// 公告范围: 1全部 2指定组织 3指定用户
 	NoticeRangeAll  = 1
 	NoticeRangeDept = 2
 	NoticeRangeUser = 3
