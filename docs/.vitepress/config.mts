@@ -4,7 +4,7 @@ import type { DefaultTheme } from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "Xiu Admin",
-  description: "XiuAdmin基于全新GoFrame2+Vue3+VueVbenAdmin开发的全栖框架，适合企业级完整应用开发。",
+  description: "XiuAdmin 基于 GoFrame2、Vue3、Vue Vben Admin 技术栈开发的全栈框架，适用于中后台应用开发。",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -26,7 +26,7 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/xiujiecn/xiu-admin' }
     ],
     footer: {
-      message: '基于 Apache2.0 许可发布',
+      message: '基于 Apache License 2.0 开源许可发布',
       copyright: `版权所有 © 2024-${new Date().getFullYear()} 李秀杰`
     },
   }
@@ -39,7 +39,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
     items: [
         { text: '平台简介', link: '/guide' },
         { text: '演示图例', link: '/guide#演示图例' },
-        { text: '跟新日志', link: '/changlog' },
+        { text: '更新日志', link: '/changlog' },
       ]
     },
     {
