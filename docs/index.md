@@ -4,8 +4,8 @@ layout: home
 
 hero:
   name: "Xiu Admin"
-  text: "企业级管理系统框架"
-  tagline: 全新升级，开箱即用，简单高效
+  text: "中后台管理系统开发框架"
+  tagline: 基于 GoFrame2 与 Vue3，适用于中后台应用开发
   actions:
     - theme: brand
       text: 文档
@@ -28,10 +28,10 @@ features:
     details: 基于 GoFrame2、Vue3、VueVbenAdmin、TypeScript、Vite、Pinia、VueUse等最新技术栈。
   - icon: 🦄
     title: 高生产率
-    details: 极强的可扩展性，应用化、模块化、插件化机制敏捷开发，几分钟即可搭建一个应用开发框架。
+    details: 支持应用化、模块化、插件化开发方式，可较快搭建中后台应用开发基础结构。
   - icon: 💡
     title: 快速生成代码
-    details: 无需编写代码，只需创建表进行简单配置就能生成一个完善的 CURD、树表等常用的开发代码，其中所需表单控件也是勾选即可直接生成。
+    details: 通过可视化配置和建表，可生成 CURD、树表等常用业务代码，表单控件支持勾选配置。
   - icon: 🔐
     title: 认证机制
     details: 采用 JWT 的用户状态认证，支持多用户类型、多用户状态、多用户角色、多用户权限。
