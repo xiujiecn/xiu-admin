@@ -23,7 +23,7 @@ type SysRoleDao struct {
 type SysRoleColumns struct {
 	RoleId            string // 角色ID
 	TenantId          string // 租户编号
-	DeptId            string // 部门组织id
+	DeptId            string // 部门机构id
 	RoleName          string // 角色名称
 	RoleKey           string // 角色权限字符串
 	RoleSort          string // 显示顺序

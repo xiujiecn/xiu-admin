@@ -224,7 +224,7 @@ func (l *gCurd) genLogicListWhereEach(buffer *bytes.Buffer, in *genmodel.CurdPre
 	for _, field := range fields {
 		isQuery := false
 		// 树表查询上级
-		if in.Options.Step.IsTreeTable && IsPidName(field.Name) {
+		if in.Options.Step.IsTreeTable && field.Name == in.Options.Tree.PidColumn {
 			isQuery = true
 			field.QueryWhere = WMEq
 		}

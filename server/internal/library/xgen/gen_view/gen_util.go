@@ -13,8 +13,11 @@ import (
 	"strings"
 	"unicode"
 
+	"xiuadmin/internal/dao"
+	"xiuadmin/internal/library/mcache"
 	genmodel "xiuadmin/internal/library/xgen/gen_model"
 	"xiuadmin/internal/library/xgen/gen_view/gohtml"
+	"xiuadmin/internal/service"
 	"xiuadmin/utility"
 	version "xiuadmin/utility/version"
 
@@ -218,6 +221,7 @@ func ImportSql(ctx context.Context, path string) error {
 		return err
 	}
 
+	beforeMaxMenuId, _ := dao.SysMenu.Ctx(ctx).Max(dao.SysMenu.Columns().MenuId)
 	sqlArr := strings.Split(string(rows), "\n")
 	for _, sql := range sqlArr {
 		sql = strings.TrimSpace(sql)
@@ -230,6 +234,55 @@ func ImportSql(ctx context.Context, path string) error {
 		if err != nil {
 			return err
 		}
+	}
+	if err = syncGeneratedMenus(ctx, gconv.Int64(beforeMaxMenuId)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func syncGeneratedMenus(ctx context.Context, beforeMaxMenuId int64) error {
+	var menuIds []int64
+	if err := dao.SysMenu.Ctx(ctx).
+		Fields(dao.SysMenu.Columns().MenuId).
+		WhereGT(dao.SysMenu.Columns().MenuId, beforeMaxMenuId).
+		OrderAsc(dao.SysMenu.Columns().MenuId).
+		Scan(&menuIds); err != nil {
+		return err
+	}
+	if len(menuIds) == 0 {
+		return nil
+	}
+
+	for _, menuId := range menuIds {
+		if err := service.MemDBSysMenu().LoadData(ctx, menuId); err != nil {
+			return err
+		}
+	}
+
+	var roleIds []int64
+	if err := dao.SysRoleMenu.Ctx(ctx).
+		Fields(dao.SysRoleMenu.Columns().RoleId).
+		WhereIn(dao.SysRoleMenu.Columns().MenuId, menuIds).
+		Group(dao.SysRoleMenu.Columns().RoleId).
+		Scan(&roleIds); err != nil {
+		return err
+	}
+	if len(roleIds) == 0 {
+		return nil
+	}
+
+	var userIds []int64
+	if err := dao.SysUserRole.Ctx(ctx).
+		Fields(dao.SysUserRole.Columns().UserId).
+		WhereIn(dao.SysUserRole.Columns().RoleId, roleIds).
+		Group(dao.SysUserRole.Columns().UserId).
+		Scan(&userIds); err != nil {
+		return err
+	}
+	for _, userId := range userIds {
+		_ = mcache.RemoveUserAccessCodeList(ctx, userId)
+		_ = mcache.RemoveUserRoleDataAccessCodeList(ctx, userId)
 	}
 	return nil
 }

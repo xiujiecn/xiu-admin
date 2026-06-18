@@ -1,7 +1,6 @@
 <template>
   <BasicDrawer :close-on-click-modal="false" :title="title" class="w-[600px]">
-    <BasicForm>
-    </BasicForm>
+    <BasicForm></BasicForm>
   </BasicDrawer>
 </template>
 <script setup lang="ts">
@@ -13,8 +12,8 @@ import { addFullName, cloneDeep } from '@vben/utils';
 
 import { useVbenForm } from '#/adapter/form';
 import { Alert } from 'ant-design-vue';
-import { Edit, View } from '@{.importWebApi}';
-import { editSchema@{ if eq .options.Step.IsTreeTable true }, treeOption, loadTreeOption@{end} } from './model';
+import { Edit, View } from '#/api/gen/testTree';
+import { editSchema, treeOption, loadTreeOption } from './model';
 
 const emit = defineEmits<{ reload: [] }>();
 interface ModalProps {
@@ -22,7 +21,6 @@ interface ModalProps {
   update: boolean;
   view: boolean;
 }
-
 
 const isUpdate = ref(false);
 const isView = ref(false);
@@ -39,19 +37,16 @@ const [BasicForm, formApi] = useVbenForm({
     componentProps: {
       class: 'w-full',
     },
-    formItemClass: 'col-span-@{.script.formGridSpan}',
+    formItemClass: 'col-span-1',
   },
   layout: 'vertical',
   schema: editSchema,
   showDefaultActions: false,
-  wrapperClass: 'grid-cols-@{.script.formGridSpan} gap-x-4',
+  wrapperClass: 'grid-cols-1 gap-x-4',
 });
 
-@{ if eq .isEditModal true }
-const [BasicDrawer, drawerApi] = useVbenModal
-@{else}
 const [BasicDrawer, drawerApi] = useVbenDrawer
-@{end}
+
 ({
   onCancel: handleCancel,
   onConfirm: handleConfirm,
@@ -63,24 +58,24 @@ const [BasicDrawer, drawerApi] = useVbenDrawer
     const { id, update, view, } = drawerApi.getData() as ModalProps;
     isUpdate.value = update;
     isView.value = view;
-    @{ if eq .options.Step.IsTreeTable true }
+
     await loadTreeOption();
     formApi.updateSchema([
       {
         componentProps: {
-          fieldNames: { label: '@{.options.Tree.TitleField.TsName}', value: '@{.pk.TsName}' },
+          fieldNames: { label: 'treeName', value: 'id' },
           showSearch: true,
           treeData: treeOption.value,
           treeDefaultExpandAll: true,
           treeLine: { showLeafIcon: false },
-          treeNodeFilterProp: '@{.options.Tree.TitleField.TsName}',
+          treeNodeFilterProp: 'treeName',
         },
-        fieldName: '@{.options.Tree.PidField.TsName}',
+        fieldName: 'parentId',
       },
     ]);
-    @{end}
+
     if (isUpdate.value || isView.value) {
-      const record = await View({ @{.pk.TsName}: id });
+      const record = await View({ id: id });
       await formApi.setValues(record);
     }
     drawerApi.setState({ confirmLoading: false, loading: false })

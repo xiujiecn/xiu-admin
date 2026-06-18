@@ -21,7 +21,7 @@ func (l *gCurd) webIndexTplData(ctx context.Context, in *genmodel.CurdPreviewPar
 		importVueMethod   = []string{"h", "reactive", "ref", "computed"}
 		importApiMethod   = []string{"List"}
 		importModelMethod = []string{"columns", "querySchema", "type RowType"}
-		importUtilsMethod = []string{"adaTableScrollX"}
+		importUtilsMethod []string
 		importIcons       []string
 		actionWidth       int64 = 72
 	)
@@ -83,17 +83,10 @@ func (l *gCurd) webIndexTplData(ctx context.Context, in *genmodel.CurdPreviewPar
 		// importModelMethod = append(importModelMethod, "loadOptions")
 	}
 
-	// 普通树表
-	if in.Options.Step.IsTreeTable && !in.Options.Step.IsOptionTreeTable {
-		importUtilsMethod = append(importUtilsMethod, "convertListToTree")
-	}
-
 	// 选项式树表
 	if in.Options.Step.IsOptionTreeTable {
-		importVueMethod = append(importVueMethod, []string{"onMounted", "unref"}...)
+		importVueMethod = append(importVueMethod, "onMounted")
 		// importIcons = append(importIcons, []string{"FormOutlined", "SearchOutlined"}...)
-		importApiMethod = append(importApiMethod, "TreeOption")
-		importUtilsMethod = append(importUtilsMethod, "getTreeKeys")
 		importModelMethod = append(importModelMethod, []string{"loadTreeOption", "treeOption", "State"}...)
 	}
 

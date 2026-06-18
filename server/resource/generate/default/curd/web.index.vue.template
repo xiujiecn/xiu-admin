@@ -18,17 +18,23 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
-    labelField: 'id',
+    labelField: '@{.pk.TsName}',
   },
   rowConfig: {
-    keyField: 'id',
+    keyField: '@{.pk.TsName}',
   },
   columns: columns,
   exportConfig: {},
   height: 'auto',
   keepSource: true,
   showOverflow: false,
+@{ if eq .options.Step.IsTreeTable true }
+  pagerConfig: {
+    enabled: false,
+  },
+@{else}
   pagerConfig: {},
+@{end}
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
@@ -48,6 +54,14 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     search: true,
     zoom: true,
   },
+@{ if eq .options.Step.IsTreeTable true }
+  treeConfig: {
+    parentField: '@{.options.Tree.PidField.TsName}',
+    rowField: '@{.pk.TsName}',
+    transform: true,
+    expandAll: true,
+  },
+@{end}
 };
 
 const gridEvents: DeepPartial<VxeGridListeners> = {
@@ -59,6 +73,16 @@ const CheckboxChecked = ref(false);
 function handleCheckboxChange() {
   CheckboxChecked.value = gridApi.grid.getCheckboxRecords().length > 0;
 }
+
+@{ if eq .options.Step.IsTreeTable true }
+function expandAll() {
+  gridApi.grid?.setAllTreeExpand(true);
+}
+
+function collapseAll() {
+  gridApi.grid?.setAllTreeExpand(false);
+}
+@{end}
 
 const [Grid, gridApi] = useVbenVxeGrid({
   @{ if eq .isSearchForm true }
@@ -114,7 +138,7 @@ async function handleRefresh() {
 @{ if eq .options.Step.HasBatchDel true }
 function handleMultiDelete() {
   const rows = gridApi.grid.getCheckboxRecords();
-  const ids: string[] = [];
+  const ids: RowType['@{.pk.TsName}'][] = [];
   for (const row of rows) {
     ids.push(row.@{.pk.TsName});
   }
@@ -150,7 +174,7 @@ async function handleExport() {
 
 @{ if eq .options.Step.HasStatus true }
 async function handleStatusChange(row: RowType) {
-  await Status({ id: row.id, status: row.status }); 
+  await Status({ @{.pk.TsName}: row.@{.pk.TsName}, status: row.status });
   await message.success("操作成功")
   await handleRefresh();
 }
@@ -170,6 +194,10 @@ async function handleStatusChange(row: RowType) {
         @{end}
         @{ if eq .options.Step.HasExport true }
         <Button class="mr-2 flex items-center" type="primary" :icon="h(MdiExport)" @click="handleExport" v-access:code="'cpm:gen:@{.varName | LcFirst}:export'">导出</Button>
+        @{end}
+        @{ if eq .options.Step.IsTreeTable true }
+        <Button class="mr-2 flex items-center" @click="expandAll">展开</Button>
+        <Button class="mr-2 flex items-center" @click="collapseAll">折叠</Button>
         @{end}
       </template>
       @{ if eq .options.Step.HasStatus true }
