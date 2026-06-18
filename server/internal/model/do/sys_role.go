@@ -14,7 +14,7 @@ type SysRole struct {
 	g.Meta            `orm:"table:sys_role, do:true"`
 	RoleId            any         // 角色ID
 	TenantId          any         // 租户编号
-	DeptId            any         // 部门组织id
+	DeptId            any         // 部门机构id
 	RoleName          any         // 角色名称
 	RoleKey           any         // 角色权限字符串
 	RoleSort          any         // 显示顺序

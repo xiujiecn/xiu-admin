@@ -49,10 +49,9 @@ export function newState(state: State | Record<string, any> | null): State {
 export const treeOption = ref([]);
 
 // 加载关系树选项
-export function loadTreeOption() {
-  TreeOption().then((res) => {
-    treeOption.value = res;
-  });
+export async function loadTreeOption() {
+  const res = await TreeOption();
+  treeOption.value = res;
+  return res;
 }
 @{end}
-

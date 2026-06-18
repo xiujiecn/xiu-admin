@@ -50,7 +50,7 @@ export let selectListObj: GenCodesSelect = {
 };
 export let tableListObj: DbTableSelectModel[] = [];
 
-export function getSelectList(key: keyof GenCodesSelect) {
+export function getSelectList<K extends keyof GenCodesSelect>(key: K): GenCodesSelect[K] {
   return selectListObj[key];
 }
 export function setSelectList(key: keyof GenCodesSelect, value: any) {
@@ -104,6 +104,9 @@ export const genInfoObj = {
     },
     tree: {
       titleColumn: null,
+      pidColumn: 'parent_id',
+      levelColumn: null,
+      treeColumn: null,
       styleType: 1,
     },
     funcDict: {
@@ -621,6 +624,66 @@ export const developBaseSchema: VbenFormSchema[] = [
     fieldName: 'options.autoOps',
     label: '高级设置',
     formItemClass: 'col-span-4',
+  },
+  {
+    component: 'Select',
+    fieldName: 'options.tree.titleColumn',
+    label: '树名称字段',
+    componentProps: {
+      allowClear: true,
+      options: [],
+      placeholder: '请选择树节点显示字段',
+    },
+    dependencies: {
+      show: (values) => values.genType === 1,
+      triggerFields: ['genType'],
+    },
+    formItemClass: 'col-span-1',
+  },
+  {
+    component: 'Select',
+    fieldName: 'options.tree.pidColumn',
+    label: '树父级字段',
+    componentProps: {
+      allowClear: true,
+      options: [],
+      placeholder: '请选择父级ID字段',
+    },
+    dependencies: {
+      show: (values) => values.genType === 1,
+      triggerFields: ['genType'],
+    },
+    formItemClass: 'col-span-1',
+  },
+  {
+    component: 'Select',
+    fieldName: 'options.tree.levelColumn',
+    label: '树层级字段',
+    componentProps: {
+      allowClear: true,
+      options: [],
+      placeholder: '请选择层级字段',
+    },
+    dependencies: {
+      show: (values) => values.genType === 1,
+      triggerFields: ['genType'],
+    },
+    formItemClass: 'col-span-1',
+  },
+  {
+    component: 'Select',
+    fieldName: 'options.tree.treeColumn',
+    label: '树路径字段',
+    componentProps: {
+      allowClear: true,
+      options: [],
+      placeholder: '请选择关系路径字段',
+    },
+    dependencies: {
+      show: (values) => values.genType === 1,
+      triggerFields: ['genType'],
+    },
+    formItemClass: 'col-span-1',
   },
   {
     component: 'TreeSelect',

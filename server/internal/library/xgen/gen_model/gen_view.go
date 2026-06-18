@@ -66,8 +66,15 @@ type PresetStep struct {
 // OptionsTree 树形结构选项
 type OptionsTree struct {
 	TitleColumn string `json:"titleColumn"`
+	PidColumn   string `json:"pidColumn"`
+	LevelColumn string `json:"levelColumn"`
+	TreeColumn  string `json:"treeColumn"`
 	StyleType   int    `json:"styleType"`
 	TitleField  *GenCodesColumnListModel
+	PidField    *GenCodesColumnListModel
+	LevelField  *GenCodesColumnListModel
+	TreeField   *GenCodesColumnListModel
+	HasTreePath bool
 }
 
 // CurdOptionsMenu 菜单选项

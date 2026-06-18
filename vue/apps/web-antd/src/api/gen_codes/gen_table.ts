@@ -97,7 +97,10 @@ export interface SysGenTableJoinModel {
 }
 
 export interface SysGenTableTreeModel {
-    titleColumn: string;
+    titleColumn: string|null;
+    pidColumn: string;
+    levelColumn: string|null;
+    treeColumn: string|null;
     styleType: number;
 }
 export interface SysGenTableMenuModel {
