@@ -45,6 +45,8 @@ const loadSelectList = () => {
 
   const genTypeOptions = getSelectList('genType');
   const genTypeValue = genTypeOptions?.[0]?.value;
+  const templateOptions = genTypeOptions?.find((item) => item.value === genTypeValue)?.templates ?? [];
+  const templateValue = templateOptions?.[0]?.value;
   const dbOptions = getSelectList('db');
 
   formApi.updateSchema([
@@ -67,8 +69,16 @@ const loadSelectList = () => {
       },
       fieldName: 'tableName',
     },
+    {
+      componentProps: {
+        options: templateOptions,
+        defaultValue: templateValue,
+      },
+      fieldName: 'genTemplate',
+    },
   ]);
   formApi.setFieldValue('genType', genTypeValue);
+  formApi.setFieldValue('genTemplate', templateValue);
 }
 
 const [BasicDrawer, drawerApi] = useVbenDrawer({

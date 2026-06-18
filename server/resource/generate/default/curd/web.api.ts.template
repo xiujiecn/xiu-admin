@@ -53,6 +53,6 @@ export function Export(params:any) {
 @{ if eq .options.Step.IsTreeTable true }
 // 获取@{.tableComment}关系树选项
 export function TreeOption() {
-  return requestClient.get<any>('gen/@{.apiPrefix}/treeOption', { params });
+  return requestClient.get<any>('gen/@{.apiPrefix}/treeOption');
 }
 @{end}

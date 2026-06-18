@@ -1,5 +1,5 @@
 <!--
- * @description 机构管理页面
+ * @description 组织管理页面
  * @Link  https://github.com/xiujiecn/xiu-admin
  * @Copyright  Copyright (c) 2025 LiXiujie
  * @Author  Lxj <li@xiujie.cn>
@@ -12,11 +12,12 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { SysDeptListData } from '#/api/system/dept';
 import { AccessControl, useAccess } from '@vben/access';
+import { useRouter } from 'vue-router';
 const { hasAccessByCodes } = useAccess();
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { getVxePopupContainer } from '@vben/utils';
-import { Button, message, Popconfirm,Tag  } from 'ant-design-vue';
+import { Button, message, Popconfirm,Tag, Dropdown, Menu, MenuItem  } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysDeptListApi, deleteSysDeptApi } from '#/api/system/dept'; 
@@ -44,7 +45,26 @@ const formOptions: VbenFormProps = {
     {
       component: 'Input',
       fieldName: 'deptName',
-      label: '机构名称',
+      label: '组织名称',
+    },
+    {
+      component: 'Select',
+      componentProps: {
+        allowClear: true,
+        options: [
+          {
+            label: '部门',
+            value: '0',
+          },
+          {
+            label: '公司',
+            value: '1',
+          },
+        ],
+        placeholder: '请选择',
+      },
+      fieldName: 'deptType',
+      label: '组织类型',
     },
     {
       component: 'Select',
@@ -65,6 +85,7 @@ const formOptions: VbenFormProps = {
       fieldName: 'status',
       label: '状态',
     },
+  
   ],
   // 控制表单是否显示折叠按钮
   showCollapseButton: true,
@@ -77,8 +98,9 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   align: 'center',
   columns: [
-    { field: 'deptName', title: '机构名称' , treeNode: true, minWidth: 240,  align: 'left', },
-    { field: 'deptCategory', title: '机构编码', minWidth: 100 },
+    { field: 'deptName', title: '组织名称' , treeNode: true, minWidth: 240,  align: 'left', },
+    { field: 'deptCategory', title: '组织编码', minWidth: 100 },
+    { field: 'deptType', slots: { default: 'deptType' },title: '组织类型', width: 80 },
     {
       field: 'status',
       slots: { default: 'status' },
@@ -168,11 +190,20 @@ async function handleRefresh() {
   await gridApi.query();
   expandAll();
 }
+
+const router = useRouter();
+const handleClickUserManage = (row: SysDeptListData) => {
+  router.push(`/system/user?deptId=${row.deptId}`);
+}
+const handleClickRoleManage = (row: SysDeptListData) => {
+  router.push(`/system/role?deptId=${row.deptId}`);
+}
+
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid :table-title="'机构管理'">
+    <Grid :table-title="'组织管理'">
       <template #toolbar-tools>
         
         <Button class="mr-2 flex items-center"  @click="expandAll">展开</Button>
@@ -182,15 +213,27 @@ async function handleRefresh() {
       <template #status="{ row }">
         <Tag :color="row.status == '0' ? 'green' : 'red'">{{ row.status == '0' ? '正常' : '停用' }}</Tag>
       </template>
+      <template #deptType="{ row }">
+        <Tag :color="row.deptType === 1 ? 'blue' : 'green'">{{ row.deptType === 1 ? '公司' : '部门' }}</Tag>
+      </template>
       <template #action="{ row }">
         <div class="flex items-center">
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleView(row)" v-access:code="'cpm:system:dept:query'">查看</Button>
           <Button class="mr-2 border-none p-0" :block="false" type="link" @click="handleEdit(row)" v-access:code="'cpm:system:dept:edit'">修改</Button>
-          <AccessControl :codes="['cpm:system:dept:remove']" type="code">
-            <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
-              <Button class="mr-2 border-none p-0" :block="false" type="link" danger >删除</Button>
-            </Popconfirm>
-          </AccessControl>
+          <Dropdown>
+            <template #overlay>
+              <Menu>
+                <MenuItem @click="handleClickUserManage(row)">用户管理</MenuItem>
+                <MenuItem @click="handleClickRoleManage(row)">角色管理</MenuItem>
+                <AccessControl :codes="['cpm:system:dept:remove']" type="code">
+                  <Popconfirm :get-popup-container="getVxePopupContainer" placement="left" title="确定删除吗？" @confirm="handleDelete(row)" >
+                  <MenuItem>删除组织</MenuItem>
+                  </Popconfirm>
+                </AccessControl>
+              </Menu>
+            </template>
+            <Button class="mr-2 border-none p-0" :block="false" type="link" >更多</Button>
+          </Dropdown>
         </div>
       </template>
     </Grid>

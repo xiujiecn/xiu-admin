@@ -117,8 +117,9 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
   columns: [
     { type: 'checkbox', width: 40 },
-    { field: 'roleId', title: 'ID' },
+    { field: 'roleId', title: 'ID',width: 80  },
     { field: 'roleName', title: '角色名称' },
+    { field: 'deptName', title: '所属组织' },
     { field: 'roleKey', title: '角色权限字符串' },
     { field: 'dataScope', title: '数据范围', slots: { default: 'dataScope' }, minWidth: 90 },
     { field: 'roleSort', title: '排序',width: 60 },

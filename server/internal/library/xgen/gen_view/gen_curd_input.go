@@ -210,7 +210,9 @@ func (l *gCurd) genStructFieldDefinition(in *genmodel.CurdPreviewParam, field *g
 	)
 
 	addResult := func() []string {
-		if inputType == InputTypeEditParamFields && !IsIndexPK(field.Index) && !strings.HasPrefix(field.GoType, "*") {
+		isTreeManagedField := in.Options.Step.IsTreeTable && field.Name == in.Options.Tree.PidColumn
+		isTreeManagedField = isTreeManagedField || (in.Options.Step.IsTreeTable && in.Options.Tree.HasTreePath && (field.Name == in.Options.Tree.LevelColumn || field.Name == in.Options.Tree.TreeColumn))
+		if inputType == InputTypeEditParamFields && !IsIndexPK(field.Index) && !isTreeManagedField && !strings.HasPrefix(field.GoType, "*") {
 			result = append(result, " #*"+field.GoType)
 		} else {
 			result = append(result, " #"+field.GoType)
@@ -230,7 +232,10 @@ func (l *gCurd) genStructFieldDefinition(in *genmodel.CurdPreviewParam, field *g
 		}
 
 		// 树表内部维护字段
-		if in.Options.Step.IsTreeTable && gstr.InArray(defaultTreeFields, field.Name) {
+		if in.Options.Step.IsTreeTable && field.Name == in.Options.Tree.PidColumn {
+			return true
+		}
+		if in.Options.Step.IsTreeTable && in.Options.Tree.HasTreePath && (field.Name == in.Options.Tree.LevelColumn || field.Name == in.Options.Tree.TreeColumn) {
 			return true
 		}
 
@@ -261,7 +266,7 @@ func (l *gCurd) genStructFieldDefinition(in *genmodel.CurdPreviewParam, field *g
 
 	switch inputType {
 	case InputTypeListInp:
-		if in.Options.Step.IsTreeTable && IsPidName(field.Name) {
+		if in.Options.Step.IsTreeTable && field.Name == in.Options.Tree.PidColumn {
 			isQuery = true
 			field.QueryWhere = WMEq
 		}
@@ -287,7 +292,7 @@ func (l *gCurd) genStructFieldDefinition(in *genmodel.CurdPreviewParam, field *g
 		if IsIndexPK(field.Index) && isMaster {
 			addResult()
 			// 树表的pid字段
-		} else if in.Options.Step.IsTreeTable && IsPidName(field.Name) {
+		} else if in.Options.Step.IsTreeTable && field.Name == in.Options.Tree.PidColumn {
 			addResult()
 		} else if field.IsList {
 			addResult()
@@ -330,7 +335,7 @@ func (l *gCurd) genStructFieldDefinition(in *genmodel.CurdPreviewParam, field *g
 		if IsIndexPK(field.Index) {
 			return addResult()
 		}
-		if IsPidName(field.Name) {
+		if field.Name == in.Options.Tree.PidColumn {
 			return addResult()
 		}
 		if in.Options.Tree.TitleColumn == field.Name {

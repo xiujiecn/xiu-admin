@@ -8,7 +8,6 @@ package genview
 import (
 	"context"
 	"runtime"
-	"slices"
 	"strings"
 	"xiuadmin/internal/dao"
 	genconsts "xiuadmin/internal/library/xgen/gen_consts"
@@ -27,7 +26,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/os/gview"
 	"github.com/gogf/gf/v2/text/gstr"
-	"github.com/gogf/gf/v2/util/gutil"
 )
 
 var Curd = gCurd{}
@@ -274,39 +272,77 @@ func initTableTree(in *genmodel.CurdPreviewParam) (err error) {
 		if err = CheckTreeTableFields(in.MasterFields); err != nil {
 			return err
 		}
+		if in.Options.Tree == nil {
+			in.Options.Tree = &genmodel.OptionsTree{}
+		}
 
-		// 解析选项树名称字段
-		has := false
+		if in.Options.Tree.PidColumn == "" {
+			in.Options.Tree.PidColumn = "parent_id"
+		}
+		if in.Options.Tree.TitleColumn == "" {
+			if field := inferTreeTitleField(in.MasterFields, in.Options.Tree.PidColumn); field != nil {
+				in.Options.Tree.TitleColumn = field.Name
+			}
+		}
+
+		hasTitle := false
+		hasPid := false
+		hasLevel := false
+		hasTree := false
 		for _, field := range in.MasterFields {
 			if in.Options.Tree.TitleColumn == field.Name {
 				in.Options.Tree.TitleField = field
-				has = true
-				break
+				hasTitle = true
+			}
+			if in.Options.Tree.PidColumn == field.Name {
+				in.Options.Tree.PidField = field
+				hasPid = true
+			}
+			if in.Options.Tree.LevelColumn != "" && in.Options.Tree.LevelColumn == field.Name {
+				in.Options.Tree.LevelField = field
+				hasLevel = true
+			}
+			if in.Options.Tree.TreeColumn != "" && in.Options.Tree.TreeColumn == field.Name {
+				in.Options.Tree.TreeField = field
+				hasTree = true
 			}
 		}
-		if !has {
+		if !hasTitle {
 			err = gerror.New("请选择一个有效的树名称字段")
 			return
 		}
+		if !hasPid {
+			err = gerror.New("请选择一个有效的父级字段")
+			return
+		}
+		in.Options.Tree.HasTreePath = hasLevel && hasTree
 	}
 	return err
 }
 
-// CheckTreeTableFields 检查树表字段
-func CheckTreeTableFields(columns []*genmodel.GenCodesColumnListModel) (err error) {
-	var fields = gutil.Copy(defaultTreeFields).([]string)
-	for _, v := range columns {
-		if gstr.InArray(fields, v.Name) {
-			fields = slices.DeleteFunc(fields, func(item string) bool {
-				return item == v.Name
-			})
+func inferTreeTitleField(fields []*genmodel.GenCodesColumnListModel, pidColumn string) *genmodel.GenCodesColumnListModel {
+	preferredNames := []string{"tree_name", "name", "title", "label", "menu_name", "dept_name", "category_name"}
+	for _, name := range preferredNames {
+		for _, field := range fields {
+			if field.Name == name {
+				return field
+			}
 		}
 	}
-
-	if len(fields) > 0 {
-		err = gerror.Newf("树表必须包含[%v]字段", strings.Join(fields, "、"))
-		return err
+	for _, field := range fields {
+		if IsIndexPK(field.Index) || field.Name == pidColumn || field.Name == "tenant_id" {
+			continue
+		}
+		goType := strings.TrimPrefix(field.GoType, "*")
+		if goType == "string" {
+			return field
+		}
 	}
+	return nil
+}
+
+// CheckTreeTableFields 检查树表字段
+func CheckTreeTableFields(columns []*genmodel.GenCodesColumnListModel) (err error) {
 	return
 }
 
@@ -720,13 +756,9 @@ func (l *gCurd) generateWebModelContent(ctx context.Context, in *genmodel.CurdPr
 	genFile.Path = utility.MergeAbs(in.Config.Application.Crud.Templates[in.In.GenTemplate].WebViewsPath, gstr.LcFirst(in.In.VarName), "model.tsx")
 	genFile.Meth = genconsts.GenCodesBuildMethCreate
 	if gfile.Exists(genFile.Path) {
-		genFile.Meth = genconsts.GenCodesBuildMethSkip
-	}
-	genFile.Required = true
-
-	if genFile.Meth == genconsts.GenCodesBuildMethSkip && gstr.InArray(in.Options.AutoOps, "forcedCover") {
 		genFile.Meth = genconsts.GenCodesBuildMethCover
 	}
+	genFile.Required = true
 	in.Content.Views[name] = genFile
 	return
 }
@@ -845,7 +877,8 @@ func (l *gCurd) generateSqlContent(ctx context.Context, in *genmodel.CurdPreview
 		tplData = g.Map{
 			"dbName":        config.Name,
 			"menuTable":     config.Prefix + "sys_menu",
-			"mainComponent": "LAYOUT",
+			"roleMenuTable": config.Prefix + "sys_role_menu",
+			"mainComponent": "BasicLayout",
 		}
 		genFile = new(genmodel.GenFile)
 	)

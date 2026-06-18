@@ -27,8 +27,8 @@ type SysNoticeColumns struct {
 	NoticeType    string // 公告类型（1通知 2公告）
 	NoticeContent string // 公告内容
 	Status        string // 公告状态（0正常 1关闭）
-	NoticeRange   string // 通知范围（1全员 2指定机构 3指定用户）
-	DeptIds       string // 通知机构ID列表JSON
+	NoticeRange   string // 通知范围（1全员 2指定组织 3指定用户）
+	DeptIds       string // 通知组织ID列表JSON
 	UserIds       string // 通知用户ID列表JSON
 	CreatedDept   string // 创建部门
 	CreatedBy     string // 创建者

@@ -8,12 +8,14 @@ import { preferences } from '@vben/preferences';
 
 import { message } from 'ant-design-vue';
 import { cloneDeep } from 'lodash-es';
+import { RouterView } from 'vue-router';
 
 import { getAllMenusApi } from '#/api';
 import { BasicLayout, IFrameView } from '#/layouts';
 import { $t } from '#/locales';
 import { localRoutes } from './routes/local';
 const forbiddenComponent = () => import('#/views/_core/fallback/forbidden.vue');
+const ParentLayout = async () => RouterView;
 
 async function generateAccess(options: GenerateMenuAndRoutesOptions) {
   const pageMap: ComponentRecordType = import.meta.glob('../views/**/*.vue');
@@ -21,6 +23,8 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
   const layoutMap: ComponentRecordType = {
     BasicLayout,
     IFrameView,
+    LAYOUT: BasicLayout,
+    ParentLayout,
   };
 
   return await generateAccessible(preferences.app.accessMode, {

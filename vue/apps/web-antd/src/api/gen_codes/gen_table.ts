@@ -30,7 +30,7 @@ export interface SysGenTableListModel {
     masterColumns: string;  // 主表字段
     addonName: string;  // 插件名称
     status: string;  // 生成状态（0成功
-    createdDept: number;  // 创建机构
+    createdDept: number;  // 创建组织
     createdBy: number;  // 创建者
     createdAt: string;  // 创建时间
 }
@@ -97,7 +97,10 @@ export interface SysGenTableJoinModel {
 }
 
 export interface SysGenTableTreeModel {
-    titleColumn: string;
+    titleColumn: string|null;
+    pidColumn: string;
+    levelColumn: string|null;
+    treeColumn: string|null;
     styleType: number;
 }
 export interface SysGenTableMenuModel {

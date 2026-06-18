@@ -17,11 +17,12 @@ import EditMasterCell from './components/EditMasterCell.vue';
 import EditSlaveCell from './components/EditSlaveCell.vue';
 import { getSysGenTableViewApi, getGenCodesSelectsApi,type GenCodesPreviewRes, 
   type SysGenTableOptionsModel, type SysGenTableJoinModel, getGenCodesTableSelectApi, editSysGenTableApi, 
-  postGenCodesPreviewApi, postGenCodesBuildApi, type SysGenTableViewRes } from '#/api/gen_codes/gen_table';
+  postGenCodesPreviewApi, postGenCodesBuildApi, type SysGenTableViewRes, getGenCodesColumnListApi } from '#/api/gen_codes/gen_table';
 import { getSysMenuListApi } from '#/api/system/menu';
-import { developBaseSchema, developJoinSchema, getSelectList, setSelectListObj, newState, genInfoObj } from './model';
+import { developBaseSchema, developJoinSchema, getSelectList, setSelectListObj, newState, genInfoObj, formatColumns } from './model';
 import { $t } from '@vben/locales';
 import { cloneDeep,merge } from 'lodash-es';
+import { useAccessStore } from '@vben/stores';
 import {
   addFullName,
   getPopupContainer,
@@ -35,12 +36,99 @@ const tableId = ref(route.query.tableId);
 const genInfo = ref(newState(null));
 const previewModel = ref<GenCodesPreviewRes>({ views: {} });
 const showPreviewModal = ref(false);
+const accessStore = useAccessStore();
+
+function getColumnSelectOptions(columns: any) {
+  return formatColumns(columns).map((item: any) => ({
+    label: `${item.dc}(${item.name})`,
+    value: item.name,
+  }));
+}
+
+function updateTreeColumnSelects(columns: any) {
+  const options = getColumnSelectOptions(columns);
+  baseFormApi.updateSchema([
+    {
+      componentProps: {
+        allowClear: true,
+        options,
+        placeholder: '请选择树节点显示字段',
+      },
+      fieldName: 'options.tree.titleColumn',
+    },
+    {
+      componentProps: {
+        allowClear: true,
+        options,
+        placeholder: '请选择父级ID字段',
+      },
+      fieldName: 'options.tree.pidColumn',
+    },
+    {
+      componentProps: {
+        allowClear: true,
+        options,
+        placeholder: '请选择层级字段',
+      },
+      fieldName: 'options.tree.levelColumn',
+    },
+    {
+      componentProps: {
+        allowClear: true,
+        options,
+        placeholder: '请选择关系路径字段',
+      },
+      fieldName: 'options.tree.treeColumn',
+    },
+  ]);
+}
+
+async function syncTreeColumnValues(tree?: SysGenTableOptionsModel['tree']) {
+  if (!tree) {
+    return;
+  }
+  await baseFormApi.setFieldValue('options.tree.titleColumn', tree.titleColumn || undefined);
+  await baseFormApi.setFieldValue('options.tree.pidColumn', tree.pidColumn || 'parent_id');
+  await baseFormApi.setFieldValue('options.tree.levelColumn', tree.levelColumn || undefined);
+  await baseFormApi.setFieldValue('options.tree.treeColumn', tree.treeColumn || undefined);
+}
+
+function inferTreeTitleColumn(columns: any) {
+  const formattedColumns = formatColumns(columns);
+  const preferredNames = ['tree_name', 'name', 'title', 'label', 'menu_name', 'dept_name', 'category_name'];
+  for (const name of preferredNames) {
+    if (formattedColumns.some((item: any) => item.name === name)) {
+      return name;
+    }
+  }
+  return formattedColumns.find((item: any) => item.tsType === 'string' || item.goType === 'string')?.name ?? '';
+}
+
+async function ensureMasterColumns(res: SysGenTableViewRes) {
+  let masterColumns = formatColumns(res.masterColumns);
+  if (masterColumns.length === 0 && res.dbName && res.tableName) {
+    const columnRes = await getGenCodesColumnListApi({
+      alias: '',
+      dbGroup: res.dbName,
+      isLink: 0,
+      tableName: res.tableName,
+    });
+    masterColumns = formatColumns(columnRes.items);
+  }
+  res.masterColumns = masterColumns;
+  updateTreeColumnSelects(masterColumns);
+  const tree = (res.options as SysGenTableOptionsModel).tree;
+  if (res.genType === 1 && tree && !tree.titleColumn) {
+    tree.titleColumn = inferTreeTitleColumn(masterColumns);
+  }
+}
+
 async function setupMenuSelect() {
   const menuArray = await getSysMenuListApi();
-  menuArray.items.forEach((item) => {
+  menuArray.items.forEach((item: any) => {
     item.menuName = $t(item.menuName);
   });
-  const filteredList = menuArray.items.filter((item) => item.menuType !== 'F');
+  const filteredList = menuArray.items.filter((item: any) => item.menuType !== 'F');
   const menuTree = listToTree(filteredList, { id: 'menuId', pid: 'parentId' });
   const fullMenuTree = [
     {
@@ -144,11 +232,25 @@ async function getTableInfo() {
   if (!(res.options as SysGenTableOptionsModel).tree) {
     (res.options as SysGenTableOptionsModel).tree = {
       titleColumn: "",
+      pidColumn: "parent_id",
+      levelColumn: null,
+      treeColumn: null,
       styleType: 1,
     };
+  } else {
+    (res.options as SysGenTableOptionsModel).tree = {
+      titleColumn: "",
+      pidColumn: "parent_id",
+      levelColumn: null,
+      treeColumn: null,
+      styleType: 1,
+      ...(res.options as SysGenTableOptionsModel).tree,
+    };
   }
+  await ensureMasterColumns(res);
   genInfo.value = res;
-  baseFormApi.setValues(res);
+  await baseFormApi.setValues(res);
+  await syncTreeColumnValues((res.options as SysGenTableOptionsModel).tree);
   console.log('vue/apps/web-antd/src/views/tool/gen/develop.vue getTableInfo', res);
 }
 
@@ -294,7 +396,7 @@ async function handleSaveConfig() {
     async onOk() {
       const params = await packGenInfo();
       console.log('vue/apps/web-antd/src/views/tool/gen/develop.vue handleSaveConfig', params);
-      await editSysGenTableApi(params).then(async (res) => {
+      await editSysGenTableApi(params).then(async () => {
         message.success('保存成功');
       });
     },
@@ -325,6 +427,9 @@ async function handleBuildBtn() {
     async onOk() {
       loading.value = true;
       await postGenCodesBuildApi(params);
+      accessStore.setIsAccessChecked(false);
+      accessStore.setAccessMenus([]);
+      accessStore.setAccessRoutes([]);
       message.success('生成成功');
       loading.value = false;
     },

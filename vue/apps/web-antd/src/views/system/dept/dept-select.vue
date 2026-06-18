@@ -1,5 +1,5 @@
 <!--
- * @description 机构选择组件
+ * @description 组织选择组件
  * @Link  https://github.com/xiujiecn/xiu-admin
  * @Copyright  Copyright (c) 2025 LiXiujie
  * @Author  Lxj <li@xiujie.cn>
@@ -77,7 +77,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   align: 'center',
   columns: [
     { align: 'left', title: '', type: 'checkbox', width: 40 },
-    { field: 'deptName', title: '机构名称', treeNode: true, minWidth: 160, align: 'left', },
+    { field: 'deptName', title: '组织名称', treeNode: true, minWidth: 160, align: 'left', },
   ],
   exportConfig: {},
   height: 'auto',

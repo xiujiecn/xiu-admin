@@ -4,8 +4,8 @@
 gfcli:
   gen:
     dao:
-      - link: "mysql:root:123456@tcp(localhost:3306)/xiuadmin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
-        tables: "sys_tenant"
+      - link: "mysql:root:123456@tcp(localhost:3306)/xiu_admin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+        tables: "sys_dept,sys_role"
         descriptionTag:  true # 数据表字段注释
         noModelComment:  true
         jsonCase: "CamelLower" # 生成json字段时，字段名使用驼峰命名

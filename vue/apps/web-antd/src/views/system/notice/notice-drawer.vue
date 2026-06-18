@@ -129,14 +129,14 @@ async function handleCancel() {
 
 
 
-/** 获取机构树内容,并格式化 */
+/** 获取组织树内容,并格式化 */
 async function getDeptTree() {
   const treeRes = await getSysDeptTreeApi();
   const treeData = treeRes.items;
   addFullName(treeData, 'deptName', ' / ');
   return treeData;
 }
-//加载机构选项
+//加载组织选项
 async function loadDeptOptions() {
   const treeData = await getDeptTree();
   // console.log(treeData)

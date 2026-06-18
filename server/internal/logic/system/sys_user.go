@@ -353,8 +353,14 @@ func (l *sSysUser) Profile(ctx context.Context) (user *model.UserProfileModel, e
 	if err != nil {
 		return nil, err
 	}
+	companyInfo := service.SysDept().GetParentCompanyInfo(ctx, u.DeptId)
 	return &model.UserProfileModel{
 		SysUserViewModel: *u,
+		CompanyInfo: &model.SysDeptMiniModel{
+			DeptId:   companyInfo.DeptId,
+			DeptName: companyInfo.DeptName,
+			ParentId: companyInfo.ParentId,
+		},
 	}, nil
 }
 
@@ -636,7 +642,7 @@ func (l *sSysUser) Register(ctx context.Context, param *model.SysUserRegisterMod
 		return gerror.New("租户无效")
 	}
 
-	// 获取租户的默认注册机构ID
+	// 获取租户的默认注册组织ID
 	config := &model.SysConfigViewModel{}
 	mod = g.DB().Model(dao.SysConfig.Table())
 	mod = mod.Where(dao.SysConfig.Columns().ConfigKey, consts.ConfigKeyTenantDefaultRegisterDeptId)

@@ -18,8 +18,8 @@ type SysNotice struct {
 	NoticeType    interface{} // 公告类型（1通知 2公告）
 	NoticeContent []byte      // 公告内容
 	Status        interface{} // 公告状态（0正常 1关闭）
-	NoticeRange   interface{} // 通知范围（1全员 2指定机构 3指定用户）
-	DeptIds       interface{} // 通知机构ID列表JSON
+	NoticeRange   interface{} // 通知范围（1全员 2指定组织 3指定用户）
+	DeptIds       interface{} // 通知组织ID列表JSON
 	UserIds       interface{} // 通知用户ID列表JSON
 	CreatedDept   interface{} // 创建部门
 	CreatedBy     interface{} // 创建者

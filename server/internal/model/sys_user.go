@@ -90,6 +90,7 @@ type SysUserViewModel struct {
 
 type UserProfileModel struct {
 	SysUserViewModel
+	CompanyInfo *SysDeptMiniModel `json:"companyInfo" orm:"with:dept_id=dept_id" description:"公司信息"`
 }
 
 type UpdateCurrentUserModel struct {

@@ -70,7 +70,7 @@ func (s *s@{.servFunName}) List(ctx context.Context, in *@{.templateGroup}in.@{.
 
 @{ if eq .options.Step.IsTreeTable true }
   // 树形列表判断是否需要分页
-	if in.Pagination {
+	if in.Page > 0 && in.PageSize > 0 {
 		mod = mod.Page(in.Page, in.PageSize)
 	}
 @{end}
@@ -128,9 +128,45 @@ func (s *s@{.servFunName}) Export(ctx context.Context, in *@{.templateGroup}in.@
 // Edit 修改/新增@{.tableComment}
 func (s *s@{.servFunName}) Edit(ctx context.Context, in *@{.templateGroup}in.@{.varName}EditParam) (err error) {
 @{.edit.unique}	return g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
-		@{ if eq .options.Step.IsTreeTable true }in.Pid, in.Level, in.Tree, err = xgorm.AutoUpdateTree(ctx, &dao.@{.daoName}, in.@{.pk.GoName}, in.Pid)
+		@{ if and (eq .options.Step.IsTreeTable true) (eq .options.Tree.HasTreePath true) }in.@{.options.Tree.PidField.GoName}, in.@{.options.Tree.LevelField.GoName}, in.@{.options.Tree.TreeField.GoName}, err = xgorm.AutoUpdateTree(ctx, &dao.@{.daoName}, in.@{.pk.GoName}, in.@{.options.Tree.PidField.GoName}, &xgorm.TreeFiledOption{
+			IdField:    dao.@{.daoName}.Columns().@{.pk.GoName},
+			PidField:   dao.@{.daoName}.Columns().@{.options.Tree.PidField.GoName},
+			LevelField: dao.@{.daoName}.Columns().@{.options.Tree.LevelField.GoName},
+			TreeField:  dao.@{.daoName}.Columns().@{.options.Tree.TreeField.GoName},
+		})
 		if err != nil {
 			return err
+		}@{end}
+		@{ if and (eq .options.Step.IsTreeTable true) (eq .options.Tree.HasTreePath false) }if in.@{.pk.GoName} > 0 && in.@{.pk.GoName} == in.@{.options.Tree.PidField.GoName} {
+			return gerror.New("上级不能是自己！")
+		}
+		if in.@{.options.Tree.PidField.GoName} > 0 {
+			count, err := dao.@{.daoName}.Ctx(ctx).WherePri(in.@{.options.Tree.PidField.GoName}).Count()
+			if err != nil {
+				return err
+			}
+			if count == 0 {
+				return gerror.New("未查询到树表上级信息，请检查！")
+			}
+			nextPid := in.@{.options.Tree.PidField.GoName}
+			visited := map[interface{}]bool{}
+			for nextPid > 0 {
+				if nextPid == in.@{.pk.GoName} {
+					return gerror.New("上级不能设为自己当前的子级！")
+				}
+				if visited[nextPid] {
+					return gerror.New("树表上级关系存在循环，请检查！")
+				}
+				visited[nextPid] = true
+				var parent *@{.templateGroup}in.@{.varName}TreeOption
+				if err = dao.@{.daoName}.Ctx(ctx).Fields(dao.@{.daoName}.Columns().@{.options.Tree.PidField.GoName}).WherePri(nextPid).Scan(&parent); err != nil {
+					return err
+				}
+				if parent == nil {
+					return gerror.New("未查询到树表上级信息，请检查！")
+				}
+				nextPid = parent.@{.options.Tree.PidField.GoName}
+			}
 		}@{end}
 		// 修改
 		if in.@{.pk.GoName} > 0 {
@@ -147,9 +183,9 @@ func (s *s@{.servFunName}) Edit(ctx context.Context, in *@{.templateGroup}in.@{.
 @{ if eq .options.Step.HasDel true }
 // Delete 删除@{.tableComment}
 func (s *s@{.servFunName}) Delete(ctx context.Context, in *@{.templateGroup}in.@{.varName}DeleteParam) (err error) {
-	@{ if eq .options.Step.IsTreeTable true }count, err := dao.@{.daoName}.Ctx(ctx).Where(dao.@{.daoName}.Columns().Pid, in.@{.pk.GoName}).Count()
+	@{ if eq .options.Step.IsTreeTable true }count, err := dao.@{.daoName}.Ctx(ctx).Where(dao.@{.daoName}.Columns().@{.options.Tree.PidField.GoName}, in.@{.pk.GoName}).Count()
 	if err != nil {
-		err = gerror.Wrap(err, consts.ErrorORM)
+		err = gerror.Wrap(err, "查询@{.tableComment}下级失败，请稍后重试！")
 		return err
 	}
 	if count > 0 {
@@ -228,7 +264,7 @@ func (s *s@{.servFunName}) Switch(ctx context.Context, in *@{.templateGroup}in.@
 // TreeOption 获取@{.tableComment}关系树选项
 func (s *s@{.servFunName}) TreeOption(ctx context.Context) (nodes []tree.Node, err error) {
 	var models []*@{.templateGroup}in.@{.varName}TreeOption
-	if err = s.Model(ctx@{ if eq .options.Step.HasNotFilterAuth true } ,&handler.Option{FilterAuth: false}@{end}).Fields(@{.templateGroup}in.@{.varName}TreeOption{}).OrderAsc(dao.@{.daoName}.Columns().Pid).@{.listOrder}.Scan(&models); err != nil {
+	if err = s.Model(ctx@{ if eq .options.Step.HasNotFilterAuth true } ,&handler.Option{FilterAuth: false}@{end}).Fields(@{.templateGroup}in.@{.varName}TreeOption{}).OrderAsc(dao.@{.daoName}.Columns().@{.options.Tree.PidField.GoName}).@{.listOrder}.Scan(&models); err != nil {
 		err = gerror.Wrap(err, "获取@{.tableComment}关系树选项失败！")
 		return
 	}
@@ -236,7 +272,7 @@ func (s *s@{.servFunName}) TreeOption(ctx context.Context) (nodes []tree.Node, e
 	for i, v := range models {
 		nodes[i] = v
 	}
-	return tree.ListToTree(0, nodes)
+	return tree.ListToTree(0, nodes), nil
 }
 @{end}
 

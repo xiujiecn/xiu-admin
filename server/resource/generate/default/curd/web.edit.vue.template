@@ -14,7 +14,7 @@ import { addFullName, cloneDeep } from '@vben/utils';
 import { useVbenForm } from '#/adapter/form';
 import { Alert } from 'ant-design-vue';
 import { Edit, View } from '@{.importWebApi}';
-import { editSchema } from './model';
+import { editSchema@{ if eq .options.Step.IsTreeTable true }, treeOption, loadTreeOption@{end} } from './model';
 
 const emit = defineEmits<{ reload: [] }>();
 interface ModalProps {
@@ -63,6 +63,22 @@ const [BasicDrawer, drawerApi] = useVbenDrawer
     const { id, update, view, } = drawerApi.getData() as ModalProps;
     isUpdate.value = update;
     isView.value = view;
+    @{ if eq .options.Step.IsTreeTable true }
+    await loadTreeOption();
+    formApi.updateSchema([
+      {
+        componentProps: {
+          fieldNames: { label: '@{.options.Tree.TitleField.TsName}', value: '@{.pk.TsName}' },
+          showSearch: true,
+          treeData: treeOption.value,
+          treeDefaultExpandAll: true,
+          treeLine: { showLeafIcon: false },
+          treeNodeFilterProp: '@{.options.Tree.TitleField.TsName}',
+        },
+        fieldName: '@{.options.Tree.PidField.TsName}',
+      },
+    ]);
+    @{end}
     if (isUpdate.value || isView.value) {
       const record = await View({ @{.pk.TsName}: id });
       await formApi.setValues(record);

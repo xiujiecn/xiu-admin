@@ -142,6 +142,7 @@ func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (o
 		dataDeptInsert.DeptName = param.CompanyName
 		dataDeptInsert.ParentId = 0
 		dataDeptInsert.OrderNum = 0
+		dataDeptInsert.DeptType = 1 // 0:部门 1是公司
 		dataDeptInsert.Status = consts.SysDeptStatusNormal
 		dataDeptInsert.CreatedBy = contexts.GetUserId(ctx)
 		dataDeptInsert.CreatedAt = gtime.Now()
@@ -356,7 +357,7 @@ INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config
 INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '是否启动在线用户强制退出', 'sys.online.forceLogout', 'true', 'Y', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), 'true开启,false关闭');
 INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '系统启用的监控通道', 'iot.default.channel.gb28181', '0', 'Y', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), '');
 INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '报警资源匹配时间', 'iot.alarm.image.timesec', '10', 'N', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), NULL);
-INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '自主注册机构ID', 'iot.register.dept', '0', 'N', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), NULL);
+INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '自主注册组织ID', 'iot.register.dept', '0', 'N', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), NULL);
 INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '自主注册角色ID', 'iot.register.role', '0', 'N', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), NULL);
 INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '系统默认MQTT渠道', 'iot.default.channel.mqtt', '0', 'N', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), NULL);
 INSERT INTO sys_config (tenant_id, config_name, config_key, config_value, config_type, created_dept, created_by, created_at, remark) VALUES ('{{.TenantId}}', '系统默认TCP渠道', 'iot.default.channel.tcp', '0', 'N', {{.CreatedDept}}, {{.CreatedBy}}, SYSDATE(), NULL);

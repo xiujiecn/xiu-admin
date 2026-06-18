@@ -132,7 +132,7 @@ func (s *sSysNotice) Add(ctx context.Context, param *model.SysNoticeAddParam) (e
 	gconv.Struct(param, &data)
 	if param.NoticeRange == consts.NoticeRangeDept {
 		if len(param.DeptIdList) == 0 {
-			return errors.New("通知机构ID列表不能为空")
+			return errors.New("通知组织ID列表不能为空")
 		}
 		deptIds, err := json.Marshal(param.DeptIdList)
 		if err != nil {
@@ -236,7 +236,7 @@ func (s *sSysNotice) Edit(ctx context.Context, param *model.SysNoticeEditParam) 
 	gconv.Struct(param, &data)
 	if param.NoticeRange == consts.NoticeRangeDept {
 		if len(param.DeptIdList) == 0 {
-			return errors.New("通知机构ID列表不能为空")
+			return errors.New("通知组织ID列表不能为空")
 		}
 		deptIds, err := json.Marshal(param.DeptIdList)
 		if err != nil {

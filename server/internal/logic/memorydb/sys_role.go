@@ -119,6 +119,7 @@ func (s *sMemDBSysRole) CreateTable(ctx context.Context) error {
 			CREATE TABLE "sys_role" (
 				"role_id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 				"tenant_id" TEXT DEFAULT '000000' CHECK(length("tenant_id") <= 20),
+				"dept_id" INTEGER DEFAULT 0,
 				"role_name" TEXT NOT NULL CHECK(length("role_name") <= 30),
 				"role_key" TEXT NOT NULL CHECK(length("role_key") <= 100),
 				"role_sort" INTEGER NOT NULL,
