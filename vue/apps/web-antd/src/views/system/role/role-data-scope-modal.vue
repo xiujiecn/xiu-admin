@@ -126,8 +126,8 @@ async function handleCancel() {
 }
 /**
  * 通过回调更新 无法通过v-model
- * @param deptIds 选中的机构ID数组
- * @param checkStrictly 机构选择是否严格模式 true 严格模式(解除父子联动) false 非严格模式(父子联动), 默认非严格模式, 后台 1：非严格模式(父子联动) 0：严格模式(解除父子联动)
+ * @param deptIds 选中的组织ID数组
+ * @param checkStrictly 组织选择是否严格模式 true 严格模式(解除父子联动) false 非严格模式(父子联动), 默认非严格模式, 后台 1：非严格模式(父子联动) 0：严格模式(解除父子联动)
  */
 async function handleDeptChange(deptIds2: number[], checkStrictly2: boolean) {
   await nextTick();

@@ -109,9 +109,9 @@ func (c *c@{.varName}) @{.varName}TreeOption(ctx context.Context, req *v1.@{.var
 	}
 
 	if len(data) > 0 {
-		res = (*@{.varName | ToLower}.TreeOptionRes)(&data)
+		res = (*v1.@{.varName}TreeOptionRes)(&data)
 	} else {
-		temp := make(@{.varName | ToLower}.TreeOptionRes, 0)
+		temp := make(v1.@{.varName}TreeOptionRes, 0)
 		res = &temp
 	}
 	return

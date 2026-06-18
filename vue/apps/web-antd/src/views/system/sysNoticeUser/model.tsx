@@ -20,7 +20,7 @@ export class State {
   public noticeContent = null; // 公告内容
   public status = 0; // 公告状态
   public isRead = 0; // 是否已读
-  public createdDept = 0; // 创建机构
+  public createdDept = 0; // 创建组织
   public createdBy = 0; // 创建者
   public createdBySumma?: null | MemberSumma = null; // 创建者摘要信息
   public createdAt = ''; // 创建时间
@@ -182,7 +182,7 @@ export const viewSchema: DescItem[] = [
   { field: 'noticeContent', label: '公告内容' },
   { field: 'status', label: '公告状态' },
   { field: 'isRead', label: '是否已读' },
-  { field: 'createdDept', label: '创建机构' },
+  { field: 'createdDept', label: '创建组织' },
   { field: 'createdBy', label: '创建者' },
   { field: 'createdAt', label: '创建时间' },
   { field: 'updatedBy', label: '更新者' },

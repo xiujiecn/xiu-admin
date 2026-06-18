@@ -18,13 +18,15 @@ type SysDeptMiniModel struct {
 }
 
 type SysDeptListParam struct {
-	DeptName string `json:"deptName"`
-	Status   string `json:"status"`
+	DeptName string `json:"deptName" description:"部门名称"`
+	Status   string `json:"status" description:"部门状态（0正常 1停用）"`
+	DeptType *int   `json:"deptType" description:"部门类型(0:部门 1:公司)"`
 }
 
 type SysDeptListModel struct {
 	DeptId       int64  `json:"deptId"       orm:"dept_id"       description:"部门id"`
 	TenantId     string `json:"tenantId"     orm:"tenant_id"     description:"租户编号"`
+	DeptType     int    `json:"deptType"     orm:"dept_type"     description:"部门类型(0:部门 1:公司)"`
 	ParentId     int64  `json:"parentId"     orm:"parent_id"     description:"父部门id"`
 	Ancestors    string `json:"ancestors"    orm:"ancestors"     description:"祖级列表"`
 	DeptName     string `json:"deptName"     orm:"dept_name"     description:"部门名称"`
@@ -43,11 +45,13 @@ type SysDeptTreeModel struct {
 	DeptName  string              `json:"deptName"    description:"部门名称"`
 	Children  []*SysDeptTreeModel `json:"children"   description:"子部门"`
 	Ancestors string              `json:"ancestors"   description:"祖级列表"`
+	DeptType  int                 `json:"deptType"    description:"部门类型(0:部门 1:公司)"`
 }
 
 type SysDeptViewModel struct {
 	DeptId       int64       `json:"deptId"       orm:"dept_id"       description:"部门id"`
 	TenantId     string      `json:"tenantId"     orm:"tenant_id"     description:"租户编号"`
+	DeptType     int         `json:"deptType"     orm:"dept_type"     description:"部门类型(0:部门 1:公司)"`
 	ParentId     int64       `json:"parentId"     orm:"parent_id"     description:"父部门id"`
 	Ancestors    string      `json:"ancestors"    orm:"ancestors"     description:"祖级列表"`
 	DeptName     string      `json:"deptName"     orm:"dept_name"     description:"部门名称"`
@@ -73,6 +77,7 @@ type SysDeptAddModel struct {
 	Phone        string `json:"phone"        description:"联系电话"`
 	Email        string `json:"email"        description:"邮箱"`
 	Status       string `json:"status"       description:"部门状态（0正常 1停用）"`
+	DeptType     int    `json:"deptType"     description:"部门类型(0:部门 1:公司)"`
 }
 
 type SysDeptEditModel struct {
@@ -85,8 +90,13 @@ type SysDeptEditModel struct {
 	Phone        *string `json:"phone"        description:"联系电话"`
 	Email        *string `json:"email"        description:"邮箱"`
 	Status       *string `json:"status"       description:"部门状态（0正常 1停用）"`
+	DeptType     *int    `json:"deptType"     description:"部门类型(0:部门 1:公司)"`
 }
 
 type SysDeptDeleteModel struct {
 	DeptId int64 `json:"deptId" description:"部门id"`
+}
+
+type SysDeptTreeParam struct {
+	DeptType *int `json:"deptType" description:"部门类型(0:部门 1:公司)"`
 }

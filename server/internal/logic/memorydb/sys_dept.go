@@ -124,6 +124,7 @@ func (s *sMemDBSysDept) CreateTable(ctx context.Context) error {
 			"parent_id" INTEGER DEFAULT 0,
 			"ancestors" TEXT DEFAULT '' CHECK(length("ancestors") <= 500),
 			"dept_name" TEXT DEFAULT '' CHECK(length("dept_name") <= 30),
+			"dept_type" INTEGER DEFAULT 0,
 			"dept_category" TEXT CHECK(length("dept_category") <= 100),
 			"order_num" INTEGER DEFAULT 0,
 			"leader" INTEGER,

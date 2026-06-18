@@ -68,18 +68,23 @@ const postName = computed(() => {
       </div>
       <div class="px-[24px]">
         <Descriptions :column="1">
-          <DescriptionsItem label="账号">
+          <DescriptionsItem label="用户账号">
             {{ profile.user.userName }}
           </DescriptionsItem>
           <DescriptionsItem label="手机号码">
             {{ profile.user.phonenumber || '未绑定手机号' }}
           </DescriptionsItem>
-          <DescriptionsItem label="邮箱">
+          <DescriptionsItem label="用户邮箱">
             {{ profile.user.email || '未绑定邮箱' }}
           </DescriptionsItem>
-          <DescriptionsItem label="机构">
+          <DescriptionsItem label="所属公司">
             <Tag color="processing">
-              {{ profile.user.deptInfo?.deptName ?? '未分配机构' }}
+              {{ profile.user.companyInfo?.deptName ?? '未分配公司' }}
+            </Tag>
+          </DescriptionsItem>
+          <DescriptionsItem label="所属组织">
+            <Tag color="processing">
+              {{ profile.user.deptInfo?.deptName ?? '未分配组织' }}
             </Tag>
             <Tag v-if="postName" color="processing">
               {{ postName }}

@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strconv"
 	genmodel "xiuadmin/internal/library/xgen/gen_model"
 	"xiuadmin/utility"
 
@@ -116,16 +117,7 @@ import { getDictOptions } from '#/utils/dict';`)
 
 func (l *gCurd) genWebModelStateItems(ctx context.Context, in *genmodel.CurdPreviewParam) (items []*StateItem) {
 	for _, field := range in.MasterFields {
-		var value = field.DefaultValue
-		if value == nil {
-			value = "null"
-		}
-		if value == "" {
-			value = `''`
-		}
-		if value == "NULL" {
-			value = "null"
-		}
+		var value = webModelDefaultValue(field)
 
 		// 选项组件默认值调整
 		if gconv.Int(value) == 0 && IsSelectFormModel(field.FormMode) {
@@ -157,6 +149,27 @@ func (l *gCurd) genWebModelStateItems(ctx context.Context, in *genmodel.CurdPrev
 		}
 	}
 	return
+}
+
+func webModelDefaultValue(field *genmodel.GenCodesColumnListModel) interface{} {
+	value := field.DefaultValue
+	if value == nil {
+		return "null"
+	}
+
+	if gconv.String(value) == "NULL" {
+		return "null"
+	}
+
+	switch field.GoType {
+	case GoTypeString, GoTypeBytes, GoTypeDate, GoTypeDatetime, GoTypeTime, GoTypeGTime:
+		return strconv.Quote(gconv.String(value))
+	default:
+		if value == "" {
+			return "null"
+		}
+		return value
+	}
 }
 
 func (l *gCurd) genWebModelDictOptions(ctx context.Context, in *genmodel.CurdPreviewParam) error {
@@ -316,6 +329,9 @@ func (l *gCurd) genWebModelFormSchemaEach(buffer *bytes.Buffer, fields []*genmod
 			}
 		}
 		rules := "null"
+		if in.Options.Step.IsTreeTable && isEdit && field.Name == in.Options.Tree.PidColumn {
+			field.FormMode = FMPidTreeSelect
+		}
 		if field.IsEdit {
 			if field.Required {
 				if field.FormMode == FMInputNumber {
@@ -570,6 +586,26 @@ func (l *gCurd) genWebModelFormSchemaEach(buffer *bytes.Buffer, fields []*genmod
 		},
 		`, field.TsName, "Select", field.Dc, field.Dc, l.genWebDictOption(in.Options.DictMap[field.TsName]), rules, field.FormGridSpan)
 
+		case FMPidTreeSelect:
+			component = fmt.Sprintf(`  {
+			fieldName: '%s',
+			component: '%s',
+			label: '%s',
+			defaultValue: 0,
+			componentProps: {
+				allowClear: true,
+				fieldNames: { label: '%s', value: '%s' },
+				showSearch: true,
+				treeData: [],
+				treeDefaultExpandAll: true,
+				treeLine: { showLeafIcon: false },
+				treeNodeFilterProp: '%s',
+			},
+			rules:%v,
+			formItemClass: 'col-span-%d',
+		},
+		`, field.TsName, "TreeSelect", field.Dc, in.Options.Tree.TitleField.TsName, in.Pk.TsName, in.Options.Tree.TitleField.TsName, rules, field.FormGridSpan)
+
 		default:
 			component = defaultComponent
 		}
@@ -690,6 +726,9 @@ func (l *gCurd) genWebModelColumnsEach(buffer *bytes.Buffer, in *genmodel.CurdPr
 			defaultComponent = fmt.Sprintf("  {\n    title: '%s',\n    field: '%s',\n    align: '%v',\n    width: %v,\n },\n", field.Dc, field.TsName, field.Align, field.Width)
 			component        string
 		)
+		if in.Options.Step.IsTreeTable && in.Options.Tree.TitleColumn == field.Name {
+			defaultComponent = fmt.Sprintf("  {\n    title: '%s',\n    field: '%s',\n    align: '%v',\n    width: %v,\n    treeNode: true,\n },\n", field.Dc, field.TsName, field.Align, field.Width)
+		}
 
 		// 查询用户摘要
 		if in.Options.Step.HasHookMemberSummary && IsMemberSummaryField(field.Name) {

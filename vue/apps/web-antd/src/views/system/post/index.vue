@@ -110,7 +110,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { field: 'postId', title: 'ID' },
     { field: 'postCode', title: '岗位编码' },
     { field: 'postName', title: '岗位名称' },
-    { field: 'deptInfo.deptName', title: '机构' },
+    { field: 'deptInfo.deptName', title: '组织' },
     { field: 'postCategory', title: '岗位类别' },
     {
       field: 'status',

@@ -48,6 +48,12 @@ func GenTypeSelects(ctx context.Context) (output []*genmodel.SelectGenTypeModel,
 		if err != nil {
 			return
 		}
+		if len(confTemplates) == 0 && confName != "crud" {
+			err = g.Cfg().MustGet(ctx, "xgen.application.crud.templates").Scan(&confTemplates)
+			if err != nil {
+				return
+			}
+		}
 
 		for index, v := range confTemplates {
 			item.Templates = append(item.Templates, &genmodel.SelectGenTemplateModel{

@@ -14,6 +14,7 @@ import (
 type SysRoleListModel struct {
 	RoleId            int64       `json:"roleId"            orm:"role_id"             description:"角色ID"`
 	TenantId          string      `json:"tenantId"          orm:"tenant_id"           description:"租户编号"`
+	DeptId            int64       `json:"deptId"            orm:"dept_id"             description:"部门组织id"`
 	RoleName          string      `json:"roleName"          orm:"role_name"           description:"角色名称"`
 	RoleKey           string      `json:"roleKey"           orm:"role_key"            description:"角色权限字符串"`
 	RoleSort          int         `json:"roleSort"          orm:"role_sort"           description:"显示顺序"`
@@ -24,6 +25,7 @@ type SysRoleListModel struct {
 	CreatedDept       int64       `json:"createdDept"       orm:"created_dept"        description:"创建部门"`
 	CreatedAt         *gtime.Time `json:"createdAt"         orm:"created_at"          description:"创建时间"`
 	Remark            string      `json:"remark"            orm:"remark"              description:"备注"`
+	DeptName          string      `json:"deptName"          orm:"dept_name"           description:"部门名称"`
 }
 
 type SysRoleListParam struct {
@@ -33,6 +35,7 @@ type SysRoleListParam struct {
 	RoleKey   string   `json:"roleKey"                  description:"角色权限字符串"`
 	CreatedAt []string `json:"createdAt"                description:"创建时间"`
 	RoleIds   []int64  `json:"roleIds"                  description:"角色ID"`
+	DeptId    *int64   `json:"deptId"                   description:"部门组织id"`
 }
 
 type SysRoleMiniModel struct {
@@ -47,6 +50,7 @@ type SysRoleViewParam struct {
 type SysRoleViewModel struct {
 	RoleId            int64       `json:"roleId"            orm:"role_id"             description:"角色ID"`
 	TenantId          string      `json:"tenantId"          orm:"tenant_id"           description:"租户编号"`
+	DeptId            int64       `json:"deptId"            orm:"dept_id"             description:"部门组织id"`
 	RoleName          string      `json:"roleName"          orm:"role_name"           description:"角色名称"`
 	RoleKey           string      `json:"roleKey"           orm:"role_key"            description:"角色权限字符串"`
 	RoleSort          int         `json:"roleSort"          orm:"role_sort"           description:"显示顺序"`
@@ -76,6 +80,7 @@ type SysRoleAddParam struct {
 	UpdatedAt         *gtime.Time `json:"updatedAt"         orm:"updated_at"          description:"更新时间"`
 	Remark            string      `json:"remark"            orm:"remark"              description:"备注"`
 	MenuIds           []int64     `json:"menuIds"           orm:"menu_ids"            description:"菜单ID"`
+	DeptId            *int64      `json:"deptId"            orm:"dept_id"             description:"部门组织id"`
 }
 
 type SysRoleAddModel struct {
@@ -93,6 +98,7 @@ type SysRoleEditParam struct {
 	UpdatedAt         *gtime.Time `json:"updatedAt"         orm:"updated_at"          description:"更新时间"`
 	Remark            *string     `json:"remark"            orm:"remark"              description:"备注"`
 	MenuIds           []int64     `json:"menuIds"           orm:"menu_ids"            description:"菜单ID"`
+	DeptId            *int64      `json:"deptId"            orm:"dept_id"             description:"部门组织id"`
 }
 
 type SysRoleEditModel struct {

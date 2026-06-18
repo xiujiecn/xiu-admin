@@ -71,4 +71,12 @@ INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree
 -- 关系树选项
 INSERT INTO `@{.menuTable}` (`menu_id`, `menu_name`, `parent_id`, `level`, `tree`, `order_num`, `path`, `component`, `query_param`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `remark`) VALUES (NULL, '获取@{.tableComment}关系树选项', @listId, '@{.btnLevel}', CONCAT('@{.dirTree}tr_', @dirId, ' tr_', @listId,' '), 10, '', '', '', 1, 0, 'F', '0', '0', 'gen:@{.apiPrefix}:treeOption', '', 103, 1, @now, NULL, NULL, '');
 @{end}
+
+-- 默认绑定到超级管理员角色
+INSERT IGNORE INTO `@{.roleMenuTable}` (`role_id`, `menu_id`)
+SELECT 1, `menu_id`
+FROM `@{.menuTable}`
+WHERE `menu_id` IN (@dirId, @listId)
+   OR `parent_id` = @listId;
+
 COMMIT;

@@ -10,10 +10,12 @@
 import { computed, ref } from 'vue';
 import { useVbenDrawer } from '@vben/common-ui';
 import { $t } from '@vben/locales';
-import { cloneDeep } from '@vben/utils';
 import { useVbenForm } from '#/adapter/form';
 import MenuSelect from '../menu/menu-select.vue';
 import { Spin } from 'ant-design-vue';
+import { getSysDeptTreeApi } from '#/api/system/dept';
+import { addFullName, cloneDeep, getPopupContainer } from '@vben/utils';
+
 import {
   addSysRoleApi,
   editSysRoleApi,
@@ -67,6 +69,8 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
       menuIds.value = [];
       return null;
     }
+    setupDeptSelect();
+
     drawerApi.setState({ confirmLoading: true, loading: true });
     const { id, update, view } = drawerApi.getData();
     isUpdate.value = update;
@@ -136,6 +140,46 @@ async function handleCancel() {
   drawerApi.close();
   await formApi.resetForm();
 }
+
+
+/**
+ * 初始化组织选择
+ */
+ async function setupDeptSelect() {
+  // updateSchema
+  const deptTree = await getSysDeptTreeApi({ deptType: 1 });
+  // 选中后显示在输入框的值 即父节点 / 子节点
+  addFullName(deptTree.items, 'deptName', ' / ');
+  console.log('role-drawer.vue setupDeptSelect',deptTree);
+  formApi.updateSchema([
+    {
+      componentProps: (formModel) => ({
+        class: 'w-full',
+        fieldNames: {
+          key: 'deptId',
+          value: 'deptId',
+          children: 'children',
+          label: 'deptName',
+        },
+        getPopupContainer,
+        async onSelect(deptId: number | string) {
+
+        },
+        placeholder: '请选择',
+        showSearch: true,
+        treeData: deptTree.items,
+        treeDefaultExpandAll: true,
+        treeLine: { showLeafIcon: false },
+        // 筛选的字段
+        treeNodeFilterProp: 'label',
+        // 选中后显示在输入框的值
+        treeNodeLabelProp: 'fullName',
+      }),
+      fieldName: 'deptId',
+    },
+  ]);
+}
+
 </script>
 
 <template>
