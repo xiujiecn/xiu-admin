@@ -102,6 +102,10 @@ func (s *sSysAuth) Login(ctx context.Context, param *model.LoginParams) (res *mo
 		return nil, "", err
 	}
 
+	if err = service.SysUser().UpdateLoginInfo(ctx, user.UserId, ip); err != nil {
+		g.Log().Warningf(ctx, "sSysAuth.Login UpdateLoginInfo failed, userId: %d, ip: %s, error: %v", user.UserId, ip, err)
+	}
+
 	// 保存登录日志
 	go func() {
 		id, err := service.SysLogininfor().AddLogininfor(ctx, logininfor)
@@ -420,6 +424,10 @@ func (s *sSysAuth) LoginByOpenId(ctx context.Context, social *model.SysSocialLis
 		logininfor.Status = "1"
 		logininfor.Msg = err.Error()
 		return nil, "", err
+	}
+
+	if err = service.SysUser().UpdateLoginInfo(ctx, user.UserId, ip); err != nil {
+		g.Log().Warningf(ctx, "sSysAuth.LoginByOpenId UpdateLoginInfo failed, userId: %d, ip: %s, error: %v", user.UserId, ip, err)
 	}
 
 	// 保存登录日志

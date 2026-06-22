@@ -312,6 +312,7 @@ type (
 		UpdateUser(ctx context.Context, req *model.SysUserUpdateModel) (err error)
 		DeleteUser(ctx context.Context, userIds []int64) (err error)
 		ResetPassword(ctx context.Context, userId int64, password string) (err error)
+		UpdateLoginInfo(ctx context.Context, userId int64, loginIp string) (err error)
 		// 获取用户角色ID列表
 		GetUserRoleIds(ctx context.Context, userId int64) (roleIds []int64, err error)
 		// 获取用户岗位ID列表
