@@ -7,6 +7,7 @@ package router
 
 import (
 	"context"
+	"xiuadmin/internal/controller/info"
 	"xiuadmin/internal/service"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -19,6 +20,15 @@ func InitRouter(ctx context.Context, s *ghttp.Server) {
 	if uploadPath != "" {
 		s.AddStaticPath("/upload", uploadPath)
 	}
+	s.Group("/api/v1", func(group *ghttp.RouterGroup) {
+		group.Middleware(
+			service.Middleware().ResponseHandler,
+			service.Middleware().CORS,
+		)
+		group.Bind(
+			info.NewV1(),
+		)
+	})
 	s.Group("/api/v1", func(group *ghttp.RouterGroup) {
 		group.Middleware(
 			service.Middleware().Ctx,

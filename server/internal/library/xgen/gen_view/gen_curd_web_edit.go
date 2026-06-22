@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	genmodel "xiuadmin/internal/library/xgen/gen_model"
+	"xiuadmin/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"
@@ -35,7 +36,11 @@ func (l *gCurd) genWebEditFormItem(ctx context.Context, in *genmodel.CurdPreview
 		}
 
 		var (
-			defaultComponent = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n          <n-input placeholder=\"请输入%s\" v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.Dc, field.TsName)
+			defaultComponent = fmt.Sprintf(`<Col :span="%d">
+          <FormItem label="%s" name="%s">
+            <Input placeholder="请输入%s" v-model:value="formValue.%s" />
+          </FormItem>
+        </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.Dc, field.TsName)
 			component        string
 		)
 
@@ -48,102 +53,202 @@ func (l *gCurd) genWebEditFormItem(ctx context.Context, in *genmodel.CurdPreview
 			component = defaultComponent
 
 		case FMInputNumber:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-input-number placeholder=\"请输入%s\" v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.Dc, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <InputNumber class="w-full" placeholder="请输入%s" v-model:value="formValue.%s" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.Dc, field.TsName)
 
 		case FMInputTextarea:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-input type=\"textarea\" placeholder=\"%s\" v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.Dc, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <Textarea placeholder="请输入%s" v-model:value="formValue.%s" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.Dc, field.TsName)
 
 		case FMInputEditor:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <Editor style=\"height: 450px\" id=\"%s\" v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <RichTextarea style="height: 450px" v-model="formValue.%s" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMInputDynamic:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-dynamic-input\n            v-model:value=\"formValue.%s\"\n            preset=\"pair\"\n            key-placeholder=\"键名\"\n            value-placeholder=\"键值\"\n          />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <Space direction="vertical" class="w-full">
+                <Space v-for="(item, index) in formValue.%s" :key="index">
+                  <Input v-model:value="item.key" placeholder="键名" />
+                  <Input v-model:value="item.value" placeholder="键值" />
+                </Space>
+              </Space>
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMDate:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <DatePicker v-model:formValue=\"formValue.%s\" type=\"date\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
-
-		// case FMDateRange:  // 必须要有两个字段，后面优化下
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <DatePicker v-model:value="formValue.%s" class="w-full" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMTime:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <DatePicker v-model:formValue=\"formValue.%s\" type=\"datetime\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
-
-		// case FMTimeRange: // 必须要有两个字段，后面优化下
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <DatePicker v-model:value="formValue.%s" show-time class="w-full" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMRadio:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-radio-group v-model:value=\"formValue.%s\" name=\"%s\">\n            <n-radio-button\n              v-for=\"%s in dict.getOptionUnRef('%s')\"\n              :key=\"%s.value\"\n              :value=\"%s.value\"\n              :label=\"%s.label\"\n            />\n          </n-radio-group>\n          </n-form-item>", field.Dc, field.TsName, field.TsName, field.TsName, field.TsName, in.Options.DictMap[field.TsName], field.TsName, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <RadioGroup
+                v-model:value="formValue.%s"
+                :options="getDictOptions('%s')"
+                option-type="button"
+                button-style="solid"
+              />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName, in.Options.DictMap[field.TsName])
 
 		case FMCheckbox:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-checkbox-group v-model:value=\"formValue.%s\">\n            <n-space>\n              <n-checkbox\n                v-for=\"item in dict.getOptionUnRef('%s')\"\n                :key=\"item.value\"\n                :value=\"item.value\"\n                :label=\"item.label\"\n              />\n            </n-space>\n          </n-checkbox-group>\n          </n-form-item>", field.Dc, field.TsName, field.TsName, in.Options.DictMap[field.TsName])
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <CheckboxGroup v-model:value="formValue.%s">
+                <Space>
+                  <Checkbox
+                    v-for="item in getDictOptions('%s')"
+                    :key="item.value"
+                    :value="item.value"
+                  >
+                    {{ item.label }}
+                  </Checkbox>
+                </Space>
+              </CheckboxGroup>
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName, in.Options.DictMap[field.TsName])
 
 		case FMSelect:
 			if in.Options.DictMap[field.TsName] != nil {
-				component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-select v-model:value=\"formValue.%s\" :options=\"dict.getOptionUnRef('%s')\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName, in.Options.DictMap[field.TsName])
+				component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <Select v-model:value="formValue.%s" :options="getDictOptions('%s')" placeholder="请选择%s" class="w-full" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName, in.Options.DictMap[field.TsName], field.Dc)
 			} else {
-				component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-select v-model:value=\"formValue.%s\" options=\"\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
+				component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <Select v-model:value="formValue.%s" placeholder="请选择%s" class="w-full" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName, field.Dc)
 			}
 
 		case FMSelectMultiple:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-select multiple v-model:value=\"formValue.%s\" :options=\"dict.getOptionUnRef('%s')\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName, in.Options.DictMap[field.TsName])
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <Select v-model:value="formValue.%s" mode="multiple" :options="getDictOptions('%s')" placeholder="请选择%s" class="w-full" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName, in.Options.DictMap[field.TsName], field.Dc)
 
 		case FMUploadImage:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <UploadImage :maxNumber=\"1\" v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <ImageUpload :max-count="1" v-model:value="formValue.%s" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMUploadImages:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <UploadImage :maxNumber=\"10\" v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <ImageUpload :max-count="10" v-model:value="formValue.%s" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMUploadFile:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <UploadFile :maxNumber=\"1\" v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <FileUpload :max-count="1" v-model:value="formValue.%s" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMUploadFiles:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <UploadFile :maxNumber=\"10\" v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <FileUpload :max-count="10" v-model:value="formValue.%s" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMSwitch:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-switch :unchecked-value=\"2\" :checked-value=\"1\" v-model:value=\"formValue.%s\"\n        />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <Switch v-model:checked="formValue.%s" :checked-value="1" :un-checked-value="2" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMRate:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <n-rate allow-half :default-value=\"formValue.%s\" :on-update:value=\"update%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName, field.GoName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <Rate allow-half v-model:value="formValue.%s" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName)
 
 		case FMCitySelector:
-			component = fmt.Sprintf("<n-form-item label=\"%s\" path=\"%s\">\n            <CitySelector v-model:value=\"formValue.%s\" />\n          </n-form-item>", field.Dc, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+            <FormItem label="%s" name="%s">
+              <Cascader v-model:value="formValue.%s" placeholder="请选择%s" class="w-full" />
+            </FormItem>
+          </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.TsName, field.Dc)
+
 		case FMPidTreeSelect:
-			component = fmt.Sprintf(`<n-form-item label="%v" path="pid">
-              <n-tree-select
-                :options="treeOption"
-                v-model:value="formValue.pid"
-                key-field="%v"
-                label-field="%v"
-                clearable
-                filterable
-                default-expand-all
-                show-path
-              />
-            </n-form-item>`, field.Dc, in.Pk.TsName, in.Options.Tree.TitleField.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+              <FormItem label="%v" name="pid">
+                <TreeSelect
+                  v-model:value="formValue.pid"
+                  :tree-data="treeOption"
+                  :field-names="{ label: '%v', value: '%v', children: 'children' }"
+                  allow-clear
+                  show-search
+                  tree-default-expand-all
+                  :tree-node-filter-prop="'%v'"
+                  class="w-full"
+                />
+              </FormItem>
+            </Col>`, field.FormGridSpan, field.Dc, in.Options.Tree.TitleField.TsName, in.Pk.TsName, in.Options.Tree.TitleField.TsName)
+
 		case FMTreeSelect:
-			component = fmt.Sprintf(`<n-form-item label="%v" path="%v">
-              <n-tree-select
-                placeholder="请选择%v"
-                v-model:value="formValue.%v"
-                :options="[{ label: 'AA', key: 1, children: [{ label: 'BB', key: 2 }] }]"
-                clearable
-                filterable
-                default-expand-all
-              />
-            </n-form-item>`, field.Dc, field.TsName, field.Dc, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+              <FormItem label="%v" name="%v">
+                <TreeSelect
+                  placeholder="请选择%v"
+                  v-model:value="formValue.%v"
+                  :tree-data="[{ title: 'AA', value: 1, children: [{ title: 'BB', value: 2 }] }]"
+                  allow-clear
+                  show-search
+                  tree-default-expand-all
+                  class="w-full"
+                />
+              </FormItem>
+            </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.Dc, field.TsName)
+
 		case FMCascader:
-			component = fmt.Sprintf(`<n-form-item label="%v" path="%v">
-              <n-cascader
-                placeholder="请选择%v"
-                v-model:value="formValue.%v"
-                :options="[{ label: 'AA', value: 1, children: [{ label: 'BB', value: 2 }] }]"
-                clearable
-                filterable
-              />
-            </n-form-item>`, field.Dc, field.TsName, field.Dc, field.TsName)
+			component = fmt.Sprintf(`<Col :span="%d">
+              <FormItem label="%v" name="%v">
+                <Cascader
+                  placeholder="请选择%v"
+                  v-model:value="formValue.%v"
+                  :options="[{ label: 'AA', value: 1, children: [{ label: 'BB', value: 2 }] }]"
+                  allow-clear
+                  show-search
+                  class="w-full"
+                />
+              </FormItem>
+            </Col>`, field.FormGridSpan, field.Dc, field.TsName, field.Dc, field.TsName)
+
 		default:
 			component = defaultComponent
 		}
 
-		buffer.WriteString(fmt.Sprintf("<n-gi span=\"%v\">%v</n-gi>\n\n", field.FormGridSpan, component))
+		buffer.WriteString(component + "\n\n")
 	}
 	return buffer.String()
 }
@@ -152,14 +257,14 @@ func (l *gCurd) genWebEditScript(ctx context.Context, in *genmodel.CurdPreviewPa
 	var (
 		data         = make(g.Map)
 		importBuffer = bytes.NewBuffer(nil)
-		setupBuffer  = bytes.NewBuffer(nil)
+		antdUI       []string
 	)
 
 	importBuffer.WriteString("  import { ref, computed } from 'vue';\n")
 
 	// 导入字典
 	if in.Options.DictOps.Has {
-		importBuffer.WriteString("  import { useDictStore } from '@/store/modules/dict';\n")
+		importBuffer.WriteString("  import { getDictOptions } from '#/utils/dict';\n")
 	}
 
 	// 导入api
@@ -185,33 +290,51 @@ func (l *gCurd) genWebEditScript(ctx context.Context, in *genmodel.CurdPreviewPa
 			continue
 		}
 		switch field.FormMode {
+		case FMInput, FMInputTextarea, FMInputDynamic:
+			antdUI = append(antdUI, "Col", "FormItem", "Input", "Space")
+		case FMInputNumber:
+			antdUI = append(antdUI, "Col", "FormItem", "InputNumber")
 		case FMDate, FMDateRange, FMTime, FMTimeRange:
-			if !gstr.Contains(importBuffer.String(), `import DatePicker`) {
-				importBuffer.WriteString("  import DatePicker from '@/components/DatePicker/datePicker.vue';\n")
-			}
+			antdUI = append(antdUI, "Col", "FormItem", "DatePicker")
 		case FMInputEditor:
-			if !gstr.Contains(importBuffer.String(), `import Editor`) {
-				importBuffer.WriteString("  import Editor from '@/components/Editor/editor.vue';\n")
+			if !gstr.Contains(importBuffer.String(), `import { Tinymce as RichTextarea }`) {
+				importBuffer.WriteString("  import { Tinymce as RichTextarea } from '#/components/tinymce';\n")
 			}
+			antdUI = append(antdUI, "Col", "FormItem")
 		case FMUploadImage, FMUploadImages:
-			if !gstr.Contains(importBuffer.String(), `import UploadImage`) {
-				importBuffer.WriteString("  import UploadImage from '@/components/Upload/uploadImage.vue';\n")
+			if !gstr.Contains(importBuffer.String(), `import { ImageUpload }`) {
+				importBuffer.WriteString("  import { ImageUpload } from '#/components/upload';\n")
 			}
+			antdUI = append(antdUI, "Col", "FormItem")
 		case FMUploadFile, FMUploadFiles:
-			if !gstr.Contains(importBuffer.String(), `import UploadFile`) {
-				importBuffer.WriteString("  import UploadFile from '@/components/Upload/uploadFile.vue';\n")
+			if !gstr.Contains(importBuffer.String(), `import { FileUpload }`) {
+				importBuffer.WriteString("  import { FileUpload } from '#/components/upload';\n")
 			}
+			antdUI = append(antdUI, "Col", "FormItem")
+		case FMRadio:
+			antdUI = append(antdUI, "Col", "FormItem", "RadioGroup")
+		case FMCheckbox:
+			antdUI = append(antdUI, "Col", "FormItem", "CheckboxGroup", "Checkbox", "Space")
+		case FMSelect, FMSelectMultiple:
+			antdUI = append(antdUI, "Col", "FormItem", "Select")
+		case FMSwitch:
+			antdUI = append(antdUI, "Col", "FormItem", "Switch")
 		case FMRate:
-			setupBuffer.WriteString(fmt.Sprintf("  function update%s(num) {\n    formValue.value.%s = num;\n  }\n", field.GoName, field.TsName))
-		case FMCitySelector:
-			if !gstr.Contains(importBuffer.String(), `import CitySelector`) {
-				importBuffer.WriteString("  import CitySelector from '@/components/CitySelector/citySelector.vue';\n")
-			}
+			antdUI = append(antdUI, "Col", "FormItem", "Rate")
+		case FMCitySelector, FMCascader:
+			antdUI = append(antdUI, "Col", "FormItem", "Cascader")
+		case FMPidTreeSelect, FMTreeSelect:
+			antdUI = append(antdUI, "Col", "FormItem", "TreeSelect")
 		}
 	}
 
+	antdUI = utility.UniqueSlice(antdUI)
+	if len(antdUI) > 0 {
+		importBuffer.WriteString("  import " + ImportWebMethod(antdUI) + " from 'ant-design-vue';\n")
+	}
+
 	data["import"] = importBuffer.String()
-	data["setup"] = setupBuffer.String()
+	data["setup"] = ""
 	if in.Options.PresetStep != nil {
 		data["formGridSpan"] = in.Options.PresetStep.FormGridCols
 	}
