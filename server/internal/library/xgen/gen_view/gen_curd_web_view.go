@@ -28,13 +28,15 @@ func (l *gCurd) generateWebViewItem(ctx context.Context, in *genmodel.CurdPrevie
 		}
 
 		var (
-			defaultComponent = fmt.Sprintf("<n-descriptions-item>\n          <template #label>%s</template>\n          {{ formValue.%s }}\n        </n-descriptions-item>", field.Dc, field.TsName)
+			defaultComponent = fmt.Sprintf(`<DescriptionsItem label="%s">{{ formValue.%s }}</DescriptionsItem>`, field.Dc, field.TsName)
 			component        string
 		)
 
 		switch field.FormMode {
 		case FMInputTextarea, FMInputEditor:
-			component = fmt.Sprintf("<n-descriptions-item>\n          <template #label>%s</template>\n          <span v-html=\"formValue.%s\"></span></n-descriptions-item>", field.Dc, field.TsName)
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <span v-html="formValue.%s"></span>
+        </DescriptionsItem>`, field.Dc, field.TsName)
 
 		case FMInputDynamic:
 			component = defaultComponent
@@ -46,28 +48,78 @@ func (l *gCurd) generateWebViewItem(ctx context.Context, in *genmodel.CurdPrevie
 			component = defaultComponent
 
 		case FMRadio, FMSelect:
-			component = fmt.Sprintf("<n-descriptions-item label=\"%s\">\n          <n-tag :type=\"dict.getType('%s', formValue.%s)\" size=\"small\" class=\"min-left-space\">{{ dict.getLabel('%s', formValue.%s) }}</n-tag>\n        </n-descriptions-item>", field.Dc, in.Options.DictMap[field.TsName], field.TsName, in.Options.DictMap[field.TsName], field.TsName)
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <component :is="renderDict(String(formValue.%s), '%s')" />
+        </DescriptionsItem>`, field.Dc, field.TsName, in.Options.DictMap[field.TsName])
 
 		case FMCheckbox, FMSelectMultiple:
-			component = fmt.Sprintf("<n-descriptions-item label=\"%s\">\n          <template v-for=\"(item, key) in formValue.%s\" :key=\"key\">\n            <n-tag :type=\"dict.getType('%s', item)\" size=\"small\" class=\"min-left-space\">{{ dict.getLabel('%s', item) }}</n-tag>\n          </template>\n        </n-descriptions-item>", field.Dc, field.TsName, in.Options.DictMap[field.TsName], in.Options.DictMap[field.TsName])
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <component :is="renderDictTags(formValue.%s, '%s')" />
+        </DescriptionsItem>`, field.Dc, field.TsName, in.Options.DictMap[field.TsName])
 
 		case FMUploadImage:
-			component = fmt.Sprintf("<n-descriptions-item>\n          <template #label>%s</template>\n          <n-image style=\"margin-left: 10px; height: 100px; width: 100px\" :src=\"formValue.%s\"/></n-descriptions-item>", field.Dc, field.TsName)
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <Image style="margin-left: 10px; height: 100px; width: 100px" :src="formValue.%s" />
+        </DescriptionsItem>`, field.Dc, field.TsName)
 
 		case FMUploadImages:
-			component = fmt.Sprintf("<n-descriptions-item>\n          <template #label>%s</template>\n          <n-image-group>\n            <n-space>\n              <span v-for=\"(item, key) in formValue.%s\" :key=\"key\">\n                <n-image style=\"margin-left: 10px; height: 100px; width: 100px\" :src=\"item\" />\n              </span>\n            </n-space>\n          </n-image-group>\n        </n-descriptions-item>", field.Dc, field.TsName)
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <Image.PreviewGroup>
+            <Space>
+              <Image
+                v-for="(item, key) in formValue.%s"
+                :key="key"
+                style="margin-left: 10px; height: 100px; width: 100px"
+                :src="item"
+              />
+            </Space>
+          </Image.PreviewGroup>
+        </DescriptionsItem>`, field.Dc, field.TsName)
 
 		case FMUploadFile:
-			component = fmt.Sprintf("<n-descriptions-item>\n          <template #label>%s</template>\n          <div class=\"upload-card\"  v-show=\"formValue.%s !== ''\" @click=\"download(formValue.%s)\">\n            <div class=\"upload-card-item\" style=\"height: 100px; width: 100px\">\n              <div class=\"upload-card-item-info\">\n                <div class=\"img-box\">\n                  <n-avatar :style=\"fileAvatarCSS\">{{ getFileExt(formValue.%s) }}</n-avatar>\n                </div>\n              </div>\n            </div>\n          </div>\n        </n-descriptions-item>", field.Dc, field.TsName, field.TsName, field.TsName)
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <div class="upload-card" v-show="formValue.%s !== ''" @click="download(formValue.%s)">
+            <div class="upload-card-item" style="height: 100px; width: 100px">
+              <div class="upload-card-item-info">
+                <div class="img-box">
+                  <Avatar :style="fileAvatarCSS">{{ getFileExt(formValue.%s) }}</Avatar>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DescriptionsItem>`, field.Dc, field.TsName, field.TsName, field.TsName)
 
 		case FMUploadFiles:
-			component = fmt.Sprintf("<n-descriptions-item>\n          <template #label>%s</template>\n          <div class=\"upload-card\">\n            <n-space style=\"gap: 0px 0px\">\n              <div\n                class=\"upload-card-item\"\n                style=\"height: 100px; width: 100px\"\n                v-for=\"(item, key) in formValue.%s\"\n                :key=\"key\"\n              >\n                <div class=\"upload-card-item-info\">\n                  <div class=\"img-box\">\n                    <n-avatar :style=\"fileAvatarCSS\" @click=\"download(item)\">{{\n                      getFileExt(item)\n                    }}</n-avatar>\n                  </div>\n                </div>\n              </div>\n            </n-space>\n          </div>\n        </n-descriptions-item>", field.Dc, field.TsName)
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <div class="upload-card">
+            <Space :size="0">
+              <div
+                class="upload-card-item"
+                style="height: 100px; width: 100px"
+                v-for="(item, key) in formValue.%s"
+                :key="key"
+              >
+                <div class="upload-card-item-info">
+                  <div class="img-box">
+                    <Avatar :style="fileAvatarCSS" @click="download(item)">{{
+                      getFileExt(item)
+                    }}</Avatar>
+                  </div>
+                </div>
+              </div>
+            </Space>
+          </div>
+        </DescriptionsItem>`, field.Dc, field.TsName)
 
 		case FMSwitch:
-			component = fmt.Sprintf("<n-descriptions-item label=\"%s\">\n          <n-switch v-model:value=\"formValue.%s\" :unchecked-value=\"2\" :checked-value=\"1\" :disabled=\"true\"/></n-descriptions-item>", field.Dc, field.TsName)
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <Switch :checked="formValue.%s === 1" disabled />
+        </DescriptionsItem>`, field.Dc, field.TsName)
 
 		case FMRate:
-			component = fmt.Sprintf("<n-descriptions-item label=\"%s\"\n          ><n-rate readonly :default-value=\"formValue.%s\"\n        /></n-descriptions-item>", field.Dc, field.TsName)
+			component = fmt.Sprintf(`<DescriptionsItem label="%s">
+          <Rate :value="formValue.%s" disabled allow-half />
+        </DescriptionsItem>`, field.Dc, field.TsName)
 
 		default:
 			component = defaultComponent

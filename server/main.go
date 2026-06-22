@@ -11,6 +11,7 @@ import (
 	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
 	_ "xiuadmin/internal/packed"
+	"xiuadmin/internal/service"
 
 	_ "xiuadmin/internal/logic"
 
@@ -35,5 +36,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	service.Info().SetInfoBuild(BuildVersion, BuildTime, CommitID)
+	service.Info().SetInfoName("web", "XiuAdminServer", "XiuAdmin", "中后台管理系统开发框架")
 	cmd.Main.Run(ctx)
 }
