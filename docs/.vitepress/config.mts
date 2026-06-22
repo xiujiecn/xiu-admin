@@ -27,7 +27,7 @@ export default defineConfig({
     ],
     footer: {
       message: '基于 Apache License 2.0 开源许可发布',
-      copyright: `版权所有 © 2024-${new Date().getFullYear()} 李秀杰`
+      copyright: `版权所有 © 2024-${new Date().getFullYear()} <a href="https://beian.miit.gov.cn/" target="_blank">鲁ICP备2024117944号-4</a> 李秀杰`
     },
   }
 })
