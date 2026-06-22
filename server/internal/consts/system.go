@@ -52,13 +52,14 @@ var (
 )
 
 var (
-	// 角色数据范围: 1全部数据权限 2自定数据权限 3本部门数据权限 4本部门及以下数据权限 5仅本人数据权限 6本部门及以下或本人数据权限
+	// 角色数据范围: 1全部数据权限 2自定数据权限 3本部门数据权限 4本部门及以下数据权限 5仅本人数据权限 6本部门及以下或本人数据权限 7本组织及本组织下一级数据权限
 	SysRoleDataScopeAll                    = "1"
 	SysRoleDataScopeCustom                 = "2"
 	SysRoleDataScopeDept                   = "3"
 	SysRoleDataScopeDeptAndBelow           = "4"
 	SysRoleDataScopePersonal               = "5"
 	SysRoleDataScopeDeptAndBelowOrPersonal = "6"
+	SysRoleDataScopeOrgAndNextLevel        = "7"
 )
 
 var (
