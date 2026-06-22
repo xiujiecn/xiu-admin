@@ -585,6 +585,18 @@ func (l *sSysUser) ResetPassword(ctx context.Context, userId int64, password str
 	return nil
 }
 
+func (l *sSysUser) UpdateLoginInfo(ctx context.Context, userId int64, loginIp string) (err error) {
+	_, err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().UserId, userId).Data(map[string]any{
+		dao.SysUser.Columns().LoginIp:   loginIp,
+		dao.SysUser.Columns().LoginDate: gtime.Now(),
+	}).Update()
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysUser.UpdateLoginInfo err: %v, userId: %d, loginIp: %s", err, userId, loginIp)
+		return err
+	}
+	return nil
+}
+
 // 获取用户角色ID列表
 func (l *sSysUser) GetUserRoleIds(ctx context.Context, userId int64) (roleIds []int64, err error) {
 	urList := make([]*entity.SysUserRole, 0)
