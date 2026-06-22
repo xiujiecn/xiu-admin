@@ -77,6 +77,8 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 		} else if dataScope == consts.SysRoleDataScopeDeptAndBelowOrPersonal { // 角色数据范围: 6本部门及以下或本人数据权限
 			deptIds = append(deptIds, GetDeptAndSub(ctx, user.DeptId)...)
 			userIds = append(userIds, user.ID)
+		} else if dataScope == consts.SysRoleDataScopeOrgAndNextLevel { // 角色数据范围: 7本组织及本组织下一级数据权限
+			deptIds = append(deptIds, GetOrgAndNextLevelDeptIds(ctx, user.DeptId)...)
 		}
 	} else {
 		for _, role := range user.Roles {
@@ -102,6 +104,8 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 			} else if dataScope == consts.SysRoleDataScopeDeptAndBelowOrPersonal { // 角色数据范围: 6本部门及以下或本人数据权限
 				deptIds = append(deptIds, GetDeptAndSub(ctx, user.DeptId)...)
 				userIds = append(userIds, user.ID)
+			} else if dataScope == consts.SysRoleDataScopeOrgAndNextLevel { // 角色数据范围: 7本组织及本组织下一级数据权限
+				deptIds = append(deptIds, GetOrgAndNextLevelDeptIds(ctx, user.DeptId)...)
 			}
 		}
 	}
@@ -133,6 +137,46 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 		m = m.WhereIn(userFilterField, userIds)
 	}
 	return m
+}
+
+// GetParentCompanyDeptId 获取用户所属上级公司组织ID
+func GetParentCompanyDeptId(ctx context.Context, deptId int64) int64 {
+	if deptId <= 0 {
+		return deptId
+	}
+	var dept entity.SysDept
+	err := g.Model("sys_dept").Where("dept_id", deptId).Scan(&dept)
+	if err != nil || dept.DeptId == 0 {
+		return deptId
+	}
+	if dept.ParentId == 0 || dept.DeptType == 1 {
+		return dept.DeptId
+	}
+	return GetParentCompanyDeptId(ctx, dept.ParentId)
+}
+
+// GetDeptDirectSub 获取指定部门的直接下级部门ID
+func GetDeptDirectSub(ctx context.Context, deptId int64) (ids []int64) {
+	array, err := g.Model("sys_dept").
+		Where("parent_id", deptId).
+		Fields("dept_id").
+		Array()
+	if err != nil {
+		g.Log().Panicf(ctx, "GetDeptDirectSub err:%+v", err)
+		return
+	}
+	for _, v := range array {
+		ids = append(ids, v.Int64())
+	}
+	return
+}
+
+// GetOrgAndNextLevelDeptIds 获取本组织及本组织下一级数据权限范围：所属公司组织及直接下级
+func GetOrgAndNextLevelDeptIds(ctx context.Context, deptId int64) (ids []int64) {
+	orgDeptId := GetParentCompanyDeptId(ctx, deptId)
+	ids = append(ids, orgDeptId)
+	ids = append(ids, GetDeptDirectSub(ctx, orgDeptId)...)
+	return
 }
 
 // GetDeptAndSub 获取指定部门的所有下级，含本部门

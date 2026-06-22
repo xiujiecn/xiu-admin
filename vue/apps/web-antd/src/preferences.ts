@@ -16,7 +16,7 @@ export const overridesPreferences = defineOverridesPreferences({
   },
   logo: {
     enable: true,
-    source: "https://iot.xiujie.cn/wp-content/uploads/2025/02/96x96.webp",
+    source: "https://xiujiezhilian.cn/logo.png",
   },
   copyright: {
     enable: true,
