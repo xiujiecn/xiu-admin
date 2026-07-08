@@ -13,6 +13,7 @@ import (
 type SysJob struct {
 	g.Meta         `orm:"table:sys_job, do:true"`
 	JobId          interface{} // 任务ID
+	TenantId       interface{} // 租户编号
 	JobName        interface{} // 任务名称
 	JobParams      interface{} // 参数
 	JobGroup       interface{} // 任务组名

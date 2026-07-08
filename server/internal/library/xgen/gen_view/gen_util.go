@@ -14,6 +14,7 @@ import (
 	"unicode"
 
 	"xiuadmin/internal/dao"
+	"xiuadmin/internal/library/contexts"
 	"xiuadmin/internal/library/mcache"
 	genmodel "xiuadmin/internal/library/xgen/gen_model"
 	"xiuadmin/internal/library/xgen/gen_view/gohtml"
@@ -263,6 +264,7 @@ func syncGeneratedMenus(ctx context.Context, beforeMaxMenuId int64) error {
 	var roleIds []int64
 	if err := dao.SysRoleMenu.Ctx(ctx).
 		Fields(dao.SysRoleMenu.Columns().RoleId).
+		Where(dao.SysRoleMenu.Columns().TenantId, contexts.GetTenantId(ctx)).
 		WhereIn(dao.SysRoleMenu.Columns().MenuId, menuIds).
 		Group(dao.SysRoleMenu.Columns().RoleId).
 		Scan(&roleIds); err != nil {
@@ -275,6 +277,7 @@ func syncGeneratedMenus(ctx context.Context, beforeMaxMenuId int64) error {
 	var userIds []int64
 	if err := dao.SysUserRole.Ctx(ctx).
 		Fields(dao.SysUserRole.Columns().UserId).
+		Where(dao.SysUserRole.Columns().TenantId, contexts.GetTenantId(ctx)).
 		WhereIn(dao.SysUserRole.Columns().RoleId, roleIds).
 		Group(dao.SysUserRole.Columns().UserId).
 		Scan(&userIds); err != nil {

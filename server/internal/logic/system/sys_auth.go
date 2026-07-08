@@ -333,6 +333,9 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 			for _, r := range rmList {
 				if r.MenuId == m.MenuId {
 					roleDS := roleDataScopeMap[r.RoleId]
+					if r.DataScope != "" && r.DataScope != consts.SysRoleMenuDataScopeRole {
+						roleDS = r.DataScope
+					}
 					if len(roleDS) < 1 {
 						roleDS = consts.SysRoleDataScopeAll
 					}

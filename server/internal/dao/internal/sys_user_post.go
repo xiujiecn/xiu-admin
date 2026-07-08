@@ -21,14 +21,16 @@ type SysUserPostDao struct {
 
 // SysUserPostColumns defines and stores column names for the table sys_user_post.
 type SysUserPostColumns struct {
-	UserId string // 用户ID
-	PostId string // 岗位ID
+	TenantId string // 租户编号
+	UserId   string // 用户ID
+	PostId   string // 岗位ID
 }
 
 // sysUserPostColumns holds the columns for the table sys_user_post.
 var sysUserPostColumns = SysUserPostColumns{
-	UserId: "user_id",
-	PostId: "post_id",
+	TenantId: "tenant_id",
+	UserId:   "user_id",
+	PostId:   "post_id",
 }
 
 // NewSysUserPostDao creates and returns a new DAO object for table data access.

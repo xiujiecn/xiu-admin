@@ -107,15 +107,18 @@ func (s *sSysRole) View(ctx context.Context, param *model.SysRoleViewParam) (res
 		return nil, err
 	}
 	// 获取角色菜单
-	roleMenus, err := s.GetRoleMenu(ctx, param.RoleId)
+	roleMenus, err := s.getRoleMenuRelations(ctx, param.RoleId)
 	if err != nil {
 		return nil, err
 	}
 	menuIdList := make([]int64, 0)
+	roleMenuDataScopes := make(map[int64]string)
 	for _, menu := range roleMenus {
 		menuIdList = append(menuIdList, menu.MenuId)
+		roleMenuDataScopes[menu.MenuId] = menu.DataScope
 	}
 	res.MenuIds = menuIdList
+	res.RoleMenuDataScopes = roleMenuDataScopes
 	// 获取角色部门
 	roleDepts, err := s.GetRoleDept(ctx, param.RoleId)
 	if err != nil {
@@ -129,15 +132,26 @@ func (s *sSysRole) View(ctx context.Context, param *model.SysRoleViewParam) (res
 	return
 }
 
+func (s *sSysRole) getRoleMenuRelations(ctx context.Context, id int64) (res []*entity.SysRoleMenu, err error) {
+	err = dao.SysRoleMenu.Ctx(ctx).
+		Where(dao.SysRoleMenu.Columns().TenantId, contexts.GetTenantId(ctx)).
+		Where(dao.SysRoleMenu.Columns().RoleId, id).Scan(&res)
+	return
+}
+
 // 获取角色菜单
 func (s *sSysRole) GetRoleMenu(ctx context.Context, id int64) (res []*entity.SysMenu, err error) {
-	err = dao.SysRoleMenu.Ctx(ctx).Where(dao.SysRoleMenu.Columns().RoleId, id).Scan(&res)
+	err = dao.SysRoleMenu.Ctx(ctx).
+		Where(dao.SysRoleMenu.Columns().TenantId, contexts.GetTenantId(ctx)).
+		Where(dao.SysRoleMenu.Columns().RoleId, id).Scan(&res)
 	return
 }
 
 // 获取角色部门
 func (s *sSysRole) GetRoleDept(ctx context.Context, id int64) (res []*entity.SysDept, err error) {
-	err = dao.SysRoleDept.Ctx(ctx).Where(dao.SysRoleDept.Columns().RoleId, id).Scan(&res)
+	err = dao.SysRoleDept.Ctx(ctx).
+		Where(dao.SysRoleDept.Columns().TenantId, contexts.GetTenantId(ctx)).
+		Where(dao.SysRoleDept.Columns().RoleId, id).Scan(&res)
 	return
 }
 
@@ -153,13 +167,16 @@ func (s *sSysRole) GetRoleListMenu(ctx context.Context, ids []int64) (res []*ent
 		}
 		for _, menu := range menus {
 			res = append(res, &entity.SysRoleMenu{
-				RoleId: consts.SuperAdminRoleId,
-				MenuId: menu.MenuId,
+				TenantId: contexts.GetTenantId(ctx),
+				RoleId:   consts.SuperAdminRoleId,
+				MenuId:   menu.MenuId,
 			})
 		}
 		return res, nil
 	}
-	err = dao.SysRoleMenu.Ctx(ctx).WhereIn(dao.SysRoleMenu.Columns().RoleId, ids).Scan(&res)
+	err = dao.SysRoleMenu.Ctx(ctx).
+		Where(dao.SysRoleMenu.Columns().TenantId, contexts.GetTenantId(ctx)).
+		WhereIn(dao.SysRoleMenu.Columns().RoleId, ids).Scan(&res)
 	return
 }
 
@@ -189,7 +206,7 @@ func (s *sSysRole) Add(ctx context.Context, param *model.SysRoleAddParam) (role 
 		RoleId: roleId,
 	}
 	// 新增角色菜单
-	err = s.RoleMenu(ctx, roleId, param.MenuIds)
+	err = s.RoleMenu(ctx, roleId, param.MenuIds, param.RoleMenuDataScopes)
 	if err != nil {
 		return role, err
 	}
@@ -216,7 +233,7 @@ func (s *sSysRole) Edit(ctx context.Context, param *model.SysRoleEditParam) (rol
 	}
 	event.EventsInstance().Emit(ctx, consts.EventKeyDBSysRoleUpdate, param.RoleId)
 	// 更新角色菜单
-	err = s.RoleMenu(ctx, param.RoleId, param.MenuIds)
+	err = s.RoleMenu(ctx, param.RoleId, param.MenuIds, param.RoleMenuDataScopes)
 	if err != nil {
 		return role, err
 	}
@@ -251,10 +268,11 @@ func (s *sSysRole) Delete(ctx context.Context, param *model.SysRoleDeleteParam) 
 	return
 }
 
-func (s *sSysRole) RoleMenu(ctx context.Context, roleId int64, menuIds []int64) (err error) {
+func (s *sSysRole) RoleMenu(ctx context.Context, roleId int64, menuIds []int64, dataScopes map[int64]string) (err error) {
+	tenantId := contexts.GetTenantId(ctx)
 	// 查询角色菜单
 	roleMenu := make([]*entity.SysRoleMenu, 0)
-	err = dao.SysRoleMenu.Ctx(ctx).Where(dao.SysRoleMenu.Columns().RoleId, roleId).Scan(&roleMenu)
+	err = dao.SysRoleMenu.Ctx(ctx).Where(dao.SysRoleMenu.Columns().TenantId, tenantId).Where(dao.SysRoleMenu.Columns().RoleId, roleId).Scan(&roleMenu)
 	if err != nil {
 		return err
 	}
@@ -265,31 +283,65 @@ func (s *sSysRole) RoleMenu(ctx context.Context, roleId int64, menuIds []int64) 
 
 	delMenuIds := utility.ArrayRightDiff(currMenuIds, menuIds)
 	addMenuIds := utility.ArrayRightDiff(menuIds, currMenuIds)
+	updateMenuIds := utility.ArrayRightDiff(menuIds, addMenuIds)
 
 	// 删除角色菜单
 	if len(delMenuIds) > 0 {
-		_, err = dao.SysRoleMenu.Ctx(ctx).Where(dao.SysRoleMenu.Columns().RoleId, roleId).WhereIn(dao.SysRoleMenu.Columns().MenuId, delMenuIds).Delete()
+		_, err = dao.SysRoleMenu.Ctx(ctx).Where(dao.SysRoleMenu.Columns().TenantId, tenantId).Where(dao.SysRoleMenu.Columns().RoleId, roleId).WhereIn(dao.SysRoleMenu.Columns().MenuId, delMenuIds).Delete()
 	}
 
 	// 新增角色菜单
 	if len(addMenuIds) > 0 {
-		addData := make([]map[string]interface{}, 0)
+		addData := make([]*do.SysRoleMenu, 0)
 		for _, menuId := range addMenuIds {
-			addData = append(addData, map[string]interface{}{
-				"role_id": roleId,
-				"menu_id": menuId,
+			addData = append(addData, &do.SysRoleMenu{
+				TenantId:  tenantId,
+				RoleId:    roleId,
+				MenuId:    menuId,
+				DataScope: normalizeRoleMenuDataScope(dataScopes[menuId]),
 			})
 		}
 		_, err = dao.SysRoleMenu.Ctx(ctx).Data(addData).Insert()
+		if err != nil {
+			return err
+		}
+	}
+	for _, menuId := range updateMenuIds {
+		_, err = dao.SysRoleMenu.Ctx(ctx).
+			Where(dao.SysRoleMenu.Columns().TenantId, tenantId).
+			Where(dao.SysRoleMenu.Columns().RoleId, roleId).
+			Where(dao.SysRoleMenu.Columns().MenuId, menuId).
+			Data(do.SysRoleMenu{
+				DataScope: normalizeRoleMenuDataScope(dataScopes[menuId]),
+			}).Update()
+		if err != nil {
+			return err
+		}
 	}
 	return
 }
 
+func normalizeRoleMenuDataScope(dataScope string) string {
+	switch dataScope {
+	case consts.SysRoleDataScopeAll,
+		consts.SysRoleDataScopeDept,
+		consts.SysRoleDataScopeDeptAndBelow,
+		consts.SysRoleDataScopePersonal,
+		consts.SysRoleDataScopeDeptAndBelowOrPersonal,
+		consts.SysRoleDataScopeOrgAndNextLevel,
+		consts.SysRoleDataScopeOrgNextLevel:
+		return dataScope
+	default:
+		return consts.SysRoleMenuDataScopeRole
+	}
+}
+
 // 自定义角色部门数据权限
 func (s *sSysRole) RoleDept(ctx context.Context, roleId int64, deptIds []int64) (err error) {
+	tenantId := contexts.GetTenantId(ctx)
 	// 查询角色部门
 	roleDept := make([]*entity.SysRoleDept, 0)
-	err = dao.SysRoleDept.Ctx(ctx).Where(dao.SysRoleDept.Columns().RoleId, roleId).Scan(&roleDept)
+	err = dao.SysRoleDept.Ctx(ctx).Where(dao.SysRoleDept.Columns().TenantId, tenantId).Where(dao.SysRoleDept.Columns().RoleId, roleId).Scan(&roleDept)
 	if err != nil {
 		return err
 	}
@@ -303,7 +355,7 @@ func (s *sSysRole) RoleDept(ctx context.Context, roleId int64, deptIds []int64) 
 
 	// 删除角色部门
 	if len(delDeptIds) > 0 {
-		_, err = dao.SysRoleDept.Ctx(ctx).Where(dao.SysRoleDept.Columns().RoleId, roleId).WhereIn(dao.SysRoleDept.Columns().DeptId, delDeptIds).Delete()
+		_, err = dao.SysRoleDept.Ctx(ctx).Where(dao.SysRoleDept.Columns().TenantId, tenantId).Where(dao.SysRoleDept.Columns().RoleId, roleId).WhereIn(dao.SysRoleDept.Columns().DeptId, delDeptIds).Delete()
 	}
 
 	// 新增角色部门
@@ -311,8 +363,9 @@ func (s *sSysRole) RoleDept(ctx context.Context, roleId int64, deptIds []int64) 
 		addData := make([]map[string]interface{}, 0)
 		for _, deptId := range addDeptIds {
 			addData = append(addData, map[string]interface{}{
-				"role_id": roleId,
-				"dept_id": deptId,
+				dao.SysRoleDept.Columns().TenantId: tenantId,
+				dao.SysRoleDept.Columns().RoleId:   roleId,
+				dao.SysRoleDept.Columns().DeptId:   deptId,
 			})
 		}
 		_, err = dao.SysRoleDept.Ctx(ctx).Data(addData).Insert()

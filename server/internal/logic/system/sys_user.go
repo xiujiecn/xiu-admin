@@ -198,9 +198,14 @@ func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUs
 	if err != nil {
 		return nil, err
 	}
+	if user == nil {
+		return nil, gerror.NewCode(consts.CodeUserNotFound, "用户不存在")
+	}
 	// 获取用户角色
 	userRoles := make([]*entity.SysUserRole, 0)
-	err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, id).Scan(&userRoles)
+	err = dao.SysUserRole.Ctx(ctx).
+		Where(dao.SysUserRole.Columns().TenantId, user.TenantId).
+		Where(dao.SysUserRole.Columns().UserId, id).Scan(&userRoles)
 	if err != nil {
 		return nil, err
 	}
@@ -209,9 +214,13 @@ func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUs
 		roleIds = append(roleIds, userRole.RoleId)
 	}
 	roles := make([]*entity.SysRole, 0)
-	err = dao.SysRole.Ctx(ctx).WhereIn(dao.SysRole.Columns().RoleId, roleIds).Scan(&roles)
-	if err != nil {
-		return nil, err
+	if len(roleIds) > 0 {
+		err = dao.SysRole.Ctx(ctx).
+			Where(dao.SysRole.Columns().TenantId, user.TenantId).
+			WhereIn(dao.SysRole.Columns().RoleId, roleIds).Scan(&roles)
+		if err != nil {
+			return nil, err
+		}
 	}
 	user.Roles = make([]*model.SysRoleMiniModel, 0)
 	for _, role := range roles {
@@ -221,7 +230,9 @@ func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUs
 	}
 	// 获取用户岗位
 	userPosts := make([]*entity.SysUserPost, 0)
-	err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, id).Scan(&userPosts)
+	err = dao.SysUserPost.Ctx(ctx).
+		Where(dao.SysUserPost.Columns().TenantId, user.TenantId).
+		Where(dao.SysUserPost.Columns().UserId, id).Scan(&userPosts)
 	if err != nil {
 		return nil, err
 	}
@@ -230,9 +241,13 @@ func (l *sSysUser) GetUserById(ctx context.Context, id int64) (user *model.SysUs
 		postIds = append(postIds, userPost.PostId)
 	}
 	posts := make([]*entity.SysPost, 0)
-	err = dao.SysPost.Ctx(ctx).WhereIn(dao.SysPost.Columns().PostId, postIds).Scan(&posts)
-	if err != nil {
-		return nil, err
+	if len(postIds) > 0 {
+		err = dao.SysPost.Ctx(ctx).
+			Where(dao.SysPost.Columns().TenantId, user.TenantId).
+			WhereIn(dao.SysPost.Columns().PostId, postIds).Scan(&posts)
+		if err != nil {
+			return nil, err
+		}
 	}
 	user.Posts = make([]*model.SysPostMiniModel, 0)
 	for _, post := range posts {
@@ -371,7 +386,11 @@ func (l *sSysUser) AddUser(ctx context.Context, req *model.SysUserAddModel) (dat
 	d := make([]map[string]any, 0)
 	if len(req.RoleIds) > 0 {
 		for _, roleId := range req.RoleIds {
-			d = append(d, map[string]any{dao.SysUserRole.Columns().UserId: userId, dao.SysUserRole.Columns().RoleId: roleId})
+			d = append(d, map[string]any{
+				dao.SysUserRole.Columns().TenantId: req.TenantId,
+				dao.SysUserRole.Columns().UserId:   userId,
+				dao.SysUserRole.Columns().RoleId:   roleId,
+			})
 		}
 		_, err = dao.SysUserRole.Ctx(ctx).Data(d).Insert()
 		if err != nil {
@@ -382,7 +401,11 @@ func (l *sSysUser) AddUser(ctx context.Context, req *model.SysUserAddModel) (dat
 	if len(req.PostIds) > 0 {
 		d = make([]map[string]any, 0)
 		for _, postId := range req.PostIds {
-			d = append(d, map[string]any{dao.SysUserPost.Columns().UserId: userId, dao.SysUserPost.Columns().PostId: postId})
+			d = append(d, map[string]any{
+				dao.SysUserPost.Columns().TenantId: req.TenantId,
+				dao.SysUserPost.Columns().UserId:   userId,
+				dao.SysUserPost.Columns().PostId:   postId,
+			})
 		}
 		_, err = dao.SysUserPost.Ctx(ctx).Data(d).Insert()
 		if err != nil {
@@ -543,6 +566,14 @@ func (l *sSysUser) UpdateCurrentUserContact(ctx context.Context, req *model.Upda
 
 func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel) (err error) {
 	currUserId := contexts.GetUserId(ctx)
+	var existsUser *entity.SysUser
+	if err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, req.UserId).Scan(&existsUser); err != nil {
+		return err
+	}
+	if existsUser == nil {
+		return gerror.NewCode(consts.CodeUserNotFound, "用户不存在")
+	}
+	tenantId := existsUser.TenantId
 	req.UpdatedAt = gtime.Now()
 	req.UpdatedBy = &currUserId
 	_, err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, req.UserId).Data(req).OmitNil().Update()
@@ -551,7 +582,7 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 	}
 	// 用户角色
 	urList := make([]*entity.SysUserRole, 0)
-	err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, req.UserId).Scan(&urList)
+	err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().TenantId, tenantId).Where(dao.SysUserRole.Columns().UserId, req.UserId).Scan(&urList)
 	if err != nil {
 		return err
 	}
@@ -585,7 +616,7 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 	}
 	// 删除多余的角色
 	if len(delRoleIds) > 0 {
-		_, err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, req.UserId).WhereIn(dao.SysUserRole.Columns().RoleId, delRoleIds).Delete()
+		_, err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().TenantId, tenantId).Where(dao.SysUserRole.Columns().UserId, req.UserId).WhereIn(dao.SysUserRole.Columns().RoleId, delRoleIds).Delete()
 		if err != nil {
 			return err
 		}
@@ -594,7 +625,11 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 	d := make([]map[string]any, 0)
 	if len(addRoleIds) > 0 {
 		for _, roleId := range addRoleIds {
-			d = append(d, map[string]any{dao.SysUserRole.Columns().UserId: req.UserId, dao.SysUserRole.Columns().RoleId: roleId})
+			d = append(d, map[string]any{
+				dao.SysUserRole.Columns().TenantId: tenantId,
+				dao.SysUserRole.Columns().UserId:   req.UserId,
+				dao.SysUserRole.Columns().RoleId:   roleId,
+			})
 		}
 		_, err = dao.SysUserRole.Ctx(ctx).Data(d).Insert()
 		if err != nil {
@@ -603,7 +638,7 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 	}
 	// 查询用户岗位
 	upList := make([]*entity.SysUserPost, 0)
-	err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, req.UserId).Scan(&upList)
+	err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().TenantId, tenantId).Where(dao.SysUserPost.Columns().UserId, req.UserId).Scan(&upList)
 	if err != nil {
 		return err
 	}
@@ -637,7 +672,7 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 	}
 	// 删除多余岗位
 	if len(delPostIds) > 0 {
-		_, err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, req.UserId).WhereIn(dao.SysUserPost.Columns().PostId, delPostIds).Delete()
+		_, err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().TenantId, tenantId).Where(dao.SysUserPost.Columns().UserId, req.UserId).WhereIn(dao.SysUserPost.Columns().PostId, delPostIds).Delete()
 		if err != nil {
 			return err
 		}
@@ -646,7 +681,11 @@ func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel
 	d = make([]map[string]any, 0)
 	if len(addPostIds) > 0 {
 		for _, postId := range addPostIds {
-			d = append(d, map[string]any{dao.SysUserPost.Columns().UserId: req.UserId, dao.SysUserPost.Columns().PostId: postId})
+			d = append(d, map[string]any{
+				dao.SysUserPost.Columns().TenantId: tenantId,
+				dao.SysUserPost.Columns().UserId:   req.UserId,
+				dao.SysUserPost.Columns().PostId:   postId,
+			})
 		}
 		_, err = dao.SysUserPost.Ctx(ctx).Data(d).Insert()
 		if err != nil {
@@ -734,7 +773,12 @@ func (l *sSysUser) UpdateLoginInfo(ctx context.Context, userId int64, loginIp st
 // 获取用户角色ID列表
 func (l *sSysUser) GetUserRoleIds(ctx context.Context, userId int64) (roleIds []int64, err error) {
 	urList := make([]*entity.SysUserRole, 0)
-	err = dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, userId).Scan(&urList)
+	tenantId := contexts.GetTenantId(ctx)
+	db := dao.SysUserRole.Ctx(ctx).Where(dao.SysUserRole.Columns().UserId, userId)
+	if tenantId != "" {
+		db = db.Where(dao.SysUserRole.Columns().TenantId, tenantId)
+	}
+	err = db.Scan(&urList)
 	if err != nil {
 		return nil, err
 	}
@@ -747,7 +791,12 @@ func (l *sSysUser) GetUserRoleIds(ctx context.Context, userId int64) (roleIds []
 // 获取用户岗位ID列表
 func (l *sSysUser) GetUserPostIds(ctx context.Context, userId int64) (postIds []int64, err error) {
 	upList := make([]*entity.SysUserPost, 0)
-	err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, userId).Scan(&upList)
+	tenantId := contexts.GetTenantId(ctx)
+	db := dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, userId)
+	if tenantId != "" {
+		db = db.Where(dao.SysUserPost.Columns().TenantId, tenantId)
+	}
+	err = db.Scan(&upList)
 	if err != nil {
 		return nil, err
 	}
@@ -1132,7 +1181,11 @@ func (l *sSysUser) Register(ctx context.Context, param *model.SysUserRegisterMod
 	}
 	if config != nil && config.ConfigValue != "" {
 		roleId := gconv.Int64(config.ConfigValue)
-		d := map[string]any{dao.SysUserRole.Columns().UserId: userId, dao.SysUserRole.Columns().RoleId: roleId}
+		d := map[string]any{
+			dao.SysUserRole.Columns().TenantId: param.TenantId,
+			dao.SysUserRole.Columns().UserId:   userId,
+			dao.SysUserRole.Columns().RoleId:   roleId,
+		}
 		_, err = dao.SysUserRole.Ctx(ctx).Data(d).Insert()
 		if err != nil {
 			g.Log().Error(ctx, "获取租户的默认角色失败", err)

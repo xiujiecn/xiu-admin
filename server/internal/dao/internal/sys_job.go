@@ -22,6 +22,7 @@ type SysJobDao struct {
 // SysJobColumns defines and stores column names for the table sys_job.
 type SysJobColumns struct {
 	JobId          string // 任务ID
+	TenantId       string // 租户编号
 	JobName        string // 任务名称
 	JobParams      string // 参数
 	JobGroup       string // 任务组名
@@ -43,6 +44,7 @@ type SysJobColumns struct {
 // sysJobColumns holds the columns for the table sys_job.
 var sysJobColumns = SysJobColumns{
 	JobId:          "job_id",
+	TenantId:       "tenant_id",
 	JobName:        "job_name",
 	JobParams:      "job_params",
 	JobGroup:       "job_group",

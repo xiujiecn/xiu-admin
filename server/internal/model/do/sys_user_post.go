@@ -10,7 +10,8 @@ import (
 
 // SysUserPost is the golang structure of table sys_user_post for DAO operations like Where/Data.
 type SysUserPost struct {
-	g.Meta `orm:"table:sys_user_post, do:true"`
-	UserId interface{} // 用户ID
-	PostId interface{} // 岗位ID
+	g.Meta   `orm:"table:sys_user_post, do:true"`
+	TenantId interface{} // 租户编号
+	UserId   interface{} // 用户ID
+	PostId   interface{} // 岗位ID
 }

@@ -10,7 +10,8 @@ import (
 
 // SysRoleDept is the golang structure of table sys_role_dept for DAO operations like Where/Data.
 type SysRoleDept struct {
-	g.Meta `orm:"table:sys_role_dept, do:true"`
-	RoleId interface{} // 角色ID
-	DeptId interface{} // 部门ID
+	g.Meta   `orm:"table:sys_role_dept, do:true"`
+	TenantId interface{} // 租户编号
+	RoleId   interface{} // 角色ID
+	DeptId   interface{} // 部门ID
 }

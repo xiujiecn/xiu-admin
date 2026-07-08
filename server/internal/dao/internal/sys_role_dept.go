@@ -21,14 +21,16 @@ type SysRoleDeptDao struct {
 
 // SysRoleDeptColumns defines and stores column names for the table sys_role_dept.
 type SysRoleDeptColumns struct {
-	RoleId string // 角色ID
-	DeptId string // 部门ID
+	TenantId string // 租户编号
+	RoleId   string // 角色ID
+	DeptId   string // 部门ID
 }
 
 // sysRoleDeptColumns holds the columns for the table sys_role_dept.
 var sysRoleDeptColumns = SysRoleDeptColumns{
-	RoleId: "role_id",
-	DeptId: "dept_id",
+	TenantId: "tenant_id",
+	RoleId:   "role_id",
+	DeptId:   "dept_id",
 }
 
 // NewSysRoleDeptDao creates and returns a new DAO object for table data access.

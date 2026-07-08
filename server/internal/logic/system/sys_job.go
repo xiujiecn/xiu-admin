@@ -43,7 +43,7 @@ func NewSysJob() *sSysJob {
 func (s *sSysJob) Model(ctx context.Context, option ...*handler.Option) *gdb.Model {
 	if len(option) == 0 {
 		option = append(option, &handler.Option{
-			FilterTenant: false,
+			FilterTenant: true,
 			FilterAuth:   true,
 		})
 	}
@@ -96,6 +96,7 @@ func (c *sSysJob) Add(ctx context.Context, jobAdd *model.SysJobAddModel) (LastIn
 	}
 
 	jobAdd.CreatedDept = claims.BaseClaims.DeptId
+	jobAdd.TenantId = claims.BaseClaims.TenantId
 	jobAdd.CreatedAt = gtime.Now()
 	jobAdd.CreatedBy = claims.BaseClaims.ID
 	jobAdd.UpdatedAt = gtime.Now()
@@ -366,7 +367,8 @@ func (c *sSysJob) Exec(ctx context.Context, jobId int64) error {
 func (c *sSysJob) InitRegister() error {
 	g.Log().Debug(context.Background(), "初始化任务注册")
 	jobs := &[]*model.SysJobViewModel{}
-	err := c.Model(context.Background()).Where(dao.SysJob.Columns().Status, consts.SysJobStatusNormal).Scan(jobs)
+	err := c.Model(context.Background(), &handler.Option{FilterTenant: false, FilterAuth: false}).
+		Where(dao.SysJob.Columns().Status, consts.SysJobStatusNormal).Scan(jobs)
 	if err != nil {
 		return err
 	}

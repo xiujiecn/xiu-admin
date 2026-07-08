@@ -41,6 +41,7 @@ const showMenuSelect = ref(false);
 
 /** 选中的菜单id */
 const menuIds = ref<number[]>([]);
+const roleMenuDataScopes = ref<Record<number, string>>({});
 
 /** ====================  组件实例  ==================== */
 /** 菜单选择组件实例 */
@@ -67,6 +68,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
   async onOpenChange(isOpen) {
     if (!isOpen) {
       menuIds.value = [];
+      roleMenuDataScopes.value = {};
       return null;
     }
     setupDeptSelect();
@@ -82,6 +84,7 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
 
       // 获取菜单id列表
       menuIds.value = record.menuIds;
+      roleMenuDataScopes.value = record.roleMenuDataScopes || {};
     }
     showMenuSelect.value = true;
     drawerApi.setState({ confirmLoading: false, loading: false });
@@ -123,6 +126,7 @@ async function handleConfirm() {
     const data = cloneDeep(await formApi.getValues());
     // 获取菜单id
     data.menuIds = refMenuSelect.value?.getData();
+    data.roleMenuDataScopes = refMenuSelect.value?.getDataScopes();
     // 编辑数据
     await (isUpdate.value ? editSysRoleApi(data) : addSysRoleApi(data));
     emit('reload');
@@ -141,16 +145,15 @@ async function handleCancel() {
   await formApi.resetForm();
 }
 
-
 /**
  * 初始化组织选择
  */
- async function setupDeptSelect() {
+async function setupDeptSelect() {
   // updateSchema
   const deptTree = await getSysDeptTreeApi({ deptType: 1 });
   // 选中后显示在输入框的值 即父节点 / 子节点
   addFullName(deptTree.items, 'deptName', ' / ');
-  console.log('role-drawer.vue setupDeptSelect',deptTree);
+  console.log('role-drawer.vue setupDeptSelect', deptTree);
   formApi.updateSchema([
     {
       componentProps: (formModel) => ({
@@ -162,9 +165,7 @@ async function handleCancel() {
           label: 'deptName',
         },
         getPopupContainer,
-        async onSelect(deptId: number | string) {
-
-        },
+        async onSelect(deptId: number | string) {},
         placeholder: '请选择',
         showSearch: true,
         treeData: deptTree.items,
@@ -179,7 +180,6 @@ async function handleCancel() {
     },
   ]);
 }
-
 </script>
 
 <template>
@@ -190,6 +190,7 @@ async function handleCancel() {
           <MenuSelect
             ref="refMenuSelect"
             :menuIds="menuIds"
+            :dataScopes="roleMenuDataScopes"
             v-if="showMenuSelect"
           />
         </div>
