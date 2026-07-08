@@ -179,7 +179,11 @@ func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err
 		menuIds = append(menuIds, menu.MenuId)
 	}
 	g.Log().Infof(ctx, "sSysMenu.GetUserMenu menuIds: %v", menuIds)
-	// 获取用户角色菜单
+	if len(menuIds) == 0 {
+		return make([]*entity.SysMenu, 0), nil
+	}
+	// 只返回角色直接勾选的菜单；未勾选的父目录不强制补齐，
+	// 树构建时会把缺少授权父级的菜单提升为一级菜单。
 	err = l.ModelQuery(ctx).WhereIn(dao.SysMenu.Columns().MenuId, menuIds).
 		Where(dao.SysMenu.Columns().Status, consts.SysMenuStatusNormal).
 		Order(dao.SysMenu.Columns().OrderNum).Scan(&data)
@@ -190,6 +194,10 @@ func (l *sSysMenu) GetUserMenu(ctx context.Context) (data []*entity.SysMenu, err
 // 构建用户动态路由树
 func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMenu, menuList []*entity.SysMenu, allPath string) (data v1.MenuAllRes, err error) {
 	data = make(v1.MenuAllRes, 0)
+	menuIdSet := make(map[int64]struct{}, len(menuList))
+	for _, menu := range menuList {
+		menuIdSet[menu.MenuId] = struct{}{}
+	}
 	for _, menu := range menuList {
 		if menu.Status == consts.SysMenuStatusDisable {
 			continue
@@ -202,7 +210,12 @@ func (l *sSysMenu) BuildUserMenuTree(ctx context.Context, parentMenu *v1.RouteMe
 		if parentMenu != nil {
 			pId = parentMenu.Id
 		}
-		if menu.ParentId == pId {
+		isRootOrphan := parentMenu == nil && menu.ParentId != 0
+		if isRootOrphan {
+			_, isRootOrphan = menuIdSet[menu.ParentId]
+			isRootOrphan = !isRootOrphan
+		}
+		if menu.ParentId == pId || isRootOrphan {
 			openInNewWindow := false
 			var link *string
 			if menu.IsFrame == consts.SysMenuIsFrameYes {

@@ -94,16 +94,25 @@ type UserProfileModel struct {
 }
 
 type UpdateCurrentUserModel struct {
-	NickName    string `json:"nickName"`
-	Email       string `json:"email"`
-	Phonenumber string `json:"phonenumber"`
-	Avatar      string `json:"avatar"`
-	Sex         string `json:"sex"`
+	NickName string `json:"nickName"`
+	Avatar   string `json:"avatar"`
+	Sex      string `json:"sex"`
 }
 
 type UpdateCurrentUserPasswordModel struct {
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`
+}
+
+type UpdateCurrentUserContactCodeModel struct {
+	Contact      string `json:"contact" v:"required#手机号或邮箱不能为空" dc:"手机号或邮箱"`
+	CaptchaID    string `json:"captchaID" v:"required#图片验证码不能为空" dc:"图片验证码ID"`
+	CaptchaValue string `json:"captchaValue" v:"required#图片验证码不能为空" dc:"图片验证码值"`
+}
+
+type UpdateCurrentUserContactModel struct {
+	Contact string `json:"contact" v:"required#手机号或邮箱不能为空" dc:"手机号或邮箱"`
+	Code    string `json:"code" v:"required#验证码不能为空" dc:"短信/邮箱验证码"`
 }
 
 type SysUserAddModel struct {
@@ -149,11 +158,22 @@ type SysUserUpdateModel struct {
 	RoleIds     []int64     `json:"roleIds"     orm:"role_ids"     description:"角色ID列表"`
 }
 type SysUserRegisterModel struct {
-	UserName     string `json:"userName"  v:"required#用户账号不能为空"  dc:"用户账号"`
-	Password     string `json:"password"  v:"required#密码不能为空"  dc:"密码"`
-	TenantId     string `json:"tenantId"  v:"required#租户编号不能为空"  dc:"租户编号"`
-	CaptchaID    string `json:"captchaId"  v:"required#验证码不能为空"  dc:"验证码ID"`
-	CaptchaValue string `json:"captchaValue"  v:"required#验证码不能为空"  dc:"验证码值"`
+	UserName        string `json:"userName" dc:"用户账号"`
+	Contact         string `json:"contact" dc:"手机号或邮箱"`
+	Code            string `json:"code" dc:"短信/邮箱验证码"`
+	Password        string `json:"password" v:"required#密码不能为空" dc:"密码"`
+	ConfirmPassword string `json:"confirmPassword" dc:"确认密码"`
+	CompanyName     string `json:"companyName" dc:"公司名称"`
+	TenantId        string `json:"tenantId" dc:"租户编号"`
+	CaptchaID       string `json:"captchaID" dc:"兼容旧注册验证码ID"`
+	CaptchaValue    string `json:"captchaValue" dc:"兼容旧注册验证码值"`
+}
+
+type SysUserRegisterCodeModel struct {
+	Contact      string `json:"contact" v:"required#手机号或邮箱不能为空" dc:"手机号或邮箱"`
+	TenantId     string `json:"tenantId" dc:"租户编号"`
+	CaptchaID    string `json:"captchaID" v:"required#图片验证码不能为空" dc:"图片验证码ID"`
+	CaptchaValue string `json:"captchaValue" v:"required#图片验证码不能为空" dc:"图片验证码值"`
 }
 
 type SysUserStatusParam struct {

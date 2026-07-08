@@ -11,15 +11,15 @@ import { defineComponent } from 'vue';
 
 import { TabPane, Tabs } from 'ant-design-vue';
 
-import AccountBind from './components/account-bind.vue';
 import BaseSetting from './components/base-setting.vue';
+import ContactSetting from './components/contact-setting.vue';
 import OnlineDevice from './components/online-device.vue';
 import SecureSetting from './components/secure-setting.vue';
 
 export default defineComponent({
   components: {
-    AccountBind,
     BaseSetting,
+    ContactSetting,
     OnlineDevice,
     SecureSetting,
     TabPane,
@@ -38,14 +38,21 @@ export default defineComponent({
         name: '安全设置',
       },
       {
-        component: 'AccountBind',
-        key: '3',
-        name: '账号绑定',
-      },
-      {
         component: 'OnlineDevice',
         key: '4',
         name: '在线设备',
+      },
+      {
+        component: 'ContactSetting',
+        key: '5',
+        name: '修改邮箱',
+        props: { type: 'email' },
+      },
+      {
+        component: 'ContactSetting',
+        key: '6',
+        name: '修改电话',
+        props: { type: 'phone' },
       },
     ];
 
@@ -60,7 +67,7 @@ export default defineComponent({
   <Tabs class="bg-background rounded-[var(--radius)] px-[16px] lg:flex-1">
     <template v-for="item in settingList" :key="item.key">
       <TabPane :tab="item.name">
-        <component :is="item.component" v-bind="$attrs" />
+        <component :is="item.component" v-bind="{ ...$attrs, ...item.props }" />
       </TabPane>
     </template>
   </Tabs>

@@ -87,6 +87,17 @@ async function setLeaderOptions() {
   ]);
 }
 
+async function setDeptTypeDisabled(disabled: boolean) {
+  formApi.updateSchema([
+    {
+      componentProps: {
+        disabled,
+      },
+      fieldName: 'deptType',
+    },
+  ]);
+}
+
 const isUpdate = ref(false);
 const isView = ref(false);
 
@@ -123,13 +134,20 @@ const [BasicDrawer, drawerApi] = useVbenDrawer({
     isView.value = view;
     await initDeptSelect();
     if (isUpdate.value || isView.value) {
+      await setDeptTypeDisabled(true);
       const record = await viewSysDeptApi({ deptId: Number(id) });
       record.leader = record.leader ? Number(record.leader) : null;
       record.deptType = record.deptType ? String(record.deptType) : '0';
       await formApi.setValues(record);
       await initDeptUsers(record.deptId);
     }else {
-      formApi.resetForm();
+      await setDeptTypeDisabled(false);
+      await formApi.resetForm();
+      await formApi.setValues({
+        deptType: '0',
+        orderNum: 0,
+        status: '0',
+      });
       await setLeaderOptions();
     }
 

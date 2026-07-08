@@ -7,13 +7,19 @@ package system
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
+	"net/smtp"
+	"regexp"
 	"slices"
+	"strings"
+	"time"
 	"xiuadmin/internal/consts"
 	"xiuadmin/internal/dao"
 	"xiuadmin/internal/library/contexts"
 	"xiuadmin/internal/library/event"
+	"xiuadmin/internal/library/mcache"
 	"xiuadmin/internal/library/xgorm/handler"
 	"xiuadmin/internal/model"
 	"xiuadmin/internal/model/do"
@@ -25,12 +31,39 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/gclient"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/gogf/gf/v2/util/grand"
 	"gorm.io/gorm"
 )
 
 type sSysUser struct {
+}
+
+const (
+	registerCodeDailyLimit = 5
+	registerCodeTTL        = 6 * time.Hour
+)
+
+type registerSmsConfig struct {
+	URL           string            `json:"url"`
+	Method        string            `json:"method"`
+	Headers       map[string]string `json:"headers"`
+	BodyTemplate  string            `json:"bodyTemplate"`
+	SuccessStatus int               `json:"successStatus"`
+}
+
+type registerEmailConfig struct {
+	Host         string `json:"host"`
+	Port         int    `json:"port"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	From         string `json:"from"`
+	FromName     string `json:"fromName"`
+	Subject      string `json:"subject"`
+	BodyTemplate string `json:"bodyTemplate"`
+	SSL          bool   `json:"ssl"`
 }
 
 func NewSysUser() *sSysUser {
@@ -127,21 +160,33 @@ func (l *sSysUser) GetUserByPhone(ctx context.Context, phone string, tenantId st
 	if user.Status == consts.SysUserStatusExpired {
 		return nil, gerror.NewCode(consts.CodeUserExpired, "账号已过期")
 	}
+	if user.Status == consts.SysUserStatusDeleted {
+		return nil, gerror.NewCode(consts.CodeUserDeleted, "账号已删除")
+	}
 
 	return
 }
 
-// 根据用户名和密码获取用户信息
+// 根据用户名、手机号、邮箱和密码获取用户信息
 func (l *sSysUser) GetUserByUsernameAndPassword(ctx context.Context, tenantId string, username string, password string) (user *entity.SysUser, err error) {
-	// 判断用户名是否存在
-	user, err = l.GetUserByUsername(ctx, username, tenantId)
+	loginName := strings.TrimSpace(username)
+	if loginName == "" {
+		return nil, gerror.NewCode(consts.CodeUserNotFound, "账号不存在")
+	}
+	if isEmailContact(loginName) {
+		user, err = l.GetUserByEmail(ctx, loginName, tenantId)
+	} else if isPhoneContact(loginName) {
+		user, err = l.GetUserByPhone(ctx, loginName, tenantId)
+	} else {
+		user, err = l.GetUserByUsername(ctx, loginName, tenantId)
+	}
 	if err != nil {
 		return nil, err
 	}
 	// 判断密码是否正确
 	password = utility.PasswordEncrypt(password, user.Salt)
 	if password != user.Password {
-		g.Log().Errorf(ctx, "密码错误: username:%s, password:%s, user:%+v", username, password, user)
+		g.Log().Errorf(ctx, "密码错误: loginName:%s, password:%s, user:%+v", loginName, password, user)
 		return nil, gerror.NewCode(consts.CodeUserPasswordError, "密码错误")
 	}
 	return user, nil
@@ -407,6 +452,95 @@ func (l *sSysUser) UpdateCurrentUserPassword(ctx context.Context, req *model.Upd
 	return nil
 }
 
+func (l *sSysUser) validateCurrentUserContact(ctx context.Context, userId int64, tenantId string, contact string) error {
+	if isPhoneContact(contact) {
+		existsUser, err := l.GetUserByPhone(ctx, contact, tenantId)
+		if err != nil {
+			return err
+		}
+		if existsUser != nil && existsUser.UserId != userId {
+			return gerror.NewCode(consts.CodePhoneExists, "手机号已存在")
+		}
+		return nil
+	}
+	if isEmailContact(contact) {
+		existsUser, err := l.GetUserByEmail(ctx, contact, tenantId)
+		if err != nil {
+			return err
+		}
+		if existsUser != nil && existsUser.UserId != userId {
+			return gerror.NewCode(consts.CodeEmailExists, "邮箱已存在")
+		}
+		return nil
+	}
+	return gerror.New("请输入正确的手机号或邮箱")
+}
+
+func (l *sSysUser) SendCurrentUserContactCode(ctx context.Context, req *model.UpdateCurrentUserContactCodeModel) (err error) {
+	userId := contexts.GetUserId(ctx)
+	user := contexts.GetUser(ctx)
+	if user == nil || userId == 0 {
+		return gerror.NewCode(consts.CodeLoginExpired, "登录已过期")
+	}
+	req.Contact = strings.TrimSpace(req.Contact)
+	if err = l.validateCurrentUserContact(ctx, userId, user.TenantId, req.Contact); err != nil {
+		return err
+	}
+	if err = service.SysCaptcha().VerifyCaptcha(ctx, req.CaptchaID, req.CaptchaValue); err != nil {
+		return err
+	}
+	code := grand.Digits(6)
+	if err = mcache.Set(ctx, userContactCodeCacheKey(userId, req.Contact), code, registerCodeTTL); err != nil {
+		return err
+	}
+	if isPhoneContact(req.Contact) {
+		err = sendRegisterSmsCode(ctx, req.Contact, code)
+	} else {
+		err = sendRegisterEmailCode(ctx, req.Contact, code)
+	}
+	if err != nil {
+		_, _ = mcache.Instance().Remove(ctx, userContactCodeCacheKey(userId, req.Contact))
+		return err
+	}
+	return nil
+}
+
+func (l *sSysUser) UpdateCurrentUserContact(ctx context.Context, req *model.UpdateCurrentUserContactModel) (err error) {
+	userId := contexts.GetUserId(ctx)
+	user := contexts.GetUser(ctx)
+	if user == nil || userId == 0 {
+		return gerror.NewCode(consts.CodeLoginExpired, "登录已过期")
+	}
+	req.Contact = strings.TrimSpace(req.Contact)
+	if err = l.validateCurrentUserContact(ctx, userId, user.TenantId, req.Contact); err != nil {
+		return err
+	}
+	cacheValue, err := mcache.Get(ctx, userContactCodeCacheKey(userId, req.Contact))
+	cacheCode := gconv.String(cacheValue)
+	if err != nil || cacheCode == "" {
+		return gerror.NewCode(consts.CodeCaptchaError, "验证码已失效")
+	}
+	if cacheCode != req.Code {
+		return gerror.NewCode(consts.CodeCaptchaError, "验证码错误")
+	}
+	data := map[string]any{
+		dao.SysUser.Columns().UpdatedBy: userId,
+		dao.SysUser.Columns().UpdatedAt: gtime.Now(),
+	}
+	if isPhoneContact(req.Contact) {
+		data[dao.SysUser.Columns().Phonenumber] = req.Contact
+	} else {
+		data[dao.SysUser.Columns().Email] = req.Contact
+	}
+	_, err = l.Model(ctx).Where(dao.SysUser.Columns().UserId, userId).Data(data).Update()
+	if err != nil {
+		return err
+	}
+	_, _ = mcache.Instance().Remove(ctx, userContactCodeCacheKey(userId, req.Contact))
+	event.EventsInstance().Emit(ctx, consts.EventKeyUserUpdate, userId)
+	return nil
+}
+
 func (l *sSysUser) UpdateUser(ctx context.Context, req *model.SysUserUpdateModel) (err error) {
 	currUserId := contexts.GetUserId(ctx)
 	req.UpdatedAt = gtime.Now()
@@ -623,11 +757,268 @@ func (l *sSysUser) GetUserPostIds(ctx context.Context, userId int64) (postIds []
 	return postIds, nil
 }
 
-func (l *sSysUser) Register(ctx context.Context, param *model.SysUserRegisterModel) (err error) {
-	// 验证验证码
-	err = service.SysCaptcha().VerifyCaptcha(ctx, param.CaptchaID, param.CaptchaValue)
+func normalizeRegisterTenantId(tenantId string) string {
+	if tenantId == "" {
+		return "000000"
+	}
+	return tenantId
+}
+
+func isPhoneContact(contact string) bool {
+	return regexp.MustCompile(`^1[3-9]\d{9}$`).MatchString(contact)
+}
+
+func isEmailContact(contact string) bool {
+	return regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`).MatchString(contact)
+}
+
+func registerCodeCacheKey(tenantId string, contact string) string {
+	return fmt.Sprintf("system:register:code:%s:%s", tenantId, strings.ToLower(strings.TrimSpace(contact)))
+}
+
+func userContactCodeCacheKey(userId int64, contact string) string {
+	return fmt.Sprintf("system:user:contact:code:%d:%s", userId, strings.ToLower(strings.TrimSpace(contact)))
+}
+
+func registerCodeDailyCountKey(tenantId string, contact string) string {
+	return fmt.Sprintf("system:register:code:daily:%s:%s:%s", tenantId, strings.ToLower(strings.TrimSpace(contact)), time.Now().Format("20060102"))
+}
+
+func registerCodeDailyLimitTTL() time.Duration {
+	now := time.Now()
+	tomorrow := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
+	return time.Until(tomorrow)
+}
+
+func maskRegisterContact(contact string) string {
+	if isPhoneContact(contact) && len(contact) == 11 {
+		return contact[:3] + "****" + contact[7:]
+	}
+	if at := strings.Index(contact, "@"); at > 1 {
+		return contact[:1] + "****" + contact[at:]
+	}
+	return contact
+}
+
+func renderRegisterTemplate(template string, contact string, code string) string {
+	replacer := strings.NewReplacer(
+		"{contact}", contact,
+		"{code}", code,
+		"${contact}", contact,
+		"${code}", code,
+	)
+	return replacer.Replace(template)
+}
+
+func getRegisterConfig(ctx context.Context, key string, defaultValue string) string {
+	value, err := mcache.GetSystemConfig(ctx, key, defaultValue)
+	if err != nil || strings.TrimSpace(value) == "" {
+		return g.Cfg().MustGet(ctx, key, defaultValue).String()
+	}
+	return value
+}
+
+func parseRegisterSmsConfig(ctx context.Context) (cfg registerSmsConfig, err error) {
+	cfg.URL = g.Cfg().MustGet(ctx, "register.sms.url", "").String()
+	cfg.Method = g.Cfg().MustGet(ctx, "register.sms.method", "POST").String()
+	cfg.Headers = g.Cfg().MustGet(ctx, "register.sms.headers", map[string]string{}).MapStrStr()
+	cfg.BodyTemplate = g.Cfg().MustGet(ctx, "register.sms.bodyTemplate", `{"phone":"{contact}","code":"{code}"}`).String()
+	cfg.SuccessStatus = g.Cfg().MustGet(ctx, "register.sms.successStatus", 200).Int()
+	return cfg, nil
+}
+
+func parseRegisterEmailConfig(ctx context.Context) (cfg registerEmailConfig, err error) {
+	cfg.Host = g.Cfg().MustGet(ctx, "register.email.host", "").String()
+	cfg.Port = g.Cfg().MustGet(ctx, "register.email.port", 465).Int()
+	cfg.Username = g.Cfg().MustGet(ctx, "register.email.username", "").String()
+	cfg.Password = g.Cfg().MustGet(ctx, "register.email.password", "").String()
+	cfg.From = g.Cfg().MustGet(ctx, "register.email.from", "").String()
+	cfg.FromName = g.Cfg().MustGet(ctx, "register.email.fromName", "DTU管理平台").String()
+	cfg.Subject = g.Cfg().MustGet(ctx, "register.email.subject", "注册验证码").String()
+	cfg.BodyTemplate = g.Cfg().MustGet(ctx, "register.email.bodyTemplate", "您的注册验证码是：{code}，6小时内有效。").String()
+	cfg.SSL = g.Cfg().MustGet(ctx, "register.email.ssl", true).Bool()
+	return cfg, nil
+}
+
+func sendRegisterSmsCode(ctx context.Context, contact string, code string) error {
+	cfg, err := parseRegisterSmsConfig(ctx)
 	if err != nil {
+		return gerror.Wrap(err, "短信验证码配置错误")
+	}
+	if strings.TrimSpace(cfg.URL) == "" {
+		g.Log().Infof(ctx, "注册短信验证码发送接口未配置，跳过真实发送 contact=%s code=%s", maskRegisterContact(contact), code)
+		return nil
+	}
+	method := strings.ToUpper(strings.TrimSpace(cfg.Method))
+	if method == "" {
+		method = "POST"
+	}
+	if cfg.SuccessStatus == 0 {
+		cfg.SuccessStatus = 200
+	}
+	body := renderRegisterTemplate(cfg.BodyTemplate, contact, code)
+	client := g.Client()
+	client.SetHeader("Content-Type", "application/json")
+	for k, v := range cfg.Headers {
+		client.SetHeader(k, renderRegisterTemplate(v, contact, code))
+	}
+	var response *gclient.Response
+	switch method {
+	case "GET":
+		response, err = client.Get(ctx, renderRegisterTemplate(cfg.URL, contact, code))
+	default:
+		response, err = client.Post(ctx, cfg.URL, body)
+	}
+	if err != nil {
+		return gerror.Wrap(err, "调用短信验证码接口失败")
+	}
+	defer response.Close()
+	if response.StatusCode != cfg.SuccessStatus {
+		return gerror.Newf("调用短信验证码接口失败，状态码：%d，响应：%s", response.StatusCode, response.ReadAllString())
+	}
+	return nil
+}
+
+func sendRegisterEmailCode(ctx context.Context, contact string, code string) error {
+	cfg, err := parseRegisterEmailConfig(ctx)
+	if err != nil {
+		return gerror.Wrap(err, "邮件验证码配置错误")
+	}
+	if strings.TrimSpace(cfg.Host) == "" || strings.TrimSpace(cfg.Username) == "" {
+		g.Log().Infof(ctx, "注册邮件SMTP未配置，跳过真实发送 contact=%s code=%s", maskRegisterContact(contact), code)
+		return nil
+	}
+	if cfg.Port == 0 {
+		cfg.Port = 25
+	}
+	if cfg.Subject == "" {
+		cfg.Subject = "注册验证码"
+	}
+	if cfg.BodyTemplate == "" {
+		cfg.BodyTemplate = "您的注册验证码是：{code}，6小时内有效。"
+	}
+	from := cfg.From
+	if from == "" {
+		from = cfg.Username
+	}
+	body := renderRegisterTemplate(cfg.BodyTemplate, contact, code)
+	fromHeader := from
+	if cfg.FromName != "" {
+		fromHeader = fmt.Sprintf("%s <%s>", cfg.FromName, from)
+	}
+	message := strings.Join([]string{
+		"From: " + fromHeader,
+		"To: " + contact,
+		"Subject: " + cfg.Subject,
+		"MIME-Version: 1.0",
+		"Content-Type: text/html; charset=UTF-8",
+		"",
+		body,
+	}, "\r\n")
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	auth := smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
+	if cfg.SSL {
+		conn, err := tls.Dial("tcp", addr, &tls.Config{ServerName: cfg.Host, MinVersion: tls.VersionTLS12})
+		if err != nil {
+			return gerror.Wrap(err, "连接SMTP服务器失败")
+		}
+		defer conn.Close()
+		client, err := smtp.NewClient(conn, cfg.Host)
+		if err != nil {
+			return gerror.Wrap(err, "创建SMTP客户端失败")
+		}
+		defer client.Close()
+		if err = client.Auth(auth); err != nil {
+			return gerror.Wrap(err, "SMTP认证失败")
+		}
+		if err = client.Mail(from); err != nil {
+			return err
+		}
+		if err = client.Rcpt(contact); err != nil {
+			return err
+		}
+		writer, err := client.Data()
+		if err != nil {
+			return err
+		}
+		if _, err = writer.Write([]byte(message)); err != nil {
+			_ = writer.Close()
+			return err
+		}
+		return writer.Close()
+	}
+	return smtp.SendMail(addr, auth, from, []string{contact}, []byte(message))
+}
+
+func (l *sSysUser) SendRegisterCode(ctx context.Context, param *model.SysUserRegisterCodeModel) (err error) {
+	param.TenantId = normalizeRegisterTenantId(param.TenantId)
+	param.Contact = strings.TrimSpace(param.Contact)
+	if !isPhoneContact(param.Contact) && !isEmailContact(param.Contact) {
+		return gerror.New("请输入正确的手机号或邮箱")
+	}
+	if err = service.SysCaptcha().VerifyCaptcha(ctx, param.CaptchaID, param.CaptchaValue); err != nil {
 		return err
+	}
+	dailyCountKey := registerCodeDailyCountKey(param.TenantId, param.Contact)
+	dailyCountValue, err := mcache.Get(ctx, dailyCountKey)
+	if err == nil && gconv.Int(dailyCountValue) >= registerCodeDailyLimit {
+		return gerror.Newf("当天验证码发送次数已达上限，每个手机号或邮箱每天最多发送%d条", registerCodeDailyLimit)
+	}
+	code := grand.Digits(6)
+	if err = mcache.Set(ctx, registerCodeCacheKey(param.TenantId, param.Contact), code, registerCodeTTL); err != nil {
+		return err
+	}
+	if isPhoneContact(param.Contact) {
+		err = sendRegisterSmsCode(ctx, param.Contact, code)
+	} else {
+		err = sendRegisterEmailCode(ctx, param.Contact, code)
+	}
+	if err != nil {
+		_, _ = mcache.Instance().Remove(ctx, registerCodeCacheKey(param.TenantId, param.Contact))
+		return err
+	}
+	if err = mcache.Set(ctx, dailyCountKey, gconv.Int(dailyCountValue)+1, registerCodeDailyLimitTTL()); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (l *sSysUser) Register(ctx context.Context, param *model.SysUserRegisterModel) (err error) {
+	param.TenantId = normalizeRegisterTenantId(param.TenantId)
+	param.Contact = strings.TrimSpace(param.Contact)
+	if param.Contact == "" {
+		param.Contact = strings.TrimSpace(param.UserName)
+	}
+	if param.UserName == "" {
+		param.UserName = param.Contact
+	}
+	if param.ConfirmPassword == "" {
+		param.ConfirmPassword = param.Password
+	}
+	if param.CompanyName == "" {
+		param.CompanyName = param.UserName
+	}
+	if param.Password != param.ConfirmPassword {
+		return gerror.New("两次输入的密码不一致")
+	}
+	if param.Code != "" {
+		if !isPhoneContact(param.Contact) && !isEmailContact(param.Contact) {
+			return gerror.New("请输入正确的手机号或邮箱")
+		}
+		cacheValue, err := mcache.Get(ctx, registerCodeCacheKey(param.TenantId, param.Contact))
+		cacheCode := gconv.String(cacheValue)
+		if err != nil || cacheCode == "" {
+			return gerror.NewCode(consts.CodeCaptchaError, "验证码已失效")
+		}
+		if cacheCode != param.Code {
+			return gerror.NewCode(consts.CodeCaptchaError, "验证码错误")
+		}
+	} else if param.CaptchaID != "" || param.CaptchaValue != "" {
+		if err = service.SysCaptcha().VerifyCaptcha(ctx, param.CaptchaID, param.CaptchaValue); err != nil {
+			return err
+		}
+	} else {
+		return gerror.NewCode(consts.CodeCaptchaError, "验证码不能为空")
 	}
 
 	// 检查是否开启用户注册功能
@@ -678,25 +1069,54 @@ func (l *sSysUser) Register(ctx context.Context, param *model.SysUserRegisterMod
 	if total > 0 {
 		return gerror.New("用户名已存在")
 	}
+	if isPhoneContact(param.Contact) {
+		total, err = g.DB().Model(dao.SysUser.Table()).
+			Where(dao.SysUser.Columns().Phonenumber, param.Contact).
+			Where(dao.SysUser.Columns().TenantId, param.TenantId).
+			Count()
+		if err != nil {
+			return err
+		}
+		if total > 0 {
+			return gerror.NewCode(consts.CodePhoneExists, "手机号已存在")
+		}
+	} else {
+		total, err = g.DB().Model(dao.SysUser.Table()).
+			Where(dao.SysUser.Columns().Email, param.Contact).
+			Where(dao.SysUser.Columns().TenantId, param.TenantId).
+			Count()
+		if err != nil {
+			return err
+		}
+		if total > 0 {
+			return gerror.NewCode(consts.CodeEmailExists, "邮箱已存在")
+		}
+	}
 	// 随机生成5位字符
 	salt := utility.RandomString(5)
 	password := utility.PasswordEncrypt(param.Password, salt)
 
 	newUser := &entity.SysUser{
-		UserName:  param.UserName,
-		NickName:  "",
-		Password:  password,
-		Salt:      salt,
-		TenantId:  param.TenantId,
-		DeptId:    gconv.Int64(config.ConfigValue),
-		Status:    consts.SysDeptStatusNormal,
-		CreatedBy: 0,
-		CreatedAt: gtime.Now(),
-		UpdatedBy: 0,
-		UpdatedAt: gtime.Now(),
+		UserName: param.UserName,
+		NickName: param.CompanyName,
+		Password: password,
+		Salt:     salt,
+		TenantId: param.TenantId,
+		DeptId:   gconv.Int64(config.ConfigValue),
+		Status:   consts.SysDeptStatusNormal,
+		Remark:   "注册公司：" + param.CompanyName,
 	}
+	if isPhoneContact(param.Contact) {
+		newUser.Phonenumber = param.Contact
+	} else if isEmailContact(param.Contact) {
+		newUser.Email = param.Contact
+	}
+	newUser.CreatedBy = 0
+	newUser.CreatedAt = gtime.Now()
+	newUser.UpdatedBy = 0
+	newUser.UpdatedAt = gtime.Now()
 
-	userId, err := l.Model(ctx).Data(newUser).InsertAndGetId()
+	userId, err := dao.SysUser.Ctx(ctx).Data(newUser).InsertAndGetId()
 	if err != nil {
 		return err
 	}
@@ -717,6 +1137,9 @@ func (l *sSysUser) Register(ctx context.Context, param *model.SysUserRegisterMod
 		if err != nil {
 			g.Log().Error(ctx, "获取租户的默认角色失败", err)
 		}
+	}
+	if param.Code != "" {
+		_, _ = mcache.Instance().Remove(ctx, registerCodeCacheKey(param.TenantId, param.Contact))
 	}
 	return nil
 }

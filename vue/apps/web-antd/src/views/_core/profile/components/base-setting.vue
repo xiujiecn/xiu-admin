@@ -58,12 +58,6 @@ const [BasicForm, formApi] = useVbenForm({
       rules: 'required',
     },
     {
-      component: 'Input',
-      fieldName: 'email',
-      label: '邮箱',
-      rules: z.string().email('请输入正确的邮箱'),
-    },
-    {
       component: 'RadioGroup',
       componentProps: {
         buttonStyle: 'solid',
@@ -75,14 +69,10 @@ const [BasicForm, formApi] = useVbenForm({
       label: '性别',
       rules: 'required',
     },
-    {
-      component: 'Input',
-      fieldName: 'phonenumber',
-      label: '电话',
-      rules: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的电话'),
-    },
   ],
+  actionPosition:'left',
   submitButtonOptions: {
+    // class: 'min-w-[88px] flex-none',
     content: '更新信息',
   },
 });
@@ -115,8 +105,6 @@ onMounted(() => {
   const data = pick(props.profile.user, [
     'userId',
     'nickName',
-    'email',
-    'phonenumber',
     'sex',
   ]);
   formApi.setValues(data);

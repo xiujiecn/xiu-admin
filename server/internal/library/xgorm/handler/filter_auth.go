@@ -79,6 +79,8 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 			userIds = append(userIds, user.ID)
 		} else if dataScope == consts.SysRoleDataScopeOrgAndNextLevel { // 角色数据范围: 7本组织及本组织下一级数据权限
 			deptIds = append(deptIds, GetOrgAndNextLevelDeptIds(ctx, user.DeptId)...)
+		} else if dataScope == consts.SysRoleDataScopeOrgNextLevel { // 角色数据范围: 8本组织下一级数据权限
+			deptIds = append(deptIds, GetOrgNextLevelDeptIds(ctx, user.DeptId)...)
 		}
 	} else {
 		for _, role := range user.Roles {
@@ -106,6 +108,8 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 				userIds = append(userIds, user.ID)
 			} else if dataScope == consts.SysRoleDataScopeOrgAndNextLevel { // 角色数据范围: 7本组织及本组织下一级数据权限
 				deptIds = append(deptIds, GetOrgAndNextLevelDeptIds(ctx, user.DeptId)...)
+			} else if dataScope == consts.SysRoleDataScopeOrgNextLevel { // 角色数据范围: 8本组织下一级数据权限
+				deptIds = append(deptIds, GetOrgNextLevelDeptIds(ctx, user.DeptId)...)
 			}
 		}
 	}
@@ -177,6 +181,12 @@ func GetOrgAndNextLevelDeptIds(ctx context.Context, deptId int64) (ids []int64) 
 	ids = append(ids, orgDeptId)
 	ids = append(ids, GetDeptDirectSub(ctx, orgDeptId)...)
 	return
+}
+
+// GetOrgNextLevelDeptIds 获取本组织下一级数据权限范围：所属公司组织的直接下级
+func GetOrgNextLevelDeptIds(ctx context.Context, deptId int64) (ids []int64) {
+	orgDeptId := GetParentCompanyDeptId(ctx, deptId)
+	return GetDeptDirectSub(ctx, orgDeptId)
 }
 
 // GetDeptAndSub 获取指定部门的所有下级，含本部门

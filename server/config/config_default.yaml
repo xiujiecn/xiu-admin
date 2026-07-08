@@ -63,6 +63,25 @@ captcha:
     openCaptcha: 0
     openCaptchaTimeout: 3600
 
+# 注册验证码配置。短信 bodyTemplate、邮件 bodyTemplate 支持 {contact}/{code} 或 ${contact}/${code}
+register:
+  sms:
+    url: ""
+    method: "POST"
+    headers: {}
+    bodyTemplate: '{"phone":"{contact}","code":"{code}"}'
+    successStatus: 200
+  email:
+    host: ""
+    port: 465
+    username: ""
+    password: ""
+    from: ""
+    fromName: "DTU管理平台"
+    subject: "注册验证码"
+    bodyTemplate: "您的注册验证码是：{code}，6小时内有效。"
+    ssl: true
+
 database:
   logger:
     path:    "resource/log/server/sql"
@@ -117,6 +136,8 @@ router:
     - /api/v1/system/auth/refresh
     - /api/v1/system/captcha
     - /api/v1/system/auth/getTenantList
+    - /api/v1/system/user/register
+    - /api/v1/system/user/register/code
 
 
 # 生成代码

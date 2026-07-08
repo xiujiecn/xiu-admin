@@ -75,6 +75,22 @@ type UpdateCurrentUserPasswordReq struct {
 type UpdateCurrentUserPasswordRes struct {
 }
 
+type UpdateCurrentUserContactCodeReq struct {
+	g.Meta `path:"/user/profile/contact/code" method:"post" tags:"系统-用户管理" summary:"发送当前用户邮箱/手机修改验证码" x-check-permission:"cpc:current:user"`
+	model.UpdateCurrentUserContactCodeModel
+}
+
+type UpdateCurrentUserContactCodeRes struct {
+}
+
+type UpdateCurrentUserContactReq struct {
+	g.Meta `path:"/user/profile/contact/update" method:"post" tags:"系统-用户管理" summary:"修改当前用户邮箱/手机" x-check-permission:"cpc:current:user"`
+	model.UpdateCurrentUserContactModel
+}
+
+type UpdateCurrentUserContactRes struct {
+}
+
 type UpdateUserReq struct {
 	g.Meta `path:"/user/update" method:"post" tags:"系统-用户管理" summary:"更新用户信息" x-check-permission:"cpm:system:user:edit"`
 	model.SysUserUpdateModel
@@ -129,6 +145,15 @@ type UserRegisterReq struct {
 }
 
 type UserRegisterRes struct {
+}
+
+// UserRegisterCodeReq 发送注册验证码
+type UserRegisterCodeReq struct {
+	g.Meta `path:"/user/register/code" method:"post" tags:"系统-用户管理" summary:"发送注册验证码"`
+	model.SysUserRegisterCodeModel
+}
+
+type UserRegisterCodeRes struct {
 }
 
 // StatusReq 更新用户状态

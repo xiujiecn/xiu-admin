@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 
 import { SearchX, X } from '@vben/icons';
 import { $t } from '@vben/locales';
-import { mapTree, traverseTreeValues, uniqueByField } from '@vben/utils';
+import { uniqueByField } from '@vben/utils';
 
 import { VbenIcon, VbenScrollbar } from '@vben-core/shadcn-ui';
 import { isHttpUrl } from '@vben-core/shared/utils';
@@ -37,6 +37,24 @@ const searchResults = ref<MenuRecordRaw[]>([]);
 
 const handleSearch = useThrottleFn(search, 200);
 
+function flattenLeafMenus(menus: MenuRecordRaw[]) {
+  const result: MenuRecordRaw[] = [];
+
+  const walk = (items: MenuRecordRaw[]) => {
+    for (const item of items) {
+      const children = item.children ?? [];
+      if (children.length > 0) {
+        walk(children);
+      } else {
+        result.push(item);
+      }
+    }
+  };
+
+  walk(menus);
+  return result;
+}
+
 // 搜索函数，用于根据搜索关键词查找匹配的菜单项
 function search(searchKey: string) {
   // 去除搜索关键词的前后空格
@@ -55,7 +73,7 @@ function search(searchKey: string) {
   const results: MenuRecordRaw[] = [];
 
   // 遍历搜索项
-  traverseTreeValues(searchItems.value, (item) => {
+  searchItems.value.forEach((item) => {
     // 如果菜单项的名称匹配正则表达式，将其添加到结果数组中
     if (reg.test(item.name?.toLowerCase())) {
       results.push(item);
@@ -202,12 +220,16 @@ watch(
 );
 
 onMounted(() => {
-  searchItems.value = mapTree(props.menus, (item) => {
+  searchItems.value = flattenLeafMenus(props.menus).map((item) => {
     return {
       ...item,
       name: $t(item?.name),
     };
   });
+  const leafPathSet = new Set(searchItems.value.map((item) => item.path));
+  searchHistory.value = searchHistory.value.filter((item) =>
+    leafPathSet.has(item.path),
+  );
   if (searchHistory.value.length > 0) {
     searchResults.value = searchHistory.value;
   }

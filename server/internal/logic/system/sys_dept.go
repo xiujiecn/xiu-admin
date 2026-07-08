@@ -357,9 +357,15 @@ func (l *sSysDept) GetDeptListByIds(ctx context.Context, ids []int64) (depts []*
 
 // 验证上级是否是公司
 func (l *sSysDept) ValidateParentIsCompany(ctx context.Context, parentId int64) (isCompany bool, err error) {
+	if parentId == 0 {
+		return true, nil
+	}
 	dept, err := l.GetDeptById(ctx, parentId)
 	if err != nil {
 		return false, err
+	}
+	if dept == nil || dept.DeptId == 0 {
+		return false, gerror.New("上级组织不存在")
 	}
 	return dept.DeptType == 1 || dept.ParentId == 0, nil
 }

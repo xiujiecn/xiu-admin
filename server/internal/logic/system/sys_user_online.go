@@ -49,8 +49,35 @@ func (s *sSysUserOnline) Add(ctx context.Context, userOnline *model.SysUserOnlin
 	return
 }
 
+func (s *sSysUserOnline) cleanupExpired(ctx context.Context, tenantId string) (err error) {
+	cols := dao.SysUserOnline.Columns()
+	var data []*model.SysUserOnlineViewModel
+	err = s.Model(ctx).
+		Where(cols.TenantId, tenantId).
+		WhereLT(cols.ExpireTime, gtime.Now()).
+		Scan(&data)
+	if err != nil {
+		return err
+	}
+	if len(data) == 0 {
+		return nil
+	}
+	ids := make([]int64, 0, len(data))
+	for _, v := range data {
+		ids = append(ids, v.OnlineId)
+		if v.Token != "" {
+			service.SysAuth().DeleteToken(ctx, v.Token)
+		}
+	}
+	_, err = s.Model(ctx).WhereIn(cols.OnlineId, ids).Delete()
+	return err
+}
+
 func (s *sSysUserOnline) List(ctx context.Context, query *model.SysUserOnlineListParam, page *request.PageInfo) (items []*model.SysUserOnlineListModel, total int, err error) {
 	tenantId := contexts.GetTenantId(ctx)
+	if err = s.cleanupExpired(ctx, tenantId); err != nil {
+		return nil, 0, err
+	}
 	db := s.Model(ctx).Where(dao.SysUserOnline.Columns().TenantId, tenantId)
 	if query.UserName != "" {
 		db = db.Where(dao.SysUserOnline.Columns().UserName, query.UserName)
