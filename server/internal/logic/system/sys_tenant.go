@@ -178,8 +178,10 @@ func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (o
 		dataRoleMenuInserts := []*do.SysRoleMenu{}
 		for _, menuId := range menuIds {
 			dataRoleMenuInserts = append(dataRoleMenuInserts, &do.SysRoleMenu{
-				RoleId: roleId,
-				MenuId: menuId,
+				TenantId:  tenantId,
+				RoleId:    roleId,
+				MenuId:    menuId,
+				DataScope: consts.SysRoleMenuDataScopeRole,
 			})
 		}
 		_, err = tx.Ctx(ctx).Model(dao.SysRoleMenu.Table()).Data(dataRoleMenuInserts).OmitNil().Insert()
@@ -243,8 +245,9 @@ func (l *sSysTenant) Add(ctx context.Context, param *model.SysTenantAddParam) (o
 		// 角色关联用户
 		dataUserRoleInserts := []*do.SysUserRole{}
 		dataUserRoleInserts = append(dataUserRoleInserts, &do.SysUserRole{
-			UserId: userId,
-			RoleId: roleId,
+			TenantId: tenantId,
+			UserId:   userId,
+			RoleId:   roleId,
 		})
 		_, err = tx.Ctx(ctx).Model(dao.SysUserRole.Table()).Data(dataUserRoleInserts).OmitNil().Insert()
 		if err != nil {
@@ -432,7 +435,11 @@ func (l *sSysTenant) SyncTenantMenu(ctx context.Context, tenantId string) (err e
 	}
 	menuIds := strings.Split(tenantPackage.MenuIds, ",")
 	// 获取角色对应菜单
-	roleMenuList, err := service.SysRole().GetRoleMenu(ctx, tenantInfo.AdminRoleId)
+	roleMenuList := make([]*entity.SysRoleMenu, 0)
+	err = dao.SysRoleMenu.Ctx(ctx).
+		Where(dao.SysRoleMenu.Columns().TenantId, tenantId).
+		Where(dao.SysRoleMenu.Columns().RoleId, tenantInfo.AdminRoleId).
+		Scan(&roleMenuList)
 	if err != nil {
 		g.Log().Errorf(ctx, "sSysTenant.SyncTenantMenu SysRole().GetRoleMenu err: %v, tenantId: %s, roleId: %d", err, tenantId, tenantInfo.AdminRoleId)
 		return err
@@ -448,8 +455,10 @@ func (l *sSysTenant) SyncTenantMenu(ctx context.Context, tenantId string) (err e
 		}
 		if !found {
 			insertMenuIds = append(insertMenuIds, do.SysRoleMenu{
-				RoleId: tenantInfo.AdminRoleId,
-				MenuId: gconv.Int64(menuId),
+				TenantId:  tenantId,
+				RoleId:    tenantInfo.AdminRoleId,
+				MenuId:    gconv.Int64(menuId),
+				DataScope: consts.SysRoleMenuDataScopeRole,
 			})
 		}
 	}
@@ -461,7 +470,7 @@ func (l *sSysTenant) SyncTenantMenu(ctx context.Context, tenantId string) (err e
 		}
 	}
 	if len(delMenuIds) > 0 {
-		_, err = dao.SysRoleMenu.Ctx(ctx).WhereIn(dao.SysRoleMenu.Columns().RoleId, tenantInfo.AdminRoleId).
+		_, err = dao.SysRoleMenu.Ctx(ctx).Where(dao.SysRoleMenu.Columns().TenantId, tenantId).WhereIn(dao.SysRoleMenu.Columns().RoleId, tenantInfo.AdminRoleId).
 			WhereIn(dao.SysRoleMenu.Columns().MenuId, delMenuIds).Delete()
 		if err != nil {
 			g.Log().Errorf(ctx, "sSysTenant.SyncTenantMenu SysRoleMenu.Ctx(ctx).Delete err: %v, tenantId: %s, roleId: %d, delMenuIds: %v", err, tenantId, tenantInfo.AdminRoleId, delMenuIds)

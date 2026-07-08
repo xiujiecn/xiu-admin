@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import { nextTick, ref, watch } from 'vue';
-import { Tag, Checkbox } from 'ant-design-vue';
+import { Tag, Checkbox, Select } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysMenuListApi } from '#/api/system';
 import { getMenuTypeOptionsLabel, getMenuTypeOptionsColor } from './model';
@@ -57,9 +57,21 @@ import { cloneDeep } from 'lodash-es';
 const flag = ref(true);
 /** props */
 const props = defineProps<{
+  dataScopes?: Record<number, string>;
   menuIds?: number[];
 }>();
 const resList = ref([]);
+const dataScopeMap = ref<Record<number, string>>({});
+const menuDataScopeOptions = [
+  { label: '按角色数据权限', value: '0' },
+  { label: '全部数据权限', value: '1' },
+  { label: '本部门数据权限', value: '3' },
+  { label: '本部门及以下数据权限', value: '4' },
+  { label: '仅本人数据权限', value: '5' },
+  { label: '本部门及以下或本人数据权限', value: '6' },
+  { label: '本组织及本组织下一级数据权限', value: '7' },
+  { label: '本组织下一级数据权限', value: '8' },
+];
 
 /** 监听 menuIds 变化并重新加载 Grid */
 watch(
@@ -76,6 +88,13 @@ watch(
   },
   { deep: true },
 );
+watch(
+  () => props.dataScopes,
+  (value) => {
+    dataScopeMap.value = { ...(value || {}) };
+  },
+  { deep: true, immediate: true },
+);
 
 function getData() {
   const select = gridApi.grid.getCheckboxRecords().map((item) => item.menuId);
@@ -85,8 +104,20 @@ function getData() {
   const select3 = select.concat(select2);
   return select3;
 }
+function getDataScopes() {
+  const selectedMenuIds = getData();
+  const result: Record<number, string> = {};
+  selectedMenuIds.forEach((menuId) => {
+    result[menuId] = dataScopeMap.value[menuId] || '0';
+  });
+  return result;
+}
+function handleDataScopeChange(menuId: number, value: string) {
+  dataScopeMap.value[menuId] = value;
+}
 function clearData() {
   gridApi.grid.clearCheckboxRow();
+  dataScopeMap.value = {};
 }
 
 // onUnmounted(() => {
@@ -98,6 +129,7 @@ function clearData() {
 
 defineExpose({
   getData,
+  getDataScopes,
   clearData,
 });
 /** ====================  列表实例  ==================== */
@@ -127,6 +159,12 @@ const [Grid, gridApi] = useVbenVxeGrid({
         slots: { default: 'menuType' },
       },
       { field: 'perms', title: '权限标识' },
+      {
+        field: 'dataScope',
+        title: '数据范围',
+        width: 210,
+        slots: { default: 'dataScope' },
+      },
     ],
     height: 'auto',
     keepSource: true,
@@ -150,7 +188,6 @@ const [Grid, gridApi] = useVbenVxeGrid({
               checkRowKeys: props.menuIds,
             },
           });
-        
         },
       },
     },
@@ -213,6 +250,15 @@ function checkboxLinkageChange(params: any) {
       <Tag :color="getMenuTypeOptionsColor(row.menuType)">{{
         getMenuTypeOptionsLabel(row.menuType)
       }}</Tag>
+    </template>
+    <template #dataScope="{ row }">
+      <Select
+        :value="dataScopeMap[row.menuId] || '0'"
+        @change="(value) => handleDataScopeChange(row.menuId, value as string)"
+        :options="menuDataScopeOptions"
+        size="small"
+        class="w-full text-left"
+      />
     </template>
   </Grid>
 </template>

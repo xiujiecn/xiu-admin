@@ -353,6 +353,7 @@ COMMIT;
 DROP TABLE IF EXISTS `sys_job`;
 CREATE TABLE `sys_job` (
   `job_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '任务ID',
+  `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
   `job_name` varchar(64) NOT NULL DEFAULT '' COMMENT '任务名称',
   `job_params` varchar(200) DEFAULT '' COMMENT '参数',
   `job_group` varchar(64) NOT NULL DEFAULT 'DEFAULT' COMMENT '任务组名',
@@ -376,14 +377,14 @@ CREATE TABLE `sys_job` (
 -- Records of sys_job
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_job` (`job_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (1, 'test1', '', '1', 'test.abb', '0 * * * ', 1, 1, '1', 'Lorem elit', 101, 11, '2025-03-19 12:00:33', 11, '2025-03-20 11:28:07', 11, '2025-03-20 11:28:07');
-INSERT INTO `sys_job` (`job_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (2, '韩成', 'Duis aute', '0', '0', ' sss ', 1, 0, '0', '0', 101, 11, '2025-03-19 13:13:29', 11, '2025-03-20 11:28:13', 11, '2025-03-20 11:28:13');
-INSERT INTO `sys_job` (`job_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (3, 'test2', '收拾收拾', '0', 'test2', 'test2', 2, 0, '1', 'test2', 101, 11, '2025-03-20 10:29:48', 11, '2025-03-20 11:28:13', 11, '2025-03-20 11:28:13');
-INSERT INTO `sys_job` (`job_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (4, 'test31', '1', '0', 'clear_data', '3/10 * * * * ?', 1, 0, '1', 'test31', 101, 11, '2025-03-20 10:33:23', 1, '2025-03-25 16:40:38', NULL, NULL);
-INSERT INTO `sys_job` (`job_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (5, 'test11', '', '0', 'test', '3/5 * * * 3/5 ?', 1, 0, '1', 'test11', 101, 11, '2025-03-20 11:28:57', 1, '2025-03-25 19:07:56', NULL, NULL);
-INSERT INTO `sys_job` (`job_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (6, 'test121', 'test121', '0', 'test121', '3/5 * 2,3 * * ? *', 1, 0, '1', 'test121', 101, 11, '2025-03-20 11:29:16', 11, '2025-03-24 13:01:50', NULL, NULL);
-INSERT INTO `sys_job` (`job_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (7, 'test2', '1', '1', 'test', '3/5 * * * * ?', 1, 1, '1', 'test2', 103, 1, '2025-03-25 16:53:33', 1, '2025-03-25 16:54:56', 1, '2025-03-25 16:54:56');
-INSERT INTO `sys_job` (`job_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (8, 'test1', '2', '2', 'test', '* * * ? * 2/1', 2, 1, '1', 'test2', 103, 1, '2025-03-26 09:54:08', 1, '2025-03-26 09:54:08', NULL, NULL);
+INSERT INTO `sys_job` (`job_id`, `tenant_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (1, '000000', 'test1', '', '1', 'test.abb', '0 * * * ', 1, 1, '1', 'Lorem elit', 101, 11, '2025-03-19 12:00:33', 11, '2025-03-20 11:28:07', 11, '2025-03-20 11:28:07');
+INSERT INTO `sys_job` (`job_id`, `tenant_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (2, '000000', '韩成', 'Duis aute', '0', '0', ' sss ', 1, 0, '0', '0', 101, 11, '2025-03-19 13:13:29', 11, '2025-03-20 11:28:13', 11, '2025-03-20 11:28:13');
+INSERT INTO `sys_job` (`job_id`, `tenant_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (3, '000000', 'test2', '收拾收拾', '0', 'test2', 'test2', 2, 0, '1', 'test2', 101, 11, '2025-03-20 10:29:48', 11, '2025-03-20 11:28:13', 11, '2025-03-20 11:28:13');
+INSERT INTO `sys_job` (`job_id`, `tenant_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (4, '000000', 'test31', '1', '0', 'clear_data', '3/10 * * * * ?', 1, 0, '1', 'test31', 101, 11, '2025-03-20 10:33:23', 1, '2025-03-25 16:40:38', NULL, NULL);
+INSERT INTO `sys_job` (`job_id`, `tenant_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (5, '000000', 'test11', '', '0', 'test', '3/5 * * * 3/5 ?', 1, 0, '1', 'test11', 101, 11, '2025-03-20 11:28:57', 1, '2025-03-25 19:07:56', NULL, NULL);
+INSERT INTO `sys_job` (`job_id`, `tenant_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (6, '000000', 'test121', 'test121', '0', 'test121', '3/5 * 2,3 * * ? *', 1, 0, '1', 'test121', 101, 11, '2025-03-20 11:29:16', 11, '2025-03-24 13:01:50', NULL, NULL);
+INSERT INTO `sys_job` (`job_id`, `tenant_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (7, '000000', 'test2', '1', '1', 'test', '3/5 * * * * ?', 1, 1, '1', 'test2', 103, 1, '2025-03-25 16:53:33', 1, '2025-03-25 16:54:56', 1, '2025-03-25 16:54:56');
+INSERT INTO `sys_job` (`job_id`, `tenant_id`, `job_name`, `job_params`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `remark`, `created_dept`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES (8, '000000', 'test1', '2', '2', 'test', '* * * ? * 2/1', 2, 1, '1', 'test2', 103, 1, '2025-03-26 09:54:08', 1, '2025-03-26 09:54:08', NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -788,17 +789,18 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_role_dept`;
 CREATE TABLE `sys_role_dept` (
+  `tenant_id` varchar(20) NOT NULL DEFAULT '000000' COMMENT '租户编号',
   `role_id` bigint(20) NOT NULL COMMENT '角色ID',
   `dept_id` bigint(20) NOT NULL COMMENT '部门ID',
-  PRIMARY KEY (`role_id`,`dept_id`)
+  PRIMARY KEY (`tenant_id`,`role_id`,`dept_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='角色和部门关联表';
 
 -- ----------------------------
 -- Records of sys_role_dept
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_role_dept` (`role_id`, `dept_id`) VALUES (8, 106);
-INSERT INTO `sys_role_dept` (`role_id`, `dept_id`) VALUES (8, 107);
+INSERT INTO `sys_role_dept` (`tenant_id`, `role_id`, `dept_id`) VALUES ('000000', 8, 106);
+INSERT INTO `sys_role_dept` (`tenant_id`, `role_id`, `dept_id`) VALUES ('000000', 8, 107);
 COMMIT;
 
 -- ----------------------------
@@ -806,123 +808,125 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_role_menu`;
 CREATE TABLE `sys_role_menu` (
+  `tenant_id` varchar(20) NOT NULL DEFAULT '000000' COMMENT '租户编号',
   `role_id` bigint(20) NOT NULL COMMENT '角色ID',
   `menu_id` bigint(20) NOT NULL COMMENT '菜单ID',
-  PRIMARY KEY (`role_id`,`menu_id`)
+  `data_scope` char(1) NOT NULL DEFAULT '0' COMMENT '数据范围（0按角色数据权限 1全部数据权限 3本部门数据权限 4本部门及以下数据权限 5仅本人数据权限 6本部门及以下或本人数据权限 7本组织及本组织下一级数据权限 8本组织下一级数据权限）',
+  PRIMARY KEY (`tenant_id`,`role_id`,`menu_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='角色和菜单关联表';
 
 -- ----------------------------
 -- Records of sys_role_menu
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 5);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 100);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 101);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 102);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 103);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 104);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 105);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 106);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 107);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 108);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 118);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 123);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 500);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 501);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1001);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1002);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1003);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1004);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1005);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1006);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1007);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1008);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1009);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1010);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1011);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1012);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1013);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1014);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1015);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1016);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1017);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1018);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1019);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1020);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1021);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1022);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1023);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1024);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1025);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1026);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1027);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1028);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1029);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1030);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1031);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1032);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1033);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1034);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1035);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1036);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1037);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1038);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1039);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1040);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1041);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1042);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1043);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1045);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1050);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1061);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1062);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1064);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1065);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1500);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1501);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1502);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1503);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1504);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1505);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1506);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1507);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1508);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1509);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1510);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1511);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1600);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1601);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1602);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1603);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1620);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1621);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1622);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1623);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1624);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1626);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1628);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1629);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1630);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1631);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1632);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (3, 1633);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 5);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1500);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1501);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1502);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1503);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1504);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1505);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1506);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1507);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1508);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1509);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1510);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (4, 1511);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (8, 1001);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (8, 1005);
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (8, 1007);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 5);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 100);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 101);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 102);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 103);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 104);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 105);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 106);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 107);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 108);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 118);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 123);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 500);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 501);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1001);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1002);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1003);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1004);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1005);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1006);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1007);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1008);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1009);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1010);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1011);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1012);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1013);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1014);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1015);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1016);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1017);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1018);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1019);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1020);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1021);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1022);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1023);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1024);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1025);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1026);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1027);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1028);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1029);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1030);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1031);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1032);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1033);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1034);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1035);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1036);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1037);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1038);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1039);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1040);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1041);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1042);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1043);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1045);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1050);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1061);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1062);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1064);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1065);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1500);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1501);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1502);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1503);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1504);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1505);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1506);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1507);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1508);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1509);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1510);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1511);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1600);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1601);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1602);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1603);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1620);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1621);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1622);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1623);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1624);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1626);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1628);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1629);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1630);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1631);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1632);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 3, 1633);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 5);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1500);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1501);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1502);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1503);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1504);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1505);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1506);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1507);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1508);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1509);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1510);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 4, 1511);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 8, 1001);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 8, 1005);
+INSERT INTO `sys_role_menu` (`tenant_id`, `role_id`, `menu_id`) VALUES ('000000', 8, 1007);
 COMMIT;
 
 -- ----------------------------
@@ -1188,16 +1192,17 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_user_post`;
 CREATE TABLE `sys_user_post` (
+  `tenant_id` varchar(20) NOT NULL DEFAULT '000000' COMMENT '租户编号',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `post_id` bigint(20) NOT NULL COMMENT '岗位ID',
-  PRIMARY KEY (`user_id`,`post_id`)
+  PRIMARY KEY (`tenant_id`,`user_id`,`post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户与岗位关联表';
 
 -- ----------------------------
 -- Records of sys_user_post
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_user_post` (`user_id`, `post_id`) VALUES (6, 3);
+INSERT INTO `sys_user_post` (`tenant_id`, `user_id`, `post_id`) VALUES ('000000', 6, 3);
 COMMIT;
 
 -- ----------------------------
@@ -1205,20 +1210,21 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_user_role`;
 CREATE TABLE `sys_user_role` (
+  `tenant_id` varchar(20) NOT NULL DEFAULT '000000' COMMENT '租户编号',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `role_id` bigint(20) NOT NULL COMMENT '角色ID',
-  PRIMARY KEY (`user_id`,`role_id`)
+  PRIMARY KEY (`tenant_id`,`user_id`,`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户和角色关联表';
 
 -- ----------------------------
 -- Records of sys_user_role
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES (1, 1);
-INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES (3, 3);
-INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES (4, 4);
-INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES (6, 3);
-INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES (11, 3);
+INSERT INTO `sys_user_role` (`tenant_id`, `user_id`, `role_id`) VALUES ('000000', 1, 1);
+INSERT INTO `sys_user_role` (`tenant_id`, `user_id`, `role_id`) VALUES ('000000', 3, 3);
+INSERT INTO `sys_user_role` (`tenant_id`, `user_id`, `role_id`) VALUES ('000000', 4, 4);
+INSERT INTO `sys_user_role` (`tenant_id`, `user_id`, `role_id`) VALUES ('000000', 6, 3);
+INSERT INTO `sys_user_role` (`tenant_id`, `user_id`, `role_id`) VALUES ('000000', 11, 3);
 COMMIT;
 
 -- ----------------------------

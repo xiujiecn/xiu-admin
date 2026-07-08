@@ -19,22 +19,22 @@ export interface SysRoleListParam {
 }
 
 export interface SysRoleListData {
-    roleId: number; 
-    tenantId: string;
-    roleName: string;
-    roleKey: string;
-    roleSort: number;
-    dataScope: string;
-    menuCheckStrictly: number;
-    deptCheckStrictly: number;
-    status: string;
-    createdDept: number;
-    createdAt: string;
-    remark: string;
+  roleId: number;
+  tenantId: string;
+  roleName: string;
+  roleKey: string;
+  roleSort: number;
+  dataScope: string;
+  menuCheckStrictly: number;
+  deptCheckStrictly: number;
+  status: string;
+  createdDept: number;
+  createdAt: string;
+  remark: string;
 }
 
 export interface SysRoleViewData {
-  roleId: number; 
+  roleId: number;
   tenantId: string;
   roleName: string;
   roleKey: string;
@@ -47,6 +47,7 @@ export interface SysRoleViewData {
   createdAt: string;
   remark: string;
   menuIds: number[];
+  roleMenuDataScopes: Record<number, string>;
   deptIds: number[];
 }
 
@@ -77,6 +78,7 @@ export interface SysRoleAddParam {
   status: string;
   remark: string;
   menuIds: number[];
+  roleMenuDataScopes?: Record<number, string>;
 }
 
 export interface SysRoleEditParam {
@@ -89,6 +91,7 @@ export interface SysRoleEditParam {
   status: string;
   remark: string;
   menuIds: number[];
+  roleMenuDataScopes?: Record<number, string>;
 }
 
 export interface SysRoleDeleteParam {
@@ -96,14 +99,11 @@ export interface SysRoleDeleteParam {
   roleIds: number[];
 }
 
-export interface SysRoleAddRes {
-}
+export interface SysRoleAddRes {}
 
-export interface SysRoleEditRes {
-}
+export interface SysRoleEditRes {}
 
-export interface SysRoleDeleteRes {
-}
+export interface SysRoleDeleteRes {}
 
 export interface SysRoleDataScopeEditParam {
   roleId: number;
@@ -111,26 +111,34 @@ export interface SysRoleDataScopeEditParam {
   deptCheckStrictly?: number;
   deptIds?: number[];
 }
-export interface SysRoleDataScopeEditRes {
-}
+export interface SysRoleDataScopeEditRes {}
 
-export async function addSysRoleApi(params: SysRoleAddParam|any) {
+export async function addSysRoleApi(params: SysRoleAddParam | any) {
   return requestClient.post<SysRoleAddRes>('/system/role/add', { ...params });
 }
 
-export async function editSysRoleApi(params: SysRoleEditParam|any) {
+export async function editSysRoleApi(params: SysRoleEditParam | any) {
   return requestClient.post<SysRoleEditRes>('/system/role/edit', { ...params });
 }
 
-export async function deleteSysRoleApi(params: SysRoleDeleteParam|any) {
-  return requestClient.post<SysRoleDeleteRes>('/system/role/delete', { ...params });
-} 
+export async function deleteSysRoleApi(params: SysRoleDeleteParam | any) {
+  return requestClient.post<SysRoleDeleteRes>('/system/role/delete', {
+    ...params,
+  });
+}
 
-export async function getSysRoleViewApi(params: SysRoleViewParam|any) {
-  console.log('/Users/lixiujie/dev_test/dev_go/xiujie_iot/vue/apps/web-antd/src/api/system/role.ts', params);  
+export async function getSysRoleViewApi(params: SysRoleViewParam | any) {
+  console.log(
+    '/Users/lixiujie/dev_test/dev_go/xiujie_iot/vue/apps/web-antd/src/api/system/role.ts',
+    params,
+  );
   return requestClient.get<SysRoleViewData>('/system/role/view', { params });
 }
 
-export async function editSysRoleDataScopeApi(params: SysRoleDataScopeEditParam|any) {
-  return requestClient.post<SysRoleDataScopeEditRes>('/system/role/dataScope', { ...params });
+export async function editSysRoleDataScopeApi(
+  params: SysRoleDataScopeEditParam | any,
+) {
+  return requestClient.post<SysRoleDataScopeEditRes>('/system/role/dataScope', {
+    ...params,
+  });
 }

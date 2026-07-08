@@ -251,7 +251,7 @@ type (
 		Edit(ctx context.Context, param *model.SysRoleEditParam) (role *model.SysRoleEditModel, err error)
 		// 删除角色
 		Delete(ctx context.Context, param *model.SysRoleDeleteParam) (role *model.SysRoleDeleteModel, err error)
-		RoleMenu(ctx context.Context, roleId int64, menuIds []int64) (err error)
+		RoleMenu(ctx context.Context, roleId int64, menuIds []int64, dataScopes map[int64]string) (err error)
 		// 自定义角色部门数据权限
 		RoleDept(ctx context.Context, roleId int64, deptIds []int64) (err error)
 		// 编辑角色数据权限

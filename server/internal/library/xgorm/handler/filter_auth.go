@@ -61,7 +61,7 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 			return m
 		} else if dataScope == consts.SysRoleDataScopeCustom { // 角色数据范围: 2自定数据权限
 			var roleDepts []*entity.SysRoleDept
-			err := g.Model("sys_role_dept").Where("role_id", roleId).Scan(&roleDepts)
+			err := g.Model("sys_role_dept").Where("tenant_id", contexts.GetTenantId(ctx)).Where("role_id", roleId).Scan(&roleDepts)
 			if err != nil {
 				g.Log().Panicf(ctx, "failed to get role dept data err:%+v", err)
 			}
@@ -90,7 +90,7 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 				return m
 			} else if dataScope == consts.SysRoleDataScopeCustom { // 角色数据范围: 2自定数据权限
 				var roleDepts []*entity.SysRoleDept
-				err := g.Model("sys_role_dept").Where("role_id", roleId).Scan(&roleDepts)
+				err := g.Model("sys_role_dept").Where("tenant_id", contexts.GetTenantId(ctx)).Where("role_id", roleId).Scan(&roleDepts)
 				if err != nil {
 					g.Log().Panicf(ctx, "failed to get role dept data err:%+v", err)
 				}
