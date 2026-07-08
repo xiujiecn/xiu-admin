@@ -75,6 +75,7 @@ const [BasicForm, formApi] = useVbenForm({
       rules: 'required',
     },
   ],
+  actionPosition:'left',
   submitButtonOptions: {
     content: '修改密码',
   },

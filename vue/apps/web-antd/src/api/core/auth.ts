@@ -35,6 +35,14 @@ export namespace AuthApi {
     tenantId?: string;
     username?: string;
     password?: string;
+    confirmPassword?: string;
+    code?: string;
+    companyName?: string;
+    contact?: string;
+  }
+  export interface RegisterCodeParams {
+    tenantId?: string;
+    contact?: string;
     captchaID?: string;
     captchaValue?: string;
   }
@@ -106,6 +114,10 @@ export async function registerApi(data: AuthApi.RegisterParams) {
   );
 }
 
+export async function sendRegisterCodeApi(data: AuthApi.RegisterCodeParams) {
+  return requestClient.post('/system/user/register/code', data);
+}
+
 /**
  * 刷新accessToken
  */
@@ -166,4 +178,3 @@ export function authCallback(data: AuthApi.OAuthLoginParams) {
 export function tenantList() {
   return requestClient.get<TenantResp>('/system/auth/getTenantList');
 }
-

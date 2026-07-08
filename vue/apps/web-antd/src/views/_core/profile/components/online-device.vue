@@ -19,7 +19,7 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 const userStore = useUserStore();
 const gridOptions: VxeGridProps = {
   columns: [
-    { align: 'left', title: 'ID', type: 'checkbox', width: 80 },
+    // { align: 'left', type: 'checkbox', width: 80 },
     { field: 'userName', title: '用户名称' },
     { field: 'uuid', title: 'UUID' },
     { field: 'clientKey', title: '客户端' },
@@ -30,7 +30,7 @@ const gridOptions: VxeGridProps = {
     { field: 'os', title: '操作系统' },
     { field: 'loginTime', title: '登录时间' },
     { field: 'expireTime', title: '过期时间' },
-    { title: '操作', width: 40, slots: { default: 'action' } }
+    { title: '操作', width: 80, slots: { default: 'action' },fixed: 'right' },
   ],
   keepSource: true,
   pagerConfig: {

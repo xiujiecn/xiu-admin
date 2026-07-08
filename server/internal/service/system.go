@@ -309,6 +309,8 @@ type (
 		Profile(ctx context.Context) (user *model.UserProfileModel, err error)
 		UpdateCurrentUser(ctx context.Context, req *model.UpdateCurrentUserModel) (user *model.SysUserViewModel, err error)
 		UpdateCurrentUserPassword(ctx context.Context, req *model.UpdateCurrentUserPasswordModel) (err error)
+		SendCurrentUserContactCode(ctx context.Context, req *model.UpdateCurrentUserContactCodeModel) (err error)
+		UpdateCurrentUserContact(ctx context.Context, req *model.UpdateCurrentUserContactModel) (err error)
 		UpdateUser(ctx context.Context, req *model.SysUserUpdateModel) (err error)
 		DeleteUser(ctx context.Context, userIds []int64) (err error)
 		ResetPassword(ctx context.Context, userId int64, password string) (err error)
@@ -318,6 +320,7 @@ type (
 		// 获取用户岗位ID列表
 		GetUserPostIds(ctx context.Context, userId int64) (postIds []int64, err error)
 		Register(ctx context.Context, param *model.SysUserRegisterModel) (err error)
+		SendRegisterCode(ctx context.Context, param *model.SysUserRegisterCodeModel) (err error)
 		// Status 更新用户状态
 		Status(ctx context.Context, param *model.SysUserStatusParam) (err error)
 		// 批量查询用户迷你信息

@@ -189,6 +189,25 @@ export interface SysUserListParam {
     return requestClient.post<UserInfo>('/system/user/profile/update', { ...params });
   }
 
+  export interface UpdateCurrentUserContactCodeParam {
+    contact: string;
+    captchaID: string;
+    captchaValue: string;
+  }
+
+  export interface UpdateCurrentUserContactParam {
+    contact: string;
+    code: string;
+  }
+
+  export async function sendCurrentUserContactCode(params: UpdateCurrentUserContactCodeParam) {
+    return requestClient.post('/system/user/profile/contact/code', { ...params });
+  }
+
+  export async function updateCurrentUserContact(params: UpdateCurrentUserContactParam) {
+    return requestClient.post('/system/user/profile/contact/update', { ...params });
+  }
+
   export async function getSysUser(params: SysUserViewParam) {
     return requestClient.get<SysUserViewModel>('/system/user/view', { params });
   }

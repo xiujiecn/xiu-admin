@@ -98,6 +98,7 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeTableGridOptions<RowType> = {
   align: 'center',
   columns: [
+    { field: 'deptId', title: '组织ID', width: 90 },
     { field: 'deptName', title: '组织名称' , treeNode: true, minWidth: 240,  align: 'left', },
     { field: 'deptCategory', title: '组织编码', minWidth: 100 },
     { field: 'deptType', slots: { default: 'deptType' },title: '组织类型', width: 80 },

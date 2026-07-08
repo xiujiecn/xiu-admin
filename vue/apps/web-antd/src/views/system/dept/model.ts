@@ -10,16 +10,21 @@ import type {
     VbenFormSchema,
   } from '@vben/common-ui';
   import { z } from '@vben/common-ui';
-  import { getDictOptions } from '#/utils/dict';
   import { DictEnum } from '@vben/constants';
+  import { getDictOptions } from '#/utils/dict';
   import { getPopupContainer } from '@vben/utils';
+
+  export const deptTypeOptions = [
+    { label: '部门', value: '0' },
+    { label: '公司', value: '1' },
+  ];
 
   export const drawerSchema: VbenFormSchema[] =  [
     {
       component: 'RadioGroup',
       componentProps: {
         buttonStyle: 'solid',
-        options: getDictOptions(DictEnum.SYS_DEPT_TYPE),
+        options: deptTypeOptions,
         optionType: 'button',
       },
       defaultValue: '0',

@@ -147,6 +147,22 @@ func (c *ControllerV1) UpdateCurrentUserPassword(ctx context.Context, req *v1.Up
 	return &v1.UpdateCurrentUserPasswordRes{}, nil
 }
 
+func (c *ControllerV1) UpdateCurrentUserContactCode(ctx context.Context, req *v1.UpdateCurrentUserContactCodeReq) (res *v1.UpdateCurrentUserContactCodeRes, err error) {
+	err = service.SysUser().SendCurrentUserContactCode(ctx, &req.UpdateCurrentUserContactCodeModel)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UpdateCurrentUserContactCodeRes{}, nil
+}
+
+func (c *ControllerV1) UpdateCurrentUserContact(ctx context.Context, req *v1.UpdateCurrentUserContactReq) (res *v1.UpdateCurrentUserContactRes, err error) {
+	err = service.SysUser().UpdateCurrentUserContact(ctx, &req.UpdateCurrentUserContactModel)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UpdateCurrentUserContactRes{}, nil
+}
+
 func (c *ControllerV1) UpdateUser(ctx context.Context, req *v1.UpdateUserReq) (res *v1.UpdateUserRes, err error) {
 	err = service.SysUser().UpdateUser(ctx, &req.SysUserUpdateModel)
 	if err != nil {
@@ -224,6 +240,15 @@ func (c *ControllerV1) UserRegister(ctx context.Context, req *v1.UserRegisterReq
 		return nil, err
 	}
 	return &v1.UserRegisterRes{}, nil
+}
+
+// UserRegisterCode 发送注册验证码
+func (c *ControllerV1) UserRegisterCode(ctx context.Context, req *v1.UserRegisterCodeReq) (res *v1.UserRegisterCodeRes, err error) {
+	err = service.SysUser().SendRegisterCode(ctx, &req.SysUserRegisterCodeModel)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UserRegisterCodeRes{}, nil
 }
 
 // UserStatus 更新用户状态
