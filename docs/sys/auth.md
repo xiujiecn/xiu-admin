@@ -132,6 +132,52 @@ graph TD
 
 - API权限实时生效，web后台菜单刷新页面后生效，无需重启服务
 
+### 权限通配符
+
+> 菜单的权限标识支持通配符 `*`，用于简化权限分配。当菜单权限标识以 `*` 结尾时，表示拥有该前缀下的所有权限。
+
+#### 使用示例
+
+在菜单管理中，将权限标识配置为 `system:user:*`，则该用户将自动拥有以下所有权限：
+
+- `system:user:query` - 查询
+- `system:user:add` - 新增
+- `system:user:edit` - 修改
+- `system:user:remove` - 删除
+- `system:user:export` - 导出
+- `system:user:import` - 导入
+- `system:user:resetPwd` - 重置密码
+- 以及其他所有以 `system:user:` 开头的权限
+
+#### 匹配规则
+
+1. **精确匹配优先**：如果用户拥有精确的权限码（如 `cpm:system:user:query`），优先使用精确匹配
+2. **通配符匹配**：如果用户拥有通配符权限码（如 `cpm:system:user:*`），则匹配所有以 `cpm:system:user:` 开头的权限码
+3. **多级通配**：`system:*` 可以匹配 `system:user:query`、`system:role:list` 等所有以 `system:` 开头的权限
+4. **前后端同步**：通配符匹配同时在后端中间件（API权限校验）和前端（按钮/组件权限控制）生效
+
+#### 后端接口权限配置示例
+
+接口权限校验不变，仍然使用具体权限码：
+```go
+type UserListReq struct {
+	g.Meta `path:"/user/list" method:"get" tags:"系统-用户管理" summary:"获取用户列表" x-check-permission:"cpm:system:user:query"`
+	*model.SysUserListParam
+}
+```
+
+即使用户只拥有 `cpm:system:user:*` 权限（而非精确的 `cpm:system:user:query`），也能通过权限校验。
+
+#### 前端权限控制示例
+
+前端权限校验同样支持通配符匹配：
+```vue
+<!-- 用户拥有 cpm:system:user:* 权限时，以下按钮均可见 -->
+<Button v-access:code="'cpm:system:user:add'">新增</Button>
+<Button v-access:code="'cpm:system:user:edit'">修改</Button>
+<Button v-access:code="'cpm:system:user:remove'">删除</Button>
+```
+
 
 ## 二、数据权限
 

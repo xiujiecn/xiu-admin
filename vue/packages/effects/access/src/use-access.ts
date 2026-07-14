@@ -3,6 +3,23 @@ import { computed } from 'vue';
 import { preferences, updatePreferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
+/**
+ * 检查权限码是否匹配，支持通配符 *
+ * @param pattern 用户拥有的权限码（可能包含通配符 *）
+ * @param code 需要校验的权限码
+ * @returns 是否匹配
+ */
+function matchAccessCode(pattern: string, code: string): boolean {
+  if (pattern === code) {
+    return true;
+  }
+  if (pattern.endsWith('*')) {
+    const prefix = pattern.slice(0, -1);
+    return code.startsWith(prefix);
+  }
+  return false;
+}
+
 function useAccess() {
   const accessStore = useAccessStore();
   const userStore = useUserStore();
@@ -24,12 +41,15 @@ function useAccess() {
   /**
    * 基于权限码判断是否有权限
    * @description: Determine whether there is permission，The permission code is judged by the user's permission code
+   * 支持通配符匹配，如用户拥有 "cpm:system:user:*" 可匹配 "cpm:system:user:query"
    * @param codes
    */
   function hasAccessByCodes(codes: string[]) {
-    const userCodesSet = new Set(accessStore.accessCodes);
+    const userCodes = accessStore.accessCodes;
 
-    const intersection = codes.filter((item) => userCodesSet.has(item));
+    const intersection = codes.filter((item) =>
+      userCodes.some((userCode) => matchAccessCode(userCode, item)),
+    );
     return intersection.length > 0;
   }
 
