@@ -200,14 +200,14 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 					accessCodeItemList := strings.Split(code, "&")
 					hasItem := true
 					for _, item := range accessCodeItemList {
-						if !slices.Contains(userAccessCodeList, item) {
+						if !hasAccessCode(userAccessCodeList, item) {
 							g.Log().Errorf(ctx, "sMiddleware.Auth userAccessCodeList not contains item: %v, userAccessCodeList: %v", item, userAccessCodeList)
 							hasItem = false
 							break
 						}
 						for _, roleDataAccessCode := range menuRoleDataAccessCodeList {
-							if strings.HasPrefix(roleDataAccessCode, item+"|") {
-								roleDataAccessCodeItemList := strings.Split(roleDataAccessCode, "|")
+							roleDataAccessCodeItemList := strings.Split(roleDataAccessCode, "|")
+							if len(roleDataAccessCodeItemList) > 0 && matchAccessCode(roleDataAccessCodeItemList[0], item) {
 								g.Log().Debugf(ctx, "sMiddleware.Auth roleDataAccessCodeItemList: %v", roleDataAccessCodeItemList)
 								if len(roleDataAccessCodeItemList) == 3 {
 									roleId := roleDataAccessCodeItemList[1]
@@ -233,6 +233,31 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 		}
 	}
 	r.Middleware.Next()
+}
+
+// matchAccessCode 检查权限码是否匹配，支持通配符 *
+// pattern 为用户拥有的权限码（可能包含通配符 *），code 为需要校验的权限码
+// 例如: pattern="cpm:system:user:*" 匹配 code="cpm:system:user:query"
+func matchAccessCode(pattern, code string) bool {
+	if pattern == code {
+		return true
+	}
+	if strings.HasSuffix(pattern, "*") {
+		prefix := pattern[:len(pattern)-1]
+		return strings.HasPrefix(code, prefix)
+	}
+	return false
+}
+
+// hasAccessCode 检查用户权限码列表中是否存在匹配指定权限码的项
+// 支持通配符匹配，如用户拥有 "cpm:system:user:*" 可匹配 "cpm:system:user:query"
+func hasAccessCode(userAccessCodeList []string, requiredCode string) bool {
+	for _, userCode := range userAccessCodeList {
+		if matchAccessCode(userCode, requiredCode) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsExceptLogin 判断是否需要验证登录

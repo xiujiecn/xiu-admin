@@ -226,7 +226,7 @@ export const drawerSchema: VbenFormSchema[] = [
         triggerFields: ['menuType'],
       },
       fieldName: 'perms',
-      help: `控制器中定义的权限字符\n 如: @SaCheckPermission("system:user:import")`,
+      help: `控制器中定义的权限字符\n 如: system:user:import\n 支持通配符 *，如: system:user:* 表示拥有 system:user 下所有权限`,
       label: '权限标识',
     },
     {
