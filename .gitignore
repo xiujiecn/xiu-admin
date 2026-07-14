@@ -86,3 +86,4 @@ dump.rdb
 **.tar.gz
 docs/.vitepress/dist.tar.gz
 
+.claude

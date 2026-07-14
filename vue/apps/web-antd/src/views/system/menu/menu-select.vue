@@ -9,11 +9,23 @@
 
 <script lang="ts" setup>
 import { nextTick, ref, watch } from 'vue';
+import type { DeepPartial } from '@vben/types';
+import type { VxeGridListeners } from '#/adapter/vxe-table';
 import { Tag, Checkbox, Select } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysMenuListApi } from '#/api/system';
 import { getMenuTypeOptionsLabel, getMenuTypeOptionsColor } from './model';
-import { cloneDeep } from 'lodash-es';
+
+/** ====================  右键菜单（使用 VXE Table 原生 menuConfig）  ==================== */
+/** 递归获取节点及其所有子孙节点 */
+function getDescendants(tree: any[], parentId: number, field: string, parentField: string): any[] {
+  const children = tree.filter((item: any) => item[parentField] === parentId);
+  let result = [...children];
+  children.forEach((child: any) => {
+    result = result.concat(getDescendants(tree, child[field], field, parentField));
+  });
+  return result;
+}
 /** ====================  tips:  ==================== */
 /**
  * @description Tips
@@ -133,71 +145,113 @@ defineExpose({
   clearData,
 });
 /** ====================  列表实例  ==================== */
-const [Grid, gridApi] = useVbenVxeGrid({
-  gridOptions: {
-    checkboxConfig: {
-      // 关闭父子联动
-      checkStrictly: true,
+const gridOptions = {
+  checkboxConfig: {
+    // 关闭父子联动
+    checkStrictly: true,
+  },
+  rowConfig: {
+    keyField: 'menuId',
+  },
+  align: 'center' as const,
+  columns: [
+    { align: 'left' as const, title: '', type: 'checkbox', width: 40 },
+    {
+      field: 'menuName',
+      title: '菜单名称',
+      treeNode: true,
+      minWidth: 160,
+      align: 'left' as const,
     },
-    rowConfig: {
-      keyField: 'menuId',
+    {
+      field: 'menuType',
+      title: '类型',
+      width: 60,
+      slots: { default: 'menuType' },
     },
-    align: 'center',
-    columns: [
-      { align: 'left', title: '', type: 'checkbox', width: 40 },
-      {
-        field: 'menuName',
-        title: '菜单名称',
-        treeNode: true,
-        minWidth: 160,
-        align: 'left',
-      },
-      {
-        field: 'menuType',
-        title: '类型',
-        width: 60,
-        slots: { default: 'menuType' },
-      },
-      { field: 'perms', title: '权限标识' },
-      {
-        field: 'dataScope',
-        title: '数据范围',
-        width: 210,
-        slots: { default: 'dataScope' },
-      },
-    ],
-    height: 'auto',
-    keepSource: true,
-    pagerConfig: {
-      enabled: false,
+    { field: 'perms', title: '权限标识' },
+    {
+      field: 'dataScope',
+      title: '数据范围',
+      width: 210,
+      slots: { default: 'dataScope' },
     },
-    proxyConfig: {
-      ajax: {
-        query: async ({ page }: any, formValues: any) => {
-          const res = await getSysMenuListApi({
-            page: page.currentPage,
-            pageSize: page.pageSize,
-            ...formValues,
-          });
-          resList.value = res.items;
-          return res;
-        },
-        querySuccess: () => {
-          gridApi.setGridOptions({
-            checkboxConfig: {
-              checkRowKeys: props.menuIds,
-            },
-          });
-        },
+  ],
+  height: 'auto' as const,
+  keepSource: true,
+  pagerConfig: {
+    enabled: false,
+  },
+  proxyConfig: {
+    ajax: {
+      query: async ({ page }: any, formValues: any) => {
+        const res = await getSysMenuListApi({
+          page: page.currentPage,
+          pageSize: page.pageSize,
+          ...formValues,
+        });
+        resList.value = res.items;
+        return res;
       },
-    },
-    treeConfig: {
-      parentField: 'parentId',
-      rowField: 'menuId',
-      transform: true,
-      expandAll: true,
+      querySuccess: () => {
+        gridApi.setGridOptions({
+          checkboxConfig: {
+            checkRowKeys: props.menuIds,
+          },
+        });
+      },
     },
   },
+  treeConfig: {
+    parentField: 'parentId',
+    rowField: 'menuId',
+    transform: true,
+    expandAll: true,
+  },
+  menuConfig: {
+    body: {
+      options: [
+        [
+          { code: 'selectSelf', name: '选择本级' },
+          { code: 'selectSelfAndChildren', name: '选择本级及下级' },
+        ],
+        [
+          { code: 'unselectSelf', name: '不选择本级' },
+          { code: 'unselectSelfAndChildren', name: '不选择本级及下级' },
+        ],
+      ],
+    },
+  },
+};
+
+/** 右键菜单点击事件 */
+const gridEvents: DeepPartial<VxeGridListeners> = {
+  menuClick: ({ menu, row }: any) => {
+    if (!row) return;
+    const { code } = menu;
+    if (code === 'selectSelf') {
+      gridApi.grid.clearCheckboxRow();
+      gridApi.grid.setCheckboxRow(row, true);
+    } else if (code === 'selectSelfAndChildren') {
+      gridApi.grid.clearCheckboxRow();
+      const descendants = getDescendants(resList.value, row.menuId, 'menuId', 'parentId');
+      [row, ...descendants].forEach((r: any) => {
+        gridApi.grid.setCheckboxRow(r, true);
+      });
+    } else if (code === 'unselectSelf') {
+      gridApi.grid.setCheckboxRow(row, false);
+    } else if (code === 'unselectSelfAndChildren') {
+      const descendants = getDescendants(resList.value, row.menuId, 'menuId', 'parentId');
+      [row, ...descendants].forEach((r: any) => {
+        gridApi.grid.setCheckboxRow(r, false);
+      });
+    }
+  },
+};
+
+const [Grid, gridApi] = useVbenVxeGrid({
+  gridOptions,
+  gridEvents,
 });
 
 /** ====================  多选组配置  ==================== */
@@ -225,40 +279,42 @@ function checkboxLinkageChange(params: any) {
 </script>
 
 <template>
-  <div class="flex justify-between px-2">
-    <Checkbox
-      :disabled="!flag"
-      @change="checkboxAllChange"
-      v-model:checked="checkboxStatus.all"
-      >全选/全不选</Checkbox
-    >
-    <Checkbox
-      :disabled="!flag"
-      @change="checkboxExpandChange"
-      v-model:checked="checkboxStatus.expand"
-      >展开/折叠</Checkbox
-    >
-    <Checkbox
-      :disabled="!flag"
-      @change="checkboxLinkageChange"
-      v-model:checked="checkboxStatus.linkage"
-      >父子联动</Checkbox
-    >
+  <div class="flex h-full flex-col">
+    <div class="flex justify-between px-2">
+      <Checkbox
+        :disabled="!flag"
+        @change="checkboxAllChange"
+        v-model:checked="checkboxStatus.all"
+        >全选/全不选</Checkbox
+      >
+      <Checkbox
+        :disabled="!flag"
+        @change="checkboxExpandChange"
+        v-model:checked="checkboxStatus.expand"
+        >展开/折叠</Checkbox
+      >
+      <Checkbox
+        :disabled="!flag"
+        @change="checkboxLinkageChange"
+        v-model:checked="checkboxStatus.linkage"
+        >父子联动</Checkbox
+      >
+    </div>
+    <Grid v-if="flag" class="m-0 w-full flex-1 p-0">
+      <template #menuType="{ row }">
+        <Tag :color="getMenuTypeOptionsColor(row.menuType)">{{
+          getMenuTypeOptionsLabel(row.menuType)
+        }}</Tag>
+      </template>
+      <template #dataScope="{ row }">
+        <Select
+          :value="dataScopeMap[row.menuId] || '0'"
+          @change="(value) => handleDataScopeChange(row.menuId, value as string)"
+          :options="menuDataScopeOptions"
+          size="small"
+          class="w-full text-left"
+        />
+      </template>
+    </Grid>
   </div>
-  <Grid v-if="flag" class="m-0 w-full p-0">
-    <template #menuType="{ row }">
-      <Tag :color="getMenuTypeOptionsColor(row.menuType)">{{
-        getMenuTypeOptionsLabel(row.menuType)
-      }}</Tag>
-    </template>
-    <template #dataScope="{ row }">
-      <Select
-        :value="dataScopeMap[row.menuId] || '0'"
-        @change="(value) => handleDataScopeChange(row.menuId, value as string)"
-        :options="menuDataScopeOptions"
-        size="small"
-        class="w-full text-left"
-      />
-    </template>
-  </Grid>
 </template>
