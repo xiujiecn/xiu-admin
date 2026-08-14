@@ -9,20 +9,29 @@
 
 <script lang="ts" setup>
 import { nextTick, ref, watch } from 'vue';
+import type { Ref } from 'vue';
 import type { DeepPartial } from '@vben/types';
 import type { VxeGridListeners } from '#/adapter/vxe-table';
 import { Tag, Checkbox, Select } from 'ant-design-vue';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSysMenuListApi } from '#/api/system';
+import type { SysMenuListData } from '#/api/system';
 import { getMenuTypeOptionsLabel, getMenuTypeOptionsColor } from './model';
 
-/** ====================  右键菜单（使用 VXE Table 原生 menuConfig）  ==================== */
+/** 右键菜单项 code */
+const MenuCode = {
+  SelectSelf: 'selectSelf',
+  SelectSelfAndChildren: 'selectSelfAndChildren',
+  UnselectSelf: 'unselectSelf',
+  UnselectSelfAndChildren: 'unselectSelfAndChildren',
+} as const;
+
 /** 递归获取节点及其所有子孙节点 */
-function getDescendants(tree: any[], parentId: number, field: string, parentField: string): any[] {
-  const children = tree.filter((item: any) => item[parentField] === parentId);
+function getDescendants(tree: SysMenuListData[], parentId: number, field: keyof SysMenuListData, parentField: keyof SysMenuListData): SysMenuListData[] {
+  const children = tree.filter((item) => item[parentField] === parentId);
   let result = [...children];
-  children.forEach((child: any) => {
-    result = result.concat(getDescendants(tree, child[field], field, parentField));
+  children.forEach((child) => {
+    result = result.concat(getDescendants(tree, child[field] as number, field, parentField));
   });
   return result;
 }
@@ -72,7 +81,7 @@ const props = defineProps<{
   dataScopes?: Record<number, string>;
   menuIds?: number[];
 }>();
-const resList = ref([]);
+const resList: Ref<SysMenuListData[]> = ref([]);
 const dataScopeMap = ref<Record<number, string>>({});
 const menuDataScopeOptions = [
   { label: '按角色数据权限', value: '0' },
@@ -131,13 +140,6 @@ function clearData() {
   gridApi.grid.clearCheckboxRow();
   dataScopeMap.value = {};
 }
-
-// onUnmounted(() => {
-//   console.log('unmounted');
-// });
-// onMounted(() => {
-//   console.log('mounted');
-// });
 
 defineExpose({
   getData,
@@ -212,39 +214,46 @@ const gridOptions = {
     body: {
       options: [
         [
-          { code: 'selectSelf', name: '选择本级' },
-          { code: 'selectSelfAndChildren', name: '选择本级及下级' },
+          { code: MenuCode.SelectSelf, name: '选择本级' },
+          { code: MenuCode.SelectSelfAndChildren, name: '选择本级及下级' },
         ],
         [
-          { code: 'unselectSelf', name: '不选择本级' },
-          { code: 'unselectSelfAndChildren', name: '不选择本级及下级' },
+          { code: MenuCode.UnselectSelf, name: '不选择本级' },
+          { code: MenuCode.UnselectSelfAndChildren, name: '不选择本级及下级' },
         ],
       ],
     },
   },
 };
 
+/** 设置行及其子孙节点的勾选状态 */
+function setRowAndDescendantsChecked(row: SysMenuListData, checked: boolean) {
+  const descendants = getDescendants(resList.value, row.menuId, 'menuId', 'parentId');
+  [row, ...descendants].forEach((r) => {
+    gridApi.grid.setCheckboxRow(r, checked);
+  });
+}
+
 /** 右键菜单点击事件 */
 const gridEvents: DeepPartial<VxeGridListeners> = {
   menuClick: ({ menu, row }: any) => {
     if (!row) return;
     const { code } = menu;
-    if (code === 'selectSelf') {
-      gridApi.grid.clearCheckboxRow();
-      gridApi.grid.setCheckboxRow(row, true);
-    } else if (code === 'selectSelfAndChildren') {
-      gridApi.grid.clearCheckboxRow();
-      const descendants = getDescendants(resList.value, row.menuId, 'menuId', 'parentId');
-      [row, ...descendants].forEach((r: any) => {
-        gridApi.grid.setCheckboxRow(r, true);
-      });
-    } else if (code === 'unselectSelf') {
-      gridApi.grid.setCheckboxRow(row, false);
-    } else if (code === 'unselectSelfAndChildren') {
-      const descendants = getDescendants(resList.value, row.menuId, 'menuId', 'parentId');
-      [row, ...descendants].forEach((r: any) => {
-        gridApi.grid.setCheckboxRow(r, false);
-      });
+    switch (code) {
+      case MenuCode.SelectSelf:
+        gridApi.grid.clearCheckboxRow();
+        gridApi.grid.setCheckboxRow(row, true);
+        break;
+      case MenuCode.SelectSelfAndChildren:
+        gridApi.grid.clearCheckboxRow();
+        setRowAndDescendantsChecked(row, true);
+        break;
+      case MenuCode.UnselectSelf:
+        gridApi.grid.setCheckboxRow(row, false);
+        break;
+      case MenuCode.UnselectSelfAndChildren:
+        setRowAndDescendantsChecked(row, false);
+        break;
     }
   },
 };
