@@ -43,6 +43,8 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 
 	deptIds := make([]int64, 0)
 	userIds := make([]int64, 0)
+	// 是否进入了非「全部数据」的受限范围；解析结果为空时必须拒绝，不能漏过滤
+	hasRestrictedScope := false
 	currentRoleId := ""
 	currentRoleDataScope := ""
 	currentRoleIdIf := contexts.GetDataValue(ctx, "currentRoleId")
@@ -59,7 +61,9 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 		g.Log().Infof(ctx, "uid:%d, currentRoleId: %d, currentRoleDataScope: %s", user.ID, roleId, dataScope)
 		if dataScope == consts.SysRoleDataScopeAll { // 角色数据范围: 1全部数据权限
 			return m
-		} else if dataScope == consts.SysRoleDataScopeCustom { // 角色数据范围: 2自定数据权限
+		}
+		hasRestrictedScope = true
+		if dataScope == consts.SysRoleDataScopeCustom { // 角色数据范围: 2自定数据权限
 			var roleDepts []*entity.SysRoleDept
 			err := g.Model("sys_role_dept").Where("tenant_id", contexts.GetTenantId(ctx)).Where("role_id", roleId).Scan(&roleDepts)
 			if err != nil {
@@ -89,6 +93,7 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 			if dataScope == consts.SysRoleDataScopeAll { // 角色数据范围: 1全部数据权限
 				return m
 			} else if dataScope == consts.SysRoleDataScopeCustom { // 角色数据范围: 2自定数据权限
+				hasRestrictedScope = true
 				var roleDepts []*entity.SysRoleDept
 				err := g.Model("sys_role_dept").Where("tenant_id", contexts.GetTenantId(ctx)).Where("role_id", roleId).Scan(&roleDepts)
 				if err != nil {
@@ -98,17 +103,23 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 					deptIds = append(deptIds, roleDept.DeptId)
 				}
 			} else if dataScope == consts.SysRoleDataScopeDept { // 角色数据范围: 3本部门数据权限
+				hasRestrictedScope = true
 				deptIds = append(deptIds, user.DeptId)
 			} else if dataScope == consts.SysRoleDataScopeDeptAndBelow { // 角色数据范围: 4本部门及以下数据权限
+				hasRestrictedScope = true
 				deptIds = append(deptIds, GetDeptAndSub(ctx, user.DeptId)...)
 			} else if dataScope == consts.SysRoleDataScopePersonal { // 角色数据范围: 5仅本人数据权限
+				hasRestrictedScope = true
 				userIds = append(userIds, user.ID)
 			} else if dataScope == consts.SysRoleDataScopeDeptAndBelowOrPersonal { // 角色数据范围: 6本部门及以下或本人数据权限
+				hasRestrictedScope = true
 				deptIds = append(deptIds, GetDeptAndSub(ctx, user.DeptId)...)
 				userIds = append(userIds, user.ID)
 			} else if dataScope == consts.SysRoleDataScopeOrgAndNextLevel { // 角色数据范围: 7本组织及本组织下一级数据权限
+				hasRestrictedScope = true
 				deptIds = append(deptIds, GetOrgAndNextLevelDeptIds(ctx, user.DeptId)...)
 			} else if dataScope == consts.SysRoleDataScopeOrgNextLevel { // 角色数据范围: 8本组织下一级数据权限
+				hasRestrictedScope = true
 				deptIds = append(deptIds, GetOrgNextLevelDeptIds(ctx, user.DeptId)...)
 			}
 		}
@@ -139,6 +150,10 @@ func FilterAuth(m *gdb.Model) *gdb.Model {
 		m = m.WhereIn(deptFilterField, deptIds)
 	} else if len(userIds) > 0 && userFilterField != "" {
 		m = m.WhereIn(userFilterField, userIds)
+	} else if hasRestrictedScope && (deptFilterField != "" || userFilterField != "") {
+		// 例：范围8无下级部门、范围2未配自定义部门 → 可见集合为空，禁止放行全表
+		g.Log().Warningf(ctx, "FilterAuth empty scope result, deny all data. uid:%d, deptIds:%v, userIds:%v", user.ID, deptIds, userIds)
+		m = m.Where("1 = 0")
 	}
 	return m
 }
