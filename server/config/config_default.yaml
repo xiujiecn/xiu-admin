@@ -50,7 +50,7 @@ logger:
 
 # JWT配置
 jwt:
-    signingKey: your_jwt_signing_key
+    signingKey: ""  # 必填，请自行生成足够长度的随机字符串，勿使用示例值
     expiresTime: 7d
     bufferTime: 1d
     issuer: xiujie # 发行人
@@ -75,7 +75,7 @@ register:
     host: ""
     port: 465
     username: ""
-    password: ""
+    password: ""  # 邮箱授权码，仅在本文件本地填写，不要提交到仓库
     from: ""
     fromName: "DTU管理平台"
     subject: "注册验证码"
@@ -88,7 +88,7 @@ database:
     level:   "all"
     stdout:  true
   default:  # 分组名称，可自定义，默认为default
-    link: "mysql:xj_admin:your_db_password@tcp(192.168.158.200:3306)/xiujie_admin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+    link: "mysql:root:your_password@tcp(127.0.0.1:3306)/xiu_admin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
     debug: true #开启调试模式
     charset: "utf8mb4" # (可选)数据库编码(如: utf8mb4/utf8/gbk/gb2312)，一般设置为utf8mb4。默认为utf8。
     dryRun: false #ORM空跑(只读不写)
@@ -107,7 +107,7 @@ redis:
   default:
     mode: "single" #redis模式，支持：single|cluster|sentinel
     sentinelMasterName: "xiujie-master" #哨兵模式主节点名称
-    address: 192.168.158.200:6379
+    address: 127.0.0.1:6379
     db: 0
     pass: your_redis_password
     minIdle: 5 #最小空闲连接数
@@ -121,7 +121,7 @@ queue:
   type: "asynq" # 队列类型
   asynq:
     redis:
-      address: 192.168.158.200:6379
+      address: 127.0.0.1:6379
       db: 0
       pass: your_redis_password
       user:
