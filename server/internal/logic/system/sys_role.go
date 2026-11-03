@@ -74,7 +74,11 @@ func (s *sSysRole) List(ctx context.Context, param *model.SysRoleListParam) (res
 		start, end := gtime.NewFromStr(param.CreatedAt[0]), gtime.NewFromStr(param.CreatedAt[1])
 		db = db.WhereBetween(dao.SysRole.Columns().CreatedAt, start, end.EndOfDay())
 	}
-	if len(param.RoleIds) > 0 {
+	if param.RoleIds != nil {
+		if len(param.RoleIds) == 0 {
+			// 显式传入空角色集合代表该用户没有角色，不能退化成返回全部角色
+			return nil, 0, nil
+		}
 		db = db.WhereIn(dao.SysRole.Columns().RoleId, param.RoleIds)
 	}
 	total, err = db.Count()

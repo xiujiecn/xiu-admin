@@ -79,7 +79,8 @@ type ApiCallQrcodeResult struct {
 }
 
 type QrcodeLoginSelectUserIdParam struct {
-	OpenId   string `json:"openId" dc:"微信OpenId" v:"required#微信OpenId不能为空"`
-	UserName string `json:"userName" dc:"用户名" v:"required#用户名不能为空"`
-	TenantId string `json:"tenantId" dc:"租户ID" v:"required#租户ID不能为空"`
+	OpenId     string `json:"openId" dc:"微信OpenId" v:"required#微信OpenId不能为空"`
+	TempUserId string `json:"tempUserId" dc:"扫码会话ID" v:"required#扫码会话不能为空"`
+	UserName   string `json:"userName" dc:"用户名" v:"required#用户名不能为空"`
+	TenantId   string `json:"tenantId" dc:"租户ID" v:"required#租户ID不能为空"`
 }

@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 	"xiuadmin/internal/consts"
@@ -331,6 +332,37 @@ func (s *sSysOss) GetSaveFilePathConfig(ctx context.Context, newFileType int, no
 	return fullDirPath, nil
 }
 
+// resolveSubDir 校验客户端传入的子目录参数并拼接到基础目录上
+// 客户端只能指定上传根目录内的相对子目录，禁止绝对路径与 .. 上跳
+func (s *sSysOss) resolveSubDir(ctx context.Context, baseDirPath string, subDirName string) (string, error) {
+	if subDirName == "" {
+		return baseDirPath, nil
+	}
+	uploadPath := g.Cfg().MustGet(ctx, "system.upload.local.path").String()
+	if uploadPath == "" {
+		return "", errors.New("上传路径未配置")
+	}
+	uploadRoot, err := filepath.Abs(uploadPath)
+	if err != nil {
+		return "", err
+	}
+	normalizedName := filepath.Clean(filepath.FromSlash(strings.ReplaceAll(subDirName, "\\", "/")))
+	if normalizedName == "." ||
+		filepath.IsAbs(normalizedName) ||
+		normalizedName == ".." ||
+		strings.HasPrefix(normalizedName, ".."+string(filepath.Separator)) {
+		return "", errors.New("子目录名称非法")
+	}
+	fullDirPath, err := filepath.Abs(filepath.Join(baseDirPath, normalizedName))
+	if err != nil {
+		return "", err
+	}
+	if fullDirPath != uploadRoot && !strings.HasPrefix(fullDirPath, uploadRoot+string(filepath.Separator)) {
+		return "", errors.New("子目录名称非法")
+	}
+	return fullDirPath, nil
+}
+
 func (s *sSysOss) MoveFileLocal(ctx context.Context, filePath string, newFileType int, useOriginalName int, subDirName string, isAddDate int) (result model.UploadResponse, err error) {
 	if filePath == "" {
 		err = errors.New("文件路径必须")
@@ -341,8 +373,9 @@ func (s *sSysOss) MoveFileLocal(ctx context.Context, filePath string, newFileTyp
 	if err != nil {
 		return
 	}
-	if subDirName != "" {
-		fullDirPath = fullDirPath + "/" + subDirName
+	fullDirPath, err = s.resolveSubDir(ctx, fullDirPath, subDirName)
+	if err != nil {
+		return
 	}
 	if !gfile.Exists(fullDirPath) {
 		err = gfile.Mkdir(fullDirPath)
@@ -390,8 +423,9 @@ func (s *sSysOss) SaveContentLocal(ctx context.Context, content []byte, newFileT
 	if err != nil {
 		return
 	}
-	if subDirName != "" {
-		fullDirPath = fullDirPath + "/" + subDirName
+	fullDirPath, err = s.resolveSubDir(ctx, fullDirPath, subDirName)
+	if err != nil {
+		return
 	}
 	if !gfile.Exists(fullDirPath) {
 		err = gfile.Mkdir(fullDirPath)
@@ -442,8 +476,9 @@ func (s *sSysOss) UploadLocal(ctx context.Context, file *ghttp.UploadFile, newFi
 	if err != nil {
 		return
 	}
-	if subDirName != "" {
-		fullDirPath = fullDirPath + "/" + subDirName
+	fullDirPath, err = s.resolveSubDir(ctx, fullDirPath, subDirName)
+	if err != nil {
+		return
 	}
 	if !gfile.Exists(fullDirPath) {
 		err = gfile.Mkdir(fullDirPath)

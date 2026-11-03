@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 	"xiuadmin/internal/consts"
+	"xiuadmin/internal/dao"
 	"xiuadmin/internal/library/bcache"
 	"xiuadmin/internal/library/contexts"
 	"xiuadmin/internal/library/event"
@@ -156,21 +157,24 @@ func (s *sSysAuth) GenerateToken(ctx context.Context, user *model.LoginUserOut) 
 		if err != nil {
 			return nil, "", err
 		}
-		rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
-			PageInfo: request.PageInfo{
-				Page:     1,
-				PageSize: 5000,
-			},
-			RoleIds: authorityIds,
-		})
-		if err != nil {
-			return nil, "", err
-		}
-		for _, r := range rl {
-			roles = append(roles, model.Role{
-				RoleId:    r.RoleId,
-				DataScope: r.DataScope,
+		// 用户没有任何角色时直接跳过查询，避免空集合退化为全部角色
+		if len(authorityIds) > 0 {
+			rl, _, err := service.SysRole().List(ctx, &model.SysRoleListParam{
+				PageInfo: request.PageInfo{
+					Page:     1,
+					PageSize: 5000,
+				},
+				RoleIds: authorityIds,
 			})
+			if err != nil {
+				return nil, "", err
+			}
+			for _, r := range rl {
+				roles = append(roles, model.Role{
+					RoleId:    r.RoleId,
+					DataScope: r.DataScope,
+				})
+			}
 		}
 	}
 	g.Log().Debugf(ctx, "sSysAuth.GenerateToken roles: %v", roles)
@@ -378,6 +382,18 @@ func (s *sSysAuth) GetUserAccessCodeList(ctx context.Context, userId int64) (acc
 
 // 根据openId登录
 func (s *sSysAuth) LoginByOpenId(ctx context.Context, social *model.SysSocialListModel) (res *model.LoginUserOut, token string, err error) {
+	// openId 登录必须已存在绑定关系，否则任意 openId 都能换取任意账号的 token
+	if social.OpenId == "" {
+		return nil, "", gerror.NewCode(consts.CodeNoPermission, "扫码登录信息无效")
+	}
+	user, err := service.SysUser().GetUserByUsername(ctx, social.User.UserName, social.User.TenantId)
+	if err != nil {
+		return nil, "用户不存在", err
+	}
+	if !s.hasSocialBinding(ctx, user.UserId, user.TenantId, social.OpenId, social.Source) {
+		g.Log().Warningf(ctx, "sSysAuth.LoginByOpenId binding not found, userId: %d, openId: %s, source: %s", user.UserId, social.OpenId, social.Source)
+		return nil, "", gerror.NewCode(consts.CodeNoPermission, "该微信未绑定此账号")
+	}
 	ip := g.RequestFromCtx(ctx).GetClientIp()
 	logininfor := &model.SysLogininforAddModel{
 		TenantId:      social.User.TenantId,
@@ -391,10 +407,6 @@ func (s *sSysAuth) LoginByOpenId(ctx context.Context, social *model.SysSocialLis
 		Status:        "0",
 		Msg:           "登录成功",
 		LoginTime:     gtime.Now(),
-	}
-	user, err := service.SysUser().GetUserByUsername(ctx, social.User.UserName, social.User.TenantId)
-	if err != nil {
-		return nil, "用户不存在", err
 	}
 	userOut := &model.LoginUserOut{
 		ID:       user.UserId,
@@ -459,4 +471,21 @@ func (s *sSysAuth) LoginByOpenId(ctx context.Context, social *model.SysSocialLis
 	}()
 	event.EventsInstance().Emit(ctx, consts.EventKeyUserLogin, user.UserId)
 	return userOut, token, nil
+}
+
+// hasSocialBinding 校验 openId 是否已绑定到指定用户
+func (s *sSysAuth) hasSocialBinding(ctx context.Context, userId int64, tenantId string, openId string, source string) bool {
+	m := dao.SysSocial.Ctx(ctx).
+		Where(dao.SysSocial.Columns().UserId, userId).
+		Where(dao.SysSocial.Columns().TenantId, tenantId).
+		Where(dao.SysSocial.Columns().OpenId, openId)
+	if source != "" {
+		m = m.Where(dao.SysSocial.Columns().Source, source)
+	}
+	count, err := m.Count()
+	if err != nil {
+		g.Log().Errorf(ctx, "sSysAuth.hasSocialBinding query failed, userId: %d, openId: %s, error: %v", userId, openId, err)
+		return false
+	}
+	return count > 0
 }

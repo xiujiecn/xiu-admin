@@ -680,6 +680,11 @@ func (l *sSysQrcode) QrcodeLoginSelectUserId(ctx context.Context, param *model.Q
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "扫码后选择用户登录, 参数: %v", param)
+	// 校验扫码会话：必须是真实扫码产生的临时票据，且 openId 与扫码结果一致
+	if err = l.consumeScannedSession(ctx, param.TempUserId, openId); err != nil {
+		g.Log().Warningf(ctx, "扫码会话校验失败, tempUserId: %s, error: %v", param.TempUserId, err)
+		return nil, err
+	}
 	user, err := service.SysUser().GetUserByUsername(ctx, param.UserName, param.TenantId)
 	if err != nil {
 		return nil, err
@@ -703,10 +708,47 @@ func (l *sSysQrcode) QrcodeLoginSelectUserId(ctx context.Context, param *model.Q
 			TenantId: user.TenantId,
 		},
 	})
+	if err != nil {
+		return nil, err
+	}
 	return &model.QrcodeLoginAndBindOpenIdModel{
 		LoginUserOut: userOut,
 		Token:        token,
 	}, nil
+}
+
+// consumeScannedSession 校验并消费一次扫码登录会话
+// 只有处于已扫码状态、未过期、且 openId 与扫码结果一致的会话才允许继续登录，消费后立即失效
+func (l *sSysQrcode) consumeScannedSession(ctx context.Context, tempUserId string, openId string) error {
+	if tempUserId == "" {
+		return gerror.NewCode(consts.CodeNoPermission, "扫码会话无效")
+	}
+	sysQrcodeConfig, err := getSysQrcodeConfig(ctx)
+	if err != nil {
+		return gerror.New("获取系统二维码配置失败")
+	}
+	redisKey := fmt.Sprintf(consts.KeyLoginScanWechat, sysQrcodeConfig.SceneIdLogin)
+	cacheValue, err := g.Redis().HGet(ctx, redisKey, tempUserId)
+	if err != nil || cacheValue == nil || cacheValue.Map() == nil {
+		return gerror.NewCode(consts.CodeNoPermission, "扫码会话已失效")
+	}
+	cacheModel := &model.QrcodeCacheModel{}
+	if err = gconv.Struct(cacheValue.Map(), cacheModel); err != nil {
+		return gerror.NewCode(consts.CodeNoPermission, "扫码会话无效")
+	}
+	if !cacheModel.Scanned {
+		return gerror.NewCode(consts.CodeNoPermission, "扫码会话未完成扫码")
+	}
+	if cacheModel.ExpireTime != nil && cacheModel.ExpireTime.Before(gtime.Now()) {
+		g.Redis().Do(ctx, "HDEL", redisKey, tempUserId)
+		return gerror.NewCode(consts.CodeNoPermission, "扫码会话已过期")
+	}
+	if cacheModel.OpenId == "" || cacheModel.OpenId != openId {
+		return gerror.NewCode(consts.CodeNoPermission, "扫码信息不匹配")
+	}
+	// 一次性使用，避免重复换取 token
+	g.Redis().Do(ctx, "HDEL", redisKey, tempUserId)
+	return nil
 }
 
 // 登录并绑定

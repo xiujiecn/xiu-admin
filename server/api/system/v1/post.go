@@ -41,7 +41,7 @@ type PostEditRes struct {
 }
 
 type PostDeleteReq struct {
-	g.Meta `path:"/post/delete" method:"post" tags:"系统-岗位管理" summary:"删除岗位"`
+	g.Meta `path:"/post/delete" method:"post" tags:"系统-岗位管理" summary:"删除岗位" x-check-permission:"cpm:system:post:remove"`
 	*model.SysPostDeleteParam
 }
 

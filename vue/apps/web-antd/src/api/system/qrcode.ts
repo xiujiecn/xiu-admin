@@ -118,6 +118,7 @@ export interface QrLoginSelectUserParam {
   userName: string;
   tenantId: string;
   openId: string;
+  tempUserId: string;
 }
 export async function qrLoginSelectUserApi(params: QrLoginSelectUserParam) {
   return requestClient.post<QrLoginRes>('/system/qrcode/loginSelectUser', params);
